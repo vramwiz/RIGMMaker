@@ -1,0 +1,2110 @@
+﻿{
+  "schemaVersion": 1,
+  "copiedOn": "2026-10-02",
+  "sourceRoot": "D:\\DelphiProg\\test\\AIArtToPSD",
+  "purpose": "RIGM character creation: reusable pipe transport, part separation, variants and learning references",
+  "copiedFiles": 238,
+  "existingFilesVerified": 24,
+  "legacyRecordFolder": "制作支援/学習記録/AIArtToPSD/Sample",
+  "originalMaterialRoot": "D:\\DelphiProg\\test\\AIArtToPSD\\Sample",
+  "legacyScriptsAreReferenceOnly": true,
+  "imageAndPsdMaterialsCopied": false,
+  "files": [
+    {
+      "source": "Sample/README.md",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/README.md",
+      "role": "historical_learning_and_processing",
+      "sha256": "655E763DEF7391F8B7E689CFCAAB66E00914FA15CB0B21904766734E58D5B99F",
+      "bytes": 1137,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/accepted_face_variants_20261001/native_layers.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/accepted_face_variants_20261001/native_layers.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "4B352F2576FBF392D3A54150B8DE8606F25AD2D9724F838A9BC748FC269BD9FF",
+      "bytes": 17922,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/accepted_face_variants_20261001/README.md",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/accepted_face_variants_20261001/README.md",
+      "role": "historical_learning_and_processing",
+      "sha256": "3E814D88C30637F6FF090DD0B1F0A64AE53AD5803714A7764CC5064949282C46",
+      "bytes": 1402,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/accepted_face_variants_20261001/verification.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/accepted_face_variants_20261001/verification.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "0E46831CF97ECD600C68165C3A403DC24DA345E8FC060003921DE20A5FB4A6F0",
+      "bytes": 971,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/ai_face_review_20261001/feature_sizes.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/ai_face_review_20261001/feature_sizes.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "D0DC64CC1EDE07C1FCF7E9115B7C04087C457E4F10C34EDF077B0650A0D49E9B",
+      "bytes": 15278,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/ai_face_review_20261001/measure_feature_size.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/ai_face_review_20261001/measure_feature_size.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "B251D5CBC1A729819F6C46A0D856B67D6B0632CD0C8A2B65F4051E37D96ED245",
+      "bytes": 1946,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/ai_face_review_20261001/prepare_import.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/ai_face_review_20261001/prepare_import.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "2CCB06614DA6FE5C313EBB27D6FEE6780AFCE613192723EB19143C13675EF6FE",
+      "bytes": 3411,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/ai_face_review_20261001/prompts.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/ai_face_review_20261001/prompts.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "F504DDF5EE7636F7840AE2765BC843956FE72CC96E4BE1B8E5F76E5AC8890F72",
+      "bytes": 2894,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/ai_face_review_20261001/README.md",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/ai_face_review_20261001/README.md",
+      "role": "historical_learning_and_processing",
+      "sha256": "9F37970C83B69CA71CE65542EBA5DE1AB737291A283EA1C2103CE8FD14E9AB16",
+      "bytes": 6879,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/ai_face_review_20261001/render_review.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/ai_face_review_20261001/render_review.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "ACCFFE3D3FC0FFA67CC7383A528937E67A9C19F2D57545E958CE18B742EE116E",
+      "bytes": 1972,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/ai_face_review_20261001/result-submitted.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/ai_face_review_20261001/result-submitted.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "66819B4AC8BDBF6DE40B665DD47A066E70B790BC2484F9448F2473DB0C1516C0",
+      "bytes": 3645,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/ai_separation_check_20261001/eyes_pair_prompt.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/ai_separation_check_20261001/eyes_pair_prompt.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "5B89770B0327E37DED715603478AC065E5DCEF279519D11C22D65D9F82CCD21E",
+      "bytes": 1772,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/ai_separation_check_20261001/eyes_pair_verification.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/ai_separation_check_20261001/eyes_pair_verification.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "678C997B4A2DA034C3D66BAB9204A20C22B0FC24353916875B31159C2DCDBF99",
+      "bytes": 6726,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/ai_separation_check_20261001/inspect.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/ai_separation_check_20261001/inspect.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "3B83FEE277A6FAFFDF12648307FC3BAF7CC968790F90D73B022663C938A8C249",
+      "bytes": 2664,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/ai_separation_check_20261001/prompts.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/ai_separation_check_20261001/prompts.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "5CB5E6ADC4795D0C238B8C0143B1CBC694ECE4AB9715011480F179C2416A8DD1",
+      "bytes": 3149,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/ai_separation_check_20261001/README.md",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/ai_separation_check_20261001/README.md",
+      "role": "historical_learning_and_processing",
+      "sha256": "E587CC095873A5FF96E78BA56FDE39E6AAF9DB834C4769C58FC788296198B175",
+      "bytes": 9880,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/ai_separation_check_20261001/render_retry_review.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/ai_separation_check_20261001/render_retry_review.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "7FB6745A89E158B2A1E3DCF11609879ECA138560C24D2BFA165890D8233CC4A3",
+      "bytes": 2805,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/ai_separation_check_20261001/retry_eye_prompt.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/ai_separation_check_20261001/retry_eye_prompt.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "9D3B53F8F9A4015E1F25BA17CD45A0A398DD1568DA374947725ADA3D3441A15D",
+      "bytes": 1316,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/ai_separation_check_20261001/retry_prompts.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/ai_separation_check_20261001/retry_prompts.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "DFED6CB5772CD8B4FE99D100C12042289E96457810B94E1EDA540262BA311835",
+      "bytes": 1573,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/ai_separation_check_20261001/review_eyes_pair.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/ai_separation_check_20261001/review_eyes_pair.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "CAEA2801AD184CDE90E46F08547656767A787EE285764C26CF044C66F193FEC3",
+      "bytes": 4173,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/ai_separation_check_20261001/verification_retry.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/ai_separation_check_20261001/verification_retry.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "40C9F6DE01E07D6557CA75F15BC4C05F3BFBCDBF83F9A8158CE168C47B4BCD44",
+      "bytes": 62557,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/ai_separation_check_20261001/verification.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/ai_separation_check_20261001/verification.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "B299D138DD7F34067E1087F2BD60B5CB1D3993087243D1594C11499CBD7D9F40",
+      "bytes": 41737,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/arm_behind_trial_20261001/learning_record.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/arm_behind_trial_20261001/learning_record.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "084D3AB10645B8196F1204EFB29F12BDA7F633794A9C0CAED1EE0683A84DA52B",
+      "bytes": 1538,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/arm_behind_trial_20261001/prepare_result.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/arm_behind_trial_20261001/prepare_result.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "317F2B51F671BF871D51D5533B69D8EE76E357096A4B17DCDEA3C84DBFC74DF9",
+      "bytes": 2453,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/arm_behind_trial_20261001/prompt.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/arm_behind_trial_20261001/prompt.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "FA09D3BC8E227A3CFDE398A2344AB69B34B607F90E85AA6F24610F3C4F480A98",
+      "bytes": 2823,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/arm_behind_trial_20261001/result.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/arm_behind_trial_20261001/result.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "B487AFC172AF13844999BC4EEFE66C16229F79080F63811687C489E0836ABC1F",
+      "bytes": 1399,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/arm_behind_trial_20261001/verification.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/arm_behind_trial_20261001/verification.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "A5A149C5E1706041EEA3888F3B3469DBE81E1D121015C880CD73313F5076027F",
+      "bytes": 1877,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/arm_behind_trial_20261001/verify.py",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/arm_behind_trial_20261001/verify.py",
+      "role": "historical_learning_and_processing",
+      "sha256": "E47B87CEB471D70694A6EAD3BA9E4E1B5B26F3AA75744B4BB795DCE7C0E22B01",
+      "bytes": 5792,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/body_pose_trial_20261001/learning_record.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/body_pose_trial_20261001/learning_record.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "B2B69F9B522A655A3EA820BB14774AE54C198284918A1CD0F57CCC55542439F9",
+      "bytes": 1390,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/body_pose_trial_20261001/prepare_result.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/body_pose_trial_20261001/prepare_result.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "59AA32F2B4677C5D7DBA198FB41CFDF6D37050FC9571BF6CA70C6FE33235EDE3",
+      "bytes": 2102,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/body_pose_trial_20261001/prompt.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/body_pose_trial_20261001/prompt.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "5E1795C2E27F4E7C4C8F51C72F16D204AF3EBD4EE21EDA6FC03633CEC8F425DB",
+      "bytes": 2425,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/body_pose_trial_20261001/result.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/body_pose_trial_20261001/result.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "18B107781BF30C180CAB803A3B6CAAA20DBD6D0A759FDF0712D01EE34C52D22F",
+      "bytes": 1258,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/body_pose_trial_20261001/verification.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/body_pose_trial_20261001/verification.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "17201B1EC52C118E11AFB91EF0DDFC99E32102622F1E766A2BA7FA48C70614CD",
+      "bytes": 1533,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/body_pose_trial_20261001/verify.py",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/body_pose_trial_20261001/verify.py",
+      "role": "historical_learning_and_processing",
+      "sha256": "FDFFC21283084DF89E37802DB354F2D82DC39DB239C8B17A7CEA3CD3A5E7A8F3",
+      "bytes": 4996,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/brows_only_20261001/draft-native_layers.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/brows_only_20261001/draft-native_layers.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "5795702560E4980F87C6C567DA7CA584479983685AB401467AED5F14B25ECA44",
+      "bytes": 3983,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/brows_only_20261001/draft-result.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/brows_only_20261001/draft-result.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "46DFA966AC0B8B7AAC1D1E1074DDFE9C06C6AF9DFA9784FFD9DA736C3630E029",
+      "bytes": 792,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/brows_only_20261001/draft-verification.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/brows_only_20261001/draft-verification.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "811865064809F9705EFC7B56334BCFD1DC33E6062A2FABE5B7956AE2E690AA24",
+      "bytes": 651,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/brows_only_20261001/native_layers.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/brows_only_20261001/native_layers.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "B81A48712E9C469929591F735300493E70DAC954B7B0467EEE6535254BEE7E08",
+      "bytes": 4004,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/brows_only_20261001/prepare_brows.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/brows_only_20261001/prepare_brows.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "99A92668A27C99A8D2BBEBA0B9CED3FB13450F7857E14772EE3B115677CB1854",
+      "bytes": 2413,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/brows_only_20261001/prepare_result.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/brows_only_20261001/prepare_result.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "038A8AE6DE95406DA11B6E58E82E1C4E2B0EC3914A4C29F076825AAEB26FF5BA",
+      "bytes": 1426,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/brows_only_20261001/README.md",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/brows_only_20261001/README.md",
+      "role": "historical_learning_and_processing",
+      "sha256": "3492A79D92858ED11541C1ACFC9642101791F139A68C6A344D841C12BE8AFE2F",
+      "bytes": 2787,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/brows_only_20261001/result.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/brows_only_20261001/result.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "D42953CE093F40AC886F9EC2F668522D63C569DC0BF4B2EDDFD923201A18956B",
+      "bytes": 792,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/brows_only_20261001/verification.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/brows_only_20261001/verification.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "E8DD9E6C48E1589548644CEBFF21D24852703907CCB2B3F29870E93F185D7C50",
+      "bytes": 651,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/brows_only_20261001/verify.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/brows_only_20261001/verify.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "F9A0E8A6D295DE7BF3C0311A2EFAEC8C207956B8045B93C7FA19B3C79F9D31C8",
+      "bytes": 2856,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/brows_sheet_trial_20261001/alpha_measurements.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/brows_sheet_trial_20261001/alpha_measurements.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "F0AF0A7838564E5CA7C5085A1F5F790453DF84511F6AD1F790FE613AAFD5317E",
+      "bytes": 16230,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/brows_sheet_trial_20261001/inspect.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/brows_sheet_trial_20261001/inspect.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "9ADF5F6E14862E58C18772DECF1222F25FD75661FFFDA81941704A947550E3FB",
+      "bytes": 2056,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/brows_sheet_trial_20261001/learning_record.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/brows_sheet_trial_20261001/learning_record.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "61D29B71C781F9C8DBC73FED461194759A7349D0D62FF17AABC3B6084BC5D51F",
+      "bytes": 2426,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/brows_sheet_trial_20261001/measurements.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/brows_sheet_trial_20261001/measurements.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "F21DA903E5A0A9536A4F5C0997F2178B61E17B704825AB59F5FF4E54BD3BF2B6",
+      "bytes": 8558,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/brows_sheet_trial_20261001/native_layers.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/brows_sheet_trial_20261001/native_layers.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "B627802023410961C48A463668BB3E7E5DC8973FBB043752D92F9F1BE32E3609",
+      "bytes": 17847,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/brows_sheet_trial_20261001/prepare_layout.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/brows_sheet_trial_20261001/prepare_layout.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "749198DAD59E710464292835574973D7B5C821771CF6218376CDFE9B9F8DA2F8",
+      "bytes": 6035,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/brows_sheet_trial_20261001/prepare_result.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/brows_sheet_trial_20261001/prepare_result.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "DF6D5EDC166B0C19D66670B8FFBC8C77B9100A3ADC73D3C76C03FDE1170F8462",
+      "bytes": 2189,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/brows_sheet_trial_20261001/prompt.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/brows_sheet_trial_20261001/prompt.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "D66DF4CDC2E0082BD912F5ED6B3A0C08C6E1F14CA1710DCACF2929713430FD41",
+      "bytes": 3633,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/brows_sheet_trial_20261001/README.md",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/brows_sheet_trial_20261001/README.md",
+      "role": "historical_learning_and_processing",
+      "sha256": "335966E37140E051FF98567C1C47FBCB12223684DEAD470E870D9BBD8B398BAD",
+      "bytes": 6103,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/brows_sheet_trial_20261001/result.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/brows_sheet_trial_20261001/result.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "A65847D84479BE94E3F78502721AE1DB08CD8F59E31BD79C077051DD7BAF252B",
+      "bytes": 5817,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/brows_sheet_trial_20261001/review_context.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/brows_sheet_trial_20261001/review_context.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "BE7756DEEF63023BC1ABCE02E65C0E4E481DB4CF9DE1D2D4AF2E55D5AD85DA65",
+      "bytes": 361,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/brows_sheet_trial_20261001/snapshot-cancel.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/brows_sheet_trial_20261001/snapshot-cancel.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "1CF524E27649F95CAAEA3118F592E7C046C46C3F2BB542D9CB76C4F53C5975C2",
+      "bytes": 481,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/brows_sheet_trial_20261001/verification.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/brows_sheet_trial_20261001/verification.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "9E633B54646F348A85BEB2DDDA7312FF6B596307F7FF5971222E18D47A1E3B86",
+      "bytes": 7529,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/brows_sheet_trial_20261001/verify.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/brows_sheet_trial_20261001/verify.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "800EBB8013B2D2912C09094754EE09BEB1C82073F52EF24908D198BD89340A62",
+      "bytes": 6851,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/expression_mouth_trial_20261001/alpha.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/expression_mouth_trial_20261001/alpha.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "A74FE25C915F3B1526F022A730D515916E2C194C4C503B0C934269027456C3E3",
+      "bytes": 2131,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/expression_mouth_trial_20261001/inspect_alpha.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/expression_mouth_trial_20261001/inspect_alpha.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "CA45F9D3CC9A8E8526F31054A281E65509117CC4F7E1B389339C8A110F58188B",
+      "bytes": 1339,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/expression_mouth_trial_20261001/native_layers.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/expression_mouth_trial_20261001/native_layers.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "1B0C7E9CAB54CC0A2871A4FB2BC4955D148CCB1A51C1DD91F95A9D5398876F14",
+      "bytes": 4633,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/expression_mouth_trial_20261001/prepare_result.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/expression_mouth_trial_20261001/prepare_result.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "7B5D30A48D8DC862EEB7568C5E4A3A492343D9B8F169E71D94AC72EEA164CC96",
+      "bytes": 1745,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/expression_mouth_trial_20261001/prompt.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/expression_mouth_trial_20261001/prompt.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "7A43648EA78F8EE8FC7D910BC39D5B6B18CAF458880FFE9BFD707C54E1B80B78",
+      "bytes": 1591,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/expression_mouth_trial_20261001/README.md",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/expression_mouth_trial_20261001/README.md",
+      "role": "historical_learning_and_processing",
+      "sha256": "FDA728C2E9784659D6894817CC09411FD98A7AE5F8699C4F10A7F54A98295E65",
+      "bytes": 4306,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/expression_mouth_trial_20261001/result.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/expression_mouth_trial_20261001/result.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "C138EF5F9EE07F8BF93404CAF3AF21CB8A2BD8E437118007825F68F3D01E43D5",
+      "bytes": 1364,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/expression_mouth_trial_20261001/verification.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/expression_mouth_trial_20261001/verification.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "758836879AAE6783DB671E2EC7FBAEB30FA9CD410E8D478A3D3B33546D6CDAFC",
+      "bytes": 835,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/expression_mouth_trial_20261001/verify.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/expression_mouth_trial_20261001/verify.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "15E9C694CC3BC28963CE0B723078EC5A734A133AEF6BCC4790BF919B23D892E9",
+      "bytes": 3155,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/eyes_no_hair_20261001/native_layers.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/eyes_no_hair_20261001/native_layers.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "CD2481B3DC9BF3A7CED1A61CA2F23E4C5B999A0A7754452EFF1D537B107A07C1",
+      "bytes": 3983,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/eyes_no_hair_20261001/prepare_eyes.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/eyes_no_hair_20261001/prepare_eyes.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "D43ED3A73B09E4CEBA5CB2DD0183BB87FCC97DA2A4CDA2C9A5430C708BCA1681",
+      "bytes": 2315,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/eyes_no_hair_20261001/prepare_result.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/eyes_no_hair_20261001/prepare_result.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "9FB4645AD4840F222ACCD877DA20D0CE170353867D3BFEA19EF3F2B37925DB65",
+      "bytes": 1429,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/eyes_no_hair_20261001/README.md",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/eyes_no_hair_20261001/README.md",
+      "role": "historical_learning_and_processing",
+      "sha256": "E2E79523CF8E9B8B9807CEFDBA6958DEC05B2EEFBDE67EBC777A5C233C7FEDD0",
+      "bytes": 2578,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/eyes_no_hair_20261001/result.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/eyes_no_hair_20261001/result.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "541719A6321A7564F203F7BA8E04DCC8869C066B39EF7F260C7A3A6E1276BD47",
+      "bytes": 798,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/eyes_no_hair_20261001/verification.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/eyes_no_hair_20261001/verification.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "EB5D6EFDEA2F43FCFBC308019C5A07330FAF0959B0D9E93053E2056E0F25BF1D",
+      "bytes": 653,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/eyes_no_hair_20261001/verify.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/eyes_no_hair_20261001/verify.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "AA198DA12A4E018B680211D1556CCB3949CE699E2601FCAADBD109FBAA5450C4",
+      "bytes": 2848,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/eyes_sheet_trial_20261001/alpha_measurements.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/eyes_sheet_trial_20261001/alpha_measurements.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "F885CADF0EE3ABFE2D61F558E88434A9B08F46BC3189CD5F88D8A7AA8E89EE99",
+      "bytes": 12189,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/eyes_sheet_trial_20261001/inspect.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/eyes_sheet_trial_20261001/inspect.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "E8DFD725ABDA9A6EA790615515F55AFE1B3EA37D82CCF7D556EB3FB5E3A7326F",
+      "bytes": 2056,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/eyes_sheet_trial_20261001/learning_record.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/eyes_sheet_trial_20261001/learning_record.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "0115B8930934093F52E0645C10E49897C9DF7780542CEF7560B61C9898B7A005",
+      "bytes": 1874,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/eyes_sheet_trial_20261001/measurements.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/eyes_sheet_trial_20261001/measurements.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "53985F841F995C06B84F8D8D1C4BE8F8F84AF56C68C0E93710EA8524DE1F8472",
+      "bytes": 5734,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/eyes_sheet_trial_20261001/native_layers.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/eyes_sheet_trial_20261001/native_layers.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "378AB85C7D5F17C40881A3888B4378F6039D77C8ED2530FF87E27D339AF9D462",
+      "bytes": 13275,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/eyes_sheet_trial_20261001/prepare_layout.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/eyes_sheet_trial_20261001/prepare_layout.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "217880380C24B4CF16EE7BB02662F32464F2D74B18661F0603AA1874EF14A428",
+      "bytes": 3564,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/eyes_sheet_trial_20261001/prepare_result.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/eyes_sheet_trial_20261001/prepare_result.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "D0E588BEC33B680C257989D6F07446746F307416AA5A069DF44F07627E0E56FF",
+      "bytes": 2157,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/eyes_sheet_trial_20261001/prompt.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/eyes_sheet_trial_20261001/prompt.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "B85F7660C3269FF9C18D3C7FAE588C0477BB58EE038044D6ED6ABA9FA7997594",
+      "bytes": 3467,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/eyes_sheet_trial_20261001/README.md",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/eyes_sheet_trial_20261001/README.md",
+      "role": "historical_learning_and_processing",
+      "sha256": "D8E3CAB97C52986E5509508341B7C7ACE0D79EB4EA08C47D5F619D00EB5DD921",
+      "bytes": 5669,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/eyes_sheet_trial_20261001/result.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/eyes_sheet_trial_20261001/result.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "3E24CABFB949A91EFC9E8BECEF0F907314A6127FF11DF839C100E192061B5C2F",
+      "bytes": 4618,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/eyes_sheet_trial_20261001/snapshot-cancel.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/eyes_sheet_trial_20261001/snapshot-cancel.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "326DDEE441802D72E853C3B8005241CE32096C02F6B1AA94E57387B9B5CC59FE",
+      "bytes": 481,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/eyes_sheet_trial_20261001/verification.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/eyes_sheet_trial_20261001/verification.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "C2CE8B0BB289618A7F9E43F938D411971E3FB8E1423A99EA90ED644AC605883F",
+      "bytes": 5488,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/eyes_sheet_trial_20261001/verify.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/eyes_sheet_trial_20261001/verify.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "557B00A581BA960EA6C95D28BB3A5DD423FBEF4AD660F1D229120AD9274EFD89",
+      "bytes": 5833,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/face_foundation_fix_20261002/app_pixel_verification.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/face_foundation_fix_20261002/app_pixel_verification.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "084C8F85050FE76837052A91D1414B5C64BA5A8914F94244723D5964FA5F46BC",
+      "bytes": 240,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/face_foundation_fix_20261002/check_pixels.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/face_foundation_fix_20261002/check_pixels.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "ADDEED1BC4ABF05803A8C458CEF847D75F28286BA3085A53AFCC8D111971DFFF",
+      "bytes": 2255,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/face_foundation_fix_20261002/complete_skin.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/face_foundation_fix_20261002/complete_skin.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "2CA3C66D6059FE7C560B9792CF935F5BC5C42F25375FA34FB7BD72729F8A8FD7",
+      "bytes": 4414,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/face_foundation_fix_20261002/edge_refinement.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/face_foundation_fix_20261002/edge_refinement.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "2C8D245DE65CA44DA8380B776CCB15CD10AA4A2A2C72F159BF599FD240E3C406",
+      "bytes": 134,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/face_foundation_fix_20261002/final_parts.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/face_foundation_fix_20261002/final_parts.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "15D85CFC9DC00011A9E515502B5869D9AA1EC3112787CAEFF1571B303E6854AC",
+      "bytes": 1067,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/face_foundation_fix_20261002/highlight-result.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/face_foundation_fix_20261002/highlight-result.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "1E54F29D620B89F41D5CE6D71A2EC1B011EE3943496B3CBF7997CB6EBBE79E55",
+      "bytes": 859,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/face_foundation_fix_20261002/import_final.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/face_foundation_fix_20261002/import_final.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "DBBB894737695070F6FC5A07931ABC5C012639FB89D6C6BDF5D7063F4C146C32",
+      "bytes": 2283,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/face_foundation_fix_20261002/learning_record.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/face_foundation_fix_20261002/learning_record.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "0DA9999899E3CD64225599DE71791F2BFCDA0B02087E77478E4A72718D8B8DA3",
+      "bytes": 4224,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/face_foundation_fix_20261002/preflight.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/face_foundation_fix_20261002/preflight.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "8B8E4C832A7E4C82CF361A97265B9C602520E66DB8C2B219D3C23B0FECCB0DCA",
+      "bytes": 188,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/face_foundation_fix_20261002/prompt.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/face_foundation_fix_20261002/prompt.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "E19ADFB899F6B636C03258798968A46C7BC795CB7F015748503A734398FCF97B",
+      "bytes": 1858,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/face_foundation_fix_20261002/README.md",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/face_foundation_fix_20261002/README.md",
+      "role": "historical_learning_and_processing",
+      "sha256": "89121D1B657A0C5CBAFDF002F7E59FF3B30803FB7BB68ED4DE61E1D4EF9AE161",
+      "bytes": 5832,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/face_foundation_fix_20261002/refine_hair_edge.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/face_foundation_fix_20261002/refine_hair_edge.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "AC38C3C89D10ACA43FAA73C049A704DBF8DE0A67CD96197A4EEA7B8B9D479858",
+      "bytes": 3623,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/face_foundation_fix_20261002/resample_in_app.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/face_foundation_fix_20261002/resample_in_app.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "D00C14B0F5A9D5A9B67BDAFF55CDF25A1329F4A7063F22B8C5F9EED3DBA56F01",
+      "bytes": 1904,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/face_foundation_fix_20261002/resample-result.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/face_foundation_fix_20261002/resample-result.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "29F795973D219516F8A84B4ED564E39BFE3FDF55F2A13656FD7601F99D038D15",
+      "bytes": 864,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/face_foundation_fix_20261002/resampled_layer.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/face_foundation_fix_20261002/resampled_layer.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "44F75E515AB0EDE7911F844B223EB53EA262C2007D7169517331417607884DBC",
+      "bytes": 478,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/face_foundation_fix_20261002/result.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/face_foundation_fix_20261002/result.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "C3B598A051BDA6032D0043CC1F1591DBE6AB62BD5B61842906451F8669C05D5A",
+      "bytes": 1875,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/face_foundation_fix_20261002/review_layers.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/face_foundation_fix_20261002/review_layers.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "88538D8BE6BDA0352D456651CE8306C3A8533CBC161FE40EB238DDCD4F5BFC45",
+      "bytes": 2588,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/face_foundation_fix_20261002/verification.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/face_foundation_fix_20261002/verification.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "D05E0AA20938C748C85EB953D19013595EDAA6DB6F6B2D8E1C3BFD19B12D89F4",
+      "bytes": 923,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/face_foundation_fix_20261002/verify_final.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/face_foundation_fix_20261002/verify_final.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "81002D0AA80F9A47295F75FD8FDDAEA1F7908A3F93DAB222002FEF59A03EFC6C",
+      "bytes": 3199,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/face_trial_20261001/README.md",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/face_trial_20261001/README.md",
+      "role": "historical_learning_and_processing",
+      "sha256": "E49F3135D76F00A7140E62E12B1146B9C4B45E38D96B8B1833B5A575305D02B3",
+      "bytes": 5187,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/face_trial_20261001/verification.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/face_trial_20261001/verification.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "4FC996E93A654B4CB4C2166D92D34BB01EF0F38193ECF5B788782E50BAE50D12",
+      "bytes": 5503,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/full_body_pose_trial_20261001/learning_record.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/full_body_pose_trial_20261001/learning_record.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "D59CD7509FC411017E87172911D0F94E885418A219CA4FB933861AD65989C122",
+      "bytes": 3876,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/full_body_pose_trial_20261001/prepare_result.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/full_body_pose_trial_20261001/prepare_result.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "41C8F07432F788CF14B0279F5F51103F6235C3636B649694C37AC39605C3A876",
+      "bytes": 2465,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/full_body_pose_trial_20261001/prompt.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/full_body_pose_trial_20261001/prompt.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "6A05C8C0E5A37232F43ADD446B54F32BEA818D0CAC5A6755C2EC896EC892E843",
+      "bytes": 3189,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/full_body_pose_trial_20261001/result.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/full_body_pose_trial_20261001/result.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "B02E8CEF4B5934F68DE2565B5EE4339F3A5F079B74F85643FB149D80AD5518E9",
+      "bytes": 1423,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/full_body_pose_trial_20261001/verification.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/full_body_pose_trial_20261001/verification.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "61BE43E5B23D931A12370087C2FEF4446EED739D9F3138E927D68CDD1DACFE86",
+      "bytes": 1573,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/full_body_pose_trial_20261001/verify.py",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/full_body_pose_trial_20261001/verify.py",
+      "role": "historical_learning_and_processing",
+      "sha256": "AE59423BD8D0A4EC14E9676E701A8C027996045E4A4AF713BD05F5FEA5E8382E",
+      "bytes": 5004,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/hair_separation_trial_20261002/app_parts.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/hair_separation_trial_20261002/app_parts.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "0D4FE6756AC51BA22AB30A622D8DF3598819DF5BE206A711D20ECD12B04FAD1A",
+      "bytes": 1179,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/hair_separation_trial_20261002/compare_final.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/hair_separation_trial_20261002/compare_final.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "754E761C264200656646BE637934A77EC156561058FB372AF3887E87E10F2A5C",
+      "bytes": 2352,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/hair_separation_trial_20261002/composite_verification.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/hair_separation_trial_20261002/composite_verification.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "5EA1C311A097FEB5332EAEA69FE2D8B74CD7FEC2061C1E1FB75B6F17BF3DD18E",
+      "bytes": 130,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/hair_separation_trial_20261002/context.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/hair_separation_trial_20261002/context.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "DDDB55A47E28331031FBBABB7591D6F70B0EAECF1DD8A95300BB18A46D1CCEA8",
+      "bytes": 619,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/hair_separation_trial_20261002/display-result.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/hair_separation_trial_20261002/display-result.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "985889E635D51A77DE29BD79BB079F9A40851860CC77F70E36D23981C61099ED",
+      "bytes": 567,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/hair_separation_trial_20261002/inspect.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/hair_separation_trial_20261002/inspect.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "EC35F143921B018002EA1417F17E14F2ED360D96FD317B8E58D652F293088FEB",
+      "bytes": 1164,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/hair_separation_trial_20261002/learning_record.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/hair_separation_trial_20261002/learning_record.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "57A594AF027AAC31CFFC6DA29AB6DAC8A8D4CE094011302A8D456348210CD4D6",
+      "bytes": 2692,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/hair_separation_trial_20261002/pixel_verification.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/hair_separation_trial_20261002/pixel_verification.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "FB1B436D76E43C3C52A91AFC2B9D1E6F671E98FEC30F980B9133ECFF52667E76",
+      "bytes": 176,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/hair_separation_trial_20261002/prepare_fill.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/hair_separation_trial_20261002/prepare_fill.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "384AB538C17639B3DDAFA85B7646268B4F6524928DAF62CA709209EB23B5F3BD",
+      "bytes": 2470,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/hair_separation_trial_20261002/prepare_import.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/hair_separation_trial_20261002/prepare_import.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "976E2B7C6A7630D07E6E40AE3523B4F259AAD0EAF7D5B7906B29CD11F28658A5",
+      "bytes": 3059,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/hair_separation_trial_20261002/preservation_verification.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/hair_separation_trial_20261002/preservation_verification.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "BB3A9DF82D96741FEFBACC6D1CE78079DCAE24E8BBCA7EEA4E0755517DA8F546",
+      "bytes": 176,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/hair_separation_trial_20261002/prompt.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/hair_separation_trial_20261002/prompt.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "D5054E57C302A74AE6DBBC6907B3305717EF1CE95623F2A03D667DFDBF5B9AB9",
+      "bytes": 1687,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/hair_separation_trial_20261002/README.md",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/hair_separation_trial_20261002/README.md",
+      "role": "historical_learning_and_processing",
+      "sha256": "9A09197065B6CA71E4E692F9DC84419D6127E59EB913DE2278E627E6D8B64748",
+      "bytes": 5328,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/hair_separation_trial_20261002/result.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/hair_separation_trial_20261002/result.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "59FEA927A5C9E649B5ACCEFEED4564CC510304F64496B45EF6BA3DF8EC407F49",
+      "bytes": 3969,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/hair_separation_trial_20261002/review.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/hair_separation_trial_20261002/review.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "957532985CA050FEEFA076DE33DCE9D45BE22E92F2BFF04E74F240A93DB7F637",
+      "bytes": 2449,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/hair_separation_trial_20261002/separate.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/hair_separation_trial_20261002/separate.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "FA7827C593C661D41B39402116E87F5FC197CC840700ADF305CB4547C0CFB65E",
+      "bytes": 4671,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/hair_separation_trial_20261002/verification.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/hair_separation_trial_20261002/verification.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "D803512574DD54ECAD4D368618503CB3C4FF126A82FC2AE5C8F6B74D485451D9",
+      "bytes": 645,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/hair_separation_trial_20261002/verify_final.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/hair_separation_trial_20261002/verify_final.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "AE55B13E138CE40CD9CFFDD81EBD5851EBBA07303EB0F5FE360BB7000BB838DC",
+      "bytes": 3077,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/hair_separation_trial_20261002/verify_import.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/hair_separation_trial_20261002/verify_import.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "CC2449E6D7D8E5E4692635935B61164CD167E0CD0C77570F448C74A3BFEB404C",
+      "bytes": 2587,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/hair_separation_trial_20261002/verify_pixels.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/hair_separation_trial_20261002/verify_pixels.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "20190F1072632273D49766DCCD139186C14BC214144A6A2AD72E3F0D8937500D",
+      "bytes": 2226,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/head_body_split_20261001/prepare.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/head_body_split_20261001/prepare.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "1F0C39A796E5077FD55180ADE20B48BED95B8DB5B5C502B42458793351FA7DC5",
+      "bytes": 2966,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/head_body_split_20261001/result.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/head_body_split_20261001/result.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "3F35896DA38CA13ED8C53E6E55B6A3A6044E3CF539552ED4B4A5B08F4F7B65DD",
+      "bytes": 2245,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/head_body_split_20261001/verification.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/head_body_split_20261001/verification.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "C3775A64F6087C83C8458DFD12E1E21F5C1470E5B57C2E2C200216824476FF33",
+      "bytes": 1789,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/head_body_split_20261001/verify.py",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/head_body_split_20261001/verify.py",
+      "role": "historical_learning_and_processing",
+      "sha256": "61A58A2AA256647D4E4334323C9B40167F5625D97EBFA0539CD61F5F7B1F1954",
+      "bytes": 5563,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/limb_pose_trial_20261001/initial_result_reverted.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/limb_pose_trial_20261001/initial_result_reverted.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "03C763FA2128DCBE605039A8B0362716FC9F3BF9AF1514789A185B3E879698ED",
+      "bytes": 5498,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/limb_pose_trial_20261001/initial_verification_rejected.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/limb_pose_trial_20261001/initial_verification_rejected.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "891AAACFE044511E53435EBC68B9C2FEDE69CF97F4442BACE4CBF8B4A5356840",
+      "bytes": 2912,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/limb_pose_trial_20261001/inspect.py",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/limb_pose_trial_20261001/inspect.py",
+      "role": "historical_learning_and_processing",
+      "sha256": "CBCC5F7A47BE7F09E4C16F2E9FA6F66443A040863F1A7C897C40A31A8F3FD5CE",
+      "bytes": 1110,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/limb_pose_trial_20261001/learning_record.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/limb_pose_trial_20261001/learning_record.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "7EB0820439BA40AC27F1EC2D418CDB36925EDDACCB9E8899621F2DB6A64AC603",
+      "bytes": 2570,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/limb_pose_trial_20261001/partition_verification.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/limb_pose_trial_20261001/partition_verification.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "4C75EA55F2C10E22AE9843F1EA8620448CFC9E65CCA573237473526934758096",
+      "bytes": 3135,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/limb_pose_trial_20261001/prepare_result.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/limb_pose_trial_20261001/prepare_result.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "E8C8A38955378903CD6CFB26439C43D4AB5682737B1341DDB8154D1DD84FE60F",
+      "bytes": 3627,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/limb_pose_trial_20261001/result.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/limb_pose_trial_20261001/result.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "636DB0D0438DC05049A9BA573AE00FDDCD170F80F4A61BC0746DDC00E0C54221",
+      "bytes": 5498,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/limb_pose_trial_20261001/split_parts.py",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/limb_pose_trial_20261001/split_parts.py",
+      "role": "historical_learning_and_processing",
+      "sha256": "78E66451419992FF93B4F70937C558A8729F684CD2FC13E1BE21AE91FA92D80D",
+      "bytes": 7305,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/limb_pose_trial_20261001/verification.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/limb_pose_trial_20261001/verification.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "FB40A2DFF93F45D01B2672423F266D1D0009D816EFCA61B7CDD6FF2BF399EA09",
+      "bytes": 3025,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/limb_pose_trial_20261001/verify_app.py",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/limb_pose_trial_20261001/verify_app.py",
+      "role": "historical_learning_and_processing",
+      "sha256": "5F7AE054B9A8CE140A56117D6F5EA1DDDBAB34E506C35F5546252583783743CE",
+      "bytes": 5473,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/mouth_only_20261001/native_layers.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/mouth_only_20261001/native_layers.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "4E220FE6A063ACEF7C93FBFA67C662DE0364196D0B18DA8BDB4AF8639165DE2A",
+      "bytes": 4004,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/mouth_only_20261001/prepare_mouth.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/mouth_only_20261001/prepare_mouth.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "287AA271CBE33BE26B12BC49D95E207FBC56C86201FE0EDC8D6A7BDA8999E8DB",
+      "bytes": 2528,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/mouth_only_20261001/prepare_result.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/mouth_only_20261001/prepare_result.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "892D2BD50CF8CE095B77D3219912DF7A53FE6FDF129101A50CED4437E6AE7AD4",
+      "bytes": 1427,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/mouth_only_20261001/README.md",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/mouth_only_20261001/README.md",
+      "role": "historical_learning_and_processing",
+      "sha256": "C70571F873C0A36846BFBC0F1A935744E6482FE59047041718724CC69C828797",
+      "bytes": 2680,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/mouth_only_20261001/result.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/mouth_only_20261001/result.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "C59C42576D308E0C04530774F1A7940B146DFC1A0B913700187BBFCC1D19AAE5",
+      "bytes": 791,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/mouth_only_20261001/verification.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/mouth_only_20261001/verification.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "4DB565E3CDE49B7096E098D8217EA672E91F3F3A08DCE4E2F2956F2CD74C3C79",
+      "bytes": 660,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/mouth_only_20261001/verify.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/mouth_only_20261001/verify.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "6D2CFEA0CB187DAB9C83033AD92538F3A0F3074675C4EE64229FB83A7AC629F2",
+      "bytes": 2860,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/mouth_sheet_retry_20261001/learning_record.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/mouth_sheet_retry_20261001/learning_record.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "AB7ED30B521BE9AA953B33348E8F3764DC89E2631F0CED50E66DFF8349E85D10",
+      "bytes": 1436,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/mouth_sheet_retry_20261001/measure.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/mouth_sheet_retry_20261001/measure.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "1C12E8FA33A1B71F693E10EF414B92B222824129FA47645982D2EAAA6D29A501",
+      "bytes": 2074,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/mouth_sheet_retry_20261001/measurements.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/mouth_sheet_retry_20261001/measurements.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "BD023974CF2F93476F2A4A291F5D19819053C8CC0BB589D964ECBA7DBA937E1F",
+      "bytes": 7272,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/mouth_sheet_retry_20261001/native_layers.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/mouth_sheet_retry_20261001/native_layers.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "9FAD2C97044EF1927414CE67F283664AEFE922566947A884BDF1A615F5A048EE",
+      "bytes": 9673,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/mouth_sheet_retry_20261001/prepare_result.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/mouth_sheet_retry_20261001/prepare_result.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "BEE4AEE37A3C043D627835CB904AAA2393302E9D268538FA96D4D62E4EAC52C0",
+      "bytes": 2261,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/mouth_sheet_retry_20261001/prompt.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/mouth_sheet_retry_20261001/prompt.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "0B56718BA31A491770A1E2A9E8682F089A5695E713E2106A0D8EF895CE6BDBEF",
+      "bytes": 3400,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/mouth_sheet_retry_20261001/README.md",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/mouth_sheet_retry_20261001/README.md",
+      "role": "historical_learning_and_processing",
+      "sha256": "FE8596F12A70398A5B3394E56BF0DD24C4C55141341C3FF83A9FE13C3A91F1F5",
+      "bytes": 7386,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/mouth_sheet_retry_20261001/result.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/mouth_sheet_retry_20261001/result.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "D340176ADC319789CE31060E80E0E6A528DCC14F374703A1A7613C4B44AD7009",
+      "bytes": 6386,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/mouth_sheet_retry_20261001/snapshot-cancel.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/mouth_sheet_retry_20261001/snapshot-cancel.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "A211769DD31A188A848BAD19FD8FF19C443DBF6E3838326810371BBD6323EB10",
+      "bytes": 480,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/mouth_sheet_retry_20261001/verification.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/mouth_sheet_retry_20261001/verification.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "AC59734BB7BC177F7640B7095DDB67B4303B906AF623D0CDA979AB96C581153E",
+      "bytes": 7353,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/mouth_sheet_retry_20261001/verify.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/mouth_sheet_retry_20261001/verify.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "5E3413B054C9638C1F7D481CFD32B5C62AB096BA7F26988757342378C2CA61DA",
+      "bytes": 5845,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/mouth_sheet_trial_20261001/prompt.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/mouth_sheet_trial_20261001/prompt.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "241F51BD61B442DA7CE3DEBC4EEEB19DC35BCB2CF9358EA925B24DA35E366AFE",
+      "bytes": 3348,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/mouth_sheet_trial_20261001/README.md",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/mouth_sheet_trial_20261001/README.md",
+      "role": "historical_learning_and_processing",
+      "sha256": "D06400A804CDFFC99CFB15BC903FD820E91FD45093BEA1A9FCB7AE8C706B2EF4",
+      "bytes": 3552,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/mouth_sheet_trial_20261001/render_review.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/mouth_sheet_trial_20261001/render_review.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "D069FDDEC2D3D96BF33FABB48E36591818411F8B585F9E45C13B253E01CFEA23",
+      "bytes": 1470,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/rectangle_face_trial_20261001/native_layers.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/rectangle_face_trial_20261001/native_layers.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "ECEE05F3FFC6947CE31BA2EF52AB427AE07555643E03D4EE73054CAB09E636D6",
+      "bytes": 3971,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/rectangle_face_trial_20261001/prepare_result.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/rectangle_face_trial_20261001/prepare_result.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "485386E6FCF7F60188EA501A581C5677430D2BDEB57F0627F4516788443BBFE6",
+      "bytes": 2586,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/rectangle_face_trial_20261001/README.md",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/rectangle_face_trial_20261001/README.md",
+      "role": "historical_learning_and_processing",
+      "sha256": "FDD19E581CDF48B26ED96C1DF38D2D98595AB4620B52364DAF984892998E4956",
+      "bytes": 3221,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/rectangle_face_trial_20261001/result.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/rectangle_face_trial_20261001/result.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "7F8AE314ACC28420E524A5A38FF111AF335ABA64492D53D6F80CC48418B7ED02",
+      "bytes": 3498,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/rectangle_face_trial_20261001/verification.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/rectangle_face_trial_20261001/verification.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "FC612EBE1F214DCB55C2D98E472354A33B6C1042F9372B4B3B092CBC876C0E9A",
+      "bytes": 1015,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/rectangle_face_trial_20261001/verify.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/rectangle_face_trial_20261001/verify.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "9AC2C2DCCC43B1273ECB231D6241B6598485ED2864B80CB38DD8BE90C66EE228",
+      "bytes": 1989,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/separation_trial_20261001/front_hair_mask.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/separation_trial_20261001/front_hair_mask.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "9A35A5F42B501BE84648C603030ECAF7F4085868288845B47C05F0C5C10760E1",
+      "bytes": 4006,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/separation_trial_20261001/imagegen_prompts.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/separation_trial_20261001/imagegen_prompts.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "892B1A0F8B0B774D40074A0082526A6698F8094F85C8B8C669C1FF0D5C8A339D",
+      "bytes": 2718,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/separation_trial_20261001/README.md",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/separation_trial_20261001/README.md",
+      "role": "historical_learning_and_processing",
+      "sha256": "E7FD5DFE897E41A40711C9C89A3579F9B62946D2B66C8917E21DC4659D7931A1",
+      "bytes": 4444,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/separation_trial_20261001/verification.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/separation_trial_20261001/verification.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "9E170F3A1FFD9D740CE00D56503FE3C7B295AA64ECC3AC3C2A104A9A82DE9F7A",
+      "bytes": 1490,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/separation_trial_20261001/psd_inspection/structure.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/separation_trial_20261001/psd_inspection/structure.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "FD7DCDF4C14F5C1C346CE2B6EB703858AE3DC8B575BD49D621491F0FC69579C8",
+      "bytes": 7083,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/square_face_trial_20261001/compare_resized.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/square_face_trial_20261001/compare_resized.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "7A507FF1E86801BABE8062ADA49B02263980E5A2D9D8104664D1B2B4F1CAD99F",
+      "bytes": 1577,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/square_face_trial_20261001/final-snapshot.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/square_face_trial_20261001/final-snapshot.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "2CFC2114285F325443D4773FAF36143F0D4CBC4379364CBA605200BCF7B48B9C",
+      "bytes": 447,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/square_face_trial_20261001/native_resized_layers.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/square_face_trial_20261001/native_resized_layers.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "0055DEE39F7AA8B9135A26830B53A49F027A919BAEE3046458FE170AB30F51CE",
+      "bytes": 6828,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/square_face_trial_20261001/prepare_resize_result.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/square_face_trial_20261001/prepare_resize_result.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "DB0631DEE63D65C60A3AC7EEC4F7E6FEA0C593D19F6072C9D2F09A6227F8E52D",
+      "bytes": 2573,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/square_face_trial_20261001/prompts.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/square_face_trial_20261001/prompts.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "7DE2806C2025D356079547E87440AC352F8DB3ED0D081F645F6B3FDFE89648AF",
+      "bytes": 2799,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/square_face_trial_20261001/README.md",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/square_face_trial_20261001/README.md",
+      "role": "historical_learning_and_processing",
+      "sha256": "FCC2E1DADBFD53640402C69D3420DDCF8B07A773C8A918646F5AB537C6EF14CE",
+      "bytes": 6428,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/square_face_trial_20261001/resize-result.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/square_face_trial_20261001/resize-result.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "4C75A08A0A4C6A8784E5E2AF27553BE7CC9A892BA30B8E27837BE33C2CEAEFFB",
+      "bytes": 3921,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_blonde_20261002/conversion-record.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_blonde_20261002/conversion-record.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "E2AE49CDA0660F6D60F3105F21CE924F321AFB82F21C0558D5C9A66B0FE390BF",
+      "bytes": 1069,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_blonde_20261002/save-original.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_blonde_20261002/save-original.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "DC2011872926291BD5819C387CBE40EA552BCC18F0E771B9A4BCE2BB9E9F3521",
+      "bytes": 624,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_blonde_20261002/verification-original.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_blonde_20261002/verification-original.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "13322AD6ADD07C01202F65C7F145D5557A06FFD1A6C075D8F7769906A13EA259",
+      "bytes": 564,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_blonde_20261002/inspection/samples.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_blonde_20261002/inspection/samples.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "EBDBB977DA131436481C31AEF619654808D82A016B97F2CE66433423A6FE4CF5",
+      "bytes": 4474,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_blonde_native_20261002/face-result-v1-unsubmitted.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_blonde_native_20261002/face-result-v1-unsubmitted.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "2E87004BE5129939CBD8CC2AD2B77967C37DBBE1DA353F7018915D4ADEDB968A",
+      "bytes": 3618,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_blonde_native_20261002/face-result.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_blonde_native_20261002/face-result.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "B1C8BE053E214E3F61AE0D0CF7BB957009D71DBE35B561AF2C0FA191C6C0D5E9",
+      "bytes": 3619,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_blonde_native_20261002/generation-alpha-analysis.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_blonde_native_20261002/generation-alpha-analysis.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "D613540773A2FBC0462E06DF6B9EBE1D6323BCA76D22FD1168FC156A37E57E25",
+      "bytes": 2916,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_blonde_native_20261002/imagegen-prompts.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_blonde_native_20261002/imagegen-prompts.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "DEF7EC012CDC99936950848A7ABAA368BCF7001A636EB786F8F0403BAACCA3CB",
+      "bytes": 2841,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_blonde_native_20261002/native-original-verification.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_blonde_native_20261002/native-original-verification.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "068AB30632CED1D18BFC284493E57708D81A99566BC13602593CF5A271343B49",
+      "bytes": 267,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_blonde_native_20261002/prepare-face-assets.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_blonde_native_20261002/prepare-face-assets.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "BCAC598D1A31A18D9D226C02F43573F062ED770D99F1C0CD7388CB1DF8502D5B",
+      "bytes": 3931,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_blonde_native_20261002/prepare-face-result.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_blonde_native_20261002/prepare-face-result.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "E8DE8C1F5F6DA155AC4D223F43B7D274BD5E7B74CF3699ED3C6E786B720BE974",
+      "bytes": 3017,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_blonde_native_20261002/prepared-verification.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_blonde_native_20261002/prepared-verification.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "5A483635DD91748D2BCDD212A0D9CAB8DD4BE2EB235589C29026E6AAB925E3E2",
+      "bytes": 1553,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_blonde_native_20261002/save-face.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_blonde_native_20261002/save-face.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "B682A84D893F317F7C19DC5FDBDCE2AF0CADF4AB10F288376BAB19955153E928",
+      "bytes": 2962,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_blonde_native_20261002/save-native-original.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_blonde_native_20261002/save-native-original.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "30A53EB1F93BDC040CD30FC369F3708F13E8FFFB5AE2E597C040B421A052DCD8",
+      "bytes": 903,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_blonde_native_20261002/verify_saved_psd.py",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_blonde_native_20261002/verify_saved_psd.py",
+      "role": "historical_learning_and_processing",
+      "sha256": "1205EFA8C3D2C508629C443C8169FBEDE74762BFBC33BA04C67C9F048CFFAB49",
+      "bytes": 6817,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_blonde_native_20261002/background-alpha-fix/imagegen-prompt.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_blonde_native_20261002/background-alpha-fix/imagegen-prompt.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "6A29B003CAA9334A32D7C8FB77D30951E9FDEC984C4C5AD3C393F7B70F79756F",
+      "bytes": 1569,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_blonde_native_20261002/background-alpha-fix/learning_record.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_blonde_native_20261002/background-alpha-fix/learning_record.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "5F77EF38E05DF561B18AC507409C18F689F7C3AF794F0F1A97335E406788C36C",
+      "bytes": 6257,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_blonde_native_20261002/background-alpha-fix/prepare-alpha.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_blonde_native_20261002/background-alpha-fix/prepare-alpha.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "AB49FB968198825D0B2B97DA03B3F9BAE672C9364DED8165FFE3580E559536BA",
+      "bytes": 4512,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_blonde_native_20261002/background-alpha-fix/psd-structure.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_blonde_native_20261002/background-alpha-fix/psd-structure.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "3C2199255B59D49649DE937BF66E351B91FC79A4F4E7A53AEEA34F63E15A19A2",
+      "bytes": 13074,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_blonde_native_20261002/background-alpha-fix/result.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_blonde_native_20261002/background-alpha-fix/result.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "9AA98D7633F0E875156A5B54F1DDBF948205621B87C119BE6D0D51E3378198E9",
+      "bytes": 974,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_blonde_native_20261002/background-alpha-fix/verification.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_blonde_native_20261002/background-alpha-fix/verification.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "59245BC366FB392302099CA26428952AE7750106A7B5229E36C667232EB4DB33",
+      "bytes": 1450,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_blonde_native_20261002/background-alpha-fix/verify_transparent_psd.py",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_blonde_native_20261002/background-alpha-fix/verify_transparent_psd.py",
+      "role": "historical_learning_and_processing",
+      "sha256": "9D3D8EA5AF694CA843185EF295C2FFD3F84484B18EB4DC4F4F0BEE9F3C81804A",
+      "bytes": 6030,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_blonde_native_20261002/final-inspection/psd-structure.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_blonde_native_20261002/final-inspection/psd-structure.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "331E981FE7805C1B54996F85B0CDE061A4B77C952611D884D3FC4032AC70C285",
+      "bytes": 13043,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_blonde_native_20261002/final-inspection/verification.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_blonde_native_20261002/final-inspection/verification.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "E8CB4CEE0459CC8969297EC3D79237D2EE1571CFDE23F80404C4CFDDD6D7F0E7",
+      "bytes": 3026,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_blonde_native_20261002/native-inspection/samples.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_blonde_native_20261002/native-inspection/samples.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "10D56FF269391099BA128DFFF1465C9EB1304F49C35E7695402B4A929594CA36",
+      "bytes": 9050,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_expressions_20261002/brow-prompt.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_expressions_20261002/brow-prompt.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "CCCE409F95C425E922312818479A6941FF5BFEA15D46A5A8C41797E23FD7BE99",
+      "bytes": 4566,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_expressions_20261002/eye-prompt.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_expressions_20261002/eye-prompt.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "623732C04724AFDB2EFBAE9C9F6EB7BDC588A47B25D2D077D5269789D7E10AB1",
+      "bytes": 3754,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_expressions_20261002/eyes-measurements.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_expressions_20261002/eyes-measurements.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "C337D67E89191420F5FC807EA555E8B2B4175F9FFD5AF6D650AE59C99B39C91E",
+      "bytes": 7544,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_expressions_20261002/layout.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_expressions_20261002/layout.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "716DDC431F0892E0D77D67CA3B19CA250A81FEACD218409DC04799A3A2BF99F6",
+      "bytes": 10585,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_expressions_20261002/learning_record.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_expressions_20261002/learning_record.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "8FACBC51F2AC3385E568FC71C5E89F914C8EAC7F2D07404A5EDAC9FC0492D0B9",
+      "bytes": 6871,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_expressions_20261002/manifest.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_expressions_20261002/manifest.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "D848947A3F4FBFEDF67B53B55FC4A9ED059BD15E506A8D7BF0C0A7CE75336B08",
+      "bytes": 11354,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_expressions_20261002/mouth-prompt.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_expressions_20261002/mouth-prompt.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "72959700E42E32C06115B7376A192AFBE63E78B81C775253D6DE215D5087E495",
+      "bytes": 4052,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_expressions_20261002/mouths-measurements.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_expressions_20261002/mouths-measurements.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "72C03D7D1451FA443E022270A4B30856F904E74C422714FF94532BE831C898F1",
+      "bytes": 11274,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_expressions_20261002/prepare-result.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_expressions_20261002/prepare-result.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "4AEFA21FFA92FD012A958F86EDE4BB9778B352917620060AB0E7AA35E38770CE",
+      "bytes": 4494,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_expressions_20261002/prepare-sheets.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_expressions_20261002/prepare-sheets.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "5C19B137356292C0F20BFE555149325BDC1C2141EA20D7A5499BD16B9CB692B7",
+      "bytes": 5994,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_expressions_20261002/prompts.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_expressions_20261002/prompts.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "12F227CFDFBD5627E7EC52F39A2CDF3950EE27791ABB1482778766518CCE11D7",
+      "bytes": 13835,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_expressions_20261002/psd-structure.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_expressions_20261002/psd-structure.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "0A134FB632ADE3D0E194C60E7285A1271E94E2518EE5997C28BDB450799FF64A",
+      "bytes": 64330,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_expressions_20261002/result.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_expressions_20261002/result.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "B69529BF1F9877DDDE620E6CC6845440432263FF6B473E98DC0AAAD7C20C841C",
+      "bytes": 16670,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_expressions_20261002/selection-verification.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_expressions_20261002/selection-verification.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "9F6DEAEC4E6BCEFC01CA71319A5D57BC485FE131B470DA6B54D58910DE3810E9",
+      "bytes": 411036,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_expressions_20261002/verification.json",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_expressions_20261002/verification.json",
+      "role": "historical_learning_and_processing",
+      "sha256": "C7B954FB888822D4142D3B8F8F17B4892CD2B6701D2CD017F897653CA8281DED",
+      "bytes": 13097,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_expressions_20261002/verify-pipe-selection.ps1",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_expressions_20261002/verify-pipe-selection.ps1",
+      "role": "historical_learning_and_processing",
+      "sha256": "7B3041A7EDB1685FBB88F46A4C5E3DB6C52DD169DEB2D9AB45A587E556223F04",
+      "bytes": 3938,
+      "operation": "copied"
+    },
+    {
+      "source": "Sample/syncroh2_expressions_20261002/verify-saved-expressions.py",
+      "target": "制作支援/学習記録/AIArtToPSD/Sample/syncroh2_expressions_20261002/verify-saved-expressions.py",
+      "role": "historical_learning_and_processing",
+      "sha256": "99C14D2621180767A3096436BB7D8ABBFC3BD7122A22ED1313EC2D8B1CBC513E",
+      "bytes": 10910,
+      "operation": "copied"
+    },
+    {
+      "source": "README.md",
+      "target": "制作支援/元資料/AIArtToPSD/README.md",
+      "role": "original_guide",
+      "sha256": "287EC2181D6D5DF23750B8BEF39652EBFE149E779B97252596D83ED799617AEB",
+      "bytes": 3178,
+      "operation": "copied"
+    },
+    {
+      "source": "note.md",
+      "target": "制作支援/元資料/AIArtToPSD/note.md",
+      "role": "original_guide",
+      "sha256": "0A8FD4C63413E6414ED04B80465D30A0A55D396225CBAEBDACA17EE1759D2744",
+      "bytes": 17681,
+      "operation": "copied"
+    },
+    {
+      "source": "Codex再利用ガイド.md",
+      "target": "制作支援/元資料/AIArtToPSD/Codex再利用ガイド.md",
+      "role": "original_guide",
+      "sha256": "31CA71ECF404374D311175CAE2E8FECD420F2E67DB7D08FDAF69A268588A7EB8",
+      "bytes": 9381,
+      "operation": "copied"
+    },
+    {
+      "source": "PSD立ち絵生成ルール.md",
+      "target": "制作支援/元資料/AIArtToPSD/PSD立ち絵生成ルール.md",
+      "role": "original_guide",
+      "sha256": "7E89B9708604EE373E59F20FF465D7ED5A27CF634834FA47DE533664ADE513F5",
+      "bytes": 20047,
+      "operation": "copied"
+    },
+    {
+      "source": "パイプ操作ルール.md",
+      "target": "制作支援/元資料/AIArtToPSD/パイプ操作ルール.md",
+      "role": "original_guide",
+      "sha256": "D6A62E88856333CE6CE07CA1CC08081E72F0A870CBE02C487D8E680C51C09801",
+      "bytes": 13917,
+      "operation": "copied"
+    },
+    {
+      "source": "アプリ実装_AI画像指示交換.md",
+      "target": "制作支援/元資料/AIArtToPSD/アプリ実装_AI画像指示交換.md",
+      "role": "original_guide",
+      "sha256": "216086C097617980B9E34EE42CE6A752CEB06E8C531F66765AD50CEE56B90867",
+      "bytes": 9610,
+      "operation": "copied"
+    },
+    {
+      "source": "アプリ実装_パイプUndoと復帰.md",
+      "target": "制作支援/元資料/AIArtToPSD/アプリ実装_パイプUndoと復帰.md",
+      "role": "original_guide",
+      "sha256": "0B473DC475DD29FBBA5DBF723A7B02D4B3D0A62246EB402C8A1D140121B0495D",
+      "bytes": 8054,
+      "operation": "copied"
+    },
+    {
+      "source": "アプリ実装_表情とパーツ切替.md",
+      "target": "制作支援/元資料/AIArtToPSD/アプリ実装_表情とパーツ切替.md",
+      "role": "original_guide",
+      "sha256": "AD9E549227111995B7CA03D9844EE5B9F197BFC73874F30BFEF11C95414CEE73",
+      "bytes": 5631,
+      "operation": "copied"
+    },
+    {
+      "source": "Tools/Send-ArtCommand.ps1",
+      "target": "制作支援/パイプ/Send-RigmCommand.ps1",
+      "role": "format_independent_pipe_sender",
+      "sha256": "ABC52796AE6E8FB04F167C7C932F726BFE4C9A20E1F9BB8B770EBFFB56736117",
+      "bytes": 1855,
+      "operation": "copied"
+    },
+    {
+      "source": "Source/Core/ArtDocument.pas",
+      "target": "Source/Reference/AIArtToPSD/Core/ArtDocument.pas",
+      "role": "existing_editor_and_pipe_source",
+      "sha256": "7BECDD095A9942E9565C8B657F35A66814AEDA94EE0B0D5A8EDAF2C26DD52394",
+      "bytes": 12033,
+      "operation": "verified_existing"
+    },
+    {
+      "source": "Source/Core/ArtLayerName.pas",
+      "target": "Source/Reference/AIArtToPSD/Core/ArtLayerName.pas",
+      "role": "existing_editor_and_pipe_source",
+      "sha256": "7664AF692ED19C6A79AF2FB038AA63771FC5FC571A3CF9F3CCDE86E0D6FB4E66",
+      "bytes": 2404,
+      "operation": "verified_existing"
+    },
+    {
+      "source": "Source/Core/ArtParts.pas",
+      "target": "Source/Reference/AIArtToPSD/Core/ArtParts.pas",
+      "role": "existing_editor_and_pipe_source",
+      "sha256": "74FE390623D443F83CF2DD79FD4462FDE3CC5846A4BD78E35FA425C560DE85D0",
+      "bytes": 1534,
+      "operation": "verified_existing"
+    },
+    {
+      "source": "Source/Core/ArtRasterTransform.pas",
+      "target": "Source/Reference/AIArtToPSD/Core/ArtRasterTransform.pas",
+      "role": "existing_editor_and_pipe_source",
+      "sha256": "5F8D03744DF3C966373BDF72229F104CBD0F458E4C8D2DD4DB28EAB179FF33D4",
+      "bytes": 5659,
+      "operation": "verified_existing"
+    },
+    {
+      "source": "Source/Editor/ArtUndo.pas",
+      "target": "Source/Reference/AIArtToPSD/Editor/ArtUndo.pas",
+      "role": "existing_editor_and_pipe_source",
+      "sha256": "1A8EB0B1B81B947158B37D7D9DC81D431E24914A1250CA3C5491CA64C1125C0E",
+      "bytes": 2583,
+      "operation": "verified_existing"
+    },
+    {
+      "source": "Source/Integrations/AIExchange/ArtExchange.pas",
+      "target": "Source/Reference/AIArtToPSD/Integrations/AIExchange/ArtExchange.pas",
+      "role": "existing_editor_and_pipe_source",
+      "sha256": "9667A55838BB28AC3B0CA1F0E7A8372F87B1C824D51E0F83BC55389C9C5FCFC8",
+      "bytes": 33714,
+      "operation": "verified_existing"
+    },
+    {
+      "source": "Source/Integrations/Pipe/ArtPipeBridge.pas",
+      "target": "Source/Reference/AIArtToPSD/Integrations/Pipe/ArtPipeBridge.pas",
+      "role": "existing_editor_and_pipe_source",
+      "sha256": "DC72B1E18BE73E9CF2F8501670E8B03D529C2CFBD8EC81713624588FA29D927F",
+      "bytes": 3646,
+      "operation": "verified_existing"
+    },
+    {
+      "source": "Source/Integrations/Pipe/ArtPipeProtocol.pas",
+      "target": "Source/Reference/AIArtToPSD/Integrations/Pipe/ArtPipeProtocol.pas",
+      "role": "existing_editor_and_pipe_source",
+      "sha256": "0593F06493F11175423D3C87509B7D1E593D97B75F59936C32E3BE09473DB01B",
+      "bytes": 3525,
+      "operation": "verified_existing"
+    },
+    {
+      "source": "Source/Lib/DropFile/DropFile.pas",
+      "target": "Source/Reference/AIArtToPSD/Lib/DropFile/DropFile.pas",
+      "role": "existing_editor_and_pipe_source",
+      "sha256": "F0D70B1E9EFC9299827CF8E412565EB69DFACCEE9AC4B27538A590DC42ABDEED",
+      "bytes": 8325,
+      "operation": "verified_existing"
+    },
+    {
+      "source": "Source/Lib/Pipe/PipeServerTThread.pas",
+      "target": "Source/Reference/AIArtToPSD/Lib/Pipe/PipeServerTThread.pas",
+      "role": "existing_editor_and_pipe_source",
+      "sha256": "1CFB4F01CB3444465115134A8D6716617DB066CC5488946630094B2CC6C4B932",
+      "bytes": 5363,
+      "operation": "verified_existing"
+    },
+    {
+      "source": "Source/Lib/Pipe/README.md",
+      "target": "Source/Reference/AIArtToPSD/Lib/Pipe/README.md",
+      "role": "existing_editor_and_pipe_source",
+      "sha256": "7EC0078E964CBEE7226D2C23A8CCDB1F2A4A7BE86DD7E0AF676E9696B7A8EF1C",
+      "bytes": 1368,
+      "operation": "verified_existing"
+    },
+    {
+      "source": "Source/Lib/UI/DarkComboBox/DarkComboBox.pas",
+      "target": "Source/Reference/AIArtToPSD/Lib/UI/DarkComboBox/DarkComboBox.pas",
+      "role": "existing_editor_and_pipe_source",
+      "sha256": "2543649DA7E8E39A393EF2043DC3C95483A77096EC32B5FA888D9599E20E5721",
+      "bytes": 4654,
+      "operation": "verified_existing"
+    },
+    {
+      "source": "Source/Lib/UI/DarkComboBox/README.md",
+      "target": "Source/Reference/AIArtToPSD/Lib/UI/DarkComboBox/README.md",
+      "role": "existing_editor_and_pipe_source",
+      "sha256": "493E98F6407B1FF9B98BA4D280E9015114A879F3683534851D2271EAABDB990C",
+      "bytes": 838,
+      "operation": "verified_existing"
+    },
+    {
+      "source": "Source/Lib/UI/HorizontalTrackBar/HorizontalTrackBarControl.pas",
+      "target": "Source/Reference/AIArtToPSD/Lib/UI/HorizontalTrackBar/HorizontalTrackBarControl.pas",
+      "role": "existing_editor_and_pipe_source",
+      "sha256": "9339B5CB0E327CCB8CCDDC183630C9EE121BD50A48565017C417ABDBAA2D35C5",
+      "bytes": 11559,
+      "operation": "verified_existing"
+    },
+    {
+      "source": "Source/Lib/UI/HorizontalTrackBar/HorizontalTrackBarRenderer.pas",
+      "target": "Source/Reference/AIArtToPSD/Lib/UI/HorizontalTrackBar/HorizontalTrackBarRenderer.pas",
+      "role": "existing_editor_and_pipe_source",
+      "sha256": "F980B3CB9EF22E73E18E074477F9CA35A76199AE887B42C95FA91E39DD2EC0AD",
+      "bytes": 4252,
+      "operation": "verified_existing"
+    },
+    {
+      "source": "Source/Lib/UI/HorizontalTrackBar/README.md",
+      "target": "Source/Reference/AIArtToPSD/Lib/UI/HorizontalTrackBar/README.md",
+      "role": "existing_editor_and_pipe_source",
+      "sha256": "59879BDB596AEBDBDC843C263B9BCAA4FF1D6AFFF4A46604974EFC70E98B8A1F",
+      "bytes": 604,
+      "operation": "verified_existing"
+    },
+    {
+      "source": "Source/Lib/UI/VerticalScrollBar/README.md",
+      "target": "Source/Reference/AIArtToPSD/Lib/UI/VerticalScrollBar/README.md",
+      "role": "existing_editor_and_pipe_source",
+      "sha256": "B678D1BDC5ABE8A1D8B0EF110901DEAAE0E82AC12164DD106C6A90EC617A07CE",
+      "bytes": 426,
+      "operation": "verified_existing"
+    },
+    {
+      "source": "Source/Lib/UI/VerticalScrollBar/VerticalScrollBarControl.pas",
+      "target": "Source/Reference/AIArtToPSD/Lib/UI/VerticalScrollBar/VerticalScrollBarControl.pas",
+      "role": "existing_editor_and_pipe_source",
+      "sha256": "3BEFC71AC2CFA83EBA9D40EE2132E7FB665BC0F86DB32B75054D96671B4409C0",
+      "bytes": 9356,
+      "operation": "verified_existing"
+    },
+    {
+      "source": "Source/Persistence/PNG/ArtPng.pas",
+      "target": "Source/Reference/AIArtToPSD/Persistence/PNG/ArtPng.pas",
+      "role": "existing_editor_and_pipe_source",
+      "sha256": "EBEBF2A6D3ADBDF980F14C1371A11CB82F09B88ACA0D022558015757EBA8DCD8",
+      "bytes": 3941,
+      "operation": "verified_existing"
+    },
+    {
+      "source": "Source/Persistence/PSD/ArtPsd.pas",
+      "target": "Source/Reference/AIArtToPSD/Persistence/PSD/ArtPsd.pas",
+      "role": "existing_editor_and_pipe_source",
+      "sha256": "747148B65347980A68E62EB977639C0C3EC04D3902C37A8E022AE8DFB678F2A9",
+      "bytes": 60448,
+      "operation": "verified_existing"
+    },
+    {
+      "source": "Source/Shell/AIArtToPSDMainForm.dfm",
+      "target": "Source/Reference/AIArtToPSD/Shell/AIArtToPSDMainForm.dfm",
+      "role": "existing_editor_and_pipe_source",
+      "sha256": "51454AF3786170492787F167B2E61C38A17A19F0221E34DB6ADE9A2026CB8D45",
+      "bytes": 357,
+      "operation": "verified_existing"
+    },
+    {
+      "source": "Source/Shell/AIArtToPSDMainForm.pas",
+      "target": "Source/Reference/AIArtToPSD/Shell/AIArtToPSDMainForm.pas",
+      "role": "existing_editor_and_pipe_source",
+      "sha256": "079F002000F7CB46ADA77BA1D9B02B7825E960668C8C479EB1032EF111F35626",
+      "bytes": 52856,
+      "operation": "verified_existing"
+    },
+    {
+      "source": "Source/Shell/ArtFileHistory.pas",
+      "target": "Source/Reference/AIArtToPSD/Shell/ArtFileHistory.pas",
+      "role": "existing_editor_and_pipe_source",
+      "sha256": "ABD04180C2C73BFDE17A0AA5B6080737E324C9F73F709AF343245583A5116E30",
+      "bytes": 2486,
+      "operation": "verified_existing"
+    },
+    {
+      "source": "Source/Shell/ArtLayerList.pas",
+      "target": "Source/Reference/AIArtToPSD/Shell/ArtLayerList.pas",
+      "role": "existing_editor_and_pipe_source",
+      "sha256": "C45054FAC018BB14404AA7A33F8CC43C3ABC041EC91571D66C7525CE014EA906",
+      "bytes": 19089,
+      "operation": "verified_existing"
+    }
+  ]
+}

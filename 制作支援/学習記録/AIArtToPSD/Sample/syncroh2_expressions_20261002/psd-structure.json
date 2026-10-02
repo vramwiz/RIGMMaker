@@ -1,0 +1,2796 @@
+{
+  "path": "D:\\DelphiProg\\test\\AIArtToPSD\\Sample\\syncroh2_expressions_20261002\\blonde_expressions_review.psd",
+  "relative_path": "blonde_expressions_review.psd",
+  "size": 5827292,
+  "sha256": "e582637239d47e521f49c9ccba7ae8aadf66b2abf3ec81fb9f02052c1ea4f511",
+  "status": "ok",
+  "warnings": [],
+  "header": {
+    "version": 1,
+    "channels": 4,
+    "width": 752,
+    "height": 1344,
+    "depth": 8,
+    "color_mode": 3,
+    "reserved_zero": true
+  },
+  "sections": [
+    {
+      "kind": "color_mode",
+      "offset": 26,
+      "payload_start": 30,
+      "end": 30,
+      "length": 0
+    },
+    {
+      "kind": "resources",
+      "offset": 30,
+      "payload_start": 34,
+      "end": 34,
+      "length": 0
+    },
+    {
+      "kind": "layer_mask",
+      "offset": 34,
+      "payload_start": 38,
+      "end": 4864934,
+      "length": 4864896
+    }
+  ],
+  "layers": [
+    {
+      "index": 0,
+      "offset": 44,
+      "end": 168,
+      "rect": [
+        0,
+        0,
+        1344,
+        752
+      ],
+      "name": "元画像（比較用・原寸）",
+      "legacy_hex": "",
+      "section_type": 0,
+      "blend": "norm",
+      "opacity": 255,
+      "clipping": 0,
+      "flags": 2,
+      "visible": false,
+      "mask": {
+        "length": 0
+      },
+      "blending_ranges_length": 0,
+      "channels": [
+        {
+          "id": 0,
+          "length": 777387,
+          "offset": 4460,
+          "end": 781847,
+          "compression": 1,
+          "row_lengths_sum": 774697,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 1,
+          "length": 787615,
+          "offset": 781847,
+          "end": 1569462,
+          "compression": 1,
+          "row_lengths_sum": 784925,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 2,
+          "length": 781133,
+          "offset": 1569462,
+          "end": 2350595,
+          "compression": 1,
+          "row_lengths_sum": 778443,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": -1,
+          "length": 18818,
+          "offset": 2350595,
+          "end": 2369413,
+          "compression": 1,
+          "row_lengths_sum": 16128,
+          "validation": "rle-length-table-checked"
+        }
+      ],
+      "tags": [
+        {
+          "offset": 114,
+          "signature": "8BIM",
+          "key": "luni",
+          "length": 26,
+          "name": "元画像（比較用・原寸）",
+          "end": 152
+        },
+        {
+          "offset": 152,
+          "signature": "8BIM",
+          "key": "lyid",
+          "length": 4,
+          "layer_id": 1,
+          "end": 168
+        }
+      ],
+      "depth": 0
+    },
+    {
+      "index": 1,
+      "offset": 168,
+      "end": 290,
+      "rect": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "name": "</Layer group>",
+      "legacy_hex": "",
+      "section_type": 3,
+      "blend": "norm",
+      "opacity": 255,
+      "clipping": 0,
+      "flags": 2,
+      "visible": false,
+      "mask": {
+        "length": 0
+      },
+      "blending_ranges_length": 0,
+      "channels": [],
+      "tags": [
+        {
+          "offset": 214,
+          "signature": "8BIM",
+          "key": "luni",
+          "length": 32,
+          "name": "</Layer group>",
+          "end": 258
+        },
+        {
+          "offset": 258,
+          "signature": "8BIM",
+          "key": "lyid",
+          "length": 4,
+          "layer_id": 2,
+          "end": 274
+        },
+        {
+          "offset": 274,
+          "signature": "8BIM",
+          "key": "lsct",
+          "length": 4,
+          "section_type": 3,
+          "end": 290
+        }
+      ],
+      "depth": 0
+    },
+    {
+      "index": 2,
+      "offset": 290,
+      "end": 422,
+      "rect": [
+        0,
+        0,
+        1344,
+        752
+      ],
+      "name": "ベース（背景透過・目眉口補完）",
+      "legacy_hex": "",
+      "section_type": 0,
+      "blend": "norm",
+      "opacity": 255,
+      "clipping": 0,
+      "flags": 0,
+      "visible": true,
+      "mask": {
+        "length": 0
+      },
+      "blending_ranges_length": 0,
+      "channels": [
+        {
+          "id": 0,
+          "length": 776996,
+          "offset": 2369413,
+          "end": 3146409,
+          "compression": 1,
+          "row_lengths_sum": 774306,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 1,
+          "length": 787129,
+          "offset": 3146409,
+          "end": 3933538,
+          "compression": 1,
+          "row_lengths_sum": 784439,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 2,
+          "length": 780620,
+          "offset": 3933538,
+          "end": 4714158,
+          "compression": 1,
+          "row_lengths_sum": 777930,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": -1,
+          "length": 30789,
+          "offset": 4714158,
+          "end": 4744947,
+          "compression": 1,
+          "row_lengths_sum": 28099,
+          "validation": "rle-length-table-checked"
+        }
+      ],
+      "tags": [
+        {
+          "offset": 360,
+          "signature": "8BIM",
+          "key": "luni",
+          "length": 34,
+          "name": "ベース（背景透過・目眉口補完）",
+          "end": 406
+        },
+        {
+          "offset": 406,
+          "signature": "8BIM",
+          "key": "lyid",
+          "length": 4,
+          "layer_id": 3,
+          "end": 422
+        }
+      ],
+      "depth": 1
+    },
+    {
+      "index": 3,
+      "offset": 422,
+      "end": 538,
+      "rect": [
+        233,
+        358,
+        243,
+        386
+      ],
+      "name": "口（原画画素）",
+      "legacy_hex": "",
+      "section_type": 0,
+      "blend": "norm",
+      "opacity": 255,
+      "clipping": 0,
+      "flags": 2,
+      "visible": false,
+      "mask": {
+        "length": 0
+      },
+      "blending_ranges_length": 0,
+      "channels": [
+        {
+          "id": 0,
+          "length": 253,
+          "offset": 4744947,
+          "end": 4745200,
+          "compression": 1,
+          "row_lengths_sum": 231,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 1,
+          "length": 275,
+          "offset": 4745200,
+          "end": 4745475,
+          "compression": 1,
+          "row_lengths_sum": 253,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 2,
+          "length": 273,
+          "offset": 4745475,
+          "end": 4745748,
+          "compression": 1,
+          "row_lengths_sum": 251,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": -1,
+          "length": 139,
+          "offset": 4745748,
+          "end": 4745887,
+          "compression": 1,
+          "row_lengths_sum": 117,
+          "validation": "rle-length-table-checked"
+        }
+      ],
+      "tags": [
+        {
+          "offset": 492,
+          "signature": "8BIM",
+          "key": "luni",
+          "length": 18,
+          "name": "口（原画画素）",
+          "end": 522
+        },
+        {
+          "offset": 522,
+          "signature": "8BIM",
+          "key": "lyid",
+          "length": 4,
+          "layer_id": 4,
+          "end": 538
+        }
+      ],
+      "depth": 1
+    },
+    {
+      "index": 4,
+      "offset": 538,
+      "end": 660,
+      "rect": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "name": "</Layer group>",
+      "legacy_hex": "",
+      "section_type": 3,
+      "blend": "norm",
+      "opacity": 255,
+      "clipping": 0,
+      "flags": 2,
+      "visible": false,
+      "mask": {
+        "length": 0
+      },
+      "blending_ranges_length": 0,
+      "channels": [],
+      "tags": [
+        {
+          "offset": 584,
+          "signature": "8BIM",
+          "key": "luni",
+          "length": 32,
+          "name": "</Layer group>",
+          "end": 628
+        },
+        {
+          "offset": 628,
+          "signature": "8BIM",
+          "key": "lyid",
+          "length": 4,
+          "layer_id": 8,
+          "end": 644
+        },
+        {
+          "offset": 644,
+          "signature": "8BIM",
+          "key": "lsct",
+          "length": 4,
+          "section_type": 3,
+          "end": 660
+        }
+      ],
+      "depth": 1
+    },
+    {
+      "index": 5,
+      "offset": 660,
+      "end": 776,
+      "rect": [
+        236,
+        360,
+        240,
+        383
+      ],
+      "name": "*09 口 ん",
+      "legacy_hex": "",
+      "section_type": 0,
+      "blend": "norm",
+      "opacity": 255,
+      "clipping": 0,
+      "flags": 2,
+      "visible": false,
+      "mask": {
+        "length": 0
+      },
+      "blending_ranges_length": 0,
+      "channels": [
+        {
+          "id": 0,
+          "length": 70,
+          "offset": 4745887,
+          "end": 4745957,
+          "compression": 1,
+          "row_lengths_sum": 60,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 1,
+          "length": 69,
+          "offset": 4745957,
+          "end": 4746026,
+          "compression": 1,
+          "row_lengths_sum": 59,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 2,
+          "length": 68,
+          "offset": 4746026,
+          "end": 4746094,
+          "compression": 1,
+          "row_lengths_sum": 58,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": -1,
+          "length": 70,
+          "offset": 4746094,
+          "end": 4746164,
+          "compression": 1,
+          "row_lengths_sum": 60,
+          "validation": "rle-length-table-checked"
+        }
+      ],
+      "tags": [
+        {
+          "offset": 730,
+          "signature": "8BIM",
+          "key": "luni",
+          "length": 18,
+          "name": "*09 口 ん",
+          "end": 760
+        },
+        {
+          "offset": 760,
+          "signature": "8BIM",
+          "key": "lyid",
+          "length": 4,
+          "layer_id": 9,
+          "end": 776
+        }
+      ],
+      "depth": 2
+    },
+    {
+      "index": 6,
+      "offset": 776,
+      "end": 892,
+      "rect": [
+        223,
+        360,
+        253,
+        383
+      ],
+      "name": "*08 口 お",
+      "legacy_hex": "",
+      "section_type": 0,
+      "blend": "norm",
+      "opacity": 255,
+      "clipping": 0,
+      "flags": 2,
+      "visible": false,
+      "mask": {
+        "length": 0
+      },
+      "blending_ranges_length": 0,
+      "channels": [
+        {
+          "id": 0,
+          "length": 680,
+          "offset": 4746164,
+          "end": 4746844,
+          "compression": 1,
+          "row_lengths_sum": 618,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 1,
+          "length": 687,
+          "offset": 4746844,
+          "end": 4747531,
+          "compression": 1,
+          "row_lengths_sum": 625,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 2,
+          "length": 684,
+          "offset": 4747531,
+          "end": 4748215,
+          "compression": 1,
+          "row_lengths_sum": 622,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": -1,
+          "length": 468,
+          "offset": 4748215,
+          "end": 4748683,
+          "compression": 1,
+          "row_lengths_sum": 406,
+          "validation": "rle-length-table-checked"
+        }
+      ],
+      "tags": [
+        {
+          "offset": 846,
+          "signature": "8BIM",
+          "key": "luni",
+          "length": 18,
+          "name": "*08 口 お",
+          "end": 876
+        },
+        {
+          "offset": 876,
+          "signature": "8BIM",
+          "key": "lyid",
+          "length": 4,
+          "layer_id": 10,
+          "end": 892
+        }
+      ],
+      "depth": 2
+    },
+    {
+      "index": 7,
+      "offset": 892,
+      "end": 1008,
+      "rect": [
+        228,
+        352,
+        248,
+        390
+      ],
+      "name": "*07 口 え",
+      "legacy_hex": "",
+      "section_type": 0,
+      "blend": "norm",
+      "opacity": 255,
+      "clipping": 0,
+      "flags": 2,
+      "visible": false,
+      "mask": {
+        "length": 0
+      },
+      "blending_ranges_length": 0,
+      "channels": [
+        {
+          "id": 0,
+          "length": 629,
+          "offset": 4748683,
+          "end": 4749312,
+          "compression": 1,
+          "row_lengths_sum": 587,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 1,
+          "length": 653,
+          "offset": 4749312,
+          "end": 4749965,
+          "compression": 1,
+          "row_lengths_sum": 611,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 2,
+          "length": 657,
+          "offset": 4749965,
+          "end": 4750622,
+          "compression": 1,
+          "row_lengths_sum": 615,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": -1,
+          "length": 369,
+          "offset": 4750622,
+          "end": 4750991,
+          "compression": 1,
+          "row_lengths_sum": 327,
+          "validation": "rle-length-table-checked"
+        }
+      ],
+      "tags": [
+        {
+          "offset": 962,
+          "signature": "8BIM",
+          "key": "luni",
+          "length": 18,
+          "name": "*07 口 え",
+          "end": 992
+        },
+        {
+          "offset": 992,
+          "signature": "8BIM",
+          "key": "lyid",
+          "length": 4,
+          "layer_id": 11,
+          "end": 1008
+        }
+      ],
+      "depth": 2
+    },
+    {
+      "index": 8,
+      "offset": 1008,
+      "end": 1124,
+      "rect": [
+        230,
+        364,
+        246,
+        379
+      ],
+      "name": "*06 口 う",
+      "legacy_hex": "",
+      "section_type": 0,
+      "blend": "norm",
+      "opacity": 255,
+      "clipping": 0,
+      "flags": 2,
+      "visible": false,
+      "mask": {
+        "length": 0
+      },
+      "blending_ranges_length": 0,
+      "channels": [
+        {
+          "id": 0,
+          "length": 263,
+          "offset": 4750991,
+          "end": 4751254,
+          "compression": 1,
+          "row_lengths_sum": 229,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 1,
+          "length": 263,
+          "offset": 4751254,
+          "end": 4751517,
+          "compression": 1,
+          "row_lengths_sum": 229,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 2,
+          "length": 263,
+          "offset": 4751517,
+          "end": 4751780,
+          "compression": 1,
+          "row_lengths_sum": 229,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": -1,
+          "length": 218,
+          "offset": 4751780,
+          "end": 4751998,
+          "compression": 1,
+          "row_lengths_sum": 184,
+          "validation": "rle-length-table-checked"
+        }
+      ],
+      "tags": [
+        {
+          "offset": 1078,
+          "signature": "8BIM",
+          "key": "luni",
+          "length": 18,
+          "name": "*06 口 う",
+          "end": 1108
+        },
+        {
+          "offset": 1108,
+          "signature": "8BIM",
+          "key": "lyid",
+          "length": 4,
+          "layer_id": 12,
+          "end": 1124
+        }
+      ],
+      "depth": 2
+    },
+    {
+      "index": 9,
+      "offset": 1124,
+      "end": 1240,
+      "rect": [
+        232,
+        354,
+        244,
+        388
+      ],
+      "name": "*05 口 い",
+      "legacy_hex": "",
+      "section_type": 0,
+      "blend": "norm",
+      "opacity": 255,
+      "clipping": 0,
+      "flags": 2,
+      "visible": false,
+      "mask": {
+        "length": 0
+      },
+      "blending_ranges_length": 0,
+      "channels": [
+        {
+          "id": 0,
+          "length": 364,
+          "offset": 4751998,
+          "end": 4752362,
+          "compression": 1,
+          "row_lengths_sum": 338,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 1,
+          "length": 366,
+          "offset": 4752362,
+          "end": 4752728,
+          "compression": 1,
+          "row_lengths_sum": 340,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 2,
+          "length": 366,
+          "offset": 4752728,
+          "end": 4753094,
+          "compression": 1,
+          "row_lengths_sum": 340,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": -1,
+          "length": 247,
+          "offset": 4753094,
+          "end": 4753341,
+          "compression": 1,
+          "row_lengths_sum": 221,
+          "validation": "rle-length-table-checked"
+        }
+      ],
+      "tags": [
+        {
+          "offset": 1194,
+          "signature": "8BIM",
+          "key": "luni",
+          "length": 18,
+          "name": "*05 口 い",
+          "end": 1224
+        },
+        {
+          "offset": 1224,
+          "signature": "8BIM",
+          "key": "lyid",
+          "length": 4,
+          "layer_id": 13,
+          "end": 1240
+        }
+      ],
+      "depth": 2
+    },
+    {
+      "index": 10,
+      "offset": 1240,
+      "end": 1356,
+      "rect": [
+        222,
+        358,
+        255,
+        385
+      ],
+      "name": "*04 口 あ",
+      "legacy_hex": "",
+      "section_type": 0,
+      "blend": "norm",
+      "opacity": 255,
+      "clipping": 0,
+      "flags": 2,
+      "visible": false,
+      "mask": {
+        "length": 0
+      },
+      "blending_ranges_length": 0,
+      "channels": [
+        {
+          "id": 0,
+          "length": 852,
+          "offset": 4753341,
+          "end": 4754193,
+          "compression": 1,
+          "row_lengths_sum": 784,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 1,
+          "length": 854,
+          "offset": 4754193,
+          "end": 4755047,
+          "compression": 1,
+          "row_lengths_sum": 786,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 2,
+          "length": 841,
+          "offset": 4755047,
+          "end": 4755888,
+          "compression": 1,
+          "row_lengths_sum": 773,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": -1,
+          "length": 534,
+          "offset": 4755888,
+          "end": 4756422,
+          "compression": 1,
+          "row_lengths_sum": 466,
+          "validation": "rle-length-table-checked"
+        }
+      ],
+      "tags": [
+        {
+          "offset": 1310,
+          "signature": "8BIM",
+          "key": "luni",
+          "length": 18,
+          "name": "*04 口 あ",
+          "end": 1340
+        },
+        {
+          "offset": 1340,
+          "signature": "8BIM",
+          "key": "lyid",
+          "length": 4,
+          "layer_id": 14,
+          "end": 1356
+        }
+      ],
+      "depth": 2
+    },
+    {
+      "index": 11,
+      "offset": 1356,
+      "end": 1474,
+      "rect": [
+        225,
+        356,
+        251,
+        387
+      ],
+      "name": "*03 口 開き",
+      "legacy_hex": "",
+      "section_type": 0,
+      "blend": "norm",
+      "opacity": 255,
+      "clipping": 0,
+      "flags": 2,
+      "visible": false,
+      "mask": {
+        "length": 0
+      },
+      "blending_ranges_length": 0,
+      "channels": [
+        {
+          "id": 0,
+          "length": 718,
+          "offset": 4756422,
+          "end": 4757140,
+          "compression": 1,
+          "row_lengths_sum": 664,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 1,
+          "length": 727,
+          "offset": 4757140,
+          "end": 4757867,
+          "compression": 1,
+          "row_lengths_sum": 673,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 2,
+          "length": 727,
+          "offset": 4757867,
+          "end": 4758594,
+          "compression": 1,
+          "row_lengths_sum": 673,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": -1,
+          "length": 469,
+          "offset": 4758594,
+          "end": 4759063,
+          "compression": 1,
+          "row_lengths_sum": 415,
+          "validation": "rle-length-table-checked"
+        }
+      ],
+      "tags": [
+        {
+          "offset": 1426,
+          "signature": "8BIM",
+          "key": "luni",
+          "length": 20,
+          "name": "*03 口 開き",
+          "end": 1458
+        },
+        {
+          "offset": 1458,
+          "signature": "8BIM",
+          "key": "lyid",
+          "length": 4,
+          "layer_id": 15,
+          "end": 1474
+        }
+      ],
+      "depth": 2
+    },
+    {
+      "index": 12,
+      "offset": 1474,
+      "end": 1594,
+      "rect": [
+        233,
+        358,
+        243,
+        384
+      ],
+      "name": "*02 口 半開き",
+      "legacy_hex": "",
+      "section_type": 0,
+      "blend": "norm",
+      "opacity": 255,
+      "clipping": 0,
+      "flags": 2,
+      "visible": false,
+      "mask": {
+        "length": 0
+      },
+      "blending_ranges_length": 0,
+      "channels": [
+        {
+          "id": 0,
+          "length": 226,
+          "offset": 4759063,
+          "end": 4759289,
+          "compression": 1,
+          "row_lengths_sum": 204,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 1,
+          "length": 227,
+          "offset": 4759289,
+          "end": 4759516,
+          "compression": 1,
+          "row_lengths_sum": 205,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 2,
+          "length": 227,
+          "offset": 4759516,
+          "end": 4759743,
+          "compression": 1,
+          "row_lengths_sum": 205,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": -1,
+          "length": 185,
+          "offset": 4759743,
+          "end": 4759928,
+          "compression": 1,
+          "row_lengths_sum": 163,
+          "validation": "rle-length-table-checked"
+        }
+      ],
+      "tags": [
+        {
+          "offset": 1544,
+          "signature": "8BIM",
+          "key": "luni",
+          "length": 22,
+          "name": "*02 口 半開き",
+          "end": 1578
+        },
+        {
+          "offset": 1578,
+          "signature": "8BIM",
+          "key": "lyid",
+          "length": 4,
+          "layer_id": 16,
+          "end": 1594
+        }
+      ],
+      "depth": 2
+    },
+    {
+      "index": 13,
+      "offset": 1594,
+      "end": 1712,
+      "rect": [
+        235,
+        358,
+        241,
+        384
+      ],
+      "name": "*01 口 閉じ",
+      "legacy_hex": "",
+      "section_type": 0,
+      "blend": "norm",
+      "opacity": 255,
+      "clipping": 0,
+      "flags": 2,
+      "visible": false,
+      "mask": {
+        "length": 0
+      },
+      "blending_ranges_length": 0,
+      "channels": [
+        {
+          "id": 0,
+          "length": 98,
+          "offset": 4759928,
+          "end": 4760026,
+          "compression": 1,
+          "row_lengths_sum": 84,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 1,
+          "length": 95,
+          "offset": 4760026,
+          "end": 4760121,
+          "compression": 1,
+          "row_lengths_sum": 81,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 2,
+          "length": 96,
+          "offset": 4760121,
+          "end": 4760217,
+          "compression": 1,
+          "row_lengths_sum": 82,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": -1,
+          "length": 98,
+          "offset": 4760217,
+          "end": 4760315,
+          "compression": 1,
+          "row_lengths_sum": 84,
+          "validation": "rle-length-table-checked"
+        }
+      ],
+      "tags": [
+        {
+          "offset": 1664,
+          "signature": "8BIM",
+          "key": "luni",
+          "length": 20,
+          "name": "*01 口 閉じ",
+          "end": 1696
+        },
+        {
+          "offset": 1696,
+          "signature": "8BIM",
+          "key": "lyid",
+          "length": 4,
+          "layer_id": 17,
+          "end": 1712
+        }
+      ],
+      "depth": 2
+    },
+    {
+      "index": 14,
+      "offset": 1712,
+      "end": 1832,
+      "rect": [
+        233,
+        358,
+        243,
+        386
+      ],
+      "name": "*00 口（原画）",
+      "legacy_hex": "",
+      "section_type": 0,
+      "blend": "norm",
+      "opacity": 255,
+      "clipping": 0,
+      "flags": 0,
+      "visible": true,
+      "mask": {
+        "length": 0
+      },
+      "blending_ranges_length": 0,
+      "channels": [
+        {
+          "id": 0,
+          "length": 253,
+          "offset": 4760315,
+          "end": 4760568,
+          "compression": 1,
+          "row_lengths_sum": 231,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 1,
+          "length": 275,
+          "offset": 4760568,
+          "end": 4760843,
+          "compression": 1,
+          "row_lengths_sum": 253,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 2,
+          "length": 273,
+          "offset": 4760843,
+          "end": 4761116,
+          "compression": 1,
+          "row_lengths_sum": 251,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": -1,
+          "length": 139,
+          "offset": 4761116,
+          "end": 4761255,
+          "compression": 1,
+          "row_lengths_sum": 117,
+          "validation": "rle-length-table-checked"
+        }
+      ],
+      "tags": [
+        {
+          "offset": 1782,
+          "signature": "8BIM",
+          "key": "luni",
+          "length": 22,
+          "name": "*00 口（原画）",
+          "end": 1816
+        },
+        {
+          "offset": 1816,
+          "signature": "8BIM",
+          "key": "lyid",
+          "length": 4,
+          "layer_id": 18,
+          "end": 1832
+        }
+      ],
+      "depth": 2
+    },
+    {
+      "index": 15,
+      "offset": 1832,
+      "end": 1940,
+      "rect": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "name": "口（表情切替）",
+      "legacy_hex": "",
+      "section_type": 1,
+      "blend": "pass",
+      "opacity": 255,
+      "clipping": 0,
+      "flags": 0,
+      "visible": true,
+      "mask": {
+        "length": 0
+      },
+      "blending_ranges_length": 0,
+      "channels": [],
+      "tags": [
+        {
+          "offset": 1878,
+          "signature": "8BIM",
+          "key": "luni",
+          "length": 18,
+          "name": "口（表情切替）",
+          "end": 1908
+        },
+        {
+          "offset": 1908,
+          "signature": "8BIM",
+          "key": "lyid",
+          "length": 4,
+          "layer_id": 19,
+          "end": 1924
+        },
+        {
+          "offset": 1924,
+          "signature": "8BIM",
+          "key": "lsct",
+          "length": 4,
+          "section_type": 1,
+          "end": 1940
+        }
+      ],
+      "depth": 1,
+      "group_boundary_index": 4
+    },
+    {
+      "index": 16,
+      "offset": 1940,
+      "end": 2058,
+      "rect": [
+        142,
+        299,
+        166,
+        439
+      ],
+      "name": "両眉（原画画素）",
+      "legacy_hex": "",
+      "section_type": 0,
+      "blend": "norm",
+      "opacity": 255,
+      "clipping": 0,
+      "flags": 2,
+      "visible": false,
+      "mask": {
+        "length": 0
+      },
+      "blending_ranges_length": 0,
+      "channels": [
+        {
+          "id": 0,
+          "length": 3213,
+          "offset": 4761255,
+          "end": 4764468,
+          "compression": 1,
+          "row_lengths_sum": 3163,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 1,
+          "length": 3328,
+          "offset": 4764468,
+          "end": 4767796,
+          "compression": 1,
+          "row_lengths_sum": 3278,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 2,
+          "length": 3376,
+          "offset": 4767796,
+          "end": 4771172,
+          "compression": 1,
+          "row_lengths_sum": 3326,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": -1,
+          "length": 449,
+          "offset": 4771172,
+          "end": 4771621,
+          "compression": 1,
+          "row_lengths_sum": 399,
+          "validation": "rle-length-table-checked"
+        }
+      ],
+      "tags": [
+        {
+          "offset": 2010,
+          "signature": "8BIM",
+          "key": "luni",
+          "length": 20,
+          "name": "両眉（原画画素）",
+          "end": 2042
+        },
+        {
+          "offset": 2042,
+          "signature": "8BIM",
+          "key": "lyid",
+          "length": 4,
+          "layer_id": 5,
+          "end": 2058
+        }
+      ],
+      "depth": 1
+    },
+    {
+      "index": 17,
+      "offset": 2058,
+      "end": 2180,
+      "rect": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "name": "</Layer group>",
+      "legacy_hex": "",
+      "section_type": 3,
+      "blend": "norm",
+      "opacity": 255,
+      "clipping": 0,
+      "flags": 2,
+      "visible": false,
+      "mask": {
+        "length": 0
+      },
+      "blending_ranges_length": 0,
+      "channels": [],
+      "tags": [
+        {
+          "offset": 2104,
+          "signature": "8BIM",
+          "key": "luni",
+          "length": 32,
+          "name": "</Layer group>",
+          "end": 2148
+        },
+        {
+          "offset": 2148,
+          "signature": "8BIM",
+          "key": "lyid",
+          "length": 4,
+          "layer_id": 20,
+          "end": 2164
+        },
+        {
+          "offset": 2164,
+          "signature": "8BIM",
+          "key": "lsct",
+          "length": 4,
+          "section_type": 3,
+          "end": 2180
+        }
+      ],
+      "depth": 1
+    },
+    {
+      "index": 18,
+      "offset": 2180,
+      "end": 2306,
+      "rect": [
+        141,
+        300,
+        164,
+        442
+      ],
+      "name": "*07 両眉 画面右上げ",
+      "legacy_hex": "",
+      "section_type": 0,
+      "blend": "norm",
+      "opacity": 255,
+      "clipping": 0,
+      "flags": 2,
+      "visible": false,
+      "mask": {
+        "length": 0
+      },
+      "blending_ranges_length": 0,
+      "channels": [
+        {
+          "id": 0,
+          "length": 245,
+          "offset": 4771621,
+          "end": 4771866,
+          "compression": 1,
+          "row_lengths_sum": 197,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 1,
+          "length": 245,
+          "offset": 4771866,
+          "end": 4772111,
+          "compression": 1,
+          "row_lengths_sum": 197,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 2,
+          "length": 244,
+          "offset": 4772111,
+          "end": 4772355,
+          "compression": 1,
+          "row_lengths_sum": 196,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": -1,
+          "length": 241,
+          "offset": 4772355,
+          "end": 4772596,
+          "compression": 1,
+          "row_lengths_sum": 193,
+          "validation": "rle-length-table-checked"
+        }
+      ],
+      "tags": [
+        {
+          "offset": 2250,
+          "signature": "8BIM",
+          "key": "luni",
+          "length": 28,
+          "name": "*07 両眉 画面右上げ",
+          "end": 2290
+        },
+        {
+          "offset": 2290,
+          "signature": "8BIM",
+          "key": "lyid",
+          "length": 4,
+          "layer_id": 21,
+          "end": 2306
+        }
+      ],
+      "depth": 2
+    },
+    {
+      "index": 19,
+      "offset": 2306,
+      "end": 2432,
+      "rect": [
+        141,
+        301,
+        164,
+        441
+      ],
+      "name": "*06 両眉 画面左上げ",
+      "legacy_hex": "",
+      "section_type": 0,
+      "blend": "norm",
+      "opacity": 255,
+      "clipping": 0,
+      "flags": 2,
+      "visible": false,
+      "mask": {
+        "length": 0
+      },
+      "blending_ranges_length": 0,
+      "channels": [
+        {
+          "id": 0,
+          "length": 233,
+          "offset": 4772596,
+          "end": 4772829,
+          "compression": 1,
+          "row_lengths_sum": 185,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 1,
+          "length": 234,
+          "offset": 4772829,
+          "end": 4773063,
+          "compression": 1,
+          "row_lengths_sum": 186,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 2,
+          "length": 234,
+          "offset": 4773063,
+          "end": 4773297,
+          "compression": 1,
+          "row_lengths_sum": 186,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": -1,
+          "length": 230,
+          "offset": 4773297,
+          "end": 4773527,
+          "compression": 1,
+          "row_lengths_sum": 182,
+          "validation": "rle-length-table-checked"
+        }
+      ],
+      "tags": [
+        {
+          "offset": 2376,
+          "signature": "8BIM",
+          "key": "luni",
+          "length": 28,
+          "name": "*06 両眉 画面左上げ",
+          "end": 2416
+        },
+        {
+          "offset": 2416,
+          "signature": "8BIM",
+          "key": "lyid",
+          "length": 4,
+          "layer_id": 22,
+          "end": 2432
+        }
+      ],
+      "depth": 2
+    },
+    {
+      "index": 20,
+      "offset": 2432,
+      "end": 2552,
+      "rect": [
+        143,
+        303,
+        164,
+        438
+      ],
+      "name": "*05 両眉 困る",
+      "legacy_hex": "",
+      "section_type": 0,
+      "blend": "norm",
+      "opacity": 255,
+      "clipping": 0,
+      "flags": 2,
+      "visible": false,
+      "mask": {
+        "length": 0
+      },
+      "blending_ranges_length": 0,
+      "channels": [
+        {
+          "id": 0,
+          "length": 259,
+          "offset": 4773527,
+          "end": 4773786,
+          "compression": 1,
+          "row_lengths_sum": 215,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 1,
+          "length": 259,
+          "offset": 4773786,
+          "end": 4774045,
+          "compression": 1,
+          "row_lengths_sum": 215,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 2,
+          "length": 259,
+          "offset": 4774045,
+          "end": 4774304,
+          "compression": 1,
+          "row_lengths_sum": 215,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": -1,
+          "length": 258,
+          "offset": 4774304,
+          "end": 4774562,
+          "compression": 1,
+          "row_lengths_sum": 214,
+          "validation": "rle-length-table-checked"
+        }
+      ],
+      "tags": [
+        {
+          "offset": 2502,
+          "signature": "8BIM",
+          "key": "luni",
+          "length": 22,
+          "name": "*05 両眉 困る",
+          "end": 2536
+        },
+        {
+          "offset": 2536,
+          "signature": "8BIM",
+          "key": "lyid",
+          "length": 4,
+          "layer_id": 23,
+          "end": 2552
+        }
+      ],
+      "depth": 2
+    },
+    {
+      "index": 21,
+      "offset": 2552,
+      "end": 2670,
+      "rect": [
+        149,
+        300,
+        158,
+        441
+      ],
+      "name": "*04 両眉 楽",
+      "legacy_hex": "",
+      "section_type": 0,
+      "blend": "norm",
+      "opacity": 255,
+      "clipping": 0,
+      "flags": 2,
+      "visible": false,
+      "mask": {
+        "length": 0
+      },
+      "blending_ranges_length": 0,
+      "channels": [
+        {
+          "id": 0,
+          "length": 183,
+          "offset": 4774562,
+          "end": 4774745,
+          "compression": 1,
+          "row_lengths_sum": 163,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 1,
+          "length": 190,
+          "offset": 4774745,
+          "end": 4774935,
+          "compression": 1,
+          "row_lengths_sum": 170,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 2,
+          "length": 190,
+          "offset": 4774935,
+          "end": 4775125,
+          "compression": 1,
+          "row_lengths_sum": 170,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": -1,
+          "length": 188,
+          "offset": 4775125,
+          "end": 4775313,
+          "compression": 1,
+          "row_lengths_sum": 168,
+          "validation": "rle-length-table-checked"
+        }
+      ],
+      "tags": [
+        {
+          "offset": 2622,
+          "signature": "8BIM",
+          "key": "luni",
+          "length": 20,
+          "name": "*04 両眉 楽",
+          "end": 2654
+        },
+        {
+          "offset": 2654,
+          "signature": "8BIM",
+          "key": "lyid",
+          "length": 4,
+          "layer_id": 24,
+          "end": 2670
+        }
+      ],
+      "depth": 2
+    },
+    {
+      "index": 22,
+      "offset": 2670,
+      "end": 2788,
+      "rect": [
+        142,
+        301,
+        163,
+        441
+      ],
+      "name": "*03 両眉 哀",
+      "legacy_hex": "",
+      "section_type": 0,
+      "blend": "norm",
+      "opacity": 255,
+      "clipping": 0,
+      "flags": 2,
+      "visible": false,
+      "mask": {
+        "length": 0
+      },
+      "blending_ranges_length": 0,
+      "channels": [
+        {
+          "id": 0,
+          "length": 256,
+          "offset": 4775313,
+          "end": 4775569,
+          "compression": 1,
+          "row_lengths_sum": 212,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 1,
+          "length": 256,
+          "offset": 4775569,
+          "end": 4775825,
+          "compression": 1,
+          "row_lengths_sum": 212,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 2,
+          "length": 256,
+          "offset": 4775825,
+          "end": 4776081,
+          "compression": 1,
+          "row_lengths_sum": 212,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": -1,
+          "length": 256,
+          "offset": 4776081,
+          "end": 4776337,
+          "compression": 1,
+          "row_lengths_sum": 212,
+          "validation": "rle-length-table-checked"
+        }
+      ],
+      "tags": [
+        {
+          "offset": 2740,
+          "signature": "8BIM",
+          "key": "luni",
+          "length": 20,
+          "name": "*03 両眉 哀",
+          "end": 2772
+        },
+        {
+          "offset": 2772,
+          "signature": "8BIM",
+          "key": "lyid",
+          "length": 4,
+          "layer_id": 25,
+          "end": 2788
+        }
+      ],
+      "depth": 2
+    },
+    {
+      "index": 23,
+      "offset": 2788,
+      "end": 2906,
+      "rect": [
+        145,
+        305,
+        167,
+        437
+      ],
+      "name": "*02 両眉 怒",
+      "legacy_hex": "",
+      "section_type": 0,
+      "blend": "norm",
+      "opacity": 255,
+      "clipping": 0,
+      "flags": 2,
+      "visible": false,
+      "mask": {
+        "length": 0
+      },
+      "blending_ranges_length": 0,
+      "channels": [
+        {
+          "id": 0,
+          "length": 332,
+          "offset": 4776337,
+          "end": 4776669,
+          "compression": 1,
+          "row_lengths_sum": 286,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 1,
+          "length": 332,
+          "offset": 4776669,
+          "end": 4777001,
+          "compression": 1,
+          "row_lengths_sum": 286,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 2,
+          "length": 332,
+          "offset": 4777001,
+          "end": 4777333,
+          "compression": 1,
+          "row_lengths_sum": 286,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": -1,
+          "length": 332,
+          "offset": 4777333,
+          "end": 4777665,
+          "compression": 1,
+          "row_lengths_sum": 286,
+          "validation": "rle-length-table-checked"
+        }
+      ],
+      "tags": [
+        {
+          "offset": 2858,
+          "signature": "8BIM",
+          "key": "luni",
+          "length": 20,
+          "name": "*02 両眉 怒",
+          "end": 2890
+        },
+        {
+          "offset": 2890,
+          "signature": "8BIM",
+          "key": "lyid",
+          "length": 4,
+          "layer_id": 26,
+          "end": 2906
+        }
+      ],
+      "depth": 2
+    },
+    {
+      "index": 24,
+      "offset": 2906,
+      "end": 3024,
+      "rect": [
+        140,
+        299,
+        158,
+        442
+      ],
+      "name": "*01 両眉 喜",
+      "legacy_hex": "",
+      "section_type": 0,
+      "blend": "norm",
+      "opacity": 255,
+      "clipping": 0,
+      "flags": 2,
+      "visible": false,
+      "mask": {
+        "length": 0
+      },
+      "blending_ranges_length": 0,
+      "channels": [
+        {
+          "id": 0,
+          "length": 198,
+          "offset": 4777665,
+          "end": 4777863,
+          "compression": 1,
+          "row_lengths_sum": 160,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 1,
+          "length": 198,
+          "offset": 4777863,
+          "end": 4778061,
+          "compression": 1,
+          "row_lengths_sum": 160,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 2,
+          "length": 198,
+          "offset": 4778061,
+          "end": 4778259,
+          "compression": 1,
+          "row_lengths_sum": 160,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": -1,
+          "length": 197,
+          "offset": 4778259,
+          "end": 4778456,
+          "compression": 1,
+          "row_lengths_sum": 159,
+          "validation": "rle-length-table-checked"
+        }
+      ],
+      "tags": [
+        {
+          "offset": 2976,
+          "signature": "8BIM",
+          "key": "luni",
+          "length": 20,
+          "name": "*01 両眉 喜",
+          "end": 3008
+        },
+        {
+          "offset": 3008,
+          "signature": "8BIM",
+          "key": "lyid",
+          "length": 4,
+          "layer_id": 27,
+          "end": 3024
+        }
+      ],
+      "depth": 2
+    },
+    {
+      "index": 25,
+      "offset": 3024,
+      "end": 3146,
+      "rect": [
+        142,
+        299,
+        166,
+        439
+      ],
+      "name": "*00 両眉（原画）",
+      "legacy_hex": "",
+      "section_type": 0,
+      "blend": "norm",
+      "opacity": 255,
+      "clipping": 0,
+      "flags": 0,
+      "visible": true,
+      "mask": {
+        "length": 0
+      },
+      "blending_ranges_length": 0,
+      "channels": [
+        {
+          "id": 0,
+          "length": 3213,
+          "offset": 4778456,
+          "end": 4781669,
+          "compression": 1,
+          "row_lengths_sum": 3163,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 1,
+          "length": 3328,
+          "offset": 4781669,
+          "end": 4784997,
+          "compression": 1,
+          "row_lengths_sum": 3278,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 2,
+          "length": 3376,
+          "offset": 4784997,
+          "end": 4788373,
+          "compression": 1,
+          "row_lengths_sum": 3326,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": -1,
+          "length": 449,
+          "offset": 4788373,
+          "end": 4788822,
+          "compression": 1,
+          "row_lengths_sum": 399,
+          "validation": "rle-length-table-checked"
+        }
+      ],
+      "tags": [
+        {
+          "offset": 3094,
+          "signature": "8BIM",
+          "key": "luni",
+          "length": 24,
+          "name": "*00 両眉（原画）",
+          "end": 3130
+        },
+        {
+          "offset": 3130,
+          "signature": "8BIM",
+          "key": "lyid",
+          "length": 4,
+          "layer_id": 28,
+          "end": 3146
+        }
+      ],
+      "depth": 2
+    },
+    {
+      "index": 26,
+      "offset": 3146,
+      "end": 3256,
+      "rect": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "name": "両眉（表情切替）",
+      "legacy_hex": "",
+      "section_type": 1,
+      "blend": "pass",
+      "opacity": 255,
+      "clipping": 0,
+      "flags": 0,
+      "visible": true,
+      "mask": {
+        "length": 0
+      },
+      "blending_ranges_length": 0,
+      "channels": [],
+      "tags": [
+        {
+          "offset": 3192,
+          "signature": "8BIM",
+          "key": "luni",
+          "length": 20,
+          "name": "両眉（表情切替）",
+          "end": 3224
+        },
+        {
+          "offset": 3224,
+          "signature": "8BIM",
+          "key": "lyid",
+          "length": 4,
+          "layer_id": 29,
+          "end": 3240
+        },
+        {
+          "offset": 3240,
+          "signature": "8BIM",
+          "key": "lsct",
+          "length": 4,
+          "section_type": 1,
+          "end": 3256
+        }
+      ],
+      "depth": 1,
+      "group_boundary_index": 17
+    },
+    {
+      "index": 27,
+      "offset": 3256,
+      "end": 3374,
+      "rect": [
+        167,
+        293,
+        208,
+        448
+      ],
+      "name": "両目（原画画素）",
+      "legacy_hex": "",
+      "section_type": 0,
+      "blend": "norm",
+      "opacity": 255,
+      "clipping": 0,
+      "flags": 2,
+      "visible": false,
+      "mask": {
+        "length": 0
+      },
+      "blending_ranges_length": 0,
+      "channels": [
+        {
+          "id": 0,
+          "length": 6013,
+          "offset": 4788822,
+          "end": 4794835,
+          "compression": 1,
+          "row_lengths_sum": 5929,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 1,
+          "length": 6279,
+          "offset": 4794835,
+          "end": 4801114,
+          "compression": 1,
+          "row_lengths_sum": 6195,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 2,
+          "length": 6284,
+          "offset": 4801114,
+          "end": 4807398,
+          "compression": 1,
+          "row_lengths_sum": 6200,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": -1,
+          "length": 2067,
+          "offset": 4807398,
+          "end": 4809465,
+          "compression": 1,
+          "row_lengths_sum": 1983,
+          "validation": "rle-length-table-checked"
+        }
+      ],
+      "tags": [
+        {
+          "offset": 3326,
+          "signature": "8BIM",
+          "key": "luni",
+          "length": 20,
+          "name": "両目（原画画素）",
+          "end": 3358
+        },
+        {
+          "offset": 3358,
+          "signature": "8BIM",
+          "key": "lyid",
+          "length": 4,
+          "layer_id": 6,
+          "end": 3374
+        }
+      ],
+      "depth": 1
+    },
+    {
+      "index": 28,
+      "offset": 3374,
+      "end": 3496,
+      "rect": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "name": "</Layer group>",
+      "legacy_hex": "",
+      "section_type": 3,
+      "blend": "norm",
+      "opacity": 255,
+      "clipping": 0,
+      "flags": 2,
+      "visible": false,
+      "mask": {
+        "length": 0
+      },
+      "blending_ranges_length": 0,
+      "channels": [],
+      "tags": [
+        {
+          "offset": 3420,
+          "signature": "8BIM",
+          "key": "luni",
+          "length": 32,
+          "name": "</Layer group>",
+          "end": 3464
+        },
+        {
+          "offset": 3464,
+          "signature": "8BIM",
+          "key": "lyid",
+          "length": 4,
+          "layer_id": 30,
+          "end": 3480
+        },
+        {
+          "offset": 3480,
+          "signature": "8BIM",
+          "key": "lsct",
+          "length": 4,
+          "section_type": 3,
+          "end": 3496
+        }
+      ],
+      "depth": 1
+    },
+    {
+      "index": 29,
+      "offset": 3496,
+      "end": 3618,
+      "rect": [
+        170,
+        293,
+        211,
+        449
+      ],
+      "name": "*05 両目 見開き",
+      "legacy_hex": "",
+      "section_type": 0,
+      "blend": "norm",
+      "opacity": 255,
+      "clipping": 0,
+      "flags": 2,
+      "visible": false,
+      "mask": {
+        "length": 0
+      },
+      "blending_ranges_length": 0,
+      "channels": [
+        {
+          "id": 0,
+          "length": 3450,
+          "offset": 4809465,
+          "end": 4812915,
+          "compression": 1,
+          "row_lengths_sum": 3366,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 1,
+          "length": 3458,
+          "offset": 4812915,
+          "end": 4816373,
+          "compression": 1,
+          "row_lengths_sum": 3374,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 2,
+          "length": 3408,
+          "offset": 4816373,
+          "end": 4819781,
+          "compression": 1,
+          "row_lengths_sum": 3324,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": -1,
+          "length": 1914,
+          "offset": 4819781,
+          "end": 4821695,
+          "compression": 1,
+          "row_lengths_sum": 1830,
+          "validation": "rle-length-table-checked"
+        }
+      ],
+      "tags": [
+        {
+          "offset": 3566,
+          "signature": "8BIM",
+          "key": "luni",
+          "length": 24,
+          "name": "*05 両目 見開き",
+          "end": 3602
+        },
+        {
+          "offset": 3602,
+          "signature": "8BIM",
+          "key": "lyid",
+          "length": 4,
+          "layer_id": 31,
+          "end": 3618
+        }
+      ],
+      "depth": 2
+    },
+    {
+      "index": 30,
+      "offset": 3618,
+      "end": 3742,
+      "rect": [
+        187,
+        293,
+        206,
+        449
+      ],
+      "name": "*04 両目 ほぼ閉じ",
+      "legacy_hex": "",
+      "section_type": 0,
+      "blend": "norm",
+      "opacity": 255,
+      "clipping": 0,
+      "flags": 2,
+      "visible": false,
+      "mask": {
+        "length": 0
+      },
+      "blending_ranges_length": 0,
+      "channels": [
+        {
+          "id": 0,
+          "length": 1753,
+          "offset": 4821695,
+          "end": 4823448,
+          "compression": 1,
+          "row_lengths_sum": 1713,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 1,
+          "length": 1749,
+          "offset": 4823448,
+          "end": 4825197,
+          "compression": 1,
+          "row_lengths_sum": 1709,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 2,
+          "length": 1742,
+          "offset": 4825197,
+          "end": 4826939,
+          "compression": 1,
+          "row_lengths_sum": 1702,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": -1,
+          "length": 1210,
+          "offset": 4826939,
+          "end": 4828149,
+          "compression": 1,
+          "row_lengths_sum": 1170,
+          "validation": "rle-length-table-checked"
+        }
+      ],
+      "tags": [
+        {
+          "offset": 3688,
+          "signature": "8BIM",
+          "key": "luni",
+          "length": 26,
+          "name": "*04 両目 ほぼ閉じ",
+          "end": 3726
+        },
+        {
+          "offset": 3726,
+          "signature": "8BIM",
+          "key": "lyid",
+          "length": 4,
+          "layer_id": 32,
+          "end": 3742
+        }
+      ],
+      "depth": 2
+    },
+    {
+      "index": 31,
+      "offset": 3742,
+      "end": 3866,
+      "rect": [
+        181,
+        297,
+        199,
+        444
+      ],
+      "name": "*03 両目 笑顔閉じ",
+      "legacy_hex": "",
+      "section_type": 0,
+      "blend": "norm",
+      "opacity": 255,
+      "clipping": 0,
+      "flags": 2,
+      "visible": false,
+      "mask": {
+        "length": 0
+      },
+      "blending_ranges_length": 0,
+      "channels": [
+        {
+          "id": 0,
+          "length": 925,
+          "offset": 4828149,
+          "end": 4829074,
+          "compression": 1,
+          "row_lengths_sum": 887,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 1,
+          "length": 925,
+          "offset": 4829074,
+          "end": 4829999,
+          "compression": 1,
+          "row_lengths_sum": 887,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 2,
+          "length": 928,
+          "offset": 4829999,
+          "end": 4830927,
+          "compression": 1,
+          "row_lengths_sum": 890,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": -1,
+          "length": 861,
+          "offset": 4830927,
+          "end": 4831788,
+          "compression": 1,
+          "row_lengths_sum": 823,
+          "validation": "rle-length-table-checked"
+        }
+      ],
+      "tags": [
+        {
+          "offset": 3812,
+          "signature": "8BIM",
+          "key": "luni",
+          "length": 26,
+          "name": "*03 両目 笑顔閉じ",
+          "end": 3850
+        },
+        {
+          "offset": 3850,
+          "signature": "8BIM",
+          "key": "lyid",
+          "length": 4,
+          "layer_id": 33,
+          "end": 3866
+        }
+      ],
+      "depth": 2
+    },
+    {
+      "index": 32,
+      "offset": 3866,
+      "end": 3992,
+      "rect": [
+        178,
+        293,
+        208,
+        449
+      ],
+      "name": "*02 両目 少し伏せる",
+      "legacy_hex": "",
+      "section_type": 0,
+      "blend": "norm",
+      "opacity": 255,
+      "clipping": 0,
+      "flags": 2,
+      "visible": false,
+      "mask": {
+        "length": 0
+      },
+      "blending_ranges_length": 0,
+      "channels": [
+        {
+          "id": 0,
+          "length": 2665,
+          "offset": 4831788,
+          "end": 4834453,
+          "compression": 1,
+          "row_lengths_sum": 2603,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 1,
+          "length": 2667,
+          "offset": 4834453,
+          "end": 4837120,
+          "compression": 1,
+          "row_lengths_sum": 2605,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 2,
+          "length": 2611,
+          "offset": 4837120,
+          "end": 4839731,
+          "compression": 1,
+          "row_lengths_sum": 2549,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": -1,
+          "length": 1564,
+          "offset": 4839731,
+          "end": 4841295,
+          "compression": 1,
+          "row_lengths_sum": 1502,
+          "validation": "rle-length-table-checked"
+        }
+      ],
+      "tags": [
+        {
+          "offset": 3936,
+          "signature": "8BIM",
+          "key": "luni",
+          "length": 28,
+          "name": "*02 両目 少し伏せる",
+          "end": 3976
+        },
+        {
+          "offset": 3976,
+          "signature": "8BIM",
+          "key": "lyid",
+          "length": 4,
+          "layer_id": 34,
+          "end": 3992
+        }
+      ],
+      "depth": 2
+    },
+    {
+      "index": 33,
+      "offset": 3992,
+      "end": 4112,
+      "rect": [
+        185,
+        297,
+        200,
+        444
+      ],
+      "name": "*01 両目 閉じ",
+      "legacy_hex": "",
+      "section_type": 0,
+      "blend": "norm",
+      "opacity": 255,
+      "clipping": 0,
+      "flags": 2,
+      "visible": false,
+      "mask": {
+        "length": 0
+      },
+      "blending_ranges_length": 0,
+      "channels": [
+        {
+          "id": 0,
+          "length": 755,
+          "offset": 4841295,
+          "end": 4842050,
+          "compression": 1,
+          "row_lengths_sum": 723,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 1,
+          "length": 749,
+          "offset": 4842050,
+          "end": 4842799,
+          "compression": 1,
+          "row_lengths_sum": 717,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 2,
+          "length": 749,
+          "offset": 4842799,
+          "end": 4843548,
+          "compression": 1,
+          "row_lengths_sum": 717,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": -1,
+          "length": 738,
+          "offset": 4843548,
+          "end": 4844286,
+          "compression": 1,
+          "row_lengths_sum": 706,
+          "validation": "rle-length-table-checked"
+        }
+      ],
+      "tags": [
+        {
+          "offset": 4062,
+          "signature": "8BIM",
+          "key": "luni",
+          "length": 22,
+          "name": "*01 両目 閉じ",
+          "end": 4096
+        },
+        {
+          "offset": 4096,
+          "signature": "8BIM",
+          "key": "lyid",
+          "length": 4,
+          "layer_id": 35,
+          "end": 4112
+        }
+      ],
+      "depth": 2
+    },
+    {
+      "index": 34,
+      "offset": 4112,
+      "end": 4234,
+      "rect": [
+        167,
+        293,
+        208,
+        448
+      ],
+      "name": "*00 両目（原画）",
+      "legacy_hex": "",
+      "section_type": 0,
+      "blend": "norm",
+      "opacity": 255,
+      "clipping": 0,
+      "flags": 0,
+      "visible": true,
+      "mask": {
+        "length": 0
+      },
+      "blending_ranges_length": 0,
+      "channels": [
+        {
+          "id": 0,
+          "length": 6013,
+          "offset": 4844286,
+          "end": 4850299,
+          "compression": 1,
+          "row_lengths_sum": 5929,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 1,
+          "length": 6279,
+          "offset": 4850299,
+          "end": 4856578,
+          "compression": 1,
+          "row_lengths_sum": 6195,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": 2,
+          "length": 6284,
+          "offset": 4856578,
+          "end": 4862862,
+          "compression": 1,
+          "row_lengths_sum": 6200,
+          "validation": "rle-length-table-checked"
+        },
+        {
+          "id": -1,
+          "length": 2067,
+          "offset": 4862862,
+          "end": 4864929,
+          "compression": 1,
+          "row_lengths_sum": 1983,
+          "validation": "rle-length-table-checked"
+        }
+      ],
+      "tags": [
+        {
+          "offset": 4182,
+          "signature": "8BIM",
+          "key": "luni",
+          "length": 24,
+          "name": "*00 両目（原画）",
+          "end": 4218
+        },
+        {
+          "offset": 4218,
+          "signature": "8BIM",
+          "key": "lyid",
+          "length": 4,
+          "layer_id": 36,
+          "end": 4234
+        }
+      ],
+      "depth": 2
+    },
+    {
+      "index": 35,
+      "offset": 4234,
+      "end": 4344,
+      "rect": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "name": "両目（表情切替）",
+      "legacy_hex": "",
+      "section_type": 1,
+      "blend": "pass",
+      "opacity": 255,
+      "clipping": 0,
+      "flags": 0,
+      "visible": true,
+      "mask": {
+        "length": 0
+      },
+      "blending_ranges_length": 0,
+      "channels": [],
+      "tags": [
+        {
+          "offset": 4280,
+          "signature": "8BIM",
+          "key": "luni",
+          "length": 20,
+          "name": "両目（表情切替）",
+          "end": 4312
+        },
+        {
+          "offset": 4312,
+          "signature": "8BIM",
+          "key": "lyid",
+          "length": 4,
+          "layer_id": 37,
+          "end": 4328
+        },
+        {
+          "offset": 4328,
+          "signature": "8BIM",
+          "key": "lsct",
+          "length": 4,
+          "section_type": 1,
+          "end": 4344
+        }
+      ],
+      "depth": 1,
+      "group_boundary_index": 28
+    },
+    {
+      "index": 36,
+      "offset": 4344,
+      "end": 4460,
+      "rect": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "name": "顔パーツ分離（確認用）",
+      "legacy_hex": "",
+      "section_type": 1,
+      "blend": "pass",
+      "opacity": 255,
+      "clipping": 0,
+      "flags": 0,
+      "visible": true,
+      "mask": {
+        "length": 0
+      },
+      "blending_ranges_length": 0,
+      "channels": [],
+      "tags": [
+        {
+          "offset": 4390,
+          "signature": "8BIM",
+          "key": "luni",
+          "length": 26,
+          "name": "顔パーツ分離（確認用）",
+          "end": 4428
+        },
+        {
+          "offset": 4428,
+          "signature": "8BIM",
+          "key": "lyid",
+          "length": 4,
+          "layer_id": 7,
+          "end": 4444
+        },
+        {
+          "offset": 4444,
+          "signature": "8BIM",
+          "key": "lsct",
+          "length": 4,
+          "section_type": 1,
+          "end": 4460
+        }
+      ],
+      "depth": 0,
+      "group_boundary_index": 1
+    }
+  ],
+  "resources": [],
+  "layer_info": {
+    "offset": 38,
+    "payload_start": 42,
+    "end": 4864930,
+    "length": 4864888,
+    "trailing_bytes": 1,
+    "trailing_zero": true
+  },
+  "signed_layer_count": -37,
+  "global_mask_length": 0,
+  "global_tags": [],
+  "merged": {
+    "offset": 4864934,
+    "end": 5827292,
+    "compression": 1,
+    "row_count": 5376,
+    "encoded_bytes": 951604,
+    "payload_start": 4875688,
+    "expected_end": 5827292
+  },
+  "decode_selected": false
+}

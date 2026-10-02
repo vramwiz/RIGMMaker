@@ -1,0 +1,37 @@
+﻿{
+  "schemaVersion": 1,
+  "recordType": "rigm_character_creation_learning",
+  "date": "",
+  "purpose": "",
+  "characterName": "",
+  "rigmFormatVersion": null,
+  "sourceImages": [],
+  "targetPartIds": [],
+  "prompt": "",
+  "method": "",
+  "imageSpecificConditions": [],
+  "preservedInformation": [],
+  "verification": {
+    "pixelAndAlpha": "not_run",
+    "placementAndHierarchy": "not_run",
+    "nonTargetPreservation": "not_run",
+    "applicationImport": "not_run",
+    "rigmSaveAndReload": "not_run",
+    "userVisualEvaluation": "not_reviewed"
+  },
+  "userFeedback": "",
+  "reusableRules": [],
+  "lessons": [],
+  "nextAttemptGuidance": [],
+  "limitations": [],
+  "unverified": [],
+  "artifacts": {
+    "rigm": "",
+    "inputImages": [],
+    "finalImages": [],
+    "prompt": "",
+    "placement": "",
+    "verification": "",
+    "reviewImages": []
+  }
+}

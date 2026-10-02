@@ -48,7 +48,7 @@
         <VerInfo_Release>0</VerInfo_Release>
         <VerInfo_Build>0</VerInfo_Build>
         <VerInfo_Locale>1041</VerInfo_Locale>
-        <VerInfo_Keys>CompanyName=;FileDescription=RIGMMaker;FileVersion=1.0.0.0;InternalName=RIGMMaker;LegalCopyright=;LegalTrademarks=;OriginalFilename=RIGMMaker.exe;ProductName=RIGMMaker;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=;FileDescription=RIGM Maker;FileVersion=1.0.0.0;InternalName=RIGMMaker;LegalCopyright=;LegalTrademarks=;OriginalFilename=RIGMMaker.exe;ProductName=RIGM Maker;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
         <Custom_Styles>&quot;Windows Modern Dark|VCLSTYLE|$(BDSCOMMONDIR)\Styles\WindowsModernDark.vsf&quot;</Custom_Styles>
         <DPIAware>PerMonitorV2</DPIAware>

@@ -1,7 +1,7 @@
 ﻿object MainForm: TMainForm
   Left = 0
   Top = 0
-  Caption = 'RIGMMaker'
+  Caption = 'RIGM Maker'
   ClientHeight = 600
   ClientWidth = 960
   Color = clBtnFace

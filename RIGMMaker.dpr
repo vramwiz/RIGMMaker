@@ -12,7 +12,7 @@ begin
   Application.Initialize;
   TStyleManager.TrySetStyle('Windows Modern Dark');
   Application.MainFormOnTaskbar := True;
-  Application.Title := 'RIGMMaker';
+  Application.Title := 'RIGM Maker';
   Application.CreateForm(TMainForm, MainForm);
   Application.Run;
 end.
