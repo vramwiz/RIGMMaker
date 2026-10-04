@@ -2,12 +2,13 @@
 
 interface
 uses System.SysUtils, System.Classes, System.JSON, System.Generics.Collections, Vcl.Graphics,
-  RigmMovieModel, RigmMovieJobs;
+  RigmMovieModel, RigmMovieJobs, RigmMovieImageTransfer;
 
 type
   TRigmMovieSession = class
   private
     FProject: TRigmMovieProject;
+    FImageTransfers: TRigmImageTransfers;
     FJob: TRigmMovieJob;
     FDiagnosticJob: TRigmMovieJob;
     FDiagnostics: TJSONObject;
@@ -77,7 +78,7 @@ uses System.Math, System.IOUtils, System.StrUtils, RigmJson, RigmModel, RigmMovi
 
 constructor TRigmMovieSession.Create;
 begin
-  inherited; FProject := TRigmMovieProject.Create; FUndo := TObjectList<TRigmMovieProject>.Create(True);
+  inherited; FImageTransfers := TRigmImageTransfers.Create; FProject := TRigmMovieProject.Create; FUndo := TObjectList<TRigmMovieProject>.Create(True);
   FRedo := TObjectList<TRigmMovieProject>.Create(True); FCatalog := TJSONArray.Create;
   FObsoletePreviews := TObjectList<TRigmMovieJob>.Create(True);
   FFinishedJobs := TObjectDictionary<string,TJSONObject>.Create([doOwnsValues]); FFinishedOrder := TList<string>.Create;
@@ -87,7 +88,7 @@ begin
   FProductionOrder := TList<string>.Create;
 end;
 destructor TRigmMovieSession.Destroy;
-begin FDiagnosticJob.Free; FDiagnostics.Free; FJob.Free; FObsoletePreviews.Free; FFinishedJobs.Free; FFinishedOrder.Free; FProductionOrder.Free; FProductions.Free; FFrame.Free; FAssets.Free; FWaveform.Free; FCatalog.Free; FRedo.Free; FUndo.Free; FProject.Free; inherited; end;
+begin FImageTransfers.Free; FDiagnosticJob.Free; FDiagnostics.Free; FJob.Free; FObsoletePreviews.Free; FFinishedJobs.Free; FFinishedOrder.Free; FProductionOrder.Free; FProductions.Free; FFrame.Free; FAssets.Free; FWaveform.Free; FCatalog.Free; FRedo.Free; FUndo.Free; FProject.Free; inherited; end;
 function TRigmMovieSession.Busy: Boolean;
 begin Result := (FJob<>nil) and not FJob.Done; end;
 function TRigmMovieSession.CurrentJobKind: string;
@@ -111,7 +112,7 @@ procedure TRigmMovieSession.SetProject(Project: TRigmMovieProject);
 begin
   Poll; RetireAutomaticPreview;
   if Busy then raise ERigm.Create('ジョブ完了後にプロジェクトを開いてください。');
-  Project.Validate; Project.Revision := Max(Project.Revision,FProject.Revision+1);
+  Project.Validate; FImageTransfers.CancelAll; Project.Revision := Max(Project.Revision,FProject.Revision+1);
   FreeAndNil(FJob); FCollected := True; FRetryPending := False; FLastKind := ''; FLastOutput := '';
   if FDiagnosticJob<>nil then FDiagnosticJob.Cancel;
   FreeAndNil(FDiagnosticJob); FDiagnosticCollected := True;
@@ -567,6 +568,25 @@ begin
     if Command='edit-fail' then FEditState := 'failed';
     if FJob<>nil then FJob.Cancel; Inc(FProject.Revision); Exit(EditStatus);
   end;
+  if Command.StartsWith('image-transfer-') then begin
+    if Command='image-transfer-begin' then begin
+      RequireRevision(Args); Exit(FImageTransfers.BeginTransfer(FProject,Args));
+    end;
+    if Command='image-transfer-adopt' then begin
+      RequireRevision(Args);
+      var SceneId: string; var Path := FImageTransfers.ReadyPath(FProject,Args,SceneId);
+      Next := FProject.Clone;
+      try
+        var Scene := Next.Scene(SceneId);
+        if Scene=nil then raise ERigm.Create('Image transfer scene no longer exists');
+        Scene.Image := Path; Commit(Next); Next := nil;
+        FImageTransfers.Adopted(Args);
+      finally Next.Free; end;
+      Result := FImageTransfers.Execute('image-transfer-status',Args);
+      AddN(Result,'revision',FProject.Revision); AddB(Result,'modified',FProject.Modified); Exit;
+    end;
+    Exit(FImageTransfers.Execute(Command,Args));
+  end;
   if Command='composition-requests' then Exit(CompositionRequests(FProject));
   if IsCompositionCommand(Command) then begin
     RequireRevision(Args); Next := FProject.Clone;
@@ -629,7 +649,9 @@ begin
       '"update-subtitle":{"id":"cue id","subtitle":"display text; never changes speech"},"update-dialogue":{"id":"cue id","text":"spoken text; no auto synthesis"},'+
       '"composition-requests":{},"edit-begin":{"leaseSeconds":60},"edit-status":{},"edit-heartbeat":{"editToken":"token","leaseSeconds":60},'+
       '"edit-end":{"editToken":"token"},"edit-fail":{"editToken":"token"},"edit-release":{"manual":true}}');
-    try for var Pair in Extra do JO(Result,'commands').AddPair(Pair.JsonString.Value,Pair.JsonValue.Clone as TJSONValue); finally Extra.Free; end;
+    try for var Pair in Extra do JO(Result,'commands').AddPair(Pair.JsonString.Value,Pair.JsonValue.Clone as TJSONValue);
+    var Transfers := MovieImageTransferSchema;
+    try for var Pair in Transfers do JO(Result,'commands').AddPair(Pair.JsonString.Value,Pair.JsonValue.Clone as TJSONValue); finally Transfers.Free; end; finally Extra.Free; end;
     Exit;
   end;
   if Command='project' then begin

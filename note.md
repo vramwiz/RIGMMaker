@@ -1,4 +1,24 @@
-﻿## 2026-10-04 15:25 UTC 批評動画・第5報（アニメ本番と漫画暫定版完成、ルートEXE反映済み）
+﻿## 2026-10-04 共通パイプによるPNGバイト受信・シーン採用（今回完了）
+
+最新依頼に従い、既存の共通名前付きパイプへPNGのbegin/chunk/finish/status/cancel/adopt命令を追加した。送信側は制作支援/パイプ/Send-RigmImage.ps1。画像取得URLや公開リスナーを追加せず、既存の接続JSON・JSON封筒・送信スクリプトを使う。操作資料は[ImageTransfer.md](制作支援/パイプ/ImageTransfer.md)。
+
+16KiBチャンク・最大32MiB・静止PNGに限定し、順序・欠落・同内容再送・異内容再送・転送ID・SHA-256・PNG構造/CRC/寸法を検証する。既存プロトコルの30,000文字/60,000 UTF-8バイト制限は保持した。受信・ハッシュ・デコード・資産配置はワーカー、最大2転送・各8チャンクの待ち行列・受信中120秒無通信期限。保存先はアプリが現在プロジェクトから決め、任意パス指定とリパースポイントを拒否する。公開前の一時配置、既存同名資産の検証、採用までの書換え保護とファイル同一性確認を行う。
+
+readyだけではシーンもrevisionも変更しない。adoptで検証済み画像を開始時のシーンへ1回だけ採用し、Undo/Redo可能な未保存変更にする。自動保存・人間確認ダイアログは追加しない。編集リース・revision・プロジェクト/保存先一致を保護し、open時に未完了転送をキャンセルする。送信スクリプトは再開と有限回の再送、-NoAdopt、明示的な-SaveProjectに対応する。
+
+最終Win64 Debug/Release全ユニットビルド成功。各実アプリに既存1,918,458バイトPNGを共通パイプで送り、Debug 51項目、Release 51項目、反映した通常EXE 30項目に成功。受信資産のSHA-256一致、採用前の無変更、採用後未保存、明示保存/再open、Undo/Redo、編集リース、破損PNG、ハッシュ不一致、欠落/順序違い/再送/途中再開、キャンセル、別プロジェクト、破損既存資産・保存先ジャンクション拒否を確認した。計測コマンド応答最大はDebug 362.8199ms、Release 636.8992ms、通常EXE 417.9279ms。独自起動PIDのネイティブ画面を取得してモデルがプレビュー/タイムラインの受信画像表示を確認した。humanDesktopVerification=falseであり、人間の目視検証済みとはしない。
+
+通常EXE D:/DelphiProg/RIGMMaker/RIGMMaker.exeへ最終Releaseを反映し、そのEXEを隔離設定・専用プロジェクトで起動して検証後通常終了した。SHA-256: 597960069B293B0AD2DE2D7731A2217AE0311F94DCF6A9B546999C362253FC0F。反映前のEXE（D9537993EE0F6ADD791F71D6BCC7D978B4771EAED6DA42D0EE859463D71B655C）はWin64/Validation/ImageTransfer-20261004T195932/Preserved/root-before-image-transfer-D9537993EE0F.exeへ保管した。実行中ユーザーアプリを強制終了していない。
+
+今回の検証プロジェクト・Debug検証EXE・DCU等37項目、152,681,839バイトをごみ箱へ回収し、元パスメタデータと全ファイルハッシュから復元可能性を確認した。永久削除への代替なし。新版Release・元EXE・ソース・検証JSON/ログ・画面画像を保持する。既存の完成アニメ、漫画暫定版、元プロジェクト、元PSD計6ファイルは以前の検証記録とハッシュ一致を再確認した。長尺出力と今回に無関係な回帰一式は実行していない。120秒期限の実時間待ちと32MiB上限サイズの全転送も未実施で、コード制限と他の失敗時検証を区別する。
+
+PSD成功方式の調査: AIArtToPSDはローカルジョブ内のPNGとresult.jsonを用意し、パイプのimport命令で取り込む。Syncroh2の実装元は兄弟AviUtl2PluginLib/Lib/PSDArtEditorで、同じファイル参照方式とfileNameによるPNG取込を持つ。保存成功スクリプトのCopy-Itemと既存AIArtToPSDジョブ9画像のハッシュ一致を確認した。生成日記録2026-10-01、expression_mouth_trial_20261001、mouth_open_generated.png、jobId {1FC0B2B1-FC2B-4F16-9E30-2F50669761CF}が追跡手がかり。アーカイブのコピー日時は生成日時の証拠にしない。参照元は変更していない。
+
+今回実証したのはWindows PNGバイト→共通パイプ→アプリ資産→シーンの経路である。生成環境/親側→Windowsへの初回到達は未特定。成功例における生成ツールの元応答と直後のWindows配置操作、または現在のWindowsへ正式に取り込める生成結果が必要となる。Codex sessionsへアクセスせず、Libraryの保護メタデータを削除・回避していない。
+
+詳細証拠: [final-result.json](Win64/Validation/ImageTransfer-20261004T195932/final-result.json)、同フォルダの各Actual-*/run.json、deployment.json、cleanup-result.json、protected-work-evidence.json、psd-route-investigation.md、psd-success-clues.json。旧記録の未完了表記はその時点の状態であり、今回の完了記録を優先する。commit/pushなし。
+
+## 2026-10-04 15:25 UTC 批評動画・第5報（アニメ本番と漫画暫定版完成、ルートEXE反映済み）
 
 アニメ「星灯り郵便局-批評制作例」の本番MP4が成功。保存済み206.812秒の実VOICEVOX音声を再生成せず、専用PID20532・FFmpeg11536・job {591621E2-A92B-4F10-BE87-3A9F8D53BD52}を完了回収した。1920×1080、30fps、H.264/AAC 48kHz mono、6205フレーム、動画206.833333秒・音声206.812秒、両開始時刻0。24,983,320bytes、MP4 SHA256 F3C902141DAC5954CB816D3D1DC191595E3141B9419BAD416E2B5A2C7BB1AC11。独立ffprobeと全映像・音声デコード成功、工程completeまで進めて保存。所要1138.797秒、一時ディスク峰値44,948,590bytes。MP4の2GB中間AVI上限は本番で解消できた。実MP4から5場面を抽出し、モデルで画像・表情・ポーズ・字幕・チャートを確認。完成GUIのnative progress=1000を記録。
 
