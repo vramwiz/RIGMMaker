@@ -1,0 +1,36 @@
+{
+  "originalsUnchanged": true,
+  "files": [
+    {
+      "sourceSha256": "5E85C8E2C2E310E2EDBEE2FAB659EBE636EAD6BD5DB82118424546D571AB071C",
+      "source": "D:\\DelphiProg\\Syncroh2\\Plugin_Extension\\Serif\\Voicevox\\SerifVoicevoxApi.pas",
+      "destination": "D:\\DelphiProg\\RIGMMaker\\Source\\Lib\\Voicevox\\SerifVoicevoxApi.pas",
+      "currentDestinationSha256": "91DD0CBB99B40F62E8080B219D6A0B52DC819C1158ED082E8A9579BCB2945995"
+    },
+    {
+      "sourceSha256": "8840C9DE659A29F302089E2E7A44EF19C597139C90978EE0814E2B8566AF7B8E",
+      "source": "D:\\DelphiProg\\Syncroh2\\Plugin_Extension\\Serif\\Voicevox\\SerifVoicevoxSpeakerCatalog.pas",
+      "destination": "D:\\DelphiProg\\RIGMMaker\\Source\\Lib\\Voicevox\\SerifVoicevoxSpeakerCatalog.pas",
+      "currentDestinationSha256": "9D5A3BBE3C89BDBC434E88E78AD27CCC8B58D7F462A951FF875A642E79F5480F"
+    },
+    {
+      "sourceSha256": "CECB40514F4A8C4B7C5A1E1F1420097C5C0ECF4CBFA0DFB8DE51EA92B95E020B",
+      "source": "D:\\DelphiProg\\Syncroh2\\Plugin_Extension\\Serif\\Voicevox\\SerifVoicevoxAudioSettings.pas",
+      "destination": "D:\\DelphiProg\\RIGMMaker\\Source\\Lib\\Voicevox\\SerifVoicevoxAudioSettings.pas",
+      "currentDestinationSha256": "CECB40514F4A8C4B7C5A1E1F1420097C5C0ECF4CBFA0DFB8DE51EA92B95E020B"
+    },
+    {
+      "sourceSha256": "0E3702FF53F3C4B855977CB0D603D24BCFDA878557F00B8690FF4E8214A13937",
+      "source": "D:\\DelphiProg\\Syncroh2\\Plugin_Extension\\Serif\\Voicevox\\SerifVoicevoxDebugLog.pas",
+      "destination": "D:\\DelphiProg\\RIGMMaker\\Source\\Lib\\Voicevox\\SerifVoicevoxDebugLog.pas",
+      "currentDestinationSha256": "CBA7FDA56F460B42E383E19C45FB5CD656ECBA8031ED505220E429EA38948C79"
+    },
+    {
+      "sourceSha256": "12784DBDE9D8CA53119C5C3D6C0A1B152B8A63FF5FE2B8D9C03321DCFCE5D04B",
+      "source": "D:\\DelphiProg\\Syncroh2\\Lib\\SoundFileUtils\\SoundFileUtilsWave.pas",
+      "destination": "D:\\DelphiProg\\RIGMMaker\\Source\\Lib\\Voicevox\\SoundFileUtilsWave.pas",
+      "currentDestinationSha256": "6CF9D20C8116FA87598EEAB3E0D258862CA1AFA629F7C8BF544424DAEB69B386"
+    }
+  ],
+  "copiedUtc": "2026-10-03T12:08:35.8811727Z"
+}

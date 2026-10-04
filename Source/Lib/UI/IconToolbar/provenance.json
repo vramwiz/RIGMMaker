@@ -1,0 +1,16 @@
+{
+  "files": [
+    {
+      "destination": "Source\\Lib\\UI\\IconToolbar\\ToolBarPanelManager.pas",
+      "sha256": "4B87AC253BAFFD0A6645088DB475B86B90064F0AFEA83F89C6694DC43ED314C7",
+      "source": "D:\\DelphiProg\\Syncroh2\\Lib\\ToolBarPanelManager\\ToolBarPanelManager.pas"
+    },
+    {
+      "destination": "Source\\Lib\\UI\\IconToolbar\\SerifToolbarIcons.pas",
+      "sha256": "60A4E8B27180A7C495D024ED87E0E5213639BD4ACC3C15DAB644E76CD53EC27D",
+      "source": "D:\\DelphiProg\\Syncroh2\\Plugin_Extension\\Serif\\SerifToolbarIcons.pas"
+    }
+  ],
+  "preservedDirectory": "Win64\\PreservedArtifacts\\before-icon-toolbar-20261003T152726812",
+  "copiedAtUtc": "2026-10-03T06:27:27.2314928Z"
+}

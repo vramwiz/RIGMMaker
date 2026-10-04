@@ -231,7 +231,7 @@ begin
   State.Frequency := FFrequency;
   State.Maximum := FMaximum;
   State.Minimum := FMinimum;
-  State.PPI := CurrentPPI;
+  State.PPI := ScaleValue(96);
   State.ShowTicks := FShowTicks;
   State.ThumbBorderColor := FThumbBorderColor;
   State.ThumbColor := FThumbColor;
@@ -378,10 +378,10 @@ function THorizontalTrackBarControl.TrackBounds: TRect;
 var
   HorizontalMargin: Integer;
 begin
-  HorizontalMargin := TrackScale(8, CurrentPPI);
+  HorizontalMargin := ScaleValue(8);
   Result.Left := HorizontalMargin;
   Result.Right := Max(ClientWidth - HorizontalMargin, Result.Left);
-  Result.Top := TrackScale(13, CurrentPPI);
+  Result.Top := ScaleValue(13);
   Result.Bottom := Result.Top;
 end;
 

@@ -1,0 +1,31 @@
+{
+  "sourceModified": false,
+  "date": "2026-10-03",
+  "sourceRoot": "D:\\DelphiProg\\AviUtl2Plugin\\MMDAnimationStudio",
+  "files": [
+    {
+      "sourceSha256": "D462E934C91786D3CCB2D166EB01729E9ED570AC3D0CC51EAA359EB059A95988",
+      "method": "copy and generalize",
+      "target": "SwitchProInput.pas",
+      "source": "D:\\DelphiProg\\AviUtl2Plugin\\MMDAnimationStudio\\Source\\AI\\Controller\\MmdProControllerInput.pas"
+    },
+    {
+      "sourceSha256": "7D0425E2B0B969970E8FAAC77D21DA8954B32247B8070AA506667E8D5D064647",
+      "method": "copy and generalize",
+      "target": "SwitchProOutput.pas",
+      "source": "D:\\DelphiProg\\AviUtl2Plugin\\MMDAnimationStudio\\Source\\AI\\Controller\\Protocol\\MmdProControllerOutput.pas"
+    },
+    {
+      "sourceSha256": "B523BA2793939AC611A95B80E18A62A25EB125B24DAD98E01FA516B81B1EFE1B",
+      "method": "copy and generalize",
+      "target": "SwitchProReportDecoder.pas",
+      "source": "D:\\DelphiProg\\AviUtl2Plugin\\MMDAnimationStudio\\Source\\AI\\Controller\\Protocol\\MmdProControllerReportDecoder.pas"
+    },
+    {
+      "sourceSha256": "7A1147A8A83E699AE7FC3DC16557CF13A1864809743DB13823C55A18626F88A7",
+      "method": "extract navigation, edge and neutral logic",
+      "target": "GamepadNavigation.pas",
+      "source": "D:\\DelphiProg\\AviUtl2Plugin\\MMDAnimationStudio\\Source\\Plugin\\Extension\\Pose\\Input\\MmdTimelinePoseControllerDriver.pas"
+    }
+  ]
+}

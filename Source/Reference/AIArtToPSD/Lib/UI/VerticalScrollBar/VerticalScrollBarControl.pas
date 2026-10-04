@@ -1,4 +1,4 @@
-// Windows標準SCROLLBARへ依存せず、暗色UIに合わせて描画する縦スクロールバー。
+﻿// Windows標準SCROLLBARへ依存せず、暗色UIに合わせて描画する縦スクロールバー。
 unit VerticalScrollBarControl;
 
 interface
@@ -193,7 +193,7 @@ begin
   Canvas.Brush.Color := FTrackColor;
   Canvas.Pen.Style := psClear;
   Canvas.RoundRect(Track.Left, Track.Top, Track.Right, Track.Bottom,
-    ScrollBarScale(5, CurrentPPI), ScrollBarScale(5, CurrentPPI));
+    ScaleValue(5), ScaleValue(5));
   if FMaximum <= 0 then
     Exit;
   Thumb := ThumbRect;
@@ -204,7 +204,7 @@ begin
   Canvas.Pen.Style := psSolid;
   Canvas.Pen.Color := FThumbBorderColor;
   Canvas.RoundRect(Thumb.Left, Thumb.Top, Thumb.Right, Thumb.Bottom,
-    ScrollBarScale(5, CurrentPPI), ScrollBarScale(5, CurrentPPI));
+    ScaleValue(5), ScaleValue(5));
 end;
 
 procedure TVerticalScrollBarControl.SetBackgroundColor(Value: TColor);
@@ -288,7 +288,7 @@ begin
   Track := TrackRect;
   if FMaximum <= 0 then
     Exit(Track);
-  ThumbHeight := Max(ScrollBarScale(MINIMUM_THUMB_HEIGHT, CurrentPPI),
+  ThumbHeight := Max(ScaleValue(MINIMUM_THUMB_HEIGHT),
     MulDiv(Track.Height, FPageSize, FPageSize + FMaximum));
   ThumbHeight := Min(ThumbHeight, Track.Height);
   Travel := Max(Track.Height - ThumbHeight, 0);
@@ -320,7 +320,7 @@ function TVerticalScrollBarControl.TrackRect: TRect;
 var
   Margin: Integer;
 begin
-  Margin := ScrollBarScale(TRACK_MARGIN, CurrentPPI);
+  Margin := ScaleValue(TRACK_MARGIN);
   Result := Rect(Margin, Margin, Max(ClientWidth - Margin, Margin),
     Max(ClientHeight - Margin, Margin));
 end;
