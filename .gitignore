@@ -1,3 +1,33 @@
+# Images outside sample folders are local assets.
+*.png
+*.jpg
+*.jpeg
+*.jpe
+*.jfif
+*.bmp
+*.dib
+*.gif
+*.webp
+*.ico
+*.svg
+*.tif
+*.tiff
+*.avif
+*.heic
+*.heif
+*.tga
+*.psd
+*.psb
+!**/[Ss]ample*/**
+!**/サンプル*/**
+
+# Experimental projects, production trials, and runtime caches.
+/Tests/
+/RIGMMaker/
+/制作成果/
+/制作素材/
+
+# Delphi build and editor artifacts (including sample builds).
 *.~*
 __history/
 __recovery/

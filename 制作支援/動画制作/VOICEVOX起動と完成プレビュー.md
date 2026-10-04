@@ -1,4 +1,6 @@
-﻿# 実際に動作したVOICEVOX設定と完成プレビュー
+﻿2026-10-05の整理で `制作成果/`・`制作素材/` の制作例を削除し、同期対象外にした。本文中の「星灯り郵便局」の実例パスは削除前の履歴である。通常版 `RIGMMaker.exe` と音声機能は保持している。
+
+# 実際に動作したVOICEVOX設定と完成プレビュー
 
 この環境のSyncroh2は `C:\Users\zan12\Documents\Syncroh2\Serif\VoicevoxEngine.ini` の `[VOICEVOX] EngineExe` に `V:\Program Files\VOICEVOX\vv-engine\run.exe` を保存している。Syncroh2の `Plugin_Extension\Serif\Voicevox\SerifVoicevoxEngineConfig.pas` は保存された有効なパスを標準インストール先より先に選ぶ。`SerifVoicevoxEngineSession.pas` はエンジンのフォルダーを作業ディレクトリにし、下記引数で非表示起動して `/version` を確認する。元プロジェクトは変更していない。
 
