@@ -44,7 +44,12 @@ if($Edition -in @('fullhd','guided')){
     $baseline=Get-Content (Join-Path $validation 'fullhd-release-verification.json') -Raw | ConvertFrom-Json
     if((Get-FileHash (Join-Path $root 'RIGMMaker.fullhd.exe')).Hash -ne $baseline.releaseSha256){throw 'Protected fullhd executable changed'}
     $unchangedOutputUnits=@(foreach($file in @('RigmMovieRendering.pas','RigmMovieActing.pas','RigmMovieAudio.pas','RigmMovieAvi.pas','RigmMovieOutput.pas')){
-      $path=Join-Path $root ('Source\Studio\'+$file);$old=$baseline.sourceHashes | Where-Object path -eq $path
+      $matches=@(Get-ChildItem -LiteralPath (Join-Path $root 'Source\Studio') -Filter $file -Recurse -File)
+      if($matches.Count -ne 1){throw ('Expected exactly one source unit: '+$file)}
+      $path=$matches[0].FullName
+      # Older records store the paths from before the responsibility folders were introduced.
+      $old=@($baseline.sourceHashes | Where-Object { [IO.Path]::GetFileName($_.path) -eq $file })
+      if($old.Count -ne 1){throw ('Expected exactly one baseline source unit: '+$file)}
       $hash=(Get-FileHash $path).Hash
       if($hash -ne $old.sha256){throw ('Retained fullhd benchmark is invalid for changed '+$file)}
       @{path=$path;sha256=$hash;matchesFullhdBaseline=$true}
@@ -88,7 +93,7 @@ try {
   $smoke.exitCode=$process.ExitCode
   if($smoke.exitCode -ne 0){throw 'Release startup/close returned nonzero exit'}
 }finally{$process.Dispose()}
-$sourceHashes=@(Get-ChildItem -LiteralPath (Join-Path $root 'Source\Studio') -Filter '*.pas' | ForEach-Object {@{path=$_.FullName;sha256=(Get-FileHash -LiteralPath $_.FullName).Hash}})
+$sourceHashes=@(Get-ChildItem -LiteralPath @((Join-Path $root 'Source\Studio'),(Join-Path $root 'Source\Shell\CharacterEditor')) -Filter '*.pas' -Recurse -File | ForEach-Object {@{path=$_.FullName;sha256=(Get-FileHash -LiteralPath $_.FullName).Hash}})
 $record=@{success=$true;atUtc=[DateTime]::UtcNow.ToString('o');existingCounts=$counts;existingPassed=527;movieCore=$core;movieWorkflow=$workflow;movieSender=$movieSender;avi=$avi;mp4=$mp4;totalPassed=527+$core.passed+$workflow.passed+$movieSender.passed+$avi.passed+$mp4.passed;compilerDiagnostics=0;debugSha256=(Get-FileHash (Join-Path $validation 'Debug\RIGMMaker.exe')).Hash;releaseSha256=$releaseHash;alias=$alias;preservedDirectory=$preserved;preservedExecutables=$originals;smoke=$smoke;sourceHashes=$sourceHashes;rootExeReplaced=$false;liveDocumentCommandsSent=$false;userApplicationsTerminated=$false;realVoicevoxSpeechVerified=$false;audioFixture='explicit local test tone HTTP fixture, not VOICEVOX speech';limitations=@('real VOICEVOX engine repair awaits user permission','physical desktop mouse/controller and multi-monitor DPI not verified','true side views and new expression assets are not synthesized; existing RIGM variants and parameter acting only','MP4 uses AVI staging and retains 2GB AVI limit')}
 $record.totalPassed+=$additionalPassed
 $record['edition']=$Edition;$record['longExport']=$long;$record['longInspection']=$longInspection

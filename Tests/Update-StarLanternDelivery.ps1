@@ -9,7 +9,7 @@ $source = Join-Path $root '制作成果\星灯り郵便局-20261003T224130881\�
 $output = Join-Path $root 'Win64\Validation\StarLanternDelivery'
 $dcu = Join-Path $output 'Dcu'
 New-Item -ItemType Directory -Path $output,$dcu -Force | Out-Null
-$paths = @('Source\Studio','Source\Core','Source\Rendering','Source\Persistence','Source\Editor','Source\Reference\AIArtToPSD\Core','Source\Reference\AIArtToPSD\Persistence\PNG','Source\Reference\AIArtToPSD\Persistence\PSD') -join ';'
+$paths = @('Source\Studio','Source\Studio\Assets','Source\Studio\Audio','Source\Studio\Model','Source\Studio\Output','Source\Studio\Rendering','Source\Studio\Session','Source\Studio\Views\Creation','Source\Studio\Views\Editor','Source\Studio\Views\Preview','Source\Studio\Views\Timeline','Source\Studio\Workflow','Source\Shell\CharacterEditor','Source\Core','Source\Rendering','Source\Persistence','Source\Editor','Source\Reference\AIArtToPSD\Core','Source\Reference\AIArtToPSD\Persistence\PNG','Source\Reference\AIArtToPSD\Persistence\PSD') -join ';'
 Push-Location $root
 try {
   $cmd = 'call "C:\Program Files (x86)\Embarcadero\Studio\37.0\bin\rsvars.bat" && dcc64 -B -Q -U"'+$paths+'" -E"'+$output+'" -N0"'+$dcu+'" Tests\RigmStarLanternDelivery.dpr'

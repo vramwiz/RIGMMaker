@@ -3,7 +3,7 @@ param([string]$Mode='before')
 $ErrorActionPreference='Stop';$root=Split-Path -Parent $PSScriptRoot
 $m=Get-Content (Join-Path $root 'Win64\Validation\quality-material.json') -Raw | ConvertFrom-Json
 $out=Join-Path $root 'Win64\Validation';$dcu=Join-Path $out 'QualityDcu';New-Item -ItemType Directory -Path $dcu -Force|Out-Null
-$paths=@('Source\Studio','Source\Lib\Charts','Source\Lib\Voicevox','Source\Core','Source\Editor','Source\Rendering','Source\Persistence','Source\Reference\AIArtToPSD\Core','Source\Reference\AIArtToPSD\Persistence\PNG','Source\Reference\AIArtToPSD\Persistence\PSD') -join ';'
+$paths=@('Source\Studio','Source\Studio\Assets','Source\Studio\Audio','Source\Studio\Model','Source\Studio\Output','Source\Studio\Rendering','Source\Studio\Session','Source\Studio\Views\Creation','Source\Studio\Views\Editor','Source\Studio\Views\Preview','Source\Studio\Views\Timeline','Source\Studio\Workflow','Source\Shell\CharacterEditor','Source\Lib\Charts','Source\Lib\Voicevox','Source\Core','Source\Editor','Source\Rendering','Source\Persistence','Source\Reference\AIArtToPSD\Core','Source\Reference\AIArtToPSD\Persistence\PNG','Source\Reference\AIArtToPSD\Persistence\PSD') -join ';'
 Push-Location $root
 try{
   $cmd='call "C:\Program Files (x86)\Embarcadero\Studio\37.0\bin\rsvars.bat" && dcc64 -B -Q -U"'+$paths+'" -E"'+$out+'" -N0"'+$dcu+'" Tests\RigmMovieQualityTests.dpr'

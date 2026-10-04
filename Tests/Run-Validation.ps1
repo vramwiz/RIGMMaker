@@ -7,7 +7,7 @@ $validationRoot = Join-Path $projectRoot 'Win64\Validation'
 $radVars = 'C:\Program Files (x86)\Embarcadero\Studio\37.0\bin\rsvars.bat'
 if (-not (Test-Path -LiteralPath $radVars)) { throw "Delphi environment not found: $radVars" }
 New-Item -ItemType Directory -Path $validationRoot -Force | Out-Null
-$searchPaths = @('Tests','Source\Studio','Source\Lib\Charts','Source\Lib\Voicevox','Source\Core','Source\Editor','Source\Rendering','Source\Persistence','Source\Integrations','Source\Shell','Source\Lib\GameControllers','Source\Lib\UI\IconToolbar',
+$searchPaths = @('Tests','Source\Studio','Source\Studio\Assets','Source\Studio\Audio','Source\Studio\Model','Source\Studio\Output','Source\Studio\Rendering','Source\Studio\Session','Source\Studio\Views\Creation','Source\Studio\Views\Editor','Source\Studio\Views\Preview','Source\Studio\Views\Timeline','Source\Studio\Workflow','Source\Shell\CharacterEditor','Source\Lib\Charts','Source\Lib\Voicevox','Source\Core','Source\Editor','Source\Rendering','Source\Persistence','Source\Integrations','Source\Shell','Source\Lib\GameControllers','Source\Lib\UI\IconToolbar',
     'Source\Reference\AIArtToPSD\Core','Source\Reference\AIArtToPSD\Persistence\PNG','Source\Reference\AIArtToPSD\Persistence\PSD',
     'Source\Reference\AIArtToPSD\Integrations\Pipe','Source\Reference\AIArtToPSD\Shell','Source\Reference\AIArtToPSD\Lib\UI\VerticalScrollBar',
     'Source\Reference\AIArtToPSD\Lib\UI\HorizontalTrackBar','Source\Reference\AIArtToPSD\Lib\Pipe') -join ';'
