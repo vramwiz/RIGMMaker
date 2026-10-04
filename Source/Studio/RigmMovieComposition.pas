@@ -24,7 +24,7 @@ type
     Id,Title,Image,Description,ImagePrompt: string;
     Padding: Double;
     // Reserved timing/animation metadata. No implicit animation is generated.
-    Animation: TJSONObject;
+    Animation,Chart: TJSONObject;
     constructor Create;
     destructor Destroy; override;
     function Json: TJSONObject;
@@ -32,7 +32,7 @@ type
     procedure Validate;
   end;
 implementation
-uses System.Math, System.StrUtils, RigmJson;
+uses System.Math, System.StrUtils, RigmJson, RigmMovieChart;
 constructor TRigmMovieCharacter.Create;
 begin
   inherited; Id := NewRigmId; Name := 'キャラクター'; SpeakerId := 'narrator'; InitialPosition := 'right';
@@ -119,14 +119,15 @@ begin
   end;
 end;
 constructor TRigmMovieScene.Create;
-begin inherited; Id := NewRigmId; Title := 'シーン'; Animation := TJSONObject.Create; end;
+begin inherited; Id := NewRigmId; Title := 'シーン'; Animation := TJSONObject.Create; Chart := TJSONObject.Create; end;
 destructor TRigmMovieScene.Destroy;
-begin Animation.Free; inherited; end;
+begin Chart.Free; Animation.Free; inherited; end;
 function TRigmMovieScene.Json: TJSONObject;
 begin
   Result := TJSONObject.Create; Result.AddPair('id',Id); Result.AddPair('title',Title); Result.AddPair('image',Image);
   Result.AddPair('description',Description); Result.AddPair('imagePrompt',ImagePrompt); AddN(Result,'padding',Padding);
   Result.AddPair('animation',Animation.Clone as TJSONObject);
+  if Chart.Count>0 then Result.AddPair('chart',Chart.Clone as TJSONObject);
 end;
 class function TRigmMovieScene.FromJson(O: TJSONObject): TRigmMovieScene;
 begin
@@ -134,7 +135,11 @@ begin
   try
     Result.Id := JS(O,'id',Result.Id); Result.Title := JS(O,'title','シーン'); Result.Image := JS(O,'image');
     Result.Description := JS(O,'description'); Result.ImagePrompt := JS(O,'imagePrompt'); Result.Padding := JN(O,'padding');
-    if O.GetValue('animation')<>nil then begin Result.Animation.Free; Result.Animation := JO(O,'animation').Clone as TJSONObject; end;
+      if O.GetValue('animation')<>nil then begin Result.Animation.Free; Result.Animation := JO(O,'animation').Clone as TJSONObject; end;
+      if O.GetValue('chart')<>nil then begin
+        if not(O.GetValue('chart') is TJSONObject) then raise ERigm.Create('Scene chart must be an object');
+        Result.Chart.Free; Result.Chart := JO(O,'chart').Clone as TJSONObject;
+      end;
     Result.Validate;
   except Result.Free; raise; end;
 end;
@@ -142,5 +147,6 @@ procedure TRigmMovieScene.Validate;
 begin
   if (Id='') or (Length(Id)>128) or (Length(Title)>300) or (Length(Description)>3000) or (Length(ImagePrompt)>8000) then raise ERigm.Create('Invalid scene content');
   if not Finite(Padding) or (Padding<0) or (Padding>600) then raise ERigm.Create('Scene padding must be 0..600 seconds');
+  ValidateMovieChart(Chart);
 end;
 end.

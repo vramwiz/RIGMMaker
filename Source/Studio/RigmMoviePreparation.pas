@@ -133,7 +133,10 @@ begin
   Duration := Project.Duration; EstimatedSeconds := Duration*386.265/180*(Project.Width*Project.Height/2073600.0)*(Project.Fps/30);
   if Project.EncodeProfile='balanced' then EstimatedSeconds := EstimatedSeconds*1.3;
   if Project.EncodeProfile='quality' then EstimatedSeconds := EstimatedSeconds*1.8;
-  Staging := Round(Duration*(Project.Width*Project.Height*Project.Fps*0.06+196000)); FreeBytes := 0;
+  // MP4 streams one raw frame to FFmpeg; disk staging contains only PCM audio and compressed output.
+  if Mp4 then Staging := Round(Duration*(Project.Width*Project.Height*Project.Fps*0.025+96000))
+  else Staging := Round(Duration*(Project.Width*Project.Height*Project.Fps*0.06+196000));
+  FreeBytes := 0;
   if Target<>'' then try
     Directory := ExtractFilePath(ExpandFileName(Target));
     while (Directory<>'') and not DirectoryExists(Directory) do begin var Parent := ExcludeTrailingPathDelimiter(ExtractFilePath(ExcludeTrailingPathDelimiter(Directory))); if Parent=Directory then Break; Directory := Parent; end;
@@ -141,10 +144,17 @@ begin
       if FreeBytes<Staging then begin OutputOK := False; Issue('disk_space_low','空き容量が一時ファイルの概算より少ないため、出力先かサイズを変更してください。','movie-update-project','output',True); end;
     end else begin OutputOK := False; Issue('output_drive_unavailable','出力先のドライブと空き容量を確認できません。利用可能な保存先を選んでください。','movie-update-project','output',True); end;
   except OutputOK := False; Issue('output_path_invalid','出力先のパスを確認してください。','movie-update-project','output',True); end;
-  if Staging>1800000000 then Issue('avi_staging_risk','一時AVIの2GB制限に近い概算です。サイズ・fps・長さを下げてください。','movie-update-project','output',False);
+  if not Mp4 and (Staging>1800000000) then Issue('avi_staging_risk','一時AVIの2GB制限に近い概算です。サイズ・fps・長さを下げてください。','movie-update-project','output',False);
   var Estimate := TJSONObject.Create; AddN(Estimate,'durationSeconds',Duration); AddB(Estimate,'durationEstimated',not AudioOK);
   AddN(Estimate,'exportSeconds',EstimatedSeconds); AddN(Estimate,'stagingBytes',Staging); AddN(Estimate,'freeBytes',FreeBytes);
-  Estimate.AddPair('basis','heuristic from 1080p30 fast stored Kiritan 180s / 386.265s; material and CPU dependent; quality factors unmeasured');
+  Estimate.AddPair('basis','historical renderer heuristic from 1080p30 fast Kiritan 180s / 386.265s; material and CPU dependent; raw streaming and quality factors unmeasured');
+  if Mp4 then begin
+    Estimate.AddPair('backend','ffmpeg-raw-bgra-pipe');
+    Estimate.AddPair('stagingBasis','heuristic: 48000 Hz mono PCM plus compressed MP4; no intermediate AVI; bitrate is content dependent');
+  end else begin
+    Estimate.AddPair('backend','legacy-mjpeg-avi');
+    Estimate.AddPair('stagingBasis','heuristic: MJPEG AVI including PCM; legacy 2 GB AVI limit remains');
+  end;
   Estimate.AddPair('writePermission','not probed: read-only diagnosis'); Result.AddPair('estimate',Estimate);
   Step('script','1 台本を取り込む','movie-import-script',Project.Cues.Count>0);
   Step('setup','2 話者・キャラクター・素材を選ぶ','movie-diagnostics-refresh',EngineOK and (Unselected=0) and CharacterOK);

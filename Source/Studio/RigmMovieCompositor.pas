@@ -12,7 +12,7 @@ procedure ValidateCompositionMaterials(Project: TRigmMovieProject);
 implementation
 uses System.Classes, System.Types, System.Math, System.IOUtils, System.StrUtils,
   System.Generics.Collections, Winapi.Windows, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg,
-  ArtDocument, RigmJson, RigmStorage, RigmSample, RigmRenderer, RigmMovieRendering, RigmMovieActing;
+  ArtDocument, RigmJson, RigmStorage, RigmSample, RigmRenderer, RigmMovieRendering, RigmMovieActing, RigmMovieChart;
 type
   TActorEntry = class
     Stamp: string;
@@ -41,7 +41,7 @@ begin
     Entry.Document.ValidateStructure; ActorCache.AddOrSetValue(Path,Entry); Result := Entry.Document;
   except Entry.Free; raise; end;
 end;
-function ExistingExpressions(Document: TRigmDocument): TJSONObject;
+function LegacyExpressions(Document: TRigmDocument): TJSONObject;
 begin
   Result := TJSONObject.Create;
   if Document=nil then Exit;
@@ -70,6 +70,75 @@ begin
       if (Role='mouth') and (Emotion<>'neutral') then begin Preset.RemovePair('mouthAnimate').Free; AddB(Preset,'mouthAnimate',False); end;
       if (Role='body') and (Emotion<>'neutral') then begin Preset.RemovePair('rigSafe').Free; AddB(Preset,'rigSafe',False); end;
     end;
+  end;
+end;
+function ExistingExpressions(Document: TRigmDocument): TJSONObject;
+  function Named(Group: TArtLayer; const Names: array of string): TArtLayer;
+  begin
+    Result := nil;
+    for var Name in Names do for var L in Group.Children do
+      if SameText(L.Name.Trim.TrimLeft(['*']),Name) and not Document.IsReferencePart(L.Id) then Exit(L);
+  end;
+  function GroupRole(Group: TArtLayer): string;
+  begin
+    Result := '';
+    var Name := Group.Name.Trim.TrimLeft(['*']);
+    if MatchText(Name,['記号','感情記号','emotion symbols']) then Exit('symbol');
+    if MatchText(Name,['顔色','face color']) then Exit('color');
+    var AllSame := True;
+    for var L in Group.Children do begin
+      var Part := Document.Part(L.Id);
+      if (Part=nil) or (L.Kind<>alkImage) then Exit('');
+      if Result='' then Result := Part.Role else AllSame := AllSame and (Result=Part.Role);
+    end;
+    if not AllSame or not MatchText(Result,['eye','mouth','brow','body']) then Result := '';
+  end;
+begin
+  Result := LegacyExpressions(Document);
+  if Document=nil then Exit;
+  for var Emotion in MovieEmotionIds do begin
+    var Preset := TJSONObject.Create; var Variants := TJSONArray.Create; Preset.AddPair('variants',Variants);
+    var Evidence := Emotion='neutral'; var Blink := True; var Mouth := True; var RigSafe := True;
+    for var G in Document.Layers do if (G.Kind=alkGroup) and (G.Children.Count>1) and not Document.IsReferencePart(G.Id) then begin
+      var Role := GroupRole(G); if Role='' then Continue;
+      var Selected := Named(G,['通常','normal','default','なし','none']); var Difference: TArtLayer := nil;
+      if Role='brow' then begin
+        if Emotion='happy' then Difference := Named(G,['喜','喜び','happy','smile'])
+        else if Emotion='joy' then Difference := Named(G,['楽','楽しさ','joy'])
+        else if Emotion='angry' then Difference := Named(G,['怒','怒り','angry'])
+        else if Emotion='sad' then Difference := Named(G,['哀','哀しみ','悲しみ','sad'])
+        else if MatchText(Emotion,['doubt','confused']) then Difference := Named(G,['困る','困惑','doubt'])
+        else if Emotion='gentle' then Difference := Named(G,['楽','穏やか','gentle']);
+      end else if Role='symbol' then begin
+        if MatchText(Emotion,['happy','joy']) then Difference := Named(G,['喜び（キラキラ）','音符'])
+        else if Emotion='angry' then Difference := Named(G,['怒り'])
+        else if Emotion='sad' then Difference := Named(G,['哀しみ（涙）'])
+        else if Emotion='surprised' then Difference := Named(G,['ビックリ','！'])
+        else if Emotion='doubt' then Difference := Named(G,['？'])
+        else if Emotion='confused' then Difference := Named(G,['！？','汗']);
+      end else if Role='color' then begin
+        if Emotion='happy' then Difference := Named(G,['照れ'])
+        else if Emotion='angry' then Difference := Named(G,['赤い顔'])
+        else if Emotion='sad' then Difference := Named(G,['落ち込み（三本線）'])
+        else if MatchText(Emotion,['doubt','confused']) then Difference := Named(G,['汗'])
+        else if Emotion='gentle' then Difference := Named(G,['照れ']);
+      end else if Role='eye' then begin
+        if Emotion='gentle' then Difference := Named(G,['やさしい目','穏やか','gentle']);
+      end else if Role='body' then begin
+        if Emotion='serious' then Difference := Named(G,['腕組み','serious']);
+      end;
+      if Difference<>nil then begin Selected := Difference; Evidence := True; end;
+      if Selected=nil then Continue;
+      var Choice := TJSONObject.Create; Choice.AddPair('groupId',G.Id); Choice.AddPair('partId',Selected.Id); Variants.AddElement(Choice);
+      if (Role='eye') and not MatchText(Selected.Name.Trim.TrimLeft(['*']),['通常','normal','default','開き','open']) then Blink := False;
+      if (Role='mouth') and not MatchText(Selected.Name.Trim.TrimLeft(['*']),['通常','normal','default','閉じ','closed','ん','開き','open','半開き','half','あ','い','う','え','お']) then Mouth := False;
+      if (Role='body') and (Difference<>nil) then RigSafe := False;
+    end;
+    if Evidence and (Variants.Count>0) then begin
+      AddB(Preset,'blinkAnimate',Blink); AddB(Preset,'mouthAnimate',Mouth); AddB(Preset,'rigSafe',RigSafe);
+      Preset.AddPair('source','existing PSD differences; semantic combination of real layer names');
+      Result.RemovePair(Emotion).Free; Result.AddPair(Emotion,Preset);
+    end else Preset.Free;
   end;
 end;
 function SceneImageBounds(Project: TRigmMovieProject): TRectF;
@@ -132,9 +201,26 @@ begin
     end;
     var BlinkEnabled := True; var MouthEnabled := True; var RigSafe := Character.RigSafe;
     if Preset<>nil then begin
-      if Preset.GetValue('variants')<>nil then begin Acting.Variants.Free; Acting.Variants := JA(Preset,'variants').Clone as TJSONArray; end;
+      if Preset.GetValue('variants')<>nil then begin
+        var Merged := JA(Preset,'variants').Clone as TJSONArray;
+        // Explicit cue choices take precedence over the emotion's defaults.
+        for var V in Acting.Variants do begin
+          var GroupId := JS(TJSONObject(V),'groupId');
+          for var I := Merged.Count-1 downto 0 do
+            if JS(TJSONObject(Merged[I]),'groupId')=GroupId then Merged.Remove(I).Free;
+          Merged.AddElement(V.Clone as TJSONObject);
+        end;
+        Acting.Variants.Free; Acting.Variants := Merged;
+      end;
       BlinkEnabled := JB(Preset,'blinkAnimate',True); MouthEnabled := JB(Preset,'mouthAnimate',True);
       RigSafe := RigSafe and JB(Preset,'rigSafe',True);
+    end;
+    if (C<>nil) and (C.SpeakerId=Character.SpeakerId) then for var V in C.Acting.Variants do begin
+      var Part := Document.Art.FindLayer(JS(TJSONObject(V),'partId')); if Part=nil then Continue;
+      var Role := Document.Part(Part.Id).Role; var Name := Part.Name.Trim.TrimLeft(['*']);
+      if Role='eye' then BlinkEnabled := MatchText(Name,['通常','normal','default','開き','open'])
+      else if Role='mouth' then MouthEnabled := MatchText(Name,['通常','normal','default','閉じ','closed','ん','開き','open','半開き','half','あ','い','う','え','お'])
+      else if (Role='body') and not MatchText(Name,['通常','normal','default']) then RigSafe := False;
     end;
     // Difference selection precedes independent feature animation and small rig motion.
     Pose.PartVisibility.Clear; Pose.PartFeatureAssets.Clear; Acting.ApplyVariants(Document,Pose);
@@ -226,7 +312,8 @@ begin
       if S<>nil then begin
         var SceneImage := S.Image;
         if (SceneImage='') and (C<>nil) then SceneImage := C.Background;
-        Image(SceneImage,ImageRect,False);
+        if MovieChartEnabled(S.Chart) then DrawMovieChart(Canvas,S.Chart,ImageRect)
+        else Image(SceneImage,ImageRect,False);
         if S.Description<>'' then begin
           Canvas.Brush.Style := bsSolid; Canvas.Brush.Color := $302820; Canvas.FillRect(DescriptionRect); InflateRect(DescriptionRect,-12,-8);
           Text(S.Description,DescriptionRect,32,DT_LEFT or DT_WORDBREAK);

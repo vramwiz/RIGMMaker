@@ -11,7 +11,7 @@ uses System.SysUtils, RigmModel, RigmJson;
 function MovieOutputPresets: TJSONObject;
 begin
   Result := ParseObject('{"draft":{"width":640,"height":360,"fps":15},"hd":{"width":1280,"height":720,"fps":30},"fullhd":{"width":1920,"height":1080,"fps":30},"custom":"explicit dimensions and fps",'+
-    '"encoding":{"fast":"veryfast / CRF23 / JPEG80; smaller CPU budget","balanced":"medium / CRF20 / JPEG90","quality":"slow / CRF18 / JPEG95; larger staging and CPU time"},"threads":4,"limit":"MP4 stages AVI with 2GB limit"}');
+    '"encoding":{"fast":"veryfast / CRF23 / JPEG80; smaller CPU budget","balanced":"medium / CRF20 / JPEG90","quality":"slow / CRF18 / JPEG95; larger staging and CPU time"},"threads":4,"limit":"MP4 streams raw frames to FFmpeg; AVI alone retains its legacy 2GB limit"}');
 end;
 procedure MoviePresetDimensions(const Id: string; out Width,Height,Fps: Integer);
 begin

@@ -3,7 +3,8 @@
 interface
 uses Winapi.Windows, System.SysUtils, System.Classes, System.JSON, Vcl.Forms, Vcl.Controls, Vcl.StdCtrls,
   Vcl.ExtCtrls, Vcl.ComCtrls, Vcl.Graphics, Vcl.Menus, System.Types, System.Generics.Collections,
-  RigmMovieSession, RigmIconToolbar, RigmMovieTimeline, RigmPropertyScrollBox, Vcl.AppEvnts;
+  RigmMovieSession, RigmIconToolbar, RigmMovieTimeline, RigmPropertyScrollBox, Vcl.AppEvnts,
+  RigmMovieNotification;
 
 type
   TRigmOpenMovieFile = procedure(const Path: string) of object;
@@ -77,7 +78,7 @@ type
     FRunStep,FBackStep,FReloadDraft: TButton;
     FDraftRevision: Integer;
     FAutoDiagnosticKey,FSeenDiagnostic: string;
-    FSpeaker,FStyle,FExpression,FMotion: TComboBox;
+    FSpeaker,FStyle,FExpression,FMotion,FEmotion: TComboBox;
     FOutputPreset,FEncodeProfile,FMouthMode,FBlinkMode: TComboBox;
     FJobProgress: TPaintBox;
     FJobPosition: Integer;
@@ -124,10 +125,14 @@ type
     FPropertyScroll: array[0..4] of Integer;
     FPropertyFocus: array[0..4] of TWinControl;
     FPropertyDrafts: TRigmPropertyDrafts;
-    FPoseDraft,FActingDraft: Boolean;
+    FPoseDraft,FActingDraft,FSceneDraft,FChartDraft: Boolean;
     FOtherDraft: Boolean;
     FSceneTitle: TEdit;
     FSceneDescription: TMemo;
+    FChartKind: TComboBox;
+    FChartTitle,FChartMaximum: TEdit;
+    FChartItems: TMemo;
+    FChartColor: TColorBox;
     FLayoutChoice: TComboBox;
     FWholeMotionStatus: TLabel;
     FPropertyFields: TList<TRigmMovieProperty>;
@@ -139,10 +144,16 @@ type
     FBottom: TPanel;
     FExportPanel: TPanel;
     FExportStatus: TLabel;
+    FExportProgress: TProgressBar;
+    FExportNotification: TRigmMovieNotification;
+    FNotifiedExport,FExportProject: string;
+    FExportRefreshTick: UInt64;
+    FExportFinished: Boolean;
     FExportButton,FExportResult: TButton;
     FExportJobId,FCompletedExport,FExportWarning,FExportError: string;
     procedure ChooseExport(const Extension: string);
     procedure RefreshExport;
+    procedure LayoutExportFeedback;
     procedure ShowExportError(const Message: string);
     procedure LayoutTransport;
     procedure EditingAreaResize(Sender: TObject);
@@ -181,6 +192,8 @@ type
     procedure StartPlayback;
     procedure StopPlayback;
   public
+    function ExportNotificationRequests: Integer;
+    function ExportNotificationsShown: Integer;
     property ViewRefreshCount: Integer read FViewRefreshCount;
     property PreviewPending: Boolean read FPendingPreview;
     property PreviewRequests: Integer read FPreviewRequests;
@@ -203,7 +216,8 @@ procedure PopulateMovieMenus(Menu: TMainMenu; Handler: TNotifyEvent);
 implementation
 uses System.IOUtils, System.Math, System.StrUtils, System.UITypes,
   Winapi.Messages, Winapi.MMSystem, Winapi.ShellAPI, Vcl.Dialogs, RigmModel, RigmJson, RigmMovieModel,
-  RigmMovieAudio, RigmToolbarIcons, RigmMovieOutput, RigmMoviePreparation, RigmAppSettings, RigmEditorForm, RigmMovieWorkspace;
+  RigmMovieAudio, RigmToolbarIcons, RigmMovieOutput, RigmMoviePreparation, RigmAppSettings, RigmEditorForm, RigmMovieWorkspace,
+  RigmMovieActing, RigmMovieChart;
 
 procedure PopulateMovieMenus(Menu: TMainMenu; Handler: TNotifyEvent);
   function Group(const Name,Caption: string): TMenuItem;
@@ -536,14 +550,18 @@ begin
   FExportStatus := TLabel.Create(Self); FExportStatus.Parent := FExportPanel; FExportStatus.Align := alClient;
   FExportStatus.Name := 'MovieExportFeedbackText'; FExportStatus.AutoSize := False; FExportStatus.WordWrap := True;
   FExportStatus.Layout := tlCenter; FExportStatus.ShowHint := True;
+  FExportProgress := TProgressBar.Create(Self); FExportProgress.Parent := FExportPanel;
+  FExportProgress.Name := 'MovieExportProgress'; FExportProgress.Align := alBottom;
+  FExportProgress.Height := 10; FExportProgress.Min := 0; FExportProgress.Max := 1000;
+  FExportNotification := TRigmMovieNotification.Create(Self);
   FExportResult := TButton.Create(Self); FExportResult.Parent := FExportPanel; FExportResult.Align := alRight;
   FExportResult.Name := 'MovieExportFeedbackAction'; FExportResult.Width := 130; FExportResult.OnClick := ActionClick;
   Bottom := TPanel.Create(Self); FBottom := Bottom; Bottom.Parent := Self; Bottom.Align := alBottom; Bottom.Height := 296; Bottom.BevelOuter := bvNone; Bottom.Caption := '';
   FTimeline := TRigmMovieTimeline.Create(Self); FTimeline.Parent := Bottom; FTimeline.Align := alClient;
   FTimeline.Name := 'MovieWaveTimeline'; FTimeline.OnSeek := TimelineSeek;
   FTimeline.OnSelectCue := TimelineSelectCue;
-  Bar := TPanel.Create(Self); Bar.Parent := Bottom; Bar.Align := alBottom; Bar.Height := 64; Bar.BevelOuter := bvNone; Bar.Caption := ''; Bar.Name := 'MovieFrameSeek';
-  var SeekHeader := TPanel.Create(Self); SeekHeader.Parent := Bar; SeekHeader.Align := alTop; SeekHeader.Height := 26; SeekHeader.Caption := ''; SeekHeader.BevelOuter := bvNone; SeekHeader.Name := 'MovieSeekHeader';
+  Bar := TPanel.Create(Self); Bar.Parent := Bottom; Bar.Align := alBottom; Bar.Height := 64; Bar.BevelOuter := bvNone; Bar.Caption := ''; Bar.ShowCaption := False; Bar.Name := 'MovieFrameSeek';
+  var SeekHeader := TPanel.Create(Self); SeekHeader.Parent := Bar; SeekHeader.Align := alTop; SeekHeader.Height := 26; SeekHeader.Caption := ''; SeekHeader.ShowCaption := False; SeekHeader.BevelOuter := bvNone; SeekHeader.Name := 'MovieSeekHeader';
   FFramePosition := TLabel.Create(Self); FFramePosition.Parent := SeekHeader; FFramePosition.Align := alClient;
   FFramePosition.Name := 'MovieFramePosition'; FFramePosition.AutoSize := False; FFramePosition.Layout := tlCenter; FFramePosition.ShowHint := True;
   FZoom := TComboBox.Create(Self); FZoom.Parent := SeekHeader; FZoom.Align := alRight; FZoom.Width := 100; FZoom.Style := csDropDownList;
@@ -575,10 +593,24 @@ begin
   FLayoutChoice.Items.AddStrings(['背景・画像・説明の標準配置','L字配置・キャラクターを左','L字配置・キャラクターを右']);
   FLayoutChoice.OnChange := DraftEdited;
   Button(Right,'MovieApplyScene','場面と配置を適用',41,12,320,330);
+  FChartKind := Combo('MovieSceneChartKind','総評チャート',12,370,330);
+  FChartKind.Items.AddStrings(['なし','レーダーチャート','棒グラフ']); FChartKind.ItemIndex := 0; FChartKind.OnChange := DraftEdited;
+  FChartTitle := Edit(Right,'MovieSceneChartTitle','チャートの題名',12,424,330);
+  FChartMaximum := Edit(Right,'MovieSceneChartMaximum','満点',12,478,330);
+  L := TLabel.Create(Self); L.Parent := Right; L.Caption := '項目 = 値（1行1項目、最大8項目）';
+  FChartItems := TMemo.Create(Self); FChartItems.Parent := Right; FChartItems.Name := 'MovieSceneChartItems';
+  FChartItems.ScrollBars := ssVertical; AddProperty(L,FChartItems,532,12,330,120);
+  L := TLabel.Create(Self); L.Parent := Right; L.Caption := 'チャートの色';
+  FChartColor := TColorBox.Create(Self); FChartColor.Parent := Right; FChartColor.Name := 'MovieSceneChartColor';
+  FChartColor.Style := [cbStandardColors,cbExtendedColors,cbCustomColor,cbPrettyNames];
+  FChartColor.Selected := RGB(90,184,232); FChartColor.OnChange := DraftEdited; AddProperty(L,FChartColor,672,12,330,28);
+  Button(Right,'MovieApplySceneChart','チャートを適用',44,12,726,330);
   FBuildPropertyPage := 0;
   FSpeaker := Combo('MovieCueSpeaker','台本上の話者',12,53,158); FSpeaker.OnChange := SelectSpeaker;
   FPause := Edit(Right,'MovieCuePause','セリフ後の間（秒）',184,53,158);
   FBuildPropertyPage := 2;
+  FEmotion := Combo('MovieCueEmotion','感情（既存の立ち絵差分）',12,48,330);
+  FEmotion.OnChange := DraftEdited;
   FImageAttention := Combo('MovieImageAttention','画像への向き補助（瞳移動なし）',12,300,330);
   FImageAttention.Items.AddStrings(['説明時に控えめな頭の向き補助','補助なし','このセリフでは画像へ頭の向き補助']);
   FImageAttention.OnChange := DraftEdited;
@@ -873,7 +905,7 @@ begin
   if FRefreshing then Exit;
   if FDraftRevision=0 then begin
     FillChar(FPropertyDrafts,SizeOf(FPropertyDrafts),0); FOtherDraft := False;
-    FPoseDraft := False; FActingDraft := False;
+    FPoseDraft := False; FActingDraft := False; FSceneDraft := False; FChartDraft := False;
     // Stamp the data actually displayed, even before the next timer refresh.
     FDraftRevision := FLastRevision;
     if FDraftRevision=0 then FDraftRevision := FSession.Project.Revision;
@@ -882,11 +914,14 @@ begin
   var Found := False;
   for var Field in FPropertyFields do if Field.Control=Sender then begin FPropertyDrafts[Field.Page] := True; Found := True; Break; end;
   if not Found then FOtherDraft := True;
-  if (Sender=FExpression) or (Sender=FMotion) then FPoseDraft := True
+  if (Sender=FExpression) or (Sender=FMotion) or (Sender=FEmotion) then FPoseDraft := True
   else if Found and FPropertyDrafts[2] then begin
     for var Field in FPropertyFields do
       if (Field.Control=Sender) and (Field.Page=2) then begin FActingDraft := True; Break; end;
   end;
+  if (Sender=FChartKind) or (Sender=FChartTitle) or (Sender=FChartMaximum) or
+    (Sender=FChartItems) or (Sender=FChartColor) then FChartDraft := True
+  else if (Sender=FSceneTitle) or (Sender=FSceneDescription) or (Sender=FLayoutChoice) then FSceneDraft := True;
   if (Sender=FDialogue) or (Sender=FSubtitle) then FTextPending := True else FOnlyTextDraft := False;
 end;
 function TRigmMovieForm.Command(const Name: string; Args: TJSONObject): TJSONObject;
@@ -913,7 +948,7 @@ begin
   try
   C := FSession.Project.Cue(FSelectedId);
   if C=nil then begin
-    FSceneTitle.Clear; FSceneDescription.Clear;
+    FSceneTitle.Clear; FSceneDescription.Clear; FEmotion.Items.Clear;
     FScene.Clear; FPause.Clear; FDialogue.Clear; FSubtitle.Clear; FSpeed.Clear; FPitch.Clear;
     FStyle.ItemIndex := -1; FSpeaker.ItemIndex := -1; FExpression.ItemIndex := -1; FMotion.ItemIndex := -1;
     for var E in FActing do E.Clear;
@@ -923,6 +958,27 @@ begin
   var Scene := FSession.Project.Scene(C.Scene);
   if Scene<>nil then begin FSceneTitle.Text := Scene.Title; FSceneDescription.Text := Scene.Description; end
   else begin FSceneTitle.Clear; FSceneDescription.Clear; end;
+  FChartKind.ItemIndex := 0; FChartTitle.Text := '総評'; FChartMaximum.Text := '5'; FChartItems.Clear;
+  FChartColor.Selected := RGB(90,184,232);
+  if (Scene<>nil) and MovieChartEnabled(Scene.Chart) then begin
+    FChartKind.ItemIndex := IndexText(JS(Scene.Chart,'kind','none'),['none','radar','bar']);
+    FChartTitle.Text := JS(Scene.Chart,'title','総評'); FChartMaximum.Text := FloatToStr(JN(Scene.Chart,'maximum',5),TFormatSettings.Invariant);
+    if Scene.Chart.GetValue('items') is TJSONArray then for var V in JA(Scene.Chart,'items') do begin
+      var Item := TJSONObject(V); FChartItems.Lines.Add(JS(Item,'label')+' = '+FloatToStr(JN(Item,'value'),TFormatSettings.Invariant));
+    end;
+    var ColorValue := StrToInt('$'+Copy(JS(Scene.Chart,'color','#5AB8E8'),2,6));
+    FChartColor.Selected := RGB((ColorValue shr 16) and 255,(ColorValue shr 8) and 255,ColorValue and 255);
+  end;
+  FEmotion.Items.Clear; FEmotion.ItemIndex := -1;
+  for var I := 0 to High(MovieEmotionIds) do begin
+    var Available := (MovieEmotionIds[I]='neutral') or (MovieEmotionIds[I]=C.Emotion);
+    for var Character in FSession.Project.Characters do if (Character.SpeakerId=C.SpeakerId) and
+      (Character.Expressions.GetValue(MovieEmotionIds[I])<>nil) then Available := True;
+    if Available then begin
+      FEmotion.Items.AddObject(MovieEmotionLabels[I],TObject(NativeInt(I)));
+      if MovieEmotionIds[I]=C.Emotion then FEmotion.ItemIndex := FEmotion.Items.Count-1;
+    end;
+  end;
   FLayoutChoice.ItemIndex := 0;
   if FSession.Project.Layout='l' then
     if FSession.Project.LDirection='left' then FLayoutChoice.ItemIndex := 1 else FLayoutChoice.ItemIndex := 2;
@@ -957,6 +1013,7 @@ begin
   end;
   Inc(FViewRefreshCount);
   if FViewedProject<>FSession.Project.Id then begin FSelectedId := FSession.ResumeCue; FDrawnFrame := -1; FPendingPreview := FSession.Project.Cues.Count>0;
+    FExportJobId := ''; FExportProject := ''; FExportPanel.Visible := False;
     FTimeline.ResetView; FPreview.Fit; FViewedProject := FSession.Project.Id; end;
   FRefreshing := True;
   try
@@ -1274,6 +1331,21 @@ begin
   TPanel(FFramePosition.Parent).Height := MulDiv(26,PPI,96);
   FFramePosition.Font.Height := -MulDiv(15,PPI,96);
   FZoom.Width := MulDiv(100,PPI,96);
+  LayoutExportFeedback;
+end;
+function TRigmMovieForm.ExportNotificationRequests: Integer;
+begin Result := FExportNotification.Requests; end;
+function TRigmMovieForm.ExportNotificationsShown: Integer;
+begin Result := FExportNotification.Shown; end;
+procedure TRigmMovieForm.LayoutExportFeedback;
+begin
+  if FExportPanel=nil then Exit;
+  var Host := GetParentForm(Self,True); var PPI := CurrentPPI; if Host<>nil then PPI := Host.CurrentPPI;
+  FExportPanel.Height := MulDiv(78,PPI,96);
+  FExportResult.Width := MulDiv(130,PPI,96); FExportProgress.Height := MulDiv(10,PPI,96);
+  FExportStatus.Font.Height := -MulDiv(15,PPI,96);
+  FExportStatus.Margins.Left := MulDiv(10,PPI,96); FExportStatus.Margins.Right := MulDiv(10,PPI,96);
+  FExportStatus.AlignWithMargins := True;
 end;
 procedure TRigmMovieForm.ShowExportError(const Message: string);
 begin
@@ -1327,31 +1399,65 @@ begin
     FPendingPreview := False; FExportError := ''; FCompletedExport := '';
     A := TJSONObject.Create; A.AddPair('outputTarget',Target); A.AddPair('ffmpeg',Encoder); Run('update-project',A);
     A := TJSONObject.Create; A.AddPair('path',Target); Reply := Command('export',A);
-    try FExportJobId := JS(Reply,'jobId'); finally Reply.Free; end;
+    try FExportJobId := JS(Reply,'jobId'); FExportProject := FSession.Project.Id; FExportFinished := False; finally Reply.Free; end;
     FExportPanel.Visible := True; FStatus.Visible := False; RefreshExport;
   finally Dialog.Free; end;
 end;
 procedure TRigmMovieForm.RefreshExport;
 begin
-  if FExportJobId='' then Exit;
+  // Observe exports started through either the GUI or the shared pipe.
+  if FSession.CurrentJobKind='export' then begin
+    var Current := Command('job-status');
+    try
+      if (JS(Current,'snapshotProjectId')=FSession.Project.Id) and
+        (JS(Current,'jobId')<>FExportJobId) then begin
+        FExportJobId := JS(Current,'jobId'); FExportProject := FSession.Project.Id;
+        FCompletedExport := ''; FExportError := ''; FExportRefreshTick := 0; FExportFinished := False;
+      end;
+    finally Current.Free; end;
+  end;
+  if (FExportJobId='') or (FExportProject<>FSession.Project.Id) or FExportFinished then Exit;
   var A := TJSONObject.Create; A.AddPair('jobId',FExportJobId); var Job := Command('job-status',A);
   try
+    if not JB(Job,'done') and (GetTickCount64-FExportRefreshTick<200) then Exit;
+    FExportRefreshTick := GetTickCount64;
     var Text := 'MP4 / AVI 書き出し: '+JobText(Job);
+    if (JS(Job,'phase')='render') and (JN(Job,'phaseTotal')>0) then
+      Text := Text+Format('  %.0f / %.0f フレーム',[JN(Job,'phaseCompleted'),JN(Job,'phaseTotal')]);
     if FExportWarning<>'' then Text := Text+sLineBreak+FExportWarning;
     FExportResult.Tag := 9; FExportResult.Caption := '書き出しを中止';
     if JB(Job,'done') then begin
-      if JS(Job,'state')='succeeded' then begin
+      if (JS(Job,'state')='succeeded') and JB(Job,'collected') and
+        (not SameText(ExtractFileExt(JS(Job,'output')),'.mp4') or JB(Job,'encoderExited')) and
+        FileExists(JS(Job,'output')) then begin
         FCompletedExport := JS(Job,'output'); Text := '動画を書き出しました: '+ExtractFileName(FCompletedExport);
         if FExportWarning<>'' then Text := Text+sLineBreak+FExportWarning;
         FExportResult.Caption := '保存先を開く'; FExportResult.Tag := 40;
+        if FNotifiedExport<>FExportJobId then begin
+          FNotifiedExport := FExportJobId;
+          FExportNotification.ExportFinished(FCompletedExport);
+        end;
       end else begin
         Text := '動画書き出し: '+JobText(Job); FExportResult.Caption := '保存先を選び直す'; FExportResult.Tag := 13;
       end;
     end;
+    var KnownProgress := JN(Job,'phaseTotal')>0;
+    var Style := pbstNormal;
+    if not KnownProgress and not JB(Job,'done') then Style := pbstMarquee;
+    if FExportProgress.Style<>Style then FExportProgress.Style := Style;
+    var Position := 0;
+    if KnownProgress then Position := Round(EnsureRange(JN(Job,'phaseCompleted')/JN(Job,'phaseTotal'),0.0,1.0)*1000);
+    if (JS(Job,'state')='succeeded') and JB(Job,'done') then Position := 1000;
+    if FExportProgress.Position<>Position then FExportProgress.Position := Position;
+    FExportFinished := JB(Job,'done') and ((JS(Job,'state')<>'succeeded') or (FCompletedExport<>''));
     FExportResult.Enabled := not JB(Job,'cancelRequested') or JB(Job,'done');
     if FExportStatus.Caption<>Text then FExportStatus.Caption := Text;
     FExportStatus.Hint := JS(Job,'output')+sLineBreak+Text;
-    FExportPanel.Visible := True;
+    if not FExportPanel.Visible then begin
+      LayoutExportFeedback;
+      FExportPanel.SetBounds(0,ClientHeight-FExportPanel.Height,ClientWidth,FExportPanel.Height);
+      FExportPanel.Visible := True; FExportPanel.BringToFront; Realign;
+    end;
   finally Job.Free; end;
 end;
 procedure TRigmMovieForm.PreviewKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -1368,7 +1474,10 @@ begin
     // Escape/capture loss may bypass the native splitter's OnAfterResize.
     if FSplitterDragging and (((GetAsyncKeyState(VK_LBUTTON) and $8000)=0) or
       ((GetAsyncKeyState(VK_ESCAPE) and $8000)<>0)) then SplitterAfterResize(Self);
-    FSession.Poll; Frame := FSession.TakeFrame;
+    FSession.Poll;
+    // Collect and report an export before automatic preview can replace its job.
+    RefreshExport;
+    Frame := FSession.TakeFrame;
     if FTextPending and FOnlyTextDraft and FSession.CanEdit and not FSession.GuiLocked and
       (FDraftRevision=FSession.Project.Revision) then begin
       O := TJSONObject.Create; O.AddPair('id',FSelectedId); O.AddPair('text',FDialogue.Text); O.AddPair('subtitle',FSubtitle.Text);
@@ -1399,7 +1508,7 @@ begin
         Text := Format('  %.2f / %.2f 秒　%s　%s',[FSession.Time,FSession.Project.Duration,IfThen(FSession.Project.Modified,'未保存','保存済'),FSession.Project.FileName]);
         if O.GetValue('job')<>nil then begin
           Job := JO(O,'job'); Text := Text+sLineBreak+'  '+JobText(Job);
-          var ShowProgress := (JS(Job,'kind')<>'preview') and not JB(Job,'done') and (JN(Job,'phaseTotal')>0);
+          var ShowProgress := not MatchText(JS(Job,'kind'),['preview','export']) and not JB(Job,'done') and (JN(Job,'phaseTotal')>0);
           if FJobProgress.Visible<>ShowProgress then FJobProgress.Visible := ShowProgress;
           if JN(Job,'phaseTotal')>0 then begin
             var Position := Round(EnsureRange(JN(Job,'phaseCompleted')/JN(Job,'phaseTotal'),0.0,1.0)*1000);
@@ -1417,7 +1526,6 @@ begin
         if (FLastError<>'') and (FStatus.Caption<>FLastError) then FStatus.Caption := FLastError;
         if FStatus.Visible<>(FLastError<>'') then FStatus.Visible := FLastError<>'';
       finally O.Free; end;
-      RefreshExport;
       if not FSession.Playing and not FAudioPreparing then RefreshPreparation;
     end;
     if FSession.Playing and not FPlaying then StartPlayback;
@@ -1463,10 +1571,34 @@ var O: TJSONObject; OpenDialog: TOpenDialog; SaveDialog: TSaveDialog;
 begin
   var DraftPages := FPropertyDrafts; var OtherDraft := FOtherDraft;
   var PoseDraft := FPoseDraft; var ActingDraft := FActingDraft;
+  var SceneDraft := FSceneDraft; var ChartDraft := FChartDraft;
   var TextPending := FTextPending; var TextOnly := FOnlyTextDraft;
   try
     FLastError := '';
     case TComponent(Sender).Tag of
+      44: begin
+        var Cue := FSession.Project.Cue(FSelectedId);
+        if (Cue=nil) or (FSession.Project.Scene(Cue.Scene)=nil) then raise ERigm.Create('チャートを置く場面を選んでください。');
+        var Chart := TJSONObject.Create;
+        try
+          Chart.AddPair('kind',MovieChartKinds[EnsureRange(FChartKind.ItemIndex,0,2)]);
+          if FChartKind.ItemIndex>0 then begin
+            Chart.AddPair('title',FChartTitle.Text); AddN(Chart,'maximum',StrToFloat(FChartMaximum.Text,TFormatSettings.Invariant));
+            var ColorValue := ColorToRGB(FChartColor.Selected);
+            Chart.AddPair('color','#'+IntToHex(GetRValue(ColorValue),2)+IntToHex(GetGValue(ColorValue),2)+IntToHex(GetBValue(ColorValue),2));
+            var Items := TJSONArray.Create; Chart.AddPair('items',Items);
+            for var Line in FChartItems.Lines do if Line.Trim<>'' then begin
+              var Separator := LastDelimiter('=',Line);
+              if Separator<2 then raise ERigm.Create('各行は「項目 = 値」の形で入力してください。');
+              var Item := TJSONObject.Create; Items.AddElement(Item);
+              Item.AddPair('label',Copy(Line,1,Separator-1).Trim);
+              AddN(Item,'value',StrToFloat(Copy(Line,Separator+1,MaxInt).Trim,TFormatSettings.Invariant));
+            end;
+          end;
+          ValidateMovieChart(Chart); O := TJSONObject.Create; O.AddPair('id',Cue.Scene);
+          O.AddPair('chart',Chart.Clone as TJSONObject); Run('update-scene',O);
+        finally Chart.Free; end;
+      end;
       43: begin FPreview.Fit; Exit; end;
       34: begin FScriptPanel.Visible := not FScriptPanel.Visible; EditingAreaResize(Self); end;
       35: FSettings.Visible := not FSettings.Visible;
@@ -1548,7 +1680,10 @@ begin
       end;
       15: begin O := TJSONObject.Create; O.AddPair('character','@sample'); Run('update-project',O); end;
       16: begin O := TJSONObject.Create; O.AddPair('id',FSelectedId);
-        if FPropertyPage=2 then begin O.AddPair('expression',FExpression.Text); O.AddPair('motion',FMotion.Text); end
+          if FPropertyPage=2 then begin
+            O.AddPair('expression',FExpression.Text); O.AddPair('motion',FMotion.Text);
+            if FEmotion.ItemIndex>=0 then O.AddPair('emotion',MovieEmotionIds[NativeInt(FEmotion.Items.Objects[FEmotion.ItemIndex])]);
+          end
         else begin O.AddPair('scene',FScene.Text); O.AddPair('speaker',FSpeaker.Text);
           O.AddPair('text',Trim(FDialogue.Text)); O.AddPair('subtitle',Trim(FSubtitle.Text));
           AddN(O,'pause',StrToFloat(FPause.Text,TFormatSettings.Invariant)); end;
@@ -1643,7 +1778,7 @@ begin
     var AppliedPage := -1;
     case TComponent(Sender).Tag of
       16: if FPropertyPage=2 then AppliedPage := 2 else AppliedPage := 0;
-      20: AppliedPage := 3; 25,26: AppliedPage := 2; 41: AppliedPage := 1;
+      20: AppliedPage := 3; 25,26: AppliedPage := 2; 41,44: AppliedPage := 1;
     end;
     if AppliedPage>=0 then begin
       DraftPages[AppliedPage] := False;
@@ -1651,7 +1786,12 @@ begin
         if TComponent(Sender).Tag=16 then PoseDraft := False else ActingDraft := False;
         DraftPages[2] := PoseDraft or ActingDraft;
       end;
+      if AppliedPage=1 then begin
+        if TComponent(Sender).Tag=44 then ChartDraft := False else SceneDraft := False;
+        DraftPages[1] := SceneDraft or ChartDraft;
+      end;
       FPoseDraft := PoseDraft; FActingDraft := ActingDraft;
+      FSceneDraft := SceneDraft; FChartDraft := ChartDraft;
       FPropertyDrafts := DraftPages; FOtherDraft := OtherDraft;
       var Remaining := OtherDraft; for var Pending in DraftPages do Remaining := Remaining or Pending;
       if Remaining then begin

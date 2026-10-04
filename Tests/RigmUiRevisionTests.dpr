@@ -120,7 +120,8 @@ begin
   var L := TMainForm.Create(nil); var Toolbar,Properties: TObserver;
   Toolbar := nil; Properties := nil;
   try
-    L.Show; var A := TJSONObject.Create; A.AddPair('path',TPath.Combine(Root,'History\work-a.rigmovie'));
+    L.Show; ShowWindow(L.Handle,SW_SHOWNOACTIVATE);
+    var A := TJSONObject.Create; A.AddPair('path',TPath.Combine(Root,'History\work-a.rigmovie'));
     try var Reply := L.ExecuteWorkspace('open-work',A); Reply.Free; finally A.Free; end;
     var M := Studio(L); Check(M<>nil,'workspace opens the actual embedded movie editor'); WaitIdle(M);
     Check(L.Menu<>nil,'normal workspace has a main menu');
@@ -141,8 +142,12 @@ begin
     Check(not Find(M,'MovieStatus').Visible and not Find(M,'MoviePlaybackState').Visible,'both recurring time and job status lines are absent');
     Check(TPanel(Find(M,'MovieTransport')).Caption='','transport never exposes its internal component name');
     var Right := TRigmPropertyScrollBox(Find(M,'MovieProperties'));
+    Writeln('INITIAL DPI: main=',L.CurrentPPI,' movie=',M.CurrentPPI,' right=',Right.CurrentPPI,' hostWidth=',Find(M,'MoviePropertyHost').Width,' required=',L.ScaleValue(340)); Flush(Output);
+    Check(Find(M,'MoviePropertyHost').Width>=L.ScaleValue(340),'actual startup embedded property pane uses the host DPI before any simulated scaling');
+    Check(M.ScaleValue(96)=L.ScaleValue(96),'new embedded editor starts at the existing workspace DPI');
     Check(Find(M,'MoviePropertySplitter') is TSplitter,'right editor provides an adjustable splitter');
-    var Edit := TEdit(Find(M,'MovieCueScene')); var Text := Edit.Text; Edit.SetFocus; Edit.SelStart := Length(Text); Edit.SelText := '-pending'; Text := Edit.Text;
+    TToolButton(Find(M,'MoviePropertiesScene')).Click; Pump(80);
+    var Edit := TEdit(Find(M,'MovieSceneTitle')); var Text := Edit.Text; Edit.SetFocus; Edit.SelStart := Length(Text); Edit.SelText := '-pending'; Text := Edit.Text;
     for var DPI in [96,120,144,192,96] do for var Size in [640,850] do begin
       L.ScaleForPPI(DPI); L.Width := MulDiv(Size,DPI,96); L.Height := MulDiv(480,DPI,96); Pump(140);
       Check(L.ScaleValue(96)=DPI,'workspace simulated layout scale is '+DPI.ToString+'/'+Size.ToString);

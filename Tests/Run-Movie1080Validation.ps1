@@ -3,7 +3,7 @@ param([int]$Cues=2,[ValidateSet('fast','balanced','quality')][string]$Profile='f
 $ErrorActionPreference='Stop';$root=Split-Path -Parent $PSScriptRoot
 $m=Get-Content (Join-Path $root 'Win64\Validation\quality-material.json') -Raw | ConvertFrom-Json
 $out=Join-Path $root 'Win64\Validation';$dcu=Join-Path $out 'Movie1080Dcu';New-Item -ItemType Directory -Path $dcu -Force|Out-Null
-$paths=@('Source\Studio','Source\Lib\Voicevox','Source\Core','Source\Editor','Source\Rendering','Source\Persistence','Source\Reference\AIArtToPSD\Core','Source\Reference\AIArtToPSD\Persistence\PNG','Source\Reference\AIArtToPSD\Persistence\PSD') -join ';'
+$paths=@('Source\Studio','Source\Lib\Charts','Source\Lib\Voicevox','Source\Core','Source\Editor','Source\Rendering','Source\Persistence','Source\Reference\AIArtToPSD\Core','Source\Reference\AIArtToPSD\Persistence\PNG','Source\Reference\AIArtToPSD\Persistence\PSD') -join ';'
 Push-Location $root
 try{
   $cmd='call "C:\Program Files (x86)\Embarcadero\Studio\37.0\bin\rsvars.bat" && dcc64 -B -Q -GD -U"'+$paths+'" -E"'+$out+'" -N0"'+$dcu+'" Tests\RigmMovie1080Tests.dpr'

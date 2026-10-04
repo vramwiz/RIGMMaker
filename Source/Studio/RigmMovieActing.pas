@@ -20,6 +20,9 @@ type
   end;
 function MovieActorAssets(Document: TRigmDocument): TJSONObject;
 function MovieBlinkOpen(Seconds,Interval,Duration,Phase,Strength,Gain: Double; Fps: Integer): Double;
+const
+  MovieEmotionIds: array[0..9] of string = ('neutral','happy','sad','serious','angry','gentle','surprised','doubt','joy','confused');
+  MovieEmotionLabels: array[0..9] of string = ('通常','喜び','悲しみ','真剣','怒り','穏やか','驚き','疑問','楽しさ','困惑');
 implementation
 uses System.SysUtils, System.Math, System.StrUtils, System.Generics.Collections, ArtDocument, RigmJson;
 function MovieBlinkOpen(Seconds,Interval,Duration,Phase,Strength,Gain: Double; Fps: Integer): Double;

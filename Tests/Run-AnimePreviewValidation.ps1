@@ -9,7 +9,7 @@ if(-not $ProductionDirectory){$ProductionDirectory=Join-Path $root ('制作成�
 if(Test-Path -LiteralPath (Join-Path $ProductionDirectory '星灯り郵便局.rigmovie')){throw 'An existing user production must not be overwritten'}
 $pipes=Join-Path $validation ('AnimePreviewPipes\'+$id)
 $dcu=Join-Path $validation 'RigmAnimePreviewTestsDcu'
-$paths=@('Tests','Source\Studio','Source\Lib\Voicevox','Source\Core','Source\Editor','Source\Rendering','Source\Persistence','Source\Integrations','Source\Shell','Source\Lib\GameControllers','Source\Lib\UI\IconToolbar','Source\Reference\AIArtToPSD\Core','Source\Reference\AIArtToPSD\Persistence\PNG','Source\Reference\AIArtToPSD\Persistence\PSD','Source\Reference\AIArtToPSD\Integrations\Pipe','Source\Reference\AIArtToPSD\Shell','Source\Reference\AIArtToPSD\Lib\UI\VerticalScrollBar','Source\Reference\AIArtToPSD\Lib\UI\HorizontalTrackBar','Source\Reference\AIArtToPSD\Lib\Pipe') -join ';'
+$paths=@('Tests','Source\Studio','Source\Lib\Charts','Source\Lib\Voicevox','Source\Core','Source\Editor','Source\Rendering','Source\Persistence','Source\Integrations','Source\Shell','Source\Lib\GameControllers','Source\Lib\UI\IconToolbar','Source\Reference\AIArtToPSD\Core','Source\Reference\AIArtToPSD\Persistence\PNG','Source\Reference\AIArtToPSD\Persistence\PSD','Source\Reference\AIArtToPSD\Integrations\Pipe','Source\Reference\AIArtToPSD\Shell','Source\Reference\AIArtToPSD\Lib\UI\VerticalScrollBar','Source\Reference\AIArtToPSD\Lib\UI\HorizontalTrackBar','Source\Reference\AIArtToPSD\Lib\Pipe') -join ';'
 New-Item -ItemType Directory -Path $ProductionDirectory,$pipes,$dcu -Force | Out-Null
 $version=Invoke-RestMethod -Uri 'http://127.0.0.1:50021/version' -TimeoutSec 3
 $catalog=Invoke-RestMethod -Uri 'http://127.0.0.1:50021/speakers' -TimeoutSec 5

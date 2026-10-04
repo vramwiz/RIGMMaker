@@ -1,4 +1,4 @@
-#requires -Version 7.0
+﻿#requires -Version 7.0
 param([string]$SourceProject='制作成果\星灯り郵便局-編集版-20261004T015824236\星灯り郵便局-編集版.rigmovie')
 $ErrorActionPreference='Stop'
 $root=Split-Path -Parent $PSScriptRoot
@@ -9,7 +9,7 @@ $env:RIGMMAKER_SETTINGS_DIR=Join-Path $fixture 'settings'
 $env:RIGMMAKER_UIREV_TEST_ROOT=$fixture
 $env:RIGMMAKER_UIREV_TEST_SOURCE=Join-Path $root $SourceProject
 $sourceHash=(Get-FileHash -LiteralPath $env:RIGMMAKER_UIREV_TEST_SOURCE).Hash
-$paths=@('Tests','Source\Studio','Source\Lib\Voicevox','Source\Core','Source\Editor','Source\Rendering','Source\Persistence','Source\Integrations','Source\Shell','Source\Lib\GameControllers','Source\Lib\UI\IconToolbar','Source\Reference\AIArtToPSD\Core','Source\Reference\AIArtToPSD\Persistence\PNG','Source\Reference\AIArtToPSD\Persistence\PSD','Source\Reference\AIArtToPSD\Integrations\Pipe','Source\Reference\AIArtToPSD\Shell','Source\Reference\AIArtToPSD\Lib\UI\VerticalScrollBar','Source\Reference\AIArtToPSD\Lib\UI\HorizontalTrackBar','Source\Reference\AIArtToPSD\Lib\Pipe') -join ';'
+$paths=@('Tests','Source\Studio','Source\Lib\Charts','Source\Lib\Voicevox','Source\Core','Source\Editor','Source\Rendering','Source\Persistence','Source\Integrations','Source\Shell','Source\Lib\GameControllers','Source\Lib\UI\IconToolbar','Source\Reference\AIArtToPSD\Core','Source\Reference\AIArtToPSD\Persistence\PNG','Source\Reference\AIArtToPSD\Persistence\PSD','Source\Reference\AIArtToPSD\Integrations\Pipe','Source\Reference\AIArtToPSD\Shell','Source\Reference\AIArtToPSD\Lib\UI\VerticalScrollBar','Source\Reference\AIArtToPSD\Lib\UI\HorizontalTrackBar','Source\Reference\AIArtToPSD\Lib\Pipe') -join ';'
 $command='call "C:\Program Files (x86)\Embarcadero\Studio\37.0\bin\rsvars.bat" && dcc64 -B -Q -U"'+$paths+'" -E"'+(Join-Path $root 'Win64\Validation')+'" -N0"'+$dcu+'" Tests\RigmUiRevisionTests.dpr'
 $build=& cmd.exe /d /s /c $command 2>&1;$code=$LASTEXITCODE
 $build|Set-Content -LiteralPath (Join-Path $root 'Win64\Validation\build-UiRevisionTests.log') -Encoding utf8

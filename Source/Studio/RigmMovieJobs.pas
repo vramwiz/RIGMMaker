@@ -17,7 +17,7 @@ type
     FTarget: string;
     FTime: Double;
     FStarted,FPhaseStarted,FFinished: UInt64;
-    FPhase: string;
+    FPhase,FExportBackend: string;
     FPhaseCompleted,FPhaseTotal: Double;
     FEncoderPrivate,FEncoderWorking,FStagingPeak: UInt64;
     FEncoderPid: Cardinal;
@@ -114,6 +114,7 @@ begin
     AddN(Result,'cancelWorkerMs',TInterlocked.CompareExchange(FCancelWorkerMs,0,0));
     if FKind='production' then Result.AddPair('output',FTarget) else Result.AddPair('output',FOutput);
     Result.AddPair('phase',FPhase); AddN(Result,'phaseCompleted',FPhaseCompleted); AddN(Result,'phaseTotal',FPhaseTotal);
+    if FExportBackend<>'' then Result.AddPair('exportBackend',FExportBackend);
     if FProductionReport<>'' then Result.AddPair('production',ParseObject(FProductionReport));
     var Tick := GetTickCount64; if Done then Tick := FFinished;
     var Elapsed := 0.0; if FStarted>0 then Elapsed := (Tick-FStarted)/1000.0;
@@ -266,29 +267,38 @@ begin
     SetPhase('prepare-character',1); Document := LoadActor(FProject);
     CheckCancel; SetPhase('prepare-audio',1); Audio := CachedMovieAudio(FProject);
     Frames := Ceil(FProject.Duration*FProject.Fps); SetPhase('render',Frames); Report(0,Frames+Ord(Mp4));
-    Writer := TRigmMovieAvi.Create(Temporary,FProject.Width,FProject.Height,FProject.Fps,Frames,MovieJpegQuality(FProject.EncodeProfile));
-    for var I := 0 to Frames-1 do begin
-      CheckCancel; Frame := RenderMovieFrame(FProject,Document,I/FProject.Fps,Audio);
-      try Writer.AddFrame(Frame,Audio); finally Frame.Free; end; Report(I+1,Frames+Ord(Mp4));
-      TMonitor.Enter(FLock); try FStagingPeak := Max(FStagingPeak,UInt64(TFile.GetSize(Temporary))); finally TMonitor.Exit(FLock); end;
-    end;
-    CheckCancel; Writer.Finish; FreeAndNil(Writer);
-    if Mp4 then begin
-      SetPhase('encode',FProject.Duration);
-      EncodeMovieMp4(FProject.FfmpegExe,Temporary,Encoded,Cancelled,FProject.EncodeProfile,
-        procedure(Seconds: Double; PrivateBytes,WorkingBytes: UInt64; ProcessId: Cardinal; Exited: Boolean)
-        begin
-          var Bytes := UInt64(TFile.GetSize(Temporary)); if FileExists(Encoded) then Bytes := Bytes+UInt64(TFile.GetSize(Encoded));
-          TMonitor.Enter(FLock);
-          try FPhaseCompleted := Max(FPhaseCompleted,Min(FProject.Duration,Seconds)); FEncoderPrivate := Max(FEncoderPrivate,PrivateBytes);
-            FEncoderWorking := Max(FEncoderWorking,WorkingBytes); FStagingPeak := Max(FStagingPeak,Bytes);
-            FEncoderPid := ProcessId; FEncoderExited := Exited;
+      if Mp4 then begin
+        TMonitor.Enter(FLock); try FExportBackend := 'ffmpeg-raw-bgra-pipe'; finally TMonitor.Exit(FLock); end;
+        StreamMovieMp4(FProject,Document,Audio,Encoded,Cancelled,
+          procedure(Current,Total: Integer; StagingBytes: UInt64)
+          begin
+            Report(Current,Total+1);
+            TMonitor.Enter(FLock); try FStagingPeak := Max(FStagingPeak,StagingBytes); finally TMonitor.Exit(FLock); end;
+          end,
+          procedure begin SetPhase('encode',FProject.Duration); end,
+          procedure(Seconds: Double; PrivateBytes,WorkingBytes: UInt64; ProcessId: Cardinal; Exited: Boolean)
+          begin
+            TMonitor.Enter(FLock);
+            try
+              if FPhase='encode' then FPhaseCompleted := Max(FPhaseCompleted,Min(FProject.Duration,Seconds));
+              FEncoderPrivate := Max(FEncoderPrivate,PrivateBytes);
+              FEncoderWorking := Max(FEncoderWorking,WorkingBytes);
+              FEncoderPid := ProcessId; FEncoderExited := Exited;
           finally TMonitor.Exit(FLock); end;
         end); CheckCancel;
       if not MoveFileEx(PChar(Encoded),PChar(FOutput),MOVEFILE_WRITE_THROUGH) then RaiseLastOSError;
       Report(Frames+1,Frames+1);
-    end else
-    if not MoveFileEx(PChar(Temporary),PChar(FOutput),MOVEFILE_WRITE_THROUGH) then RaiseLastOSError;
+      end else begin
+        TMonitor.Enter(FLock); try FExportBackend := 'legacy-mjpeg-avi'; finally TMonitor.Exit(FLock); end;
+        Writer := TRigmMovieAvi.Create(Temporary,FProject.Width,FProject.Height,FProject.Fps,Frames,MovieJpegQuality(FProject.EncodeProfile));
+        for var I := 0 to Frames-1 do begin
+          CheckCancel; Frame := RenderMovieFrame(FProject,Document,I/FProject.Fps,Audio);
+          try Writer.AddFrame(Frame,Audio); finally Frame.Free; end; Report(I+1,Frames);
+          TMonitor.Enter(FLock); try FStagingPeak := Max(FStagingPeak,UInt64(TFile.GetSize(Temporary))); finally TMonitor.Exit(FLock); end;
+        end;
+        CheckCancel; Writer.Finish; FreeAndNil(Writer);
+        if not MoveFileEx(PChar(Temporary),PChar(FOutput),MOVEFILE_WRITE_THROUGH) then RaiseLastOSError;
+      end;
   finally Writer.Free; Audio.Free; Document.Free; if FileExists(Temporary) then TFile.Delete(Temporary);
     if FileExists(Encoded) then TFile.Delete(Encoded); end;
 end;

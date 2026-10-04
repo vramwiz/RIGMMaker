@@ -98,6 +98,11 @@ begin
     Project.Cues.Add(C); Exit;
   end;
   if Name='update-scene' then begin
+    if Args.GetValue('chart')<>nil then begin
+      if not(Args.GetValue('chart') is TJSONObject) then raise ERigm.Create('Scene chart must be an object');
+      var Scene := RequiredScene; var Chart := JO(Args,'chart').Clone as TJSONObject;
+      Scene.Chart.Free; Scene.Chart := Chart;
+    end;
     if Args.GetValue('animation')<>nil then begin
       var Animation := JO(Args,'animation').Clone as TJSONObject;
       var Scene := RequiredScene; Scene.Animation.Free; Scene.Animation := Animation;

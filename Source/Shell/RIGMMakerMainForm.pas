@@ -172,7 +172,10 @@ function TMainForm.NewMovieDocument: TRigmWorkspaceDocument;
 begin
   Result := TRigmWorkspaceDocument.Create; Result.Session := TRigmMovieSession.Create;
   try
-    Result.View := TRigmMovieForm.CreateForSession(Self,Result.Session,True); Result.View.Parent := FPreviewPage; Result.View.Align := alClient;
+    Result.View := TRigmMovieForm.CreateForSession(Self,Result.Session,True);
+    // Scale the new 96-DPI controls before parenting adopts the already-scaled workspace font.
+    Result.View.ScaleForPPI(CurrentPPI);
+    Result.View.Parent := FPreviewPage; Result.View.Align := alClient;
     Result.View.OnOpenWork := OpenMovieDocument;
     for var D in FDocuments do D.View.Hide;
     FDocuments.Add(Result); FActiveDocument := Result; Result.View.Show;

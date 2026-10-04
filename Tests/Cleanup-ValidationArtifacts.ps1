@@ -42,7 +42,7 @@ if(-not $Execute){
     if($file.Name -in $testNames){AddTarget $file.FullName 'compiled permanent regression/helper source'}
     else{$skipped.Add(@{path=$file.FullName;reason='product build or executable without test-source provenance'})}
   }
-  foreach($dir in Get-ChildItem -LiteralPath $validation -Directory|Where-Object Name -like '*Dcu'){
+  foreach($dir in Get-ChildItem -LiteralPath $validation -Recurse -Directory|Where-Object Name -like '*Dcu'){
     $files=@(Get-ChildItem -LiteralPath $dir.FullName -Recurse -File)
     if(@($files|Where-Object Extension -ne '.dcu').Count -eq 0){AddTarget $dir.FullName 'compiler-only DCU directory'}
   }

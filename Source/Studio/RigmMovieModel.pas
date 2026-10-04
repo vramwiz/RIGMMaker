@@ -255,7 +255,7 @@ begin
     for var C in Cues do begin
       C.Acting.Validate;
       if (Scenes.Count>0) and (Scene(C.Scene)=nil) then raise ERigm.Create('Cue scene does not exist');
-      if (C.VoiceStyleId < -1) or not MatchText(C.Emotion,['neutral','happy','sad','serious','angry','gentle']) then raise ERigm.Create('Invalid cue emotion or voice style');
+    if (C.VoiceStyleId < -1) or not MatchText(C.Emotion,MovieEmotionIds) then raise ERigm.Create('Invalid cue emotion or voice style');
       if (C.Id = '') or Seen.ContainsKey(C.Id) then raise ERigm.Create('セリフIDが空か重複しています。'); Seen.Add(C.Id,True);
       if Speaker(C.SpeakerId) = nil then raise ERigm.Create('セリフの話者がありません: '+C.SpeakerId);
       if (Length(C.Text)>2000) or (Length(C.Subtitle)>3000) or (Length(C.Scene)>300) then raise ERigm.Create('セリフが長すぎます。');

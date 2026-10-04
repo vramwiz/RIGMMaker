@@ -58,6 +58,7 @@ type
     function Status: TJSONObject;
     procedure Poll;
     function Busy: Boolean;
+    function CurrentJobKind: string;
     function CanEdit: Boolean;
     function TakeFrame: Vcl.Graphics.TBitmap;
     procedure SetProject(Project: TRigmMovieProject);
@@ -89,6 +90,8 @@ destructor TRigmMovieSession.Destroy;
 begin FDiagnosticJob.Free; FDiagnostics.Free; FJob.Free; FObsoletePreviews.Free; FFinishedJobs.Free; FFinishedOrder.Free; FProductionOrder.Free; FProductions.Free; FFrame.Free; FAssets.Free; FWaveform.Free; FCatalog.Free; FRedo.Free; FUndo.Free; FProject.Free; inherited; end;
 function TRigmMovieSession.Busy: Boolean;
 begin Result := (FJob<>nil) and not FJob.Done; end;
+function TRigmMovieSession.CurrentJobKind: string;
+begin Result := ''; if FJob<>nil then Result := FJob.Kind; end;
 function TRigmMovieSession.CanEdit: Boolean;
 begin Result := not Busy or (FJob.Kind='preview'); end;
 procedure TRigmMovieSession.RequireRevision(Args: TJSONObject);
@@ -617,9 +620,9 @@ begin
     var Extra := ParseObject('{"composition-enable":{},"add-character":{"character":{"file":".rigm","speaker":"speaker id","x":1370,"y":130,"width":520,"height":900}},'+
       '"update-character":{"id":"character id","x":0,"y":0,"width":520,"height":900,"visible":true,"rigSafe":true},"delete-character":{"id":"character id"},'+
       '"add-scene":{"scene":{"title":"string"},"text":"initial spoken line","subtitle":"display text","index":0},'+
-      '"update-scene":{"id":"scene id","image":"local image","description":"persistent scene text","imagePrompt":"generation prompt","animation":{"explainImage":"optional boolean; enables image-direction head support, not pupil gaze"}},'+
+      '"update-scene":{"id":"scene id","image":"local image","description":"persistent scene text","imagePrompt":"generation prompt","chart":{"kind":"none|radar|bar","title":"summary title","maximum":5,"color":"#5AB8E8","items":[{"label":"criterion","value":4}]},"animation":{"explainImage":"optional boolean; enables image-direction head support, not pupil gaze"}},'+
       '"delete-scene":{"id":"scene id"},"move-scene":{"id":"scene id","index":0},"resize-scene":{"id":"scene id","duration":"seconds, cannot trim existing speech"},'+
-      '"register-expression":{"id":"character id","emotion":"neutral|happy|sad|serious|angry|gentle","preset":{"variants":[],"blinkAnimate":true,"mouthAnimate":true,"rigSafe":true}},'+
+      '"register-expression":{"id":"character id","emotion":"neutral|happy|sad|serious|angry|gentle|surprised|doubt|joy|confused","preset":{"variants":[],"blinkAnimate":true,"mouthAnimate":true,"rigSafe":true}},'+
       '"register-motion":{"id":"character id","name":"motion name","motion":{"loop":true,"frames":[{"image":"local frame image","duration":0.1}]}},'+
       '"select-motion":{"id":"character id","name":"registered motion name","start":"timeline seconds; default current seek","duration":"-1 until stopped or nonnegative seconds"},"stop-motion":{"id":"character id"},'+
       '"analyze-script":{"id":"optional cue id; deterministic suggestion, explicit generation only"},'+
