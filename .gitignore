@@ -47,3 +47,6 @@ Win32/
 Win64/
 
 .DS_Store
+
+# RIGM character packages are local assets, including sample folders.
+*.[rR][iI][gG][mM]
