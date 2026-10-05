@@ -28,7 +28,7 @@ type
   end;
   TRigmMovieControls = class
   private
-    FOwner    : TForm;                   // コントロールを所有する借用先。フォームより先に本オブジェクトを破棄する。
+    FOwner    : TWinControl;                   // コントロールを所有する借用先。フォームより先に本オブジェクトを破棄する。
     FCallbacks: TRigmMovieUiCallbacks;
     FPages    : TRigmMoviePropertyPages; // 所有するページ配置部品。イベント配線より先に生成する。
     function Edit(Parent: TWinControl; const Name,Caption: string; X,Y,W: Integer): TEdit;
@@ -111,7 +111,7 @@ type
     Workflow          : TLabel;
     WorkflowPanel     : TPanel;
     Zoom              : TComboBox;              // コントロールはOwnerが所有し、ページ配置状態だけを本オブジェクトが所有する。
-    constructor Create(Owner: TForm);
+    constructor Create(Owner: TWinControl);
     // 所有するページ管理を解放する。VCLコントロールはOwnerの破棄まで保持する。
     destructor Destroy; override;
     // 96 DPIで一度だけ画面を構築する。Callbacksの所有者は本画面より長く生存する必要がある。
@@ -120,7 +120,7 @@ type
   end;
 implementation
 uses System.SysUtils, System.Math, RigmToolbarIcons, RigmMovieUiValues;
-constructor TRigmMovieControls.Create(Owner: TForm);
+constructor TRigmMovieControls.Create(Owner: TWinControl);
 begin inherited Create; FOwner := Owner; end;
 destructor TRigmMovieControls.Destroy;
 begin FPages.Free; inherited; end;

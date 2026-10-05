@@ -56,13 +56,12 @@ begin
     end;
     if (FList.Selected=nil) and (FList.Items.Count>0) then FList.Items[0].Selected := True;
     FStatus.Caption := FList.Items.Count.ToString+'件。PSDは未完成でも編集できます。台本への新規追加は別途必須仕様の検査が必要です。'+#13#10+
-      'RIGM / Live2D編集の新シェル移行は未完了です。既存ファイルは通常版で利用できます。';
+      'PSDまたは既存RIGMを選択して同じウィンドウで編集します。';
   finally FList.Items.EndUpdate; end;
 end;
 procedure TRigmCharacterManagerFrame.OpenSelected(Sender: TObject);
 begin
   if FList.Selected=nil then Exit;
-  if FList.Selected.SubItems[0]<>'PSD' then begin FStatus.Caption := 'RIGM / Live2D編集は新シェルへの移行待ちです。通常版を利用してください。'; Exit; end;
   if Assigned(FOnNavigate) then FOnNavigate(Self,apCharacterEdit,FList.Selected.SubItems[1]);
 end;
 procedure TRigmCharacterManagerFrame.NewCharacter(Sender: TObject);

@@ -3,7 +3,7 @@
 unit RigmMoviePropertyPages;
 interface
 uses System.Classes, System.Generics.Collections, Vcl.Forms, Vcl.Controls,
-  Vcl.StdCtrls, Vcl.ComCtrls, RigmPropertyScrollBox, RigmIconToolbar;
+  Vcl.StdCtrls, Vcl.ComCtrls, Vcl.Graphics, RigmPropertyScrollBox, RigmIconToolbar;
 type
   TRigmMovieProperty = record
     LabelControl: TLabel;   // 折り返し高さを測定する説明ラベル。ラベルなしの行はnil。
@@ -15,7 +15,8 @@ type
   end;
   TRigmMoviePropertyPages = class
   private
-    FOwner         : TForm;                     // 借用するコントロール所有者。埋込み時はその親のDPIを使う。
+    FCanvas: TControlCanvas;
+    FOwner         : TWinControl;                     // 借用するコントロール所有者。埋込み時はその親のDPIを使う。
     FRight         : TRigmPropertyScrollBox;
     FPropertyBar   : TRigmIconToolbar;
     FPropertyFields: TList<TRigmMovieProperty>; // 所有する配置情報。登録されたコントロールは非所有。
@@ -26,7 +27,7 @@ type
     function Pixels(Value: Integer): Integer;
   public
     // Ownerと入力欄は借用する。登録行とページ状態だけを自身で所有する。
-    constructor Create(Owner: TForm; Right: TRigmPropertyScrollBox; Bar: TRigmIconToolbar);
+    constructor Create(Owner: TWinControl; Right: TRigmPropertyScrollBox; Bar: TRigmIconToolbar);
     // 登録した配置情報だけを解放する。VCLコントロールは所有フォームへ残す。
     destructor Destroy; override;
     // 96 DPI基準の配置を登録する。現在のBuildPageへ属する行となる。
@@ -51,11 +52,11 @@ type
   end;
 implementation
 uses Winapi.Windows, System.SysUtils, System.Math, RigmModel;
-constructor TRigmMoviePropertyPages.Create(Owner: TForm; Right: TRigmPropertyScrollBox; Bar: TRigmIconToolbar);
-begin inherited Create; FOwner := Owner; FRight := Right; FPropertyBar := Bar;
+constructor TRigmMoviePropertyPages.Create(Owner: TWinControl; Right: TRigmPropertyScrollBox; Bar: TRigmIconToolbar);
+begin inherited Create; FOwner := Owner; FCanvas := TControlCanvas.Create; FCanvas.Control := Owner; FRight := Right; FPropertyBar := Bar;
   FLayoutPPI := 96; FPropertyFields := TList<TRigmMovieProperty>.Create; end;
 destructor TRigmMoviePropertyPages.Destroy;
-begin FPropertyFields.Free; inherited; end;
+begin FCanvas.Free; FPropertyFields.Free; inherited; end;
 function TRigmMoviePropertyPages.Pixels(Value: Integer): Integer;
 begin Result := MulDiv(Value,FLayoutPPI,96); end;
 procedure TRigmMoviePropertyPages.ChangeScale(M,D: Integer; isDpiChange: Boolean);
@@ -142,8 +143,8 @@ begin
           HasVisible := True;
           if Field.LabelControl<>nil then begin
             Field.LabelControl.Visible := True; var W := Available; if Field.Column<>0 then W := Half;
-            FOwner.Canvas.Font.Assign(Field.LabelControl.Font); FOwner.Canvas.TextHeight('M');
-            var R := Rect(0,0,W,0); DrawText(FOwner.Canvas.Handle,PChar(Field.LabelControl.Caption),-1,R,DT_CALCRECT or DT_WORDBREAK or DT_NOPREFIX);
+            FCanvas.Font.Assign(Field.LabelControl.Font); FCanvas.TextHeight('M');
+            var R := Rect(0,0,W,0); DrawText(FCanvas.Handle,PChar(Field.LabelControl.Caption),-1,R,DT_CALCRECT or DT_WORDBREAK or DT_NOPREFIX);
             LabelHeight := Max(LabelHeight,Max(Pixels(20),R.Height+Pixels(3)));
           end;
           ControlHeight := Max(ControlHeight,Pixels(Field.Height));
@@ -156,11 +157,11 @@ begin
           if Field.LabelControl<>nil then Field.LabelControl.SetBounds(X,Y-Scroll,W,LabelHeight);
           if Field.Control<>nil then begin
             var Height := Pixels(Field.Height);
-            if Field.Control is TEdit then FOwner.Canvas.Font.Assign(TEdit(Field.Control).Font)
-            else if Field.Control is TComboBox then FOwner.Canvas.Font.Assign(TComboBox(Field.Control).Font)
-            else if Field.Control is TButton then FOwner.Canvas.Font.Assign(TButton(Field.Control).Font);
+            if Field.Control is TEdit then FCanvas.Font.Assign(TEdit(Field.Control).Font)
+            else if Field.Control is TComboBox then FCanvas.Font.Assign(TComboBox(Field.Control).Font)
+            else if Field.Control is TButton then FCanvas.Font.Assign(TButton(Field.Control).Font);
             if (Field.Control is TEdit) or (Field.Control is TComboBox) or (Field.Control is TButton) then
-              Height := Max(Height,FOwner.Canvas.TextHeight('Mg')+Pixels(8));
+              Height := Max(Height,FCanvas.TextHeight('Mg')+Pixels(8));
             Field.Control.SetBounds(X,Y+LabelHeight-Scroll,W,Height);
             // Native combo boxes enforce a font-dependent height, particularly after DPI changes.
             ControlHeight := Max(ControlHeight,Field.Control.Height);

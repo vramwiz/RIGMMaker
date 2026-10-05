@@ -3,6 +3,11 @@ interface
 type
   TRigmAppPage = (apHome,apCharacters,apCharacterEdit,apScripts,apScriptCreate,apMovieEdit);
   TRigmNavigateEvent = procedure(Sender: TObject; Page: TRigmAppPage; const Path: string) of object;
+  IRigmPageLifecycle = interface
+    ['{45B4E7DC-407C-4D55-A181-179C1493BBF1}']
+    procedure SetActive(Value: Boolean);
+    function RequestFinish: Boolean;
+  end;
 function RigmPageTitle(Page: TRigmAppPage): string;
 implementation
 function RigmPageTitle(Page: TRigmAppPage): string;

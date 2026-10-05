@@ -1,33 +1,13 @@
-# PSD制作状態と動き基準（2026-10-05）
+﻿# PSD production requirements: 2026-10-05
 
-旧 `.psdchar` の `production` が無い場合は未検査・未完成として読み込む。原本を起動時に書き換える移行は行わない。キャラ一覧からの編集は可能。新規台本のキャラ追加はUIと `add-character` 命令で拒否する。既存作品の読み込み・描画、同じキャラファイルの配置変更は拒否しない。別ファイルへの差し替えは新規選択として検査する。
+The user confirmed normal plus joy, anger, sadness and fun. PSD_EMOTION_REQUIREMENTS_CONFIRMED=True; validation version 2. Existing aliases remain compatible. Real rendered expressions must be visible and distinct. Blink checks compare open/half/closed rendered images; phoneme checks compare closed/a/i/u/e/o. Identical image aliases and invisible layers do not satisfy completion. These checks do not determine semantic meaning or visual suitability.
 
-パッケージversion 1の任意項目として `supplementName` と `production` を追加。PSD・連番・設定は従来どおり1個のパッケージへ格納。検査結果、仕様版、内容のSHA-256、stageを保存する。手動完成フラグの命令は無い。素材・設定・部位選択の変更は再検査を必要とする。
+Motion references are mandatory: face bounds, neck, screen-left/right shoulder, upper-body bottom, in canvas pixels. Both GUI and AI inputs use the same validation. Artificial fixture coordinates must never become production reference points. Front face parts are composed before small motion; non-front/full-body sequence rendering excludes face controls.
 
-制作中は候補の検証・保存が成功してから採用する。保存失敗時は元の文書・パッケージを保持する。新規成果は `Characters/<UID>/character.psdchar`、既存は従来の保存先を維持。完成済み編集を開始したSessionは、変更で未完成へ戻っても明示保存を維持する。旧版は所有ジョブ内に保全し、途中状態も再起動で読み込める。
+Old packages without production metadata remain editable and render-compatible. Incomplete characters cannot be newly selected as script actors. Existing projects can still load. Production edits use existing draft recovery/autosave; sessions opened from completed characters require explicit saving even when edits invalidate readiness. Explicit save and reopen were tested.
 
-編集画面へ「キャラ名・補足名」「ボーン／動き基準設定」「PSDの必須仕様を検査」を追加。目パチ・音素口形のID/所属、RGBA寸法、不透明度、透明でない画素、切替画像の区別を検査する。画像の意味や見た目の採用を保証する検査ではない。
+Package version 1 retains embedded PSD, poses/sequences/settings in one .psdchar. Production metadata stores validation results, version and content digest. New registrations use Characters/<UID>/character.psdchar; old paths stay unchanged. The actual registered character still lacks fun and real measured reference points. Only copied material was used in the new checks.
 
-必須感情の正確な一覧はユーザー回答待ち。`PsdProduction.pas` の `PSD_EMOTION_REQUIREMENTS_CONFIRMED=False` により完成付与を停止している。「通常＋喜怒哀楽」を確定条件として追加していない。回答後に一覧と実画像の検査を実装し仕様版を更新する。現在はこの保留を表示し、未完成を保存する。
+Syncroh2 is a reference for production rules only. RIGMMaker-owned PSD does not require Syncroh2 keys or authentication. Do not create origin.key. Its local HMAC key is DPAPI-protected; it is not cloud authorization, PSD encryption or legal ownership proof. No key was generated, read or copied. Third-party PSD must not be relabelled as authenticated self-created material.
 
-## ボーン／動き基準
-
-重いRIGM階層・メッシュは要求しない。元キャンバス座標で、顔の範囲（2クリック）、首元、画面左の肩、画面右の肩、上半身下端（y）を保存する。全項目、キャンバス内、正の顔範囲、左右の肩と首元の位置関係、首/肩/顔より下の上半身下端を検査する。未設定・無効は確定できず、仕様検査も通らない。既存設定は表示・修正できる。
-
-AIはstatusからsessionId/revisionを取得し、`set-motion-reference` の `args.reference` へGUIと同じJSONを渡す。元キャンバス座標を保持する。`source` は `ai`/`manual` の記録であり検証を省略する権限ではない。GUI/AIとも同じ `ValidateMotionReference` を通す。
-
-```json
-{"schemaVersion":1,"source":"ai","faceBounds":{"left":120,"top":30,"right":240,"bottom":150},"neck":{"x":180,"y":170},"screenLeftShoulder":{"x":100,"y":190},"screenRightShoulder":{"x":260,"y":190},"upperBodyBottomY":360}
-```
-
-値は例示で別キャラへ固定流用しない。SYNC_Motionの腰・首を境界とする区分変形へ首元/上半身下端を接続。呼吸では上半身を伸縮し頭部をそのまま移動し、下端より下は変形しない。顔の範囲・肩は設定表示と整合性検査に使用し、局所メッシュには使用していない。非正面や過去作品の未設定キャラは従来の合成後全体変形を維持する。
-
-## Syncroh2の確認結果
-
-参照元は実在する。実プロジェクトが参照する共通ライブラリは `D:/DelphiProg/AviUtl2Plugin/AviUtl2PluginLib/Lib/PSDArtEditor`。`Shell/PsdArtEditorForm.pas` の生成待ちUI、`Integrations/AIExchange/ArtExchange.pas` の書き出し・検証・取り込み、および `Syncroh2/Doc/PSDArtEditor/LearningData` の制作/操作/交換資料を確認した。
-
-経路は、管理PSD新規作成 → 原寸PNG取り込み → exportでrequest.json/入力PNG → 外部のCodexが分離・肌補完・差分PNGとresult.jsonを制作 → importで検証・レイヤー登録 → 保存/再読込/見た目確認。アプリからクラウドAPIは呼ばない。ローカルの意味分離ライブラリが欠けているという説明は誤り。受信・登録部品はある。意味分離・肌補完・新しい表情制作はCodex側の作業で、矩形切り出しだけでは完了しない。
-
-本アプリへのexport/import接続は未実装。現在は旧AIArtToPSDコピーと独自Sessionを使う。新しい共通フォームはHMAC認証を検証し、現在のパッケージ内部PSDをそのまま開くと外部PSDになる。配置や文字列フラグで認証を付け替えない。原画像からの管理PSD新規制作とパッケージへの保存通知を接続する必要がある。共通フォームの閉じる時の自動保存も、本アプリの完成後の明示保存規則と異なる。認証・保存規則・同名unit/API衝突を整理して接続する。部品不在として新しい分離エンジンを作らない。
-
-元画像・参照コード・登録パッケージ・通常EXEは今回変更しない。確認済み変更は隔離Release EXEで起動できる。検証用点は素材複製にだけ設定し、ユーザーのキャラへ位置を推測登録していない。
+No new images, services, installations or long MP4 exports were used in this phase. See PAUSED-20261005.md for verification and unfinished work.

@@ -26,7 +26,7 @@ type
     FRigSafe,FGenerated: TCheckBox;
     FStatus: TLabel;
     FTimer: TTimer;
-    FRevision: Integer;
+    FRevision,FPreviewRevision: Integer;
     FFrameCount: UInt64;
     FRefreshing: Boolean;
     FCharacterDrafts,FSceneDrafts: TObjectDictionary<string,TJSONObject>;
@@ -54,6 +54,8 @@ type
     destructor Destroy; override;
     procedure Bind(Session: TRigmMovieSession; Movie: TRigmMovieForm);
     procedure RefreshLibrary;
+    procedure SetActive(Value: Boolean);
+    function HasInputDraft: Boolean;
     property PreviewControl: TRigmMoviePreview read FPreview;
   end;
 implementation
@@ -155,7 +157,11 @@ end;
 procedure TRigmMovieCreator.Run(const Name: string; Args: TJSONObject);
 begin var O := Command(Name,Args); O.Free; end;
 procedure TRigmMovieCreator.Bind(Session: TRigmMovieSession; Movie: TRigmMovieForm);
-begin FSession := Session; FMovie := Movie; FPreview.Session := Session; FRevision := -1; FFrameCount := High(UInt64); Refresh; end;
+begin FSession := Session; FMovie := Movie; FPreview.Session := Session; FRevision := -1; FPreviewRevision := -1; FFrameCount := High(UInt64); Refresh; end;
+procedure TRigmMovieCreator.SetActive(Value: Boolean);
+begin FTimer.Enabled := Value; end;
+function TRigmMovieCreator.HasInputDraft: Boolean;
+begin Result := FScript.Modified or (FCharacterDrafts.Count>0) or (FSceneDrafts.Count>0); end;
 procedure TRigmMovieCreator.RefreshLibrary;
 begin LoadLibrary; Refresh; end;
 procedure TRigmMovieCreator.PreviewSelection(Sender: TObject);
@@ -341,11 +347,19 @@ begin
 end;
 procedure TRigmMovieCreator.Timer(Sender: TObject);
 begin
-  if (FSession=nil) or not Visible then Exit;
+  if (FSession=nil) or not Showing then Exit;
   if FRevision<>FSession.Project.Revision then Refresh;
-  if FFrameCount<>FMovie.PreviewControl.FrameCount then begin
+  if (FMovie<>nil) and (FFrameCount<>FMovie.PreviewControl.FrameCount) then begin
     FFrameCount := FMovie.PreviewControl.FrameCount;
     if not FMovie.PreviewControl.Frame.Empty then FPreview.SetFrame(FMovie.PreviewControl.Frame);
+  end;
+  if FMovie=nil then begin
+    FSession.Poll;
+    if (FPreviewRevision<>FSession.Project.Revision) and not FSession.Busy then begin
+      var Reply := FSession.PreviewFrame(FSession.Time); Reply.Free; FPreviewRevision := FSession.Project.Revision;
+    end;
+    var Bitmap := FSession.TakeFrame;
+    try if Bitmap<>nil then FPreview.SetFrame(Bitmap); finally Bitmap.Free; end;
   end;
   FList.Enabled := not FSession.GuiLocked; FScript.ReadOnly := FSession.GuiLocked; FDescription.ReadOnly := FSession.GuiLocked;
   for var I := 0 to ComponentCount-1 do begin

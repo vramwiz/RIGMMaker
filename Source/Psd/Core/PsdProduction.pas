@@ -4,9 +4,8 @@
 interface
 uses System.SysUtils, System.JSON, PsdCharacter;
 
-const PSD_PRODUCTION_REQUIREMENTS_VERSION = 1;
-  // 必須感情の正確な一覧はユーザー回答待ち。未確定のまま完成を付与しない。
-  PSD_EMOTION_REQUIREMENTS_CONFIRMED = False;
+const PSD_PRODUCTION_REQUIREMENTS_VERSION = 2;
+  PSD_EMOTION_REQUIREMENTS_CONFIRMED = True; // 通常＋喜怒哀楽。ユーザーが2026-10-05に確定。
 
 function CheckPsdProduction(Character: TPsdCharacter): TJSONObject; // 呼出側所有。
 function PsdProductionDigest(Character: TPsdCharacter): string;
@@ -14,7 +13,22 @@ function PsdReadyForScript(Character: TPsdCharacter; out Reason: string): Boolea
 procedure ValidateMotionReference(Character: TPsdCharacter; Reference: TJSONObject);
 
 implementation
-uses System.Hash, System.Generics.Collections, ArtDocument, PsdJson;
+uses System.Hash, System.Generics.Collections, System.Classes, ArtDocument, PsdJson, PsdAnimation;
+
+function RequiredExpression(Character: TPsdCharacter; Index: Integer): string;
+const Aliases: array[0..4] of string = ('通常','喜び,喜','怒り,怒','哀しみ,悲しみ,哀','楽しみ,楽しい,楽');
+begin
+  Result := '';
+  for var Name in Aliases[Index].Split([',']) do
+    if Obj(Character.Settings,'expressions').GetValue(Name) is TJSONObject then Exit(Name);
+end;
+function RenderDigest(Renderer: TPsdRenderer; const State: TPsdFrameState): string;
+begin
+  var Pixels := Renderer.Composite(State); var Visible := False;
+  for var I := 0 to Length(Pixels) div 4-1 do if Pixels[I*4+3]<>0 then begin Visible := True; Break; end;
+  if not Visible then raise Exception.Create('合成結果が全透明です。');
+  var Hash := THashSHA2.Create; Hash.Update(Pixels); Result := Hash.HashAsString;
+end;
 
 function BytesDigest(const Bytes: TBytes): string;
 begin
@@ -83,7 +97,8 @@ begin
   if not HasPixels then raise Exception.Create('空または全透明の差分です。');
 end;
 function CheckPsdProduction(Character: TPsdCharacter): TJSONObject;
-var Checks: TJSONArray; Passed: Boolean;
+const EmotionLabels: array[0..4] of string = ('通常','喜','怒','哀','楽');
+var Checks: TJSONArray; Passed: Boolean; Renderer: TPsdRenderer; Render: TFunc<TPsdFrameState,string>;
   procedure Check(const Key,Title: string; Action: TProc);
   begin
     var O := TJSONObject.Create; Checks.AddElement(O); O.AddPair('id',Key); O.AddPair('title',Title);
@@ -92,6 +107,12 @@ var Checks: TJSONArray; Passed: Boolean;
   end;
 begin
   Result := TJSONObject.Create; Passed := True; Checks := TJSONArray.Create; Result.AddPair('checks',Checks);
+  Renderer := nil;
+  Render := function(State: TPsdFrameState): string begin
+    if Renderer=nil then Renderer := TPsdRenderer.Create(Character,nil,0);
+    Result := RenderDigest(Renderer,State);
+  end;
+  try
   Result.AddPair('schemaVersion',TJSONNumber.Create(1)); Result.AddPair('requirementsVersion',TJSONNumber.Create(PSD_PRODUCTION_REQUIREMENTS_VERSION));
   Result.AddPair('checked',TJSONBool.Create(True));
   Check('structure','PSDと登録情報',procedure begin Character.Validate; end);
@@ -103,28 +124,61 @@ begin
       raise Exception.Create('通常・半開き・閉じの切替用画像が必要です。');
     if BytesDigest(Character.Document.FindLayer(S(Blink,'normalPartId')).Pixels)=
       BytesDigest(Character.Document.FindLayer(S(Blink,'closedPartId')).Pixels) then raise Exception.Create('通常目と閉じ目が同じ画像です。');
+    var State := TPsdFrameState.Default; State.Expression := RequiredExpression(Character,0); State.Motion := 'none';
+    var Open := Render(State); State.Seconds := 3.78; var Half := Render(State);
+    State.Seconds := 3.86; var Closed := Render(State);
+    if (Open=Half) or (Open=Closed) or (Half=Closed) then raise Exception.Create('正面の実合成で通常・半開き・閉じが切り替わりません。非表示・遮蔽・表情設定を確認してください。');
   end);
   Check('lipSync','音素口パク',procedure begin
     var Lip := Obj(Obj(Character.Settings,'animation'),'lipSync'); var GroupId := S(Lip,'groupId');
     ValidatePart(Character,GroupId,S(Lip,'closedPartId')); var Phones := Obj(Lip,'phonemePartIds');
     for var Phone in ['a','i','u','e','o','N','closed'] do ValidatePart(Character,GroupId,S(Phones,Phone));
     if S(Phones,'a')=S(Lip,'closedPartId') then raise Exception.Create('開口と閉口の切替用画像が必要です。');
+    var State := TPsdFrameState.Default; State.Expression := RequiredExpression(Character,0); State.Motion := 'none'; State.AutoBlink := False; State.HasPhoneme := True;
+    var Digests := TDictionary<string,string>.Create;
+    try
+      for var Phone in ['closed','a','i','u','e','o'] do begin
+        State.Phoneme := Phone; var Digest := Render(State); var Previous: string;
+        if Digests.TryGetValue(Digest,Previous) then raise Exception.Create('正面の実合成で口形が同じです: '+Previous+' / '+Phone);
+        Digests.Add(Digest,Phone);
+      end;
+    finally Digests.Free; end;
   end);
   Check('emotions','最低限の感情差分',procedure begin
-    if not PSD_EMOTION_REQUIREMENTS_CONFIRMED then raise Exception.Create('必須感情の一覧が未確定です。完成判定は保留します。');
+    var Missing := TStringList.Create; var Digests := TDictionary<string,string>.Create;
+    try
+      for var Index := 0 to 4 do if RequiredExpression(Character,Index)='' then
+        Missing.Add(EmotionLabels[Index]);
+      if Missing.Count>0 then raise Exception.Create('必須感情が未登録です: '+StringReplace(Trim(Missing.Text),sLineBreak,' / ',[rfReplaceAll]));
+      for var Index := 0 to 4 do begin
+        var Name := RequiredExpression(Character,Index); var Expression := Obj(Obj(Character.Settings,'expressions'),Name);
+        if Arr(Expression,'variants').Count=0 then raise Exception.Create('部位の登録がない表情です: '+Name);
+        for var V in Arr(Expression,'variants') do begin var Choice := TJSONObject(V); Character.CheckChoice(S(Choice,'groupId'),S(Choice,'partId')); end;
+        var State := TPsdFrameState.Default; State.Expression := Name; State.AutoBlink := False; State.Motion := 'none';
+        var Digest := Render(State); var Previous: string;
+        if Digests.TryGetValue(Digest,Previous) then raise Exception.Create('実合成が同じ必須感情です: '+Previous+' / '+Name);
+        Digests.Add(Digest,Name);
+      end;
+    finally Digests.Free; Missing.Free; end;
   end);
   Check('motionReference','ボーン／動き基準設定',procedure begin ValidateMotionReference(Character,Obj(Character.Settings,'motionReference')); end);
   Result.AddPair('requirementsConfirmed',TJSONBool.Create(PSD_EMOTION_REQUIREMENTS_CONFIRMED));
   Result.AddPair('ready',TJSONBool.Create(Passed));
   if Passed then Result.AddPair('stage','complete') else Result.AddPair('stage','draft');
   Result.AddPair('contentDigest',PsdProductionDigest(Character));
+  finally Renderer.Free; end;
 end;
 
 function PsdReadyForScript(Character: TPsdCharacter; out Reason: string): Boolean;
 begin
   Result := False; Reason := '未完成：キャラ編集画面で仕様を検査してください。';
   try
-    if not B(Character.Production,'checked') or not B(Character.Production,'ready') then Exit;
+    if not B(Character.Production,'checked') then Exit;
+    if not B(Character.Production,'ready') then begin
+      Reason := '未完成：';
+      for var V in Arr(Character.Production,'checks') do begin var O := TJSONObject(V); if not B(O,'passed') then Reason := Reason+#13#10+S(O,'title')+': '+S(O,'message'); end;
+      Exit;
+    end;
     if not PSD_EMOTION_REQUIREMENTS_CONFIRMED or (I(Character.Production,'requirementsVersion')<>PSD_PRODUCTION_REQUIREMENTS_VERSION) then begin
       Reason := '未完成：現在の必須仕様による再検査が必要です。'; Exit;
     end;

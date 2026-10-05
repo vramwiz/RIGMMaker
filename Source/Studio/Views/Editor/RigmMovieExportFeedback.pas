@@ -2,11 +2,11 @@
 // 作品入力は変更せず、完了通知は同じジョブにつき一度だけ要求する。
 unit RigmMovieExportFeedback;
 interface
-uses System.JSON, Vcl.Forms, RigmMovieSession, RigmMovieControls;
+uses System.JSON, Vcl.Forms, Vcl.Controls, RigmMovieSession, RigmMovieControls;
 type
   TRigmMovieExportFeedback = class
   private
-    FOwner  : TForm;              // 配置と再整列に使う借用フォーム。
+    FOwner  : TWinControl;              // 配置と再整列に使う借用フォーム。
     FSession: TRigmMovieSession;  // ジョブ結果を読む借用セッション。
     FUi     : TRigmMovieControls; // 更新対象の借用コントロール集合。
     FNotifiedExport,FExportProject,FExportJobId,FCompletedExport,FExportWarning,FExportError: string;
@@ -15,7 +15,7 @@ type
     function JobStatus(Args: TJSONObject=nil): TJSONObject;
   public
     // 引数は借用し、コントロールとセッションの寿命は呼び出し側が管理する。
-    constructor Create(Owner: TForm; Session: TRigmMovieSession; Ui: TRigmMovieControls);
+    constructor Create(Owner: TWinControl; Session: TRigmMovieSession; Ui: TRigmMovieControls);
     // 出力パネルの寸法と文字を所有フォーム、または埋込み親の現在DPIへ合わせる。
     procedure LayoutExportFeedback;
     // 失敗を表示する。実行中ジョブがある場合は警告として同じ進捗表示へ加える。
@@ -33,9 +33,9 @@ type
     property CompletedPath: string read FCompletedExport; // 成功・回収・存在を確認した動画の絶対パス。未完了は空文字。
   end;
 implementation
-uses Winapi.Windows, System.SysUtils, System.Math, Vcl.Controls, Vcl.ComCtrls,
+uses Winapi.Windows, System.SysUtils, System.Math, Vcl.ComCtrls,
   RigmJson, RigmMovieJobPresentation;
-constructor TRigmMovieExportFeedback.Create(Owner: TForm; Session: TRigmMovieSession; Ui: TRigmMovieControls);
+constructor TRigmMovieExportFeedback.Create(Owner: TWinControl; Session: TRigmMovieSession; Ui: TRigmMovieControls);
 begin inherited Create; FOwner := Owner; FSession := Session; FUi := Ui; end;
 function TRigmMovieExportFeedback.JobStatus(Args: TJSONObject): TJSONObject;
 begin

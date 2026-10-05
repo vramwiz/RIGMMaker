@@ -24,11 +24,11 @@ begin
   var Title := TLabel.Create(Self); Title.Parent := Self; Title.SetBounds(48,38,740,36);
   Title.Font.Size := 22; Title.Caption := '作業を選んでください';
   Entry('HomeCharacters','キャラ管理・PSD制作',apCharacters,114);
-  Entry('HomeScripts','台本管理（新シェルへの移行待ち）',apScripts,194);
-  Entry('HomeMovie','動画編集（新シェルへの移行待ち）',apMovieEdit,274);
+  Entry('HomeScripts','台本・作品管理',apScripts,194);
+  Entry('HomeMovie','動画編集',apMovieEdit,274);
   var Note := TLabel.Create(Self); Note.Parent := Self; Note.SetBounds(48,370,930,130); Note.WordWrap := True;
-  Note.Caption := 'この隔離版では、ホーム・ページ切替・PSDキャラ編集を確認できます。'+#13#10+
-    '既存の動画・台本・Live2D機能は通常版で利用できます。新シェルへの移行は未完了です。'+#13#10+
+  Note.Caption := 'キャラの登録・編集と、既存の台本・動画制作を選んでください。'+#13#10+
+    '作品を保存すると台本・作品管理から再開できます。'+#13#10+
     'ページは初回選択時に作り、戻った後も編集中の状態を保持します。';
 end;
 procedure TRigmHomeFrame.Navigate(Sender: TObject);

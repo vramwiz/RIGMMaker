@@ -16,7 +16,7 @@ type
   end;
   TRigmEditorProperties = class
   private
-    FOwner     : TForm;                        // 入力欄のフォント・DPIを参照する借用先。
+    FOwner     : TWinControl;                        // 入力欄のフォント・DPIを参照する借用先。
     FProperties: TScrollBox;                   // 再利用する入力欄の所有者。フォームと共に生存する。
     FEditor    : TRigmEditor;                  // 表示する文書と選択を読む借用先。
     FCallbacks : TRigmEditorPropertyCallbacks;
@@ -48,7 +48,7 @@ type
     procedure BuildProperties;
   public
     // Owner、入力パネル、Editorは借用する。欄の索引と参照キャッシュだけを所有する。
-    constructor Create(Owner: TForm; Panel: TScrollBox; Editor: TRigmEditor; const Callbacks: TRigmEditorPropertyCallbacks);
+    constructor Create(Owner: TWinControl; Panel: TScrollBox; Editor: TRigmEditor; const Callbacks: TRigmEditorPropertyCallbacks);
     // 索引と参照キャッシュを破棄する。借用したフォーム・文書・入力欄は解放しない。
     destructor Destroy; override;
     // 表示用の現在状態で入力欄を更新する。Vertexは有効範囲へ補正し、作品は変更しない。
@@ -69,7 +69,7 @@ type
   end;
 implementation
 uses System.Math, System.StrUtils, ArtDocument, RigmPropertyScrollBox, RigmEditorActions;
-constructor TRigmEditorProperties.Create(Owner: TForm; Panel: TScrollBox; Editor: TRigmEditor;
+constructor TRigmEditorProperties.Create(Owner: TWinControl; Panel: TScrollBox; Editor: TRigmEditor;
   const Callbacks: TRigmEditorPropertyCallbacks);
 begin
   inherited Create; FOwner := Owner; FProperties := Panel; FEditor := Editor; FCallbacks := Callbacks;

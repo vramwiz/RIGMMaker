@@ -3,13 +3,16 @@
 // 新シェルのメインフォームはページ所有・遷移・共通終了だけを扱う。
 // 旧シェルの機能移行が完了するまではRIGMWizard.dprの隔離入口を使用する。
 interface
-uses System.Classes, Vcl.Forms, Vcl.ExtCtrls, Vcl.StdCtrls, RigmPageNavigation;
+uses System.Classes, Vcl.Forms, Vcl.Controls, Vcl.ExtCtrls, Vcl.StdCtrls, RigmPageNavigation, RigmWizardWorkspace;
 type
   TRigmWizardMainForm = class(TForm)
   private
     FRoot: string; FHost: TPanel; FTitle: TLabel;
     FPages: array[TRigmAppPage] of TFrame;
     FCurrentPage: TRigmAppPage;
+    FWorkspace: TRigmWizardWorkspace;
+    function EnsureWorkspace: TRigmWizardWorkspace;
+    procedure CommonKey(Sender: TObject; var Key: Word; Shift: TShiftState);
     function EnsurePage(Page: TRigmAppPage): TFrame;
     procedure NavigationRequested(Sender: TObject; Page: TRigmAppPage; const Path: string);
     procedure ReturnCharacters(Sender: TObject);
@@ -23,15 +26,17 @@ type
     function PageInstance(Page: TRigmAppPage): TFrame;
     property CurrentPage: TRigmAppPage read FCurrentPage;
     property DataRoot: string read FRoot;
+    property Workspace: TRigmWizardWorkspace read FWorkspace;
   end;
 var RigmWizardMain: TRigmWizardMainForm;
 implementation
-uses System.SysUtils, Vcl.Controls, RigmAppSettings, PsdStudioFrame,
-  RigmHomeFrame, RigmCharacterManagerFrame, RigmPendingFrame;
+uses System.SysUtils, RigmAppSettings, RigmCharacterEditPage, RigmMovieWorkspaceFrame,
+  RigmHomeFrame, RigmCharacterManagerFrame, RigmScriptManagerFrame, RigmScriptCreatorFrame;
 constructor TRigmWizardMainForm.Create(AOwner: TComponent);
 begin
   inherited CreateNew(AOwner); Caption := 'RIGM Maker：PSD・共通ページ検証版'; Width := 1280; Height := 840;
   Position := poScreenCenter; Font.Name := 'Yu Gothic UI'; Font.Size := 10; OnCloseQuery := Closing;
+  KeyPreview := True; OnKeyDown := CommonKey;
   FRoot := RigmDocumentsDirectory;
   var Header := TPanel.Create(Self); Header.Parent := Self; Header.Align := alTop; Header.Height := 44; Header.BevelOuter := bvNone;
   var Button := TButton.Create(Self); Button.Parent := Header; Button.Align := alLeft; Button.Width := 140; Button.Caption := 'ホームへ戻る'; Button.Name := 'WizardHome'; Button.OnClick := Home;
@@ -50,10 +55,16 @@ begin
       var Frame := TRigmCharacterManagerFrame.CreateForRoot(Self,FRoot); FPages[Page] := Frame; Frame.OnNavigate := NavigationRequested;
     end;
     apCharacterEdit: begin
-      var Frame := TPsdStudioFrame.CreateForCharacter(Self,FRoot,''); FPages[Page] := Frame; Frame.OnReturn := ReturnCharacters; Frame.OnSaved := SavedCharacter;
+      var Frame := TRigmCharacterEditPage.CreateForWorkspace(Self,EnsureWorkspace,FRoot); FPages[Page] := Frame; Frame.OnReturn := ReturnCharacters; Frame.OnSaved := SavedCharacter;
     end;
-    apScripts,apScriptCreate,apMovieEdit: begin
-      var Frame := TRigmPendingFrame.CreateForPage(Self,Page); FPages[Page] := Frame; Frame.OnNavigate := NavigationRequested;
+    apScripts: begin
+      var Frame := TRigmScriptManagerFrame.CreateForWorkspace(Self,EnsureWorkspace,FRoot); FPages[Page] := Frame; Frame.OnNavigate := NavigationRequested;
+    end;
+    apScriptCreate: begin
+      FPages[Page] := TRigmScriptCreatorFrame.CreateForWorkspace(Self,EnsureWorkspace,FRoot);
+    end;
+    apMovieEdit: begin
+      FPages[Page] := TRigmMovieWorkspaceFrame.CreateForWorkspace(Self,EnsureWorkspace);
     end;
   end;
   Result := FPages[Page]; Result.Visible := False; Result.Parent := FHost; Result.Align := alClient;
@@ -61,12 +72,14 @@ begin
 end;
 procedure TRigmWizardMainForm.NavigateTo(Page: TRigmAppPage; const Path: string);
 begin
+  var Lifecycle: IRigmPageLifecycle;
   var Target := EnsurePage(Page);
-  if (Page=apCharacterEdit) and (Path<>'') then TPsdStudioFrame(Target).ActivateCharacter(Path);
+  if (Page=apCharacterEdit) and (Path<>'') then TRigmCharacterEditPage(Target).ActivateCharacter(Path);
   var Previous := FPages[FCurrentPage];
-  if Previous<>nil then begin if Previous is TPsdStudioFrame then TPsdStudioFrame(Previous).SetActive(False); Previous.Visible := False; end;
+  if Previous<>nil then begin if Supports(Previous,IRigmPageLifecycle,Lifecycle) then Lifecycle.SetActive(False); Previous.Visible := False; end;
   FCurrentPage := Page; Target.Visible := True; Target.BringToFront; FTitle.Caption := '  '+RigmPageTitle(Page);
-  if Target is TPsdStudioFrame then TPsdStudioFrame(Target).SetActive(True);
+  if Page=apScripts then TRigmScriptManagerFrame(Target).RefreshLibrary;
+  if Supports(Target,IRigmPageLifecycle,Lifecycle) then Lifecycle.SetActive(True);
 end;
 procedure TRigmWizardMainForm.NavigationRequested(Sender: TObject; Page: TRigmAppPage; const Path: string);
 begin NavigateTo(Page,Path); end;
@@ -77,7 +90,23 @@ begin if FPages[apCharacters]<>nil then TRigmCharacterManagerFrame(FPages[apChar
 procedure TRigmWizardMainForm.Home(Sender: TObject);
 begin NavigateTo(apHome); end;
 procedure TRigmWizardMainForm.Closing(Sender: TObject; var CanClose: Boolean);
-begin CanClose := (FPages[apCharacterEdit]=nil) or TPsdStudioFrame(FPages[apCharacterEdit]).RequestFinish; end;
+begin
+  CanClose := False; var Lifecycle: IRigmPageLifecycle;
+  for var Page := Low(TRigmAppPage) to High(TRigmAppPage) do if (FPages[Page]<>nil) and
+    Supports(FPages[Page],IRigmPageLifecycle,Lifecycle) and not Lifecycle.RequestFinish then Exit;
+  if (FWorkspace<>nil) and not FWorkspace.RequestFinish then begin FTitle.Caption := '取消処理の完了後に再度終了してください。'; Exit; end;
+  CanClose := True;
+end;
+function TRigmWizardMainForm.EnsureWorkspace: TRigmWizardWorkspace;
+begin
+  if FWorkspace=nil then begin FWorkspace := TRigmWizardWorkspace.Create(Self); FWorkspace.OnNavigate := NavigationRequested; end;
+  Result := FWorkspace;
+end;
+procedure TRigmWizardMainForm.CommonKey(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  if (FCurrentPage=apMovieEdit) and (TRigmMovieWorkspaceFrame(FPages[apMovieEdit]).CurrentEditor<>nil) then
+    TRigmMovieWorkspaceFrame(FPages[apMovieEdit]).CurrentEditor.HandleKey(Key,Shift);
+end;
 function TRigmWizardMainForm.CreatedPageCount: Integer;
 begin Result := 0; for var Page := Low(TRigmAppPage) to High(TRigmAppPage) do if FPages[Page]<>nil then Inc(Result); end;
 function TRigmWizardMainForm.PageInstance(Page: TRigmAppPage): TFrame;
