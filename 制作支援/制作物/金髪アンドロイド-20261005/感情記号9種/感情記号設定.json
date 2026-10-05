@@ -1,0 +1,110 @@
+[
+  {
+    "mouthAnimate": true,
+    "name": "！・びっくり",
+    "blinkAnimate": true,
+    "rigSafe": true,
+    "variants": [
+      {
+        "groupId": "{97317B85-09F6-4F23-AC22-9A2991008F6E}",
+        "partId": "{CC508212-3A74-4AF0-B07E-53A5529D3E59}"
+      }
+    ]
+  },
+  {
+    "mouthAnimate": true,
+    "name": "？・疑問",
+    "blinkAnimate": true,
+    "rigSafe": true,
+    "variants": [
+      {
+        "groupId": "{97317B85-09F6-4F23-AC22-9A2991008F6E}",
+        "partId": "{0EFCE18B-5D20-47A1-8E90-D5366405526D}"
+      }
+    ]
+  },
+  {
+    "mouthAnimate": true,
+    "name": "！？・驚きと疑問",
+    "blinkAnimate": true,
+    "rigSafe": true,
+    "variants": [
+      {
+        "groupId": "{97317B85-09F6-4F23-AC22-9A2991008F6E}",
+        "partId": "{1F31E1B4-2CE5-4D11-AC82-960B40D3C1DF}"
+      }
+    ]
+  },
+  {
+    "mouthAnimate": true,
+    "name": "！！・強い驚き",
+    "blinkAnimate": true,
+    "rigSafe": true,
+    "variants": [
+      {
+        "groupId": "{97317B85-09F6-4F23-AC22-9A2991008F6E}",
+        "partId": "{5E87A9E4-B063-45FA-A99B-D63F0A4F1DA2}"
+      }
+    ]
+  },
+  {
+    "mouthAnimate": true,
+    "name": "驚き・集中線",
+    "blinkAnimate": true,
+    "rigSafe": true,
+    "variants": [
+      {
+        "groupId": "{97317B85-09F6-4F23-AC22-9A2991008F6E}",
+        "partId": "{78F088EA-B969-44DB-A724-1FE84E955186}"
+      }
+    ]
+  },
+  {
+    "mouthAnimate": true,
+    "name": "衝撃・ギザギザ",
+    "blinkAnimate": true,
+    "rigSafe": true,
+    "variants": [
+      {
+        "groupId": "{97317B85-09F6-4F23-AC22-9A2991008F6E}",
+        "partId": "{D1D0FB6F-22A2-4D2E-8CB2-7A56DCDEA81E}"
+      }
+    ]
+  },
+  {
+    "mouthAnimate": true,
+    "name": "動揺・汗しぶき",
+    "blinkAnimate": true,
+    "rigSafe": true,
+    "variants": [
+      {
+        "groupId": "{97317B85-09F6-4F23-AC22-9A2991008F6E}",
+        "partId": "{21038038-0707-427B-85AE-B9CF0474A0DA}"
+      }
+    ]
+  },
+  {
+    "mouthAnimate": true,
+    "name": "ガーン・縦線",
+    "blinkAnimate": true,
+    "rigSafe": true,
+    "variants": [
+      {
+        "groupId": "{97317B85-09F6-4F23-AC22-9A2991008F6E}",
+        "partId": "{4A2DB0F7-D6DF-4E19-B70A-7C12C98495CA}"
+      }
+    ]
+  },
+  {
+    "mouthAnimate": true,
+    "name": "ひらめき・電球",
+    "blinkAnimate": true,
+    "rigSafe": true,
+    "variants": [
+      {
+        "groupId": "{97317B85-09F6-4F23-AC22-9A2991008F6E}",
+        "partId": "{EF9873B4-EFE0-48DB-AEDF-C54600DC1729}"
+      }
+    ]
+  }
+]

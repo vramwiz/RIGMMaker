@@ -1,0 +1,14 @@
+{
+  "path": "D:\\Users\\take6\\RIGMMaker\\RIGM\\character-5F644440-BD54-4F76-A1C2-91E152D6516D.rigm",
+  "name": "金髪アンドロイド・解説用（表情・口パク・ポーズ・感情）",
+  "pipes": {
+    "controlPipe": "RIGMMaker.33740.{4D383F28-4238-4245-826A-19CCEADA449B}.control",
+    "commandPipe": "RIGMMaker.33740.{4D383F28-4238-4245-826A-19CCEADA449B}.control",
+    "routing": "common-command",
+    "apiVersion": 2,
+    "pagePipe": "",
+    "page": "preview",
+    "epoch": 4,
+    "connectionFile": "D:\\DelphiProg\\MyApp\\RIGMMaker\\制作支援\\制作物\\金髪アンドロイド-20261005\\session\\pipes\\RIGMMaker.33740.{4D383F28-4238-4245-826A-19CCEADA449B}.control.json"
+  }
+}

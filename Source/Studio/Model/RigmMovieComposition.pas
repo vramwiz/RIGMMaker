@@ -7,6 +7,8 @@ type
   TRigmMovieCharacter = class
   public
     Id,Name,FileName,SpeakerId,InitialPosition: string;
+    RenderFormat: string; // rigm/psd。旧作品は拡張子から補完する。
+    PsdView: TJSONObject; // 所有。PSD固有の視線/ポーズ/小動作。共通作品内へ保存。
     X,Y,Width,Height: Double;
     Visible,RigSafe,AllowGeneratedExpressions: Boolean;
     Expressions: TJSONObject;
@@ -38,14 +40,16 @@ constructor TRigmMovieCharacter.Create;
 begin
   inherited; Id := NewRigmId; Name := 'キャラクター'; SpeakerId := 'narrator'; InitialPosition := 'right';
   X := 1370; Y := 130; Width := 520; Height := 900; Visible := True; RigSafe := True;
+  RenderFormat := 'rigm'; PsdView := TJSONObject.Create;
   Expressions := TJSONObject.Create;
   Motions := TJSONObject.Create; MotionDuration := -1;
 end;
 destructor TRigmMovieCharacter.Destroy;
-begin Motions.Free; Expressions.Free; inherited; end;
+begin PsdView.Free; Motions.Free; Expressions.Free; inherited; end;
 function TRigmMovieCharacter.Json: TJSONObject;
 begin
   Result := TJSONObject.Create; Result.AddPair('id',Id); Result.AddPair('name',Name); Result.AddPair('file',FileName);
+  Result.AddPair('renderFormat',RenderFormat); if RenderFormat='psd' then Result.AddPair('psdView',PsdView.Clone as TJSONObject);
   Result.AddPair('speaker',SpeakerId); Result.AddPair('initialPosition',InitialPosition);
   AddN(Result,'x',X); AddN(Result,'y',Y); AddN(Result,'width',Width); AddN(Result,'height',Height);
   AddB(Result,'visible',Visible); AddB(Result,'rigSafe',RigSafe); AddB(Result,'allowGeneratedExpressions',AllowGeneratedExpressions);
@@ -60,6 +64,8 @@ begin
   Result := TRigmMovieCharacter.Create;
   try
     Result.Id := JS(O,'id',Result.Id); Result.Name := JS(O,'name',Result.Name); Result.FileName := JS(O,'file');
+    Result.RenderFormat := JS(O,'renderFormat',IfThen(SameText(ExtractFileExt(Result.FileName),'.psdchar'),'psd','rigm'));
+    if O.GetValue('psdView')<>nil then begin Result.PsdView.Free; Result.PsdView := JO(O,'psdView').Clone as TJSONObject; end;
     Result.SpeakerId := JS(O,'speaker','narrator'); Result.InitialPosition := JS(O,'initialPosition','right');
     Result.X := JN(O,'x',1370); Result.Y := JN(O,'y',130); Result.Width := JN(O,'width',520); Result.Height := JN(O,'height',900);
     Result.Visible := JB(O,'visible',True); Result.RigSafe := JB(O,'rigSafe',True); Result.AllowGeneratedExpressions := JB(O,'allowGeneratedExpressions');
@@ -72,6 +78,8 @@ end;
 procedure TRigmMovieCharacter.Validate;
 begin
   if (Id='') or (Length(Id)>128) or (Length(Name)>300) or (Length(FileName)>32760) then raise ERigm.Create('Invalid character identity');
+  if not MatchText(RenderFormat,['rigm','psd']) or ((RenderFormat='psd')<>SameText(ExtractFileExt(FileName),'.psdchar')) then
+    raise ERigm.Create('Character render format does not match its source');
   if not MatchText(InitialPosition,['left','center','right']) then raise ERigm.Create('Invalid initial character position');
   if not Finite(X) or not Finite(Y) or not Finite(Width) or not Finite(Height) or
     (Abs(X)>7680) or (Abs(Y)>4320) or (Width<16) or (Width>7680) or (Height<16) or (Height>4320) then raise ERigm.Create('Character rectangle is outside supported FullHD coordinates');

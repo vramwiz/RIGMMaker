@@ -6,7 +6,8 @@ uses System.Classes, System.SysUtils, System.JSON, System.Generics.Collections,
   RigmMovieSession, RigmMovieForm, RigmIconToolbar;
 type
   TCreationEntry = class
-    Name,FileName,CharacterId: string;
+    Name,FileName,CharacterId,ProductionReason: string;
+    CanAdd: Boolean;
   end;
   TRigmMovieCreator = class(TPanel)
   private
@@ -31,6 +32,8 @@ type
     FCharacterDrafts,FSceneDrafts: TObjectDictionary<string,TJSONObject>;
     FViewedCharacter,FViewedScene: string;
     FCharacterRevision,FSceneRevision: Integer;
+    FPsdGaze,FPsdMotion,FPsdPose: TComboBox;
+    FPsdPoseIds: TStringList;
     procedure DraftChanged(Sender: TObject);
     procedure PreviewSelection(Sender: TObject);
     procedure LoadThumbnail(Item: TListItem; const Path: string);
@@ -55,7 +58,7 @@ type
   end;
 implementation
 uses System.IOUtils, System.Math, System.Types, System.StrUtils, Vcl.Graphics, Vcl.Dialogs,
-  RigmJson, RigmModel, RigmMovieModel, RigmStorage, RigmToolbarIcons, RigmMovieComposition, RigmMovieCompositor, RigmMovieWorkspace, RigmMovieMotionLibrary;
+  RigmJson, RigmModel, RigmMovieModel, RigmStorage, RigmToolbarIcons, RigmMovieComposition, RigmMovieCompositor, RigmMovieWorkspace, RigmMovieMotionLibrary, RigmCharacterCatalog;
 constructor TRigmMovieCreator.CreateForWorkspace(AOwner: TComponent; const Directory: string);
   function Edit(Parent: TWinControl; const Name,Caption: string; Y: Integer): TEdit;
   begin
@@ -82,9 +85,9 @@ begin
   FStatus.Height := 48; FStatus.AutoSize := False; FStatus.WordWrap := True;
   FStatus.Caption := 'チェックで動画へ追加。選択行の設定だけを右側で編集します。配置はフルHD座標、10pxスナップです。';
   FImages := TImageList.Create(Self); FImages.Width := 96; FImages.Height := 96; FImages.ColorDepth := cd32Bit;
-  FList := TListView.Create(Self); FList.Parent := Self; FList.Align := alLeft; FList.Width := 235;
+  FList := TListView.Create(Self); FList.Parent := Self; FList.Align := alLeft; FList.Width := 320;
   FList.Name := 'CreationCharacters'; FList.ViewStyle := vsReport; FList.Checkboxes := True;
-  FList.SmallImages := FImages; FList.Columns.Add.Width := 215; FList.ShowColumnHeaders := False;
+  FList.SmallImages := FImages; FList.Columns.Add.Width := 300; FList.ShowColumnHeaders := False;
   FList.ReadOnly := True; FList.RowSelect := True; FList.HideSelection := False;
   FList.OnSelectItem := Selection; FList.OnItemChecked := Checked;
   var Right := TScrollBox.Create(Self); Right.Parent := Self; Right.Align := alRight; Right.Width := 330;
@@ -97,7 +100,7 @@ begin
   Button(Right,'CreationApplyPosition','左 / 中央 / 右へ初期配置',9,206);
   FX := Edit(Right,'CreationX','X（フルHD基準）',248); FY := Edit(Right,'CreationY','Y',302);
   FW := Edit(Right,'CreationWidth','幅（元画像の縦横比を保持して表示）',356); FH := Edit(Right,'CreationHeight','高さ',410);
-  FRigSafe := TCheckBox.Create(Self); FRigSafe.Parent := Right; FRigSafe.Caption := '小さなRIGM揺れを併用'; FRigSafe.SetBounds(12,470,290,24);
+  FRigSafe := TCheckBox.Create(Self); FRigSafe.Parent := Right; FRigSafe.Caption := '小さな動きを併用'; FRigSafe.SetBounds(12,470,290,24);
   FGenerated := TCheckBox.Create(Self); FGenerated.Parent := Right; FGenerated.Caption := '生成表情の追加を許可'; FGenerated.SetBounds(12,500,290,24);
   FRigSafe.OnClick := DraftChanged; FGenerated.OnClick := DraftChanged;
   Button(Right,'CreationApplyCharacter','選択キャラクターの設定を適用',10,534);
@@ -118,6 +121,18 @@ begin
   Button(Right,'CreationStopMotion','モーションを停止して通常表示に戻る',15,1188);
   Button(Right,'CreationRegisterMotion','モーション定義JSONを登録',16,1230);
   Button(Right,'CreationBuildMotions','感情の全体モーション4種を保管',17,1272);
+  FPsdPoseIds := TStringList.Create;
+  var LabelGaze := TLabel.Create(Self); LabelGaze.Parent := Right; LabelGaze.Caption := 'PSDの視線（画面基準）'; LabelGaze.SetBounds(12,1320,290,20);
+  FPsdGaze := TComboBox.Create(Self); FPsdGaze.Parent := Right; FPsdGaze.Style := csDropDownList; FPsdGaze.SetBounds(12,1344,290,28); FPsdGaze.OnChange := DraftChanged;
+  FPsdGaze.Name := 'CreationPsdGaze';
+  var LabelMotion := TLabel.Create(Self); LabelMotion.Parent := Right; LabelMotion.Caption := 'PSDの合成後の動き'; LabelMotion.SetBounds(12,1380,290,20);
+  FPsdMotion := TComboBox.Create(Self); FPsdMotion.Parent := Right; FPsdMotion.Style := csDropDownList; FPsdMotion.SetBounds(12,1404,290,28);
+  FPsdMotion.Name := 'CreationPsdMotion';
+  FPsdMotion.Items.AddStrings(['none','breathe','sway','jump']); FPsdMotion.OnChange := DraftChanged;
+  var LabelPose := TLabel.Create(Self); LabelPose.Parent := Right; LabelPose.Caption := 'PSDの正面 / 非正面'; LabelPose.SetBounds(12,1440,290,20);
+  FPsdPose := TComboBox.Create(Self); FPsdPose.Parent := Right; FPsdPose.Style := csDropDownList; FPsdPose.SetBounds(12,1464,290,28); FPsdPose.OnChange := DraftChanged;
+  FPsdPose.Name := 'CreationPsdPose';
+  Button(Right,'CreationApplyPsd','PSDの表示設定を適用',10,1506);
   var Center := TPanel.Create(Self); Center.Parent := Self; Center.Align := alClient; Center.BevelOuter := bvNone;
   FScript := TMemo.Create(Self); FScript.Parent := Center; FScript.Align := alBottom; FScript.Height := 150;
   FScript.Name := 'CreationScript'; FScript.ScrollBars := ssVertical;
@@ -127,7 +142,7 @@ begin
   LoadLibrary;
 end;
 destructor TRigmMovieCreator.Destroy;
-begin if FTimer<>nil then FTimer.Enabled := False; FCharacterDrafts.Free; FSceneDrafts.Free; FEntries.Free; inherited; end;
+begin if FTimer<>nil then FTimer.Enabled := False; FPsdPoseIds.Free; FCharacterDrafts.Free; FSceneDrafts.Free; FEntries.Free; inherited; end;
 function TRigmMovieCreator.Command(const Name: string; Args: TJSONObject): TJSONObject;
 begin
   if Args=nil then Args := TJSONObject.Create;
@@ -159,8 +174,8 @@ begin
     if Path='@sample' then begin Item.ImageIndex := -1; Exit; end;
     var W,H: Integer; var N: string; var B := Vcl.Graphics.TBitmap.Create;
     try
-      var Pixels := ReadRigmThumbnail(Path,N,W,H);
-      if N<>'' then begin Item.Caption := N; TCreationEntry(Item.Data).Name := N; end;
+      var Pixels := ReadCharacterThumbnail(Path,N,W,H);
+      if N<>'' then begin Item.Caption := '['+CharacterFormatLabel(Path)+'] '+N; TCreationEntry(Item.Data).Name := N; end;
       B.PixelFormat := pf32bit; B.SetSize(96,96);
       var K := Min(90/Max(1,W),90/Max(1,H)); var TW := Max(1,Round(W*K)); var TH := Max(1,Round(H*K));
       for var Y := 0 to 95 do begin var Row := PByte(B.ScanLine[Y]); for var X := 0 to 95 do begin
@@ -180,11 +195,15 @@ procedure TRigmMovieCreator.LoadLibrary;
   begin
     var E := TCreationEntry.Create; E.FileName := Path; E.Name := Name; var Item := FList.Items.Add; Item.Caption := Name; Item.Data := E;
     FEntries.Add(E); LoadThumbnail(Item,Path);
+    E.CanAdd := CharacterReadyForNewScript(Path,E.ProductionReason);
+    if not E.CanAdd then Item.Caption := Item.Caption+'（未完成・追加不可）';
   end;
 begin
   FRefreshing := True; FList.Items.BeginUpdate;
   try
-    FList.Items.Clear; FImages.Clear; FEntries.Clear; Entry('@sample','編集テスト用サンプル');
+      FList.Items.Clear; FImages.Clear; FEntries.Clear; Entry('@sample','編集テスト用サンプル');
+      var PsdDirectory := TPath.Combine(ExtractFileDir(FDirectory),'Characters');
+      if DirectoryExists(PsdDirectory) then for var P in TDirectory.GetFiles(PsdDirectory,'*.psdchar',TSearchOption.soAllDirectories) do Entry(P,ChangeFileExt(ExtractFileName(P),''));
     if DirectoryExists(FDirectory) then for var P in TDirectory.GetFiles(FDirectory,'*.rigm') do Entry(P,ChangeFileExt(ExtractFileName(P),''));
     if FList.Items.Count>0 then FList.Items[0].Selected := True;
   finally FList.Items.EndUpdate; FRefreshing := False; end;
@@ -223,11 +242,28 @@ begin
   var C := FSession.Project.Character(SelectedCharacter);
   if (Sender=FList) or (FPreview.SelectedCharacter='') then FPreview.SelectedCharacter := SelectedCharacter;
   FPreview.Invalidate;
-  if C=nil then begin FName.Text := ''; FSpeaker.Text := ''; Exit; end;
+  if C=nil then begin FName.Text := ''; FSpeaker.Text := '';
+    FPsdGaze.Enabled := False; FPsdMotion.Enabled := False; FPsdPose.Enabled := False; Exit; end;
   FName.Text := C.Name; FSpeaker.Text := C.SpeakerId; FStyle.Text := FSession.Project.Speaker(C.SpeakerId).StyleId.ToString;
   FX.Text := FloatToStr(C.X,TFormatSettings.Invariant); FY.Text := FloatToStr(C.Y,TFormatSettings.Invariant);
   FW.Text := FloatToStr(C.Width,TFormatSettings.Invariant); FH.Text := FloatToStr(C.Height,TFormatSettings.Invariant);
   FRigSafe.Checked := C.RigSafe; FGenerated.Checked := C.AllowGeneratedExpressions;
+  var Psd := C.RenderFormat='psd'; FPsdGaze.Enabled := Psd; FPsdMotion.Enabled := Psd; FPsdPose.Enabled := Psd;
+  FMotions.Enabled := not Psd;
+  TButton(FindComponent('CreationSelectMotion')).Enabled := not Psd;
+  TButton(FindComponent('CreationStopMotion')).Enabled := not Psd;
+  TButton(FindComponent('CreationApplyPsd')).Enabled := Psd;
+  FPsdGaze.Clear; FPsdPose.Clear; FPsdPoseIds.Clear; FPsdPose.Items.Add('正面'); FPsdPoseIds.Add('');
+  if Psd then begin
+    var Asset := TPsdCharacterAsset.Create(ResolveMoviePath(FSession.Project.FileName,C.FileName));
+    try
+      for var P in RigmJson.JO(Asset.Character.Settings,'gaze') do FPsdGaze.Items.Add(P.JsonString.Value);
+      for var V in RigmJson.JA(Asset.Character.Settings,'nonFront') do begin FPsdPose.Items.Add(RigmJson.JS(TJSONObject(V),'name')); FPsdPoseIds.Add(RigmJson.JS(TJSONObject(V),'id')); end;
+    finally Asset.Free; end;
+  end;
+  FPsdGaze.ItemIndex := Max(0,FPsdGaze.Items.IndexOf(JS(C.PsdView,'gaze','front')));
+  FPsdMotion.ItemIndex := Max(0,FPsdMotion.Items.IndexOf(JS(C.PsdView,'motion','breathe')));
+  FPsdPose.ItemIndex := Max(0,FPsdPoseIds.IndexOf(JS(C.PsdView,'nonFrontId')));
   var MotionName := FMotions.Text; FMotions.Items.Clear;
   for var Pair in C.Motions do FMotions.Items.Add(Pair.JsonString.Value);
   FMotions.ItemIndex := FMotions.Items.IndexOf(MotionName);
@@ -239,6 +275,9 @@ begin
     FCharacterRevision := JI(Draft,'revision'); FName.Text := JS(Draft,'name'); FSpeaker.Text := JS(Draft,'speaker'); FStyle.Text := JS(Draft,'styleText');
     FX.Text := JS(Draft,'xText'); FY.Text := JS(Draft,'yText'); FW.Text := JS(Draft,'widthText'); FH.Text := JS(Draft,'heightText');
     FRigSafe.Checked := JB(Draft,'rigSafe',C.RigSafe); FGenerated.Checked := JB(Draft,'allowGeneratedExpressions',C.AllowGeneratedExpressions);
+    if Psd then begin FPsdGaze.ItemIndex := Max(0,FPsdGaze.Items.IndexOf(JS(Draft,'psdGaze',FPsdGaze.Text)));
+      FPsdMotion.ItemIndex := Max(0,FPsdMotion.Items.IndexOf(JS(Draft,'psdMotion',FPsdMotion.Text)));
+      FPsdPose.ItemIndex := Max(0,FPsdPoseIds.IndexOf(JS(Draft,'psdNonFrontId',FPsdPoseIds[FPsdPose.ItemIndex]))); end;
   end;
   finally FRefreshing := False; end;
 end;
@@ -246,11 +285,19 @@ procedure TRigmMovieCreator.Checked(Sender: TObject; Item: TListItem);
 begin
   if FRefreshing or (FSession=nil) then Exit;
   try
-    var E := TCreationEntry(Item.Data); var O := TJSONObject.Create;
+    var E := TCreationEntry(Item.Data);
+    if Item.Checked and (E.CharacterId='') then begin
+      E.CanAdd := CharacterReadyForNewScript(E.FileName,E.ProductionReason);
+      if not E.CanAdd then begin
+        FRefreshing := True; try Item.Checked := False; finally FRefreshing := False; end;
+        FStatus.Caption := E.ProductionReason; Exit;
+      end;
+    end;
+    var O := TJSONObject.Create;
     if Item.Checked then begin
       var C := TRigmMovieCharacter.Create;
       try
-        C.Name := E.Name; C.FileName := E.FileName;
+          C.Name := E.Name; C.FileName := E.FileName; C.RenderFormat := CharacterFormat(E.FileName);
         if FSession.Project.Characters.Count>0 then C.SpeakerId := 'speaker-'+NewRigmId;
         C.X := 80+(FSession.Project.Characters.Count mod 3)*660;
         if (FSession.Project.Layout='l') and (FSession.Project.LDirection='right') then C.X := 1370;
@@ -288,6 +335,7 @@ begin
     AddN(O,'revision',FCharacterRevision); O.AddPair('name',FName.Text); O.AddPair('speaker',FSpeaker.Text); O.AddPair('styleText',FStyle.Text);
     O.AddPair('xText',FX.Text); O.AddPair('yText',FY.Text); O.AddPair('widthText',FW.Text); O.AddPair('heightText',FH.Text);
     AddB(O,'rigSafe',FRigSafe.Checked); AddB(O,'allowGeneratedExpressions',FGenerated.Checked);
+    if FPsdGaze.Enabled then begin O.AddPair('psdGaze',FPsdGaze.Text); O.AddPair('psdMotion',FPsdMotion.Text); O.AddPair('psdNonFrontId',FPsdPoseIds[Max(0,FPsdPose.ItemIndex)]); end;
     FCharacterDrafts.AddOrSetValue(DraftKey(FViewedCharacter),O);
   end;
 end;
@@ -322,8 +370,9 @@ begin
     end;
     if FSession.GuiLocked then raise ERigm.Create('Codex編集中です。編集が終了するか、ロック解除を押すと操作できます。');
     case Tag of
-      17: begin
-        var Character := FSession.Project.Character(SelectedCharacter); if Character=nil then raise ERigm.Create('Select a character first');
+        17: begin
+          var Character := FSession.Project.Character(SelectedCharacter); if Character=nil then raise ERigm.Create('Select a character first');
+          if Character.RenderFormat='psd' then raise ERigm.Create('PSDは合成後の動きを使います。全身連番はPSDキャラ編集で登録してください。');
         var Id := Character.Id; var Motions := BuildCharacterMotions(ResolveMoviePath(FSession.Project.FileName,Character.FileName));
         try
           for var Pair in Motions do begin
@@ -377,6 +426,9 @@ begin
           O.AddPair('name',FName.Text); O.AddPair('speaker',FSpeaker.Text); AddN(O,'x',StrToFloat(FX.Text,TFormatSettings.Invariant));
           AddN(O,'y',StrToFloat(FY.Text,TFormatSettings.Invariant)); AddN(O,'width',StrToFloat(FW.Text,TFormatSettings.Invariant)); AddN(O,'height',StrToFloat(FH.Text,TFormatSettings.Invariant));
           AddB(O,'rigSafe',FRigSafe.Checked); AddB(O,'allowGeneratedExpressions',FGenerated.Checked);
+          if C.RenderFormat='psd' then begin var V := TJSONObject(C.PsdView.Clone);
+            V.RemovePair('gaze').Free; V.AddPair('gaze',FPsdGaze.Text); V.RemovePair('motion').Free; V.AddPair('motion',FPsdMotion.Text);
+            V.RemovePair('nonFrontId').Free; V.AddPair('nonFrontId',FPsdPoseIds[Max(0,FPsdPose.ItemIndex)]); O.AddPair('psdView',V); end;
           AddN(O,'styleId',StrToInt(FStyle.Text));
         end;
         Run('update-character',O);

@@ -1,0 +1,44 @@
+{
+  "application": "RIGM Maker",
+  "documentId": "{151111F4-E603-47A4-B936-8D62B4A3BD48}",
+  "revision": "18",
+  "name": "金髪アンドロイド・原画",
+  "fileName": "D:\\DelphiProg\\MyApp\\RIGMMaker\\制作支援\\制作物\\金髪アンドロイド-20261005\\assembled.rigm",
+  "page": "preview",
+  "psdSourceName": "original.psd",
+  "psdImportNotes": "",
+  "generationSkipped": true,
+  "modified": false,
+  "canUndo": true,
+  "canRedo": false,
+  "selectedId": "",
+  "width": 1152,
+  "height": 2048,
+  "coordinates": "canvas-center-x-right-y-down",
+  "partCount": 51,
+  "boneCount": 6,
+  "meshCount": 42,
+  "stages": {
+    "layer": true,
+    "bone": true,
+    "mesh": true,
+    "usable": true
+  },
+  "availablePages": [
+    "layer",
+    "bone",
+    "mesh",
+    "preview"
+  ],
+  "fixRequests": [],
+  "pipes": {
+    "controlPipe": "RIGMMaker.33740.{4D383F28-4238-4245-826A-19CCEADA449B}.control",
+    "commandPipe": "RIGMMaker.33740.{4D383F28-4238-4245-826A-19CCEADA449B}.control",
+    "routing": "common-command",
+    "apiVersion": 2,
+    "pagePipe": "",
+    "page": "preview",
+    "epoch": 4,
+    "connectionFile": "D:\\DelphiProg\\MyApp\\RIGMMaker\\制作支援\\制作物\\金髪アンドロイド-20261005\\session\\pipes\\RIGMMaker.33740.{4D383F28-4238-4245-826A-19CCEADA449B}.control.json"
+  }
+}

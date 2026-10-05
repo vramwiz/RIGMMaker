@@ -39,11 +39,9 @@ begin O.RemovePair(Key).Free; O.AddPair(Key,Value); end;
 var Settings: TRigmAppSettings;
 
 function RigmDocumentsDirectory: string;
-var P: PWideChar;
 begin
-  P := nil;
-  OleCheck(SHGetKnownFolderPath(FOLDERID_Documents,0,0,P));
-  try Result := TPath.Combine(P,'RIGMMaker'); finally CoTaskMemFree(P); end;
+  Result := 'D:\Users\take6\RIGMMaker';
+  for var I := 1 to ParamCount - 1 do if ParamStr(I)='--data-root' then Result := ExpandFileName(ParamStr(I+1));
 end;
 function RigmSettingsDirectory: string;
 begin

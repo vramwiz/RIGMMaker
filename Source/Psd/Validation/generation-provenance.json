@@ -1,0 +1,24 @@
+{
+  "format": "RIGMMaker.PsdGenerationRecord",
+  "version": 1,
+  "date": "2026-10-05",
+  "tool": "image_gen.imagegen (built-in)",
+  "additionalPaidApi": false,
+  "newSoftwareInstalled": false,
+  "referenceImages": [
+    "D:\\Users\\take6\\RIGMMaker\\Work\\金髪アンドロイド-20261005\\reference\\original.png",
+    "D:\\Users\\take6\\RIGMMaker\\Work\\金髪アンドロイド-20261005\\images\\eyes\\eyes-original.png"
+  ],
+  "generationBrief": {
+    "eyes": "元キャラの両目一組・青い虹彩・まつ毛・白目・ハイライトを参考に、顔や眉や肌を含まない開いた両目の透過PNG。画面基準の左、左上、上、右上、右。元画像と同一ピクセルとは扱わない新規描画。",
+    "poses": "元キャラを参考にした金髪の女性アンドロイド。白と黒の機械ボディ。頭から足まで欠けない全身。画面左向きの厳密な横向き、顔を見せない後ろ向き。透明背景の新規描画。"
+  },
+  "preparation": "alpha境界で透明余白を測定し、X/Y共通倍率で元の目幅/全身高に合わせた。白色透過や原パーツ修正なし。prepared-assets.json に実寸・配置・倍率・両PNGのSHA-256を保存。",
+  "persistentSources": "D:\\Users\\take6\\RIGMMaker\\Work\\PsdGenerated-20261005",
+  "runtimePackage": "D:\\Users\\take6\\RIGMMaker\\Characters\\blonde-android-20261005.psdchar",
+  "newDrawings": 7,
+  "existingPartCombinations": ["哀しみ", "解説"],
+  "visualState": "pending-user-review",
+  "visualNotes": "合成画像の目位置と全身ポーズを確認。新規ポーズの輪郭に色にじみが残る。造形と視線の強さもユーザー採用確認が必要。",
+  "remainingMaterial": "実キャラの全身透過PNG連番。特定の動作・同じキャンバス/配置/解像度で各フレームを準備する。静止ポーズと常時変形は全身連番に数えない。"
+}

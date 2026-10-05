@@ -1,0 +1,19 @@
+{
+  "issues": [],
+  "total": 0,
+  "errorCount": 0,
+  "throughPageReady": true,
+  "currentStageReady": true,
+  "documentId": "{151111F4-E603-47A4-B936-8D62B4A3BD48}",
+  "revision": "12",
+  "pipes": {
+    "controlPipe": "RIGMMaker.33740.{4D383F28-4238-4245-826A-19CCEADA449B}.control",
+    "commandPipe": "RIGMMaker.33740.{4D383F28-4238-4245-826A-19CCEADA449B}.control",
+    "routing": "common-command",
+    "apiVersion": 2,
+    "pagePipe": "RIGMMaker.33740.{4D383F28-4238-4245-826A-19CCEADA449B}.layer.1",
+    "page": "layer",
+    "epoch": 1,
+    "connectionFile": "D:\\DelphiProg\\MyApp\\RIGMMaker\\制作支援\\制作物\\金髪アンドロイド-20261005\\session\\pipes\\RIGMMaker.33740.{4D383F28-4238-4245-826A-19CCEADA449B}.control.json"
+  }
+}

@@ -15,7 +15,7 @@ function MoviePreparationKey(Project: TRigmMovieProject): string;
 begin
   Result := Project.EngineUrl+'|'+ResolveMoviePath(Project.FileName,Project.CharacterFile);
   for var Character in Project.Characters do begin
-    Result := Result+'|'+Character.FileName+'|'+Character.Expressions.ToJSON+'|'+Character.Motions.ToJSON;
+    Result := Result+'|'+Character.RenderFormat+'|'+Character.FileName+'|'+Character.PsdView.ToJSON+'|'+Character.Expressions.ToJSON+'|'+Character.Motions.ToJSON;
     var Path := ResolveMoviePath(Project.FileName,Character.FileName);
     if FileExists(Path) then Result := Result+'|'+TFile.GetSize(Path).ToString+'|'+DateTimeToStr(TFile.GetLastWriteTimeUtc(Path));
   end;

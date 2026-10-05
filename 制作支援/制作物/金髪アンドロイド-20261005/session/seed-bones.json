@@ -1,0 +1,101 @@
+{
+  "items": [
+    {
+      "id": "{984D918C-BC66-460C-9ECB-2B0FE905F256}",
+      "name": "腰（下半身）",
+      "parentId": "",
+      "pairId": "",
+      "x": 0,
+      "y": -191.75,
+      "initialX": 0,
+      "initialY": -191.75,
+      "minAngle": -60,
+      "maxAngle": 60,
+      "visible": true,
+      "locked": false
+    },
+    {
+      "id": "{A003BF10-610E-4595-94DD-44F913D4E972}",
+      "name": "上半身",
+      "parentId": "{984D918C-BC66-460C-9ECB-2B0FE905F256}",
+      "pairId": "",
+      "x": 0,
+      "y": -387.875,
+      "initialX": 0,
+      "initialY": -387.875,
+      "minAngle": -60,
+      "maxAngle": 60,
+      "visible": true,
+      "locked": false
+    },
+    {
+      "id": "{EA87A7AB-31AE-4CD1-88F7-E680157F3614}",
+      "name": "首",
+      "parentId": "{A003BF10-610E-4595-94DD-44F913D4E972}",
+      "pairId": "",
+      "x": 0,
+      "y": -584,
+      "initialX": 0,
+      "initialY": -584,
+      "minAngle": -60,
+      "maxAngle": 60,
+      "visible": true,
+      "locked": false
+    },
+    {
+      "id": "{4AF9EB75-DD2C-4201-8D7C-D9918F5BBE9C}",
+      "name": "頭",
+      "parentId": "{EA87A7AB-31AE-4CD1-88F7-E680157F3614}",
+      "pairId": "",
+      "x": 3.5,
+      "y": -706.5,
+      "initialX": 3.5,
+      "initialY": -706.5,
+      "minAngle": -60,
+      "maxAngle": 60,
+      "visible": true,
+      "locked": false
+    },
+    {
+      "id": "{5C52F6F7-A874-4FB4-98D3-53340DD85C74}",
+      "name": "左肩",
+      "parentId": "{EA87A7AB-31AE-4CD1-88F7-E680157F3614}",
+      "pairId": "{BADE1297-D295-4ADE-AC84-59455757408A}",
+      "x": -172.8,
+      "y": -584,
+      "initialX": -172.8,
+      "initialY": -584,
+      "minAngle": -60,
+      "maxAngle": 60,
+      "visible": true,
+      "locked": false
+    },
+    {
+      "id": "{BADE1297-D295-4ADE-AC84-59455757408A}",
+      "name": "右肩",
+      "parentId": "{EA87A7AB-31AE-4CD1-88F7-E680157F3614}",
+      "pairId": "{5C52F6F7-A874-4FB4-98D3-53340DD85C74}",
+      "x": 172.8,
+      "y": -584,
+      "initialX": 172.8,
+      "initialY": -584,
+      "minAngle": -60,
+      "maxAngle": 60,
+      "visible": true,
+      "locked": false
+    }
+  ],
+  "total": 6,
+  "documentId": "{151111F4-E603-47A4-B936-8D62B4A3BD48}",
+  "revision": "13",
+  "pipes": {
+    "controlPipe": "RIGMMaker.33740.{4D383F28-4238-4245-826A-19CCEADA449B}.control",
+    "commandPipe": "RIGMMaker.33740.{4D383F28-4238-4245-826A-19CCEADA449B}.control",
+    "routing": "common-command",
+    "apiVersion": 2,
+    "pagePipe": "RIGMMaker.33740.{4D383F28-4238-4245-826A-19CCEADA449B}.bone.2",
+    "page": "bone",
+    "epoch": 2,
+    "connectionFile": "D:\\DelphiProg\\MyApp\\RIGMMaker\\制作支援\\制作物\\金髪アンドロイド-20261005\\session\\pipes\\RIGMMaker.33740.{4D383F28-4238-4245-826A-19CCEADA449B}.control.json"
+  }
+}

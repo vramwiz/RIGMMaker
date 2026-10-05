@@ -1,0 +1,25 @@
+{
+  "passed": true,
+  "checks": {
+    "existing_part_metadata_preserved": true,
+    "existing_pixels_preserved": true,
+    "existing_bones_preserved": true,
+    "existing_meshes_preserved": true,
+    "existing_parameters_preserved": true,
+    "existing_body_rig_preserved": true,
+    "all_stages_complete": true,
+    "nine_new_parts_and_meshes": true,
+    "new_symbols_pixels_equal_png": true,
+    "new_symbols_are_head_bound_accessories": true,
+    "new_symbols_meshes_valid": true,
+    "one_default_symbol_visible": true
+  },
+  "counts": {
+    "parts": 60,
+    "editable_images": 51,
+    "bones": 6,
+    "meshes": 51,
+    "symbol_choices": 16
+  },
+  "sha256": "34bd2bde45689d376a096ac2ac43a15504afcd0872d357296292feaa3e466eb7"
+}

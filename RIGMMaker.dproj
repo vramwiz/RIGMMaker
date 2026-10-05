@@ -1,4 +1,4 @@
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
         <ProjectGuid>{84B80434-D941-4DE4-A4BD-8166885392D9}</ProjectGuid>
         <ProjectVersion>20.4</ProjectVersion>
@@ -57,7 +57,7 @@
         <DCC_DcuOutput>Win64\$(Config)</DCC_DcuOutput>
         <DCC_ExeOutput>.</DCC_ExeOutput>
         <DCC_UsePackage>vcl;rtl;vclx;$(DCC_UsePackage)</DCC_UsePackage>
-        <DCC_UnitSearchPath>Source\Studio;Source\Studio\Assets;Source\Studio\Audio;Source\Studio\Model;Source\Studio\Output;Source\Studio\Rendering;Source\Studio\Session;Source\Studio\Views\Creation;Source\Studio\Views\Editor;Source\Studio\Views\Preview;Source\Studio\Views\Timeline;Source\Studio\Workflow;Source\Shell\CharacterEditor;Source\Lib\Charts;Source\Lib\Voicevox;Source\Shell;Source\Lib\UI\IconToolbar;Source\Lib\GameControllers;Source\Core;Source\Editor;Source\Rendering;Source\Persistence;Source\Integrations;Source\Reference\AIArtToPSD\Core;Source\Reference\AIArtToPSD\Shell;Source\Reference\AIArtToPSD\Persistence\PNG;Source\Reference\AIArtToPSD\Persistence\PSD;Source\Reference\AIArtToPSD\Integrations\Pipe;Source\Reference\AIArtToPSD\Lib\UI\VerticalScrollBar;Source\Reference\AIArtToPSD\Lib\UI\HorizontalTrackBar;Source\Reference\AIArtToPSD\Lib\Pipe;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>Source\Psd\Core;Source\Psd\Persistence;Source\Psd\Editor;Source\Psd\Rendering;Source\Psd\Integrations;Source\Psd\Shell;Source\Psd\Reference;Source\Studio;Source\Studio\Assets;Source\Studio\Audio;Source\Studio\Model;Source\Studio\Output;Source\Studio\Rendering;Source\Studio\Session;Source\Studio\Views\Creation;Source\Studio\Views\Editor;Source\Studio\Views\Preview;Source\Studio\Views\Timeline;Source\Studio\Workflow;Source\Shell\CharacterEditor;Source\Lib\Charts;Source\Lib\Voicevox;Source\Shell;Source\Lib\UI\IconToolbar;Source\Lib\GameControllers;Source\Core;Source\Editor;Source\Rendering;Source\Persistence;Source\Integrations;Source\Reference\AIArtToPSD\Core;Source\Reference\AIArtToPSD\Shell;Source\Reference\AIArtToPSD\Persistence\PNG;Source\Reference\AIArtToPSD\Persistence\PSD;Source\Reference\AIArtToPSD\Integrations\Pipe;Source\Reference\AIArtToPSD\Lib\UI\VerticalScrollBar;Source\Reference\AIArtToPSD\Lib\UI\HorizontalTrackBar;Source\Reference\AIArtToPSD\Lib\Pipe;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <SanitizedProjectName>RIGMMaker</SanitizedProjectName>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_MajorVer>1</VerInfo_MajorVer>

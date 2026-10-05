@@ -1,0 +1,380 @@
+[
+  {
+    "y": 0,
+    "file": "assets/body-normal.png",
+    "visible": true,
+    "group": "体",
+    "role": "body",
+    "name": "*通常",
+    "x": 0
+  },
+  {
+    "y": 0,
+    "file": "assets/hair-back.png",
+    "visible": true,
+    "group": "後ろ髪",
+    "role": "hair",
+    "name": "後ろ髪",
+    "x": 0
+  },
+  {
+    "y": 0,
+    "file": "assets/face-normal.png",
+    "visible": true,
+    "group": "顔色",
+    "role": "face",
+    "name": "*通常",
+    "x": 0
+  },
+  {
+    "y": 0,
+    "file": "assets/hair-original.png",
+    "visible": false,
+    "group": "髪",
+    "role": "hair",
+    "name": "*原画保持",
+    "x": 0
+  },
+  {
+    "y": 97,
+    "file": "assets/hair-clean.png",
+    "visible": true,
+    "group": "髪",
+    "role": "hair",
+    "name": "*通常",
+    "x": 402
+  },
+  {
+    "y": 0,
+    "file": "assets/eyes-original.png",
+    "visible": true,
+    "group": "目",
+    "role": "eye",
+    "name": "*通常",
+    "x": 0
+  },
+  {
+    "y": 0,
+    "file": "assets/brows-original.png",
+    "visible": false,
+    "group": "眉",
+    "role": "brow",
+    "name": "*原画保持",
+    "x": 0
+  },
+  {
+    "y": 0,
+    "file": "assets/mouth-original.png",
+    "visible": true,
+    "group": "口",
+    "role": "mouth",
+    "name": "*通常",
+    "x": 0
+  },
+  {
+    "y": 318,
+    "file": "assets/eyes-1.png",
+    "visible": false,
+    "group": "目",
+    "role": "eye",
+    "name": "*半開き",
+    "x": 480
+  },
+  {
+    "y": 325,
+    "file": "assets/eyes-2.png",
+    "visible": false,
+    "group": "目",
+    "role": "eye",
+    "name": "*閉じ",
+    "x": 487
+  },
+  {
+    "y": 322,
+    "file": "assets/eyes-3.png",
+    "visible": false,
+    "group": "目",
+    "role": "eye",
+    "name": "*笑顔閉じ",
+    "x": 483
+  },
+  {
+    "y": 309,
+    "file": "assets/eyes-4.png",
+    "visible": false,
+    "group": "目",
+    "role": "eye",
+    "name": "*見開き",
+    "x": 483
+  },
+  {
+    "y": 317,
+    "file": "assets/eyes-5.png",
+    "visible": false,
+    "group": "目",
+    "role": "eye",
+    "name": "*やさしい目",
+    "x": 480
+  },
+  {
+    "y": 412,
+    "file": "assets/mouths-0.png",
+    "visible": false,
+    "group": "口",
+    "role": "mouth",
+    "name": "*ん",
+    "x": 568
+  },
+  {
+    "y": 409,
+    "file": "assets/mouths-1.png",
+    "visible": false,
+    "group": "口",
+    "role": "mouth",
+    "name": "*半開き",
+    "x": 570
+  },
+  {
+    "y": 400,
+    "file": "assets/mouths-2.png",
+    "visible": false,
+    "group": "口",
+    "role": "mouth",
+    "name": "*あ",
+    "x": 568
+  },
+  {
+    "y": 410,
+    "file": "assets/mouths-3.png",
+    "visible": false,
+    "group": "口",
+    "role": "mouth",
+    "name": "*い",
+    "x": 566
+  },
+  {
+    "y": 408,
+    "file": "assets/mouths-4.png",
+    "visible": false,
+    "group": "口",
+    "role": "mouth",
+    "name": "*う",
+    "x": 575
+  },
+  {
+    "y": 408,
+    "file": "assets/mouths-5.png",
+    "visible": false,
+    "group": "口",
+    "role": "mouth",
+    "name": "*え",
+    "x": 566
+  },
+  {
+    "y": 401,
+    "file": "assets/mouths-6.png",
+    "visible": false,
+    "group": "口",
+    "role": "mouth",
+    "name": "*お",
+    "x": 569
+  },
+  {
+    "y": 410,
+    "file": "assets/mouths-7.png",
+    "visible": false,
+    "group": "口",
+    "role": "mouth",
+    "name": "*微笑み",
+    "x": 566
+  },
+  {
+    "y": 411,
+    "file": "assets/mouths-8.png",
+    "visible": false,
+    "group": "口",
+    "role": "mouth",
+    "name": "*悲しい",
+    "x": 569
+  },
+  {
+    "x": 580,
+    "y": 290,
+    "name": "*通常",
+    "file": "assets/brows-0.png",
+    "role": "brow",
+    "visible": true,
+    "group": "眉"
+  },
+  {
+    "y": 287,
+    "file": "assets/brows-1.png",
+    "visible": false,
+    "group": "眉",
+    "role": "brow",
+    "name": "*喜",
+    "x": 514
+  },
+  {
+    "y": 285,
+    "file": "assets/brows-2.png",
+    "visible": false,
+    "group": "眉",
+    "role": "brow",
+    "name": "*怒",
+    "x": 528
+  },
+  {
+    "y": 285,
+    "file": "assets/brows-3.png",
+    "visible": false,
+    "group": "眉",
+    "role": "brow",
+    "name": "*哀",
+    "x": 572
+  },
+  {
+    "y": 286,
+    "file": "assets/brows-4.png",
+    "visible": false,
+    "group": "眉",
+    "role": "brow",
+    "name": "*疑問",
+    "x": 524
+  },
+  {
+    "y": 286,
+    "file": "assets/brows-5.png",
+    "visible": false,
+    "group": "眉",
+    "role": "brow",
+    "name": "*困る",
+    "x": 538
+  },
+  {
+    "y": 0,
+    "file": "assets/mouth-closed.png",
+    "visible": false,
+    "group": "口",
+    "role": "mouth",
+    "name": "*閉じ",
+    "x": 0
+  },
+  {
+    "y": 238,
+    "file": "assets/body-point.png",
+    "visible": false,
+    "group": "体",
+    "role": "body",
+    "name": "*左上を指さす",
+    "x": 26
+  },
+  {
+    "y": 381,
+    "file": "assets/body-present.png",
+    "visible": false,
+    "group": "体",
+    "role": "body",
+    "name": "*手のひらで紹介",
+    "x": 151
+  },
+  {
+    "y": 354,
+    "file": "assets/body-think.png",
+    "visible": false,
+    "group": "体",
+    "role": "body",
+    "name": "*胸に手を添える",
+    "x": 86
+  },
+  {
+    "y": 0,
+    "file": "assets/face-color-1.png",
+    "visible": false,
+    "group": "顔色",
+    "role": "face",
+    "name": "*赤面",
+    "x": 0
+  },
+  {
+    "y": 0,
+    "file": "assets/face-color-2.png",
+    "visible": false,
+    "group": "顔色",
+    "role": "face",
+    "name": "*青ざめ",
+    "x": 0
+  },
+  {
+    "y": 0,
+    "file": "assets/face-color-3.png",
+    "visible": false,
+    "group": "顔色",
+    "role": "face",
+    "name": "*不調",
+    "x": 0
+  },
+  {
+    "y": 165,
+    "file": "assets/symbol-0.png",
+    "visible": true,
+    "group": "感情記号",
+    "role": "accessory",
+    "name": "*なし",
+    "x": 725
+  },
+  {
+    "y": 165,
+    "file": "assets/symbol-1.png",
+    "visible": false,
+    "group": "感情記号",
+    "role": "accessory",
+    "name": "*驚き",
+    "x": 725
+  },
+  {
+    "y": 165,
+    "file": "assets/symbol-2.png",
+    "visible": false,
+    "group": "感情記号",
+    "role": "accessory",
+    "name": "*疑問",
+    "x": 725
+  },
+  {
+    "y": 165,
+    "file": "assets/symbol-3.png",
+    "visible": false,
+    "group": "感情記号",
+    "role": "accessory",
+    "name": "*汗",
+    "x": 725
+  },
+  {
+    "y": 165,
+    "file": "assets/symbol-4.png",
+    "visible": false,
+    "group": "感情記号",
+    "role": "accessory",
+    "name": "*怒り",
+    "x": 725
+  },
+  {
+    "y": 165,
+    "file": "assets/symbol-5.png",
+    "visible": false,
+    "group": "感情記号",
+    "role": "accessory",
+    "name": "*きらめき",
+    "x": 725
+  },
+  {
+    "y": 165,
+    "file": "assets/symbol-6.png",
+    "visible": false,
+    "group": "感情記号",
+    "role": "accessory",
+    "name": "*ハート",
+    "x": 725
+  }
+]

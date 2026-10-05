@@ -13,7 +13,7 @@ procedure ValidateCompositionMaterials(Project: TRigmMovieProject);
 implementation
 uses System.Classes, System.Types, System.Math, System.IOUtils, System.StrUtils,
   System.Generics.Collections, Winapi.Windows, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg,
-  ArtDocument, RigmJson, RigmStorage, RigmSample, RigmRenderer, RigmMovieRendering, RigmMovieActing, RigmMovieChart;
+  ArtDocument, RigmJson, RigmStorage, RigmSample, RigmRenderer, RigmMovieRendering, RigmMovieActing, RigmMovieChart, RigmMoviePsdRendering;
 type
   TActorEntry = class
     Stamp: string;
@@ -241,6 +241,7 @@ begin
   TMonitor.Enter(CacheLock);
   try
     for var C in Project.Characters do if C.Visible then begin
+      if C.RenderFormat='psd' then begin ValidatePsdMovieCharacter(Project,C); Continue; end;
       var D := Actor(Project,C.FileName); var P := TRigmPose.Create;
       try
         CompositionPose(Project,C,D,0,nil,P);
@@ -324,6 +325,16 @@ begin
       GdiFlush;
       for var Character in Project.Characters do if Character.Visible then begin
         var Box := BaseRect(Character.X,Character.Y,Character.X+Character.Width,Character.Y+Character.Height);
+        if Character.RenderFormat='psd' then begin
+          var Pixels := RenderPsdMovieCharacter(Project,Character,Seconds,Audio,Max(1,Box.Width),Max(1,Box.Height));
+          for var Y := 0 to Box.Height-1 do if (Y+Box.Top>=0) and (Y+Box.Top<Project.Height) then
+            for var X := 0 to Box.Width-1 do if (X+Box.Left>=0) and (X+Box.Left<Project.Width) then begin
+              var P := (Y*Box.Width+X)*4; var Q := ((Y+Box.Top)*Project.Width+X+Box.Left)*4; var A := Pixels[P+3];
+              for var Channel := 0 to 2 do PByte(Bits)[Q+2-Channel] := (Pixels[P+Channel]*A+PByte(Bits)[Q+2-Channel]*(255-A)+127) div 255;
+              PByte(Bits)[Q+3] := 255;
+            end;
+          Continue;
+        end;
         var MotionImage: string;
         if Character.MotionFrame(Seconds,MotionImage) then begin
           var MotionBox := Box;

@@ -8,7 +8,7 @@ uses System.SysUtils, System.Classes, System.Generics.Collections,
 type
   TRigmLibraryEntry = class
   public
-    Name, FileName: string;
+    Name, FileName, RenderFormat: string;
     Sample: Boolean;
   end;
   TRigmWorkspaceDocument = class
@@ -63,12 +63,14 @@ type
     procedure ImportClick(Sender: TObject);
     procedure SampleClick(Sender: TObject);
     procedure PsdClick(Sender: TObject);
+    procedure CharacterSaved(Sender: TObject);
     procedure MovieClick(Sender: TObject);
     procedure Closing(Sender: TObject; var CanClose: Boolean);
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     procedure OpenSeparatedPsdFile(const FileName: string);
+    function OpenCharacterEditor(const Path: string): TForm;
     function ExecuteWorkspace(const Command: string; Args: TJSONObject): TJSONObject;
   protected
     procedure Resize; override;
@@ -80,7 +82,7 @@ var MainForm: TMainForm;
 implementation
 uses System.IOUtils, System.Types, System.Math, System.UITypes, Vcl.Dialogs,
   Winapi.Windows, RigmModel, RigmSample, RigmStorage, RigmRenderer, RigmToolbarIcons, RigmAppSettings, RigmJson,
-  RigmMovieModel, RigmEditor, System.StrUtils;
+  RigmMovieModel, RigmEditor, System.StrUtils, RigmCharacterCatalog, PsdStudioForm, PsdSession;
 
 {$R *.dfm}
 
@@ -233,22 +235,41 @@ begin
     TToolButton(FPagebar.FindComponent('WorkspaceCreate')).Down := Page='create';
     TToolButton(FPagebar.FindComponent('WorkspaceCharacters')).Down := Page='characters';
   end else if Command='open-work' then OpenMovieDocument(JS(Args,'path'))
-  else if Command='register-character' then begin
+  else if Command='edit-character' then begin
+    var Path := ExpandFileName(JS(Args,'path')); var View := OpenCharacterEditor(Path);
+    Result := TJSONObject.Create; Result.AddPair('renderFormat',CharacterFormat(Path)); Result.AddPair('editorClass',View.ClassName); Exit;
+  end else if Command='register-character' then begin
     var Path := ExpandFileName(JS(Args,'path')); if not FileExists(Path) then raise ERigm.Create('Character source does not exist');
+    if SameText(ExtractFileExt(Path),'.psdchar') or SameText(ExtractFileExt(Path),'.psd') then begin
+      var S := TPsdSession.Create(ExtractFileDir(FDirectory),False);
+      try
+        var Input := S.Workspace.Resolve('Exchange\import-'+NewRigmId.Replace('{','').Replace('}','')+LowerCase(ExtractFileExt(Path)),False);
+        TFile.Copy(Path,Input,False); // 入力原本を保持し、専用ルート内のファイル参照で読み込む。
+        var A := TJSONObject.Create;
+        try A.AddPair('path',Input); var R: TJSONObject;
+          if SameText(ExtractFileExt(Path),'.psdchar') then R := S.Command('open',A) else R := S.Command('import-psd',A);
+          R.Free;
+        finally A.Free; end;
+        if JS(Args,'name')<>'' then S.Character.Name := JS(Args,'name');
+        var Target := S.Workspace.Resolve('Characters\character-'+NewRigmId.Replace('{','').Replace('}','')+'.psdchar',False);
+        A := TJSONObject.Create;
+        try A.AddPair('path',Target); var R := S.Command('save',A); R.Free; finally A.Free; end;
+        RefreshLibrary(Self); FCreation.RefreshLibrary;
+        Result := TJSONObject.Create; Result.AddPair('path',Target); Result.AddPair('name',S.Character.Name); Result.AddPair('renderFormat','psd'); Exit;
+      finally S.Free; end;
+    end;
     var E := RigmEditor.TRigmEditor.Create;
     try
       if SameText(ExtractFileExt(Path),'.rigm') then E.Open(Path)
-      else if SameText(ExtractFileExt(Path),'.psd') then begin
-        var A := TJSONObject.Create; try A.AddPair('path',Path); var R := E.Execute('import-psd',A); R.Free; finally A.Free; end;
-      end else raise ERigm.Create('Character registration accepts RIGM or PSD');
+      else raise ERigm.Create('Character registration accepts RIGM, PSD character or PSD');
       if JS(Args,'name')<>'' then E.Document.Name := JS(Args,'name');
       var Target := TPath.Combine(FDirectory,'character-'+NewRigmId.Replace('{','').Replace('}','')+'.rigm');
       ForceDirectories(FDirectory); E.Save(Target); RefreshLibrary(Self); FCreation.RefreshLibrary;
-      Result := TJSONObject.Create; Result.AddPair('path',Target); Result.AddPair('name',E.Document.Name); Exit;
+      Result := TJSONObject.Create; Result.AddPair('path',Target); Result.AddPair('name',E.Document.Name); Result.AddPair('renderFormat','rigm'); Exit;
     finally E.Free; end;
   end else if Command='library' then begin
     Result := TJSONObject.Create; var A := TJSONArray.Create; Result.AddPair('characters',A);
-    for var E in FEntries do begin var O := TJSONObject.Create; O.AddPair('name',E.Name); O.AddPair('path',IfThen(E.Sample,'@sample',E.FileName)); A.AddElement(O); end; Exit;
+    for var E in FEntries do begin var O := TJSONObject.Create; O.AddPair('name',E.Name); O.AddPair('path',IfThen(E.Sample,'@sample',E.FileName)); O.AddPair('renderFormat',E.RenderFormat); A.AddElement(O); end; Exit;
   end else if Command<>'status' then raise ERigm.Create('Unknown workspace operation');
   Result := ActiveSession.Status; Result.AddPair('page',FWorkspacePage); AddN(Result,'openDocuments',FDocuments.Count);
   Result.AddPair('propertyPage',FActiveDocument.View.PropertyPageName);
@@ -269,7 +290,7 @@ begin
   Description := TLabel.Create(Self); Description.Parent := Header;
   FDescription := Description; Description.Name := 'LibraryDescription';
   Description.AutoSize := False; Description.WordWrap := True;
-  Description.Caption := 'キャラクターを選んで編集。レイヤー → ボーン → メッシュ → プレビュー'; Description.SetBounds(26, 65, 1000, 24);
+  Description.Caption := 'キャラクターを選んで編集。PSDの表情・表示、またはLive2D風のボーン・メッシュ'; Description.SetBounds(26, 65, 1000, 24);
   FToolbar := TRigmIconToolbar.Create(Self); FToolbar.Name := 'LibraryToolbar';
   FToolbar.Parent := Self; FToolbar.Align := alTop; FToolbar.Top := Header.Height;
   for I := 0 to 5 do begin
@@ -371,13 +392,13 @@ procedure TMainForm.RefreshLibrary(Sender: TObject);
       CharacterName: string; W, H, X, Y, P, C, A, OffsetX, OffsetY, Base, TW, TH: Integer;
       Row: PByte; Sample: TRigmDocument;
   begin
-    Entry := TRigmLibraryEntry.Create; Entry.FileName := FileName; Entry.Sample := IsSample;
+    Entry := TRigmLibraryEntry.Create; Entry.FileName := FileName; Entry.Sample := IsSample; Entry.RenderFormat := CharacterFormat(FileName);
     try
       if IsSample then begin
         Sample := TRigmDocument.Create;
         try PopulateRigmSample(Sample); Pixels := RenderRigm(Sample, nil, ScaleValue(120), W, H); CharacterName := '編集テスト用サンプル';
         finally Sample.Free; end;
-      end else Pixels := ReadRigmThumbnail(FileName, CharacterName, W, H);
+      end else Pixels := ReadCharacterThumbnail(FileName, CharacterName, W, H);
       Entry.Name := CharacterName; Bitmap := Vcl.Graphics.TBitmap.Create;
       try
         Bitmap.PixelFormat := pf32bit; Bitmap.SetSize(FImages.Width, FImages.Height); Bitmap.Canvas.Brush.Color := $003D3530; Bitmap.Canvas.FillRect(Rect(0, 0, Bitmap.Width, Bitmap.Height));
@@ -391,7 +412,10 @@ procedure TMainForm.RefreshLibrary(Sender: TObject);
             Row[(X + OffsetX) * 4 + 3] := 255;
           end;
         end;
-        Item := FList.Items.Add; Item.ImageIndex := FImages.Add(Bitmap, nil); Item.Caption := Entry.Name; Item.Data := Entry;
+        Item := FList.Items.Add; Item.ImageIndex := FImages.Add(Bitmap, nil); Item.Caption := '['+CharacterFormatLabel(FileName)+'] '+Entry.Name; Item.Data := Entry;
+        if Entry.RenderFormat='psd' then begin
+          var Reason: string; if not CharacterReadyForNewScript(FileName,Reason) then Item.Caption := Item.Caption+'（未完成）';
+        end;
       finally Bitmap.Free; end;
     except
       on E: Exception do begin Entry.Name := ChangeFileExt(ExtractFileName(FileName), '') + '（読み込み確認が必要）';
@@ -405,6 +429,8 @@ begin
   try
     FList.Items.Clear; FImages.Clear; FEntries.Clear;
     AddEntry('', True);
+    var PsdDirectory := TPath.Combine(ExtractFileDir(FDirectory),'Characters');
+    if DirectoryExists(PsdDirectory) then for var FileName in TDirectory.GetFiles(PsdDirectory,'*.psdchar',TSearchOption.soAllDirectories) do AddEntry(FileName,False);
     if DirectoryExists(FDirectory) then for var FileName in TDirectory.GetFiles(FDirectory, '*.rigm', TSearchOption.soTopDirectoryOnly) do AddEntry(FileName, False);
     if FList.Items.Count > 0 then FList.Items[0].Selected := True;
     FStatus.Caption := '  保存場所: ' + FDirectory + sLineBreak +
@@ -436,14 +462,30 @@ begin
 end;
 
 procedure TMainForm.OpenClick(Sender: TObject);
-var Entry: TRigmLibraryEntry; Form: TRigmEditorForm;
+var Entry: TRigmLibraryEntry;
 begin
   if FList.Selected = nil then begin MessageDlg('キャラクターを選択してください。', mtInformation, [mbOK], 0); Exit; end;
   Entry := TRigmLibraryEntry(FList.Selected.Data); if Entry.Sample then begin SampleClick(Sender); Exit; end;
-  Form := TRigmEditorForm.Create(Self);
-  try Form.OpenFile(Entry.FileName); Form.OnSaved := RefreshLibrary; Form.Show;
-  except on E: Exception do begin Form.Free; MessageDlg(E.Message, mtError, [mbOK], 0); end; end;
+  try OpenCharacterEditor(Entry.FileName);
+  except on E: Exception do MessageDlg(E.Message, mtError, [mbOK], 0); end;
 end;
+function TMainForm.OpenCharacterEditor(const Path: string): TForm;
+begin
+  if CharacterFormat(Path)='psd' then begin
+    for var Index := 0 to ComponentCount-1 do if Components[Index] is TPsdStudioForm then begin
+      var Existing := TPsdStudioForm(Components[Index]); Existing.ActivateCharacter(Path);
+      Existing.Show; Existing.BringToFront; Exit(Existing);
+    end;
+    var P := TPsdStudioForm.CreateForCharacter(Self,CharacterDataRoot(Path),Path);
+    P.OnSaved := CharacterSaved; Result := P;
+  end else begin
+    var R := TRigmEditorForm.Create(Self);
+    try R.OpenFile(Path); R.OnSaved := CharacterSaved; Result := R; except R.Free; raise; end;
+  end;
+  Result.Show;
+end;
+procedure TMainForm.CharacterSaved(Sender: TObject);
+begin RefreshLibrary(Self); if FCreation<>nil then FCreation.RefreshLibrary; end;
 
 procedure TMainForm.ImportClick(Sender: TObject);
 var Dialog: TOpenDialog; Form: TRigmEditorForm;
@@ -460,11 +502,14 @@ begin
 end;
 
 procedure TMainForm.OpenSeparatedPsdFile(const FileName: string);
-var Form: TRigmEditorForm;
 begin
-  Form := TRigmEditorForm.Create(Self);
-  try Form.OnSaved := RefreshLibrary; Form.OpenSeparatedPsd(FileName); Form.Show;
-  except Form.Free; raise; end;
+  var Root := ExtractFileDir(FDirectory); var Path := ExpandFileName(FileName);
+  if not Path.StartsWith(Root+'\',True) then begin
+    var Exchange := TPath.Combine(Root,'Exchange'); ForceDirectories(Exchange);
+    var CopyPath := TPath.Combine(Exchange,'import-'+NewRigmId.Replace('{','').Replace('}','')+'.psd');
+    TFile.Copy(Path,CopyPath,False); Path := CopyPath;
+  end;
+  var Form := TPsdStudioForm.CreateForCharacter(Self,Root,Path); Form.OnSaved := CharacterSaved; Form.Show;
 end;
 
 procedure TMainForm.PsdClick(Sender: TObject);
@@ -473,10 +518,12 @@ begin
   Dialog := TOpenDialog.Create(Self);
   try
     Dialog.Title := '分解済みPSDから開始（画像生成を省略）';
-    Dialog.Filter := '分解済みPhotoshop PSD (*.psd)|*.psd'; Dialog.DefaultExt := 'psd';
+    Dialog.Filter := 'PSDキャラ (*.psdchar)|*.psdchar|分解済みPhotoshop PSD (*.psd)|*.psd'; Dialog.DefaultExt := 'psdchar';
     Dialog.Options := [ofFileMustExist, ofPathMustExist, ofEnableSizing, ofNoChangeDir];
     if Dialog.Execute then
-      try OpenSeparatedPsdFile(Dialog.FileName);
+      try
+        if CharacterFormat(Dialog.FileName)='psd' then OpenCharacterEditor(Dialog.FileName)
+        else OpenSeparatedPsdFile(Dialog.FileName);
       except on E: Exception do MessageDlg(E.Message, mtError, [mbOK], 0); end;
   finally Dialog.Free; end;
 end;
@@ -491,6 +538,9 @@ begin
   for var I := ComponentCount - 1 downto 0 do if Components[I] is TRigmEditorForm then begin
     var Form := TRigmEditorForm(Components[I]); if Form=FHost then Continue; Form.Close;
     if Form.Visible then begin CanClose := False; Exit; end;
+  end;
+  for var I := ComponentCount - 1 downto 0 do if Components[I] is TPsdStudioForm then begin
+    var Form := TPsdStudioForm(Components[I]); Form.Close; if Form.Visible then begin CanClose := False; Exit; end;
   end;
 end;
 

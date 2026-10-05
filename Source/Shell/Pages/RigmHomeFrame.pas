@@ -1,0 +1,36 @@
+﻿unit RigmHomeFrame;
+interface
+uses System.Classes, Vcl.Forms, RigmPageNavigation;
+type
+  TRigmHomeFrame = class(TFrame)
+  private
+    FOnNavigate: TRigmNavigateEvent;
+    procedure Navigate(Sender: TObject);
+  public
+    constructor Create(AOwner: TComponent); override;
+    property OnNavigate: TRigmNavigateEvent read FOnNavigate write FOnNavigate;
+  end;
+implementation
+uses Vcl.Controls, Vcl.StdCtrls;
+{$R *.dfm}
+constructor TRigmHomeFrame.Create(AOwner: TComponent);
+  procedure Entry(const Name,Text: string; Page: TRigmAppPage; Y: Integer);
+  begin
+    var Button := TButton.Create(Self); Button.Parent := Self; Button.Name := Name;
+    Button.SetBounds(48,Y,460,58); Button.Caption := Text; Button.Tag := Ord(Page); Button.OnClick := Navigate;
+  end;
+begin
+  inherited; Align := alClient;
+  var Title := TLabel.Create(Self); Title.Parent := Self; Title.SetBounds(48,38,740,36);
+  Title.Font.Size := 22; Title.Caption := '作業を選んでください';
+  Entry('HomeCharacters','キャラ管理・PSD制作',apCharacters,114);
+  Entry('HomeScripts','台本管理（新シェルへの移行待ち）',apScripts,194);
+  Entry('HomeMovie','動画編集（新シェルへの移行待ち）',apMovieEdit,274);
+  var Note := TLabel.Create(Self); Note.Parent := Self; Note.SetBounds(48,370,930,130); Note.WordWrap := True;
+  Note.Caption := 'この隔離版では、ホーム・ページ切替・PSDキャラ編集を確認できます。'+#13#10+
+    '既存の動画・台本・Live2D機能は通常版で利用できます。新シェルへの移行は未完了です。'+#13#10+
+    'ページは初回選択時に作り、戻った後も編集中の状態を保持します。';
+end;
+procedure TRigmHomeFrame.Navigate(Sender: TObject);
+begin if Assigned(FOnNavigate) then FOnNavigate(Self,TRigmAppPage(TButton(Sender).Tag),''); end;
+end.

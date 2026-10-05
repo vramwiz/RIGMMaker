@@ -14,7 +14,8 @@ function MovieSubtitlePage(const Text: string; Canvas: TCanvas; Width,Lines: Int
 
 implementation
 uses System.Math, System.Types, System.Classes, Winapi.Windows, RigmRenderer, RigmJson,
-  Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, RigmMoviePhonemes, RigmMovieCompositor, RigmMovieActing;
+  Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, RigmMoviePhonemes, RigmMovieCompositor, RigmMovieActing,
+  RigmCharacterCatalog, RigmMovieComposition, RigmMoviePsdRendering;
 
 function MovieSubtitlePage(const Text: string; Canvas: TCanvas; Width,Lines: Integer;
   Progress: Double; out PageCount: Integer): string;
@@ -96,6 +97,16 @@ var Pose: TRigmPose; Pixels: TBytes; W,H,L,T,X,Y,P,Q,A: Integer; Row: PByte;
   C: TRigmMovieCue; Local, Start: Double; Picture: TPicture; R: TRect; Info: TBitmapInfo;
   DC: HDC; Dib,Previous: HGDIOBJ; Bits: Pointer; CaptionCanvas: TCanvas;
 begin
+  if (Project.Characters.Count=0) and (CharacterFormat(Project.CharacterFile)='psd') then begin
+    var Copy := Project.Clone;
+    try
+      var Actor := TRigmMovieCharacter.Create; Copy.Characters.Add(Actor); Actor.FileName := ResolveMoviePath(Project.FileName,Project.CharacterFile);
+      Actor.RenderFormat := 'psd'; Actor.X := 700; Actor.Y := 80; Actor.Width := 520; Actor.Height := 950;
+      if Copy.Cues.Count>0 then Actor.SpeakerId := Copy.Cues[0].SpeakerId;
+      Actor.Expressions.Free; Actor.Expressions := PsdMovieExpressions(Actor.FileName);
+      Exit(RenderComposition(Copy,Seconds,Audio));
+    finally Copy.Free; end;
+  end;
   if (Project.Scenes.Count>0) or (Project.Characters.Count>0) then Exit(RenderComposition(Project,Seconds,Audio));
   Result := Vcl.Graphics.TBitmap.Create; Pose := TRigmPose.Create;
   try

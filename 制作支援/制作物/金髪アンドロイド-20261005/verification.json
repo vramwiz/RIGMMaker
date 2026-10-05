@@ -1,0 +1,25 @@
+{
+  "checks": {
+    "all_png_pixels_equal_saved_rgba": true,
+    "all_positions_equal": true,
+    "all_visibility_equal": true,
+    "all_roles_equal": true,
+    "all_parent_ids_equal": true,
+    "all_stages_complete": true,
+    "reference_rgba_equal_source": true,
+    "each_exclusive_group_one_visible": true,
+    "42_meshes": true,
+    "6_bones": true,
+    "saved_neutral_equals_input_composition": true
+  },
+  "passed": true,
+  "final": "D:\\DelphiProg\\MyApp\\RIGMMaker\\制作支援\\制作物\\金髪アンドロイド-20261005\\金髪アンドロイド-解説用.rigm",
+  "sha256": "62f6b30f8b42b8b0edd8495ad718996d6b375f03410c40e66362c8688a59110a",
+  "counts": {
+    "images": 43,
+    "editable_images": 42,
+    "groups": 8,
+    "bones": 6,
+    "meshes": 42
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "data": {
+    "path": "D:\\DelphiProg\\MyApp\\RIGMMaker\\制作支援\\制作物\\金髪アンドロイド-20261005\\感情記号9種\\session\\library\\character-26B3AB6F-91A0-4F82-8E4B-DCCF57EFA793.rigm",
+    "name": "金髪アンドロイド・解説用（感情記号9種追加）",
+    "pipes": {
+      "controlPipe": "RIGMMaker.22024.{C05A22B0-6EE4-4D91-AB77-0E9EAB684D38}.control",
+      "commandPipe": "RIGMMaker.22024.{C05A22B0-6EE4-4D91-AB77-0E9EAB684D38}.control",
+      "routing": "common-command",
+      "apiVersion": 2,
+      "pagePipe": "RIGMMaker.22024.{C05A22B0-6EE4-4D91-AB77-0E9EAB684D38}.layer.1",
+      "page": "layer",
+      "epoch": 1,
+      "connectionFile": "D:\\DelphiProg\\MyApp\\RIGMMaker\\制作支援\\制作物\\金髪アンドロイド-20261005\\感情記号9種\\session\\pipes\\RIGMMaker.22024.{C05A22B0-6EE4-4D91-AB77-0E9EAB684D38}.control.json"
+    }
+  },
+  "requestId": "e357eb91-a8e9-4309-83c0-cb417fd0eac8"
+}

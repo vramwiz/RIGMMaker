@@ -13,7 +13,7 @@ function CompositionRequests(Project: TRigmMovieProject): TJSONObject;
 
 implementation
 uses System.SysUtils, System.IOUtils, System.Math, System.StrUtils,
-  RigmJson, RigmModel, RigmMovieComposition, RigmMovieCompositor, RigmStorage, RigmSample, RigmMovieMotionLibrary;
+  RigmJson, RigmModel, RigmMovieComposition, RigmMovieCompositor, RigmStorage, RigmSample, RigmMovieMotionLibrary, RigmMoviePsdRendering, RigmCharacterCatalog;
 function IsCompositionCommand(const Name: string): Boolean;
 begin
   Result := MatchText(Name,['composition-enable','add-character','update-character','delete-character','add-scene','update-scene',
@@ -56,7 +56,19 @@ begin
     Exit; // Speech and display text never overwrite each other.
   end;
   if Name='add-character' then begin
-    var C := TRigmMovieCharacter.FromJson(JO(Args,'character')); Project.Characters.Add(C);
+    var C := TRigmMovieCharacter.FromJson(JO(Args,'character'));
+    try
+      var Reason: string;
+      if not CharacterReadyForNewScript(ResolveMoviePath(Project.FileName,C.FileName),Reason) then raise ERigm.Create(Reason);
+      Project.Characters.Add(C);
+    except C.Free; raise; end;
+    if C.RenderFormat='psd' then begin
+      var Presets := PsdMovieExpressions(ResolveMoviePath(Project.FileName,C.FileName));
+      try for var Pair in Presets do if C.Expressions.GetValue(Pair.JsonString.Value)=nil then C.Expressions.AddPair(Pair.JsonString.Value,Pair.JsonValue.Clone as TJSONValue);
+      finally Presets.Free; end;
+      if Project.Speaker(C.SpeakerId)=nil then begin var S := TRigmMovieSpeaker.Create; S.Id := C.SpeakerId; S.Name := C.Name; Project.Speakers.Add(S); end;
+      Exit;
+    end;
     var Motions := LoadCharacterMotions(ResolveMoviePath(Project.FileName,C.FileName));
     try for var Pair in Motions do if C.Motions.GetValue(Pair.JsonString.Value)=nil then C.Motions.AddPair(Pair.JsonString.Value,Pair.JsonValue.Clone as TJSONValue); finally Motions.Free; end;
     if Project.Speaker(C.SpeakerId)=nil then begin var S := TRigmMovieSpeaker.Create; S.Id := C.SpeakerId; S.Name := C.Name; Project.Speakers.Add(S); end;
@@ -65,7 +77,13 @@ begin
   if Name='delete-character' then begin Project.Characters.Remove(RequiredCharacter); Exit; end;
   if Name='update-character' then begin
     var C := RequiredCharacter;
-    StringValue(C.Name,'name'); StringValue(C.FileName,'file'); StringValue(C.SpeakerId,'speaker'); StringValue(C.InitialPosition,'initialPosition');
+    if (Args.GetValue('file')<>nil) and not SameText(C.FileName,JS(Args,'file')) then begin
+      var Reason: string;
+      if not CharacterReadyForNewScript(ResolveMoviePath(Project.FileName,JS(Args,'file')),Reason) then raise ERigm.Create(Reason);
+    end;
+      StringValue(C.Name,'name'); StringValue(C.FileName,'file'); StringValue(C.SpeakerId,'speaker'); StringValue(C.InitialPosition,'initialPosition');
+      StringValue(C.RenderFormat,'renderFormat');
+      if Args.GetValue('psdView')<>nil then begin C.PsdView.Free; C.PsdView := JO(Args,'psdView').Clone as TJSONObject; end;
     NumberValue(C.X,'x'); NumberValue(C.Y,'y'); NumberValue(C.Width,'width'); NumberValue(C.Height,'height');
     if Args.GetValue('visible')<>nil then C.Visible := JB(Args,'visible');
     if Args.GetValue('rigSafe')<>nil then C.RigSafe := JB(Args,'rigSafe');
@@ -86,12 +104,14 @@ begin
   end;
   if Name='register-motion' then begin
     var C := RequiredCharacter; var Motion := JO(Args,'motion'); var Key := JS(Args,'name');
+    if C.RenderFormat='psd' then raise ERigm.Create('PSDの連番はキャラパッケージに登録し、psdView.nonFrontIdで選択してください。');
     for var V in JA(Motion,'frames') do
       if not FileExists(ResolveMoviePath(Project.FileName,JS(TJSONObject(V),'image'))) then raise ERigm.Create('Motion frame image does not exist');
     C.Motions.RemovePair(Key).Free; C.Motions.AddPair(Key,Motion.Clone as TJSONObject); C.Validate; Exit;
   end;
   if MatchText(Name,['select-motion','stop-motion']) then begin
     var C := RequiredCharacter;
+    if C.RenderFormat='psd' then raise ERigm.Create('PSDのポーズ/連番と小さな動きはpsdViewで指定してください。');
     if Name='stop-motion' then C.ActiveMotion := '' else begin
       C.ActiveMotion := JS(Args,'name'); C.MotionStart := JN(Args,'start'); C.MotionDuration := JN(Args,'duration',-1);
     end;
@@ -135,7 +155,13 @@ begin
   end;
   if Name='analyze-script' then begin
     for var Character in Project.Characters do begin
-      var D: TRigmDocument := nil;
+        if Character.RenderFormat='psd' then begin
+          var Presets := PsdMovieExpressions(ResolveMoviePath(Project.FileName,Character.FileName));
+          try for var P in Presets do if Character.Expressions.GetValue(P.JsonString.Value)=nil then Character.Expressions.AddPair(P.JsonString.Value,P.JsonValue.Clone as TJSONValue);
+          finally Presets.Free; end;
+          Continue;
+        end;
+        var D: TRigmDocument := nil;
       try
         if Character.FileName='@sample' then begin D := TRigmDocument.Create; PopulateRigmSample(D); end
         else D := LoadRigm(ResolveMoviePath(Project.FileName,Character.FileName));

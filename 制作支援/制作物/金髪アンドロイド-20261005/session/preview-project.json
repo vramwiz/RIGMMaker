@@ -1,0 +1,85 @@
+{
+  "format": "RIGM-MOVIE",
+  "formatVersion": 1,
+  "projectId": "{1A96A3FC-680F-413A-B2F5-8665A9EAEE6F}",
+  "ffmpeg": "",
+  "title": "新しい解説動画",
+  "character": "D:\\DelphiProg\\MyApp\\RIGMMaker\\制作支援\\制作物\\金髪アンドロイド-20261005\\金髪アンドロイド-解説用.rigm",
+  "engineUrl": "http://127.0.0.1:50021",
+  "width": 720,
+  "height": 1280,
+  "fps": 30,
+  "outputPreset": "custom",
+  "encodeProfile": "balanced",
+  "outputTarget": "",
+  "workflow": {
+    "stage": "script",
+    "previewKey": "",
+    "previewPath": "",
+    "previewHash": "",
+    "videoKey": "",
+    "videoPath": "",
+    "videoHash": ""
+  },
+  "backgroundColor": 3156000,
+  "revision": 3,
+  "speakers": [
+    {
+      "id": "narrator",
+      "name": "ナレーター",
+      "styleId": -1,
+      "speed": 1,
+      "pitch": 0,
+      "intonation": 1,
+      "volume": 1
+    }
+  ],
+  "cues": [
+    {
+      "id": "{3155F7E2-6788-4710-BBEC-A66A4D93752D}",
+      "scene": "scene1",
+      "speaker": "narrator",
+      "text": "素材の目パチと口形を確認します。",
+      "subtitle": "素材の目パチと口形を確認します。",
+      "expression": "neutral",
+      "motion": "idle",
+      "background": "",
+      "pause": 0.3,
+      "audioSeconds": 0,
+      "waveFile": "",
+      "labFile": "",
+      "audioKey": "",
+      "parameters": {},
+      "acting": {
+        "mouthMode": "auto",
+        "blinkMode": "auto",
+        "imageAttention": "auto",
+        "mouthGain": 1,
+        "lipLead": 0,
+        "blinkStrength": 1,
+        "blinkInterval": 4,
+        "blinkDuration": 0.16,
+        "blinkPhase": 0.73,
+        "headGain": 1,
+        "bodyGain": 1,
+        "onset": 0,
+        "duration": -1,
+        "fadeIn": 0,
+        "fadeOut": 0,
+        "variants": []
+      }
+    }
+  ],
+  "total": 1,
+  "offset": 0,
+  "pipes": {
+    "controlPipe": "RIGMMaker.33740.{4D383F28-4238-4245-826A-19CCEADA449B}.control",
+    "commandPipe": "RIGMMaker.33740.{4D383F28-4238-4245-826A-19CCEADA449B}.control",
+    "routing": "common-command",
+    "apiVersion": 2,
+    "pagePipe": "",
+    "page": "preview",
+    "epoch": 4,
+    "connectionFile": "D:\\DelphiProg\\MyApp\\RIGMMaker\\制作支援\\制作物\\金髪アンドロイド-20261005\\session\\pipes\\RIGMMaker.33740.{4D383F28-4238-4245-826A-19CCEADA449B}.control.json"
+  }
+}

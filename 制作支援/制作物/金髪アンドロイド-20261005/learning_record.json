@@ -1,0 +1,65 @@
+{
+  "date": "2026-10-05",
+  "status": "created_registered_saved_verified",
+  "user_visual_acceptance": "not_requested_or_received",
+  "source": "C:/Users/vramw/Pictures/magnific__background__16889.png",
+  "source_size": [1152, 2048],
+  "source_sha256": "C1A9A098C7119EE6994422C70773D5BEDA08CCB1A40406AE989D237B4137DF80",
+  "final": "金髪アンドロイド-解説用.rigm",
+  "registered_character": "金髪アンドロイド・解説用（表情・口パク・ポーズ・感情）",
+  "registered_file": "D:/Users/take6/RIGMMaker/RIGM/character-5F644440-BD54-4F76-A1C2-91E152D6516D.rigm",
+  "counts": {"editable_image_parts": 42, "reference_images": 1, "groups": 8, "bones": 6, "meshes": 42},
+  "groups": {
+    "目": ["通常", "半開き", "閉じ", "笑顔閉じ", "見開き", "やさしい目"],
+    "眉": ["原画保持", "通常", "喜", "怒", "哀", "疑問", "困る"],
+    "口": ["通常", "閉じ", "ん", "半開き", "あ", "い", "う", "え", "お", "微笑み", "悲しい"],
+    "体": ["通常", "左上を指さす", "手のひらで紹介", "胸に手を添える"],
+    "顔色": ["通常", "赤面", "青ざめ", "不調"],
+    "髪": ["原画保持", "通常"],
+    "後ろ髪": ["後ろ髪"],
+    "感情記号": ["なし", "驚き", "疑問", "汗", "怒り", "きらめき", "ハート"]
+  },
+  "method": {
+    "generation": "built-in image_gen.imagegen; actual alpha preserved; original full output copied to generated/",
+    "original_parts": "原画の両目・眉・口・体を保持。元画像は非表示の比較用として原RGBAのまま保存。",
+    "face": "生成した肌素体で上部を補完。下部は元の肌・鼻・顎との連続を調整。原画との完全な画素一致は保証しない。",
+    "hair": "元画素による抽出を保持。顔色で見える残留画素を内蔵画像生成で補正した髪を通常として追加。原画の後ろ髪も独立して保持。",
+    "colors": "同じ肌素体の通常・赤面・青ざめ・不調を生成し、色差を既存の顔シルエットに適用。",
+    "poses": "頭部を保持して体全体を差し替える採用済み手順。首のアンカーと足底位置を合わせる。生成領域内の画素一致は主張しない。",
+    "symbols": "単純な漫画記号をSystem.Drawingで透過PNGとして描画。",
+    "app": "専用パイプと設定ディレクトリーの隔離プロセス。PNG取り込み、役割、表示、階層、ボーン、メッシュ、検証、保存、ライブラリ登録はアプリで実行。"
+  },
+  "verification": {
+    "native_validation_errors": 0,
+    "all_stages_complete": true,
+    "saved_png_rgba_positions_roles_hierarchy_visibility": "verification.json の全11項目が成功",
+    "native_preview_jobs": 4,
+    "native_preview_cases": ["通常・口閉じ", "完全に閉じた目", "開口素材", "時刻0.08秒の自動まばたき"],
+    "test_audio": "none; audio-driven vowel timing not tested",
+    "test_window": "Start-Process -WindowStyle Hidden; no foreground desktop window shown",
+    "reference_unchanged": true,
+    "source_sha256_unchanged": true
+  },
+  "reusable_rules": [
+    "旧学習記録の絶対パス、パーツID、キャンバス寸法、ジョブIDは新しい文書へ再利用しない。",
+    "両目・両眉は左右一組で作り、シート全体で倍率を合わせる。",
+    "生成シートの周囲の薄い光や肌の残留を確認し、部位の白目・歯は保持する。",
+    "前髪と肌の境界は、通常色だけでなく赤面・青ざめ・閉じた目でも拡大して確認する。",
+    "素材加工ツールの完了とexit codeを確認してから最新PNGを読む。進行中セッションを捨てて古いPNGを評価しない。",
+    "透明余白の切り詰めは一度だけ行い、左・上の削除量を配置へ加える。やり直しは加工前素材から始める。",
+    "文書のpartsは50件ごとに全ページを読む。この制作は51項目あり、先頭50件だけでは記号のなしが欠ける。",
+    "PNGの左上座標からRIGMの画像中心座標へ変換する。centerX=left+width/2-576、centerY=top+height/2-1024。",
+    "上に描くグループをorder=0へ置く。保存した階層の合成を別の読み取り処理でも確認する。",
+    "GDI+とPillowの半透明画素の丸め結果は一致しない場合がある。保存画像の元RGBA・属性と、同一計算方式による入力合成を照合する。",
+    "通常目と閉じ・半開きの役割と名前をアプリの素材方式へ合わせる。笑顔閉じ等の特殊目は固定表情として扱われる。"
+  ],
+  "learning_references": [
+    "../../制作手順/パーツ分解.md",
+    "../../制作手順/差分作成.md",
+    "../../学習記録/AIArtToPSD/Sample/face_foundation_fix_20261002/learning_record.json",
+    "../../学習記録/AIArtToPSD/Sample/syncroh2_expressions_20261002/learning_record.json",
+    "../../学習記録/AIArtToPSD/Sample/body_pose_trial_20261001/learning_record.json",
+    "../../学習記録/AIArtToPSD/Sample/full_body_pose_trial_20261001/learning_record.json"
+  ],
+  "artifacts": ["prompts.json", "表情設定.json", "verification.json", "native-preview-verification.json", "saved-variants-review.png", "目パチ-口形-確認.gif", "使い方.txt"]
+}

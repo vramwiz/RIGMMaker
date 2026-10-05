@@ -1,0 +1,290 @@
+{
+  "困惑": {
+    "variants": [
+      {
+        "choice": "*悲しい",
+        "partId": "{8CE314F4-DB96-4C36-9AD4-2AB7D1364302}",
+        "group": "口",
+        "groupId": "{AB2E6398-19B7-456F-9BC0-5E7521D5D19B}"
+      },
+      {
+        "choice": "*胸に手を添える",
+        "partId": "{1FFF707F-77D9-4953-AAD1-E8A91BBDE982}",
+        "group": "体",
+        "groupId": "{3E39399F-51DE-4D84-9AA0-ABCA8DF1BDB5}"
+      },
+      {
+        "choice": "*困る",
+        "partId": "{8707C86E-4B82-478D-8376-2F9B31A004C0}",
+        "group": "眉",
+        "groupId": "{FA0E0637-48C9-4A0D-B558-74FF203FB462}"
+      },
+      {
+        "choice": "*通常",
+        "partId": "{CACA6912-BFBD-47A6-822E-C0CAED67FBFB}",
+        "group": "髪",
+        "groupId": "{6C9C4756-B1D3-42C3-ADB6-245F571CFB15}"
+      },
+      {
+        "choice": "*汗",
+        "partId": "{3328672E-7A9F-45ED-8566-3EA3E0A5545D}",
+        "group": "感情記号",
+        "groupId": "{97317B85-09F6-4F23-AC22-9A2991008F6E}"
+      },
+      {
+        "choice": "*青ざめ",
+        "partId": "{CFB00FFF-3B1B-47DB-A96F-E250787B38D9}",
+        "group": "顔色",
+        "groupId": "{6DE8267C-985F-4174-B29C-F9E1DB8A0654}"
+      },
+      {
+        "choice": "*通常",
+        "partId": "{B863791C-97C4-4ACA-86E6-E11E5B1F5F15}",
+        "group": "目",
+        "groupId": "{A53DAF43-D7F8-4E09-8232-D2EE640C6FD6}"
+      }
+    ],
+    "mouthAnimate": true,
+    "blinkAnimate": true
+  },
+  "疑問": {
+    "variants": [
+      {
+        "choice": "*半開き",
+        "partId": "{BD02B60C-6511-4E07-961E-AA751D55B20D}",
+        "group": "口",
+        "groupId": "{AB2E6398-19B7-456F-9BC0-5E7521D5D19B}"
+      },
+      {
+        "choice": "*胸に手を添える",
+        "partId": "{1FFF707F-77D9-4953-AAD1-E8A91BBDE982}",
+        "group": "体",
+        "groupId": "{3E39399F-51DE-4D84-9AA0-ABCA8DF1BDB5}"
+      },
+      {
+        "choice": "*疑問",
+        "partId": "{5602AA36-119C-4912-851B-BE63DA40849D}",
+        "group": "眉",
+        "groupId": "{FA0E0637-48C9-4A0D-B558-74FF203FB462}"
+      },
+      {
+        "choice": "*通常",
+        "partId": "{CACA6912-BFBD-47A6-822E-C0CAED67FBFB}",
+        "group": "髪",
+        "groupId": "{6C9C4756-B1D3-42C3-ADB6-245F571CFB15}"
+      },
+      {
+        "choice": "*疑問",
+        "partId": "{A8446850-9C27-400A-9294-076BFFD93024}",
+        "group": "感情記号",
+        "groupId": "{97317B85-09F6-4F23-AC22-9A2991008F6E}"
+      },
+      {
+        "choice": "*通常",
+        "partId": "{8E7D2BEC-4C42-4FE2-9F6D-7A6C9F57ADB4}",
+        "group": "顔色",
+        "groupId": "{6DE8267C-985F-4174-B29C-F9E1DB8A0654}"
+      },
+      {
+        "choice": "*やさしい目",
+        "partId": "{D1AB0EBD-E348-4C4B-96DE-F727BEA1C06D}",
+        "group": "目",
+        "groupId": "{A53DAF43-D7F8-4E09-8232-D2EE640C6FD6}"
+      }
+    ],
+    "mouthAnimate": true,
+    "blinkAnimate": false
+  },
+  "喜び": {
+    "variants": [
+      {
+        "choice": "*微笑み",
+        "partId": "{D60A63F3-0B0A-4F3F-9A6B-0BDF3910C203}",
+        "group": "口",
+        "groupId": "{AB2E6398-19B7-456F-9BC0-5E7521D5D19B}"
+      },
+      {
+        "choice": "*手のひらで紹介",
+        "partId": "{9EDFA23D-8652-4254-84AD-6F4B1BDDD849}",
+        "group": "体",
+        "groupId": "{3E39399F-51DE-4D84-9AA0-ABCA8DF1BDB5}"
+      },
+      {
+        "choice": "*喜",
+        "partId": "{D4BE23DA-D4C5-4EEA-AFDE-57E9F4C86BD7}",
+        "group": "眉",
+        "groupId": "{FA0E0637-48C9-4A0D-B558-74FF203FB462}"
+      },
+      {
+        "choice": "*通常",
+        "partId": "{CACA6912-BFBD-47A6-822E-C0CAED67FBFB}",
+        "group": "髪",
+        "groupId": "{6C9C4756-B1D3-42C3-ADB6-245F571CFB15}"
+      },
+      {
+        "choice": "*きらめき",
+        "partId": "{1E33F2D1-D8B3-4A74-9D79-C68D9FCF50E9}",
+        "group": "感情記号",
+        "groupId": "{97317B85-09F6-4F23-AC22-9A2991008F6E}"
+      },
+      {
+        "choice": "*赤面",
+        "partId": "{C2FA7530-E537-421A-B784-06AAA2852E22}",
+        "group": "顔色",
+        "groupId": "{6DE8267C-985F-4174-B29C-F9E1DB8A0654}"
+      },
+      {
+        "choice": "*笑顔閉じ",
+        "partId": "{5FDCAC4B-A008-4C71-8A8B-E58FBBB0DA8D}",
+        "group": "目",
+        "groupId": "{A53DAF43-D7F8-4E09-8232-D2EE640C6FD6}"
+      }
+    ],
+    "mouthAnimate": true,
+    "blinkAnimate": false
+  },
+  "驚き": {
+    "variants": [
+      {
+        "choice": "*お",
+        "partId": "{7075B107-A976-447D-8456-23D225FC9205}",
+        "group": "口",
+        "groupId": "{AB2E6398-19B7-456F-9BC0-5E7521D5D19B}"
+      },
+      {
+        "choice": "*左上を指さす",
+        "partId": "{F274D791-8208-4F4D-A228-D756D5FB16C2}",
+        "group": "体",
+        "groupId": "{3E39399F-51DE-4D84-9AA0-ABCA8DF1BDB5}"
+      },
+      {
+        "choice": "*疑問",
+        "partId": "{5602AA36-119C-4912-851B-BE63DA40849D}",
+        "group": "眉",
+        "groupId": "{FA0E0637-48C9-4A0D-B558-74FF203FB462}"
+      },
+      {
+        "choice": "*通常",
+        "partId": "{CACA6912-BFBD-47A6-822E-C0CAED67FBFB}",
+        "group": "髪",
+        "groupId": "{6C9C4756-B1D3-42C3-ADB6-245F571CFB15}"
+      },
+      {
+        "choice": "*驚き",
+        "partId": "{67B11B61-7E7F-4AA3-8C06-4B971AF68B1B}",
+        "group": "感情記号",
+        "groupId": "{97317B85-09F6-4F23-AC22-9A2991008F6E}"
+      },
+      {
+        "choice": "*通常",
+        "partId": "{8E7D2BEC-4C42-4FE2-9F6D-7A6C9F57ADB4}",
+        "group": "顔色",
+        "groupId": "{6DE8267C-985F-4174-B29C-F9E1DB8A0654}"
+      },
+      {
+        "choice": "*見開き",
+        "partId": "{3FD8D250-82CD-4A30-9771-4D6E35A34295}",
+        "group": "目",
+        "groupId": "{A53DAF43-D7F8-4E09-8232-D2EE640C6FD6}"
+      }
+    ],
+    "mouthAnimate": true,
+    "blinkAnimate": false
+  },
+  "通常": {
+    "variants": [
+      {
+        "choice": "*通常",
+        "partId": "{78F91D2C-C656-4D64-855D-65E4A48F29D9}",
+        "group": "口",
+        "groupId": "{AB2E6398-19B7-456F-9BC0-5E7521D5D19B}"
+      },
+      {
+        "choice": "*通常",
+        "partId": "{F0B24F3D-34DA-434E-BAAF-06DD63C32483}",
+        "group": "体",
+        "groupId": "{3E39399F-51DE-4D84-9AA0-ABCA8DF1BDB5}"
+      },
+      {
+        "choice": "*通常",
+        "partId": "{73F6003D-A411-4C5E-B44B-2D16CD5CC063}",
+        "group": "眉",
+        "groupId": "{FA0E0637-48C9-4A0D-B558-74FF203FB462}"
+      },
+      {
+        "choice": "*通常",
+        "partId": "{CACA6912-BFBD-47A6-822E-C0CAED67FBFB}",
+        "group": "髪",
+        "groupId": "{6C9C4756-B1D3-42C3-ADB6-245F571CFB15}"
+      },
+      {
+        "choice": "*なし",
+        "partId": "{129519F1-28A7-4957-ADFF-52B96EBA0EB2}",
+        "group": "感情記号",
+        "groupId": "{97317B85-09F6-4F23-AC22-9A2991008F6E}"
+      },
+      {
+        "choice": "*通常",
+        "partId": "{8E7D2BEC-4C42-4FE2-9F6D-7A6C9F57ADB4}",
+        "group": "顔色",
+        "groupId": "{6DE8267C-985F-4174-B29C-F9E1DB8A0654}"
+      },
+      {
+        "choice": "*通常",
+        "partId": "{B863791C-97C4-4ACA-86E6-E11E5B1F5F15}",
+        "group": "目",
+        "groupId": "{A53DAF43-D7F8-4E09-8232-D2EE640C6FD6}"
+      }
+    ],
+    "mouthAnimate": true,
+    "blinkAnimate": true
+  },
+  "怒り": {
+    "variants": [
+      {
+        "choice": "*い",
+        "partId": "{941CD8B1-60DC-4111-A940-C59A005C53D4}",
+        "group": "口",
+        "groupId": "{AB2E6398-19B7-456F-9BC0-5E7521D5D19B}"
+      },
+      {
+        "choice": "*通常",
+        "partId": "{F0B24F3D-34DA-434E-BAAF-06DD63C32483}",
+        "group": "体",
+        "groupId": "{3E39399F-51DE-4D84-9AA0-ABCA8DF1BDB5}"
+      },
+      {
+        "choice": "*怒",
+        "partId": "{02CFF11F-10F5-4572-808A-EA8DE950BFD0}",
+        "group": "眉",
+        "groupId": "{FA0E0637-48C9-4A0D-B558-74FF203FB462}"
+      },
+      {
+        "choice": "*通常",
+        "partId": "{CACA6912-BFBD-47A6-822E-C0CAED67FBFB}",
+        "group": "髪",
+        "groupId": "{6C9C4756-B1D3-42C3-ADB6-245F571CFB15}"
+      },
+      {
+        "choice": "*怒り",
+        "partId": "{EDD4CB8D-DF06-4233-86C5-09E5A492B27C}",
+        "group": "感情記号",
+        "groupId": "{97317B85-09F6-4F23-AC22-9A2991008F6E}"
+      },
+      {
+        "choice": "*赤面",
+        "partId": "{C2FA7530-E537-421A-B784-06AAA2852E22}",
+        "group": "顔色",
+        "groupId": "{6DE8267C-985F-4174-B29C-F9E1DB8A0654}"
+      },
+      {
+        "choice": "*半開き",
+        "partId": "{73DF99D8-AB08-495C-A312-51D3F26EB9F5}",
+        "group": "目",
+        "groupId": "{A53DAF43-D7F8-4E09-8232-D2EE640C6FD6}"
+      }
+    ],
+    "mouthAnimate": true,
+    "blinkAnimate": false
+  }
+}

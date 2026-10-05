@@ -865,7 +865,7 @@ begin
           OpenDialog.Options := [ofFileMustExist,ofPathMustExist,ofEnableSizing,ofNoChangeDir];
           case TComponent(Sender).Tag of
             1: OpenDialog.Filter := '動画プロジェクト (*.rigmovie)|*.rigmovie';
-            3: OpenDialog.Filter := 'RIGM (*.rigm)|*.rigm';
+            3: OpenDialog.Filter := 'キャラクター (*.psdchar;*.rigm)|*.psdchar;*.rigm';
             4: OpenDialog.Filter := '台本 (*.txt;*.json)|*.txt;*.json';
             17: OpenDialog.Filter := 'シーン画像 (*.png;*.jpg;*.jpeg;*.bmp)|*.png;*.jpg;*.jpeg;*.bmp';
             22: OpenDialog.Filter := 'FFmpeg (ffmpeg.exe)|ffmpeg.exe';

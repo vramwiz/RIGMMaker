@@ -222,7 +222,7 @@ begin
     Result.AddPair('movieCommandPrefix','movie-');
     if Assigned(FEditor.OnWorkspaceCommand) then begin
       Result.AddPair('workspaceCommandPrefix','app-');
-      Result.AddPair('workspace',ParseObject('{"status":{},"switch-page":{"page":"preview|create|characters","propertyPage":"optional: dialogue|scene|acting|audio|diagnostics"},"library":{},"register-character":{"path":"existing .rigm or .psd; original preserved","name":"optional display name"},"open-work":{"path":".rigmovie; current unsaved work retained"}}'));
+      Result.AddPair('workspace',ParseObject('{"status":{},"switch-page":{"page":"preview|create|characters","propertyPage":"optional: dialogue|scene|acting|audio|diagnostics"},"library":{},"edit-character":{"path":".rigm or .psdchar"},"register-character":{"path":"existing .rigm, .psdchar or .psd; original preserved","name":"optional display name"},"open-work":{"path":".rigmovie; current unsaved work retained"}}'));
     end;
   end;
   Result.AddPair('pipes', Info); WriteConnection;

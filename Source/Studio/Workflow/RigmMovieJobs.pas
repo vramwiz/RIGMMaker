@@ -64,7 +64,7 @@ uses System.IOUtils, System.Math, System.SyncObjs, Winapi.Windows, Winapi.Active
   Vcl.Imaging.pngimage, RigmModel, RigmJson, RigmSample, RigmStorage,
   RigmMovieAudio, RigmMovieRendering, RigmMovieAvi, RigmMovieMp4, RigmMovieActing, RigmMovieOutput,
   SerifVoicevoxApi, SerifVoicevoxSpeakerCatalog, SerifVoicevoxAudioSettings, RigmVoicevoxConfig,
-  RigmMoviePreparation, RigmMovieProduction, RigmMovieCompositor;
+  RigmMoviePreparation, RigmMovieProduction, RigmMovieCompositor, RigmCharacterCatalog;
 
 constructor TRigmMovieJob.Create(Project: TRigmMovieProject; const Kind,Output: string; Seconds: Double;
   Options: TJSONObject);
@@ -233,7 +233,15 @@ begin
   if Project.Characters.Count>0 then begin Path := ''; for var C in Project.Characters do if C.Visible then begin Path := C.FileName; Break; end; end;
   if Path='@sample' then begin Result := TRigmDocument.Create; PopulateRigmSample(Result); end
   else if Path='' then Result := nil
+  else if CharacterFormat(Path)='psd' then Result := nil
   else Result := LoadRigm(ResolveMoviePath(Project.FileName,Path));
+end;
+function SourceActorAssets(Project: TRigmMovieProject; Document: TRigmDocument): TJSONObject;
+begin
+  var Path := Project.CharacterFile;
+  if Project.Characters.Count>0 then begin Path := ''; for var C in Project.Characters do if C.Visible then begin Path := C.FileName; Break; end; end;
+  if CharacterFormat(Path)='psd' then Exit(ReadPsdActorAssets(ResolveMoviePath(Project.FileName,Path)));
+  Result := MovieActorAssets(Document); Result.AddPair('capabilities',MovieCapabilities(Document));
 end;
 procedure TRigmMovieJob.Preview;
 var Document: TRigmDocument; Audio: TRigmPcm; Ready: Boolean;
@@ -378,7 +386,7 @@ procedure TRigmMovieJob.ActorAssets;
 var Document: TRigmDocument; O: TJSONObject;
 begin
   Report(0,1); Document := LoadActor(FProject);
-  try CheckCancel; O := MovieActorAssets(Document); O.AddPair('capabilities',MovieCapabilities(Document)); try FCatalog := O.ToJSON; finally O.Free; end; Report(1,1);
+  try CheckCancel; O := SourceActorAssets(FProject,Document); try FCatalog := O.ToJSON; finally O.Free; end; Report(1,1);
   finally Document.Free; end;
 end;
 procedure TRigmMovieJob.Waveform;
@@ -401,7 +409,7 @@ begin
       if FProject.Characters.Count>0 then ValidateCompositionMaterials(FProject);
       Document := LoadActor(FProject);
       if Document<>nil then Document.ValidateStructure;
-      var Assets := MovieActorAssets(Document); Assets.AddPair('capabilities',MovieCapabilities(Document)); O.AddPair('assets',Assets);
+      var Assets := SourceActorAssets(FProject,Document); O.AddPair('assets',Assets);
       if Document<>nil then begin
         Pose := TRigmPose.Create; Pose.Reset;
         try

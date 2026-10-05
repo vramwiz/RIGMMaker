@@ -365,7 +365,7 @@ var Temp,TargetFile,AssetDirectory: string; O: TJSONObject; Saved: TRigmMoviePro
     if Organized then begin
       var Ext := LowerCase(ExtractFileExt(Source)); var Kind := 'Images';
       if (Ext='.wav') or (Ext='.lab') then Kind := 'Audio'
-      else if Ext='.rigm' then Kind := 'Characters';
+      else if (Ext='.rigm') or (Ext='.psdchar') then Kind := 'Characters';
       Directory := TPath.Combine(AssetDirectory,Kind);
     end;
     ForceDirectories(Directory); Target := TPath.Combine(Directory,Name);

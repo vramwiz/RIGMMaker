@@ -1,0 +1,394 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "data": {
+    "format": "RIGM-MOVIE",
+    "formatVersion": 1,
+    "textSyntax": "# scene title / speaker: text / plain text uses narrator",
+    "cueFields": {
+      "id": "stable string",
+      "scene": "string",
+      "speaker": "speaker id",
+      "text": "spoken text <=2000 characters",
+      "subtitle": "display text",
+      "pause": "seconds 0..60 after audio",
+      "expression": "neutral|smile|serious|sad",
+      "motion": "idle|still|nod|emphasis",
+      "background": "local image file",
+      "parameters": "RIGM parameter id -> number",
+      "acting": "partial actingFields object"
+    },
+    "actingFields": {
+      "mouthMode": "auto|assets|deform",
+      "blinkMode": "auto|assets|deform",
+      "mouthGain": "0..2",
+      "lipLead": "-0.3..0.3 seconds; positive samples later audio",
+      "blinkStrength": "0..1",
+      "blinkInterval": "0.3..30 seconds",
+      "blinkDuration": "0.04..1 seconds, <= interval",
+      "blinkPhase": "0..30 seconds",
+      "headGain": "0..3",
+      "bodyGain": "0..3",
+      "imageAttention": "auto|off|head; image-direction head tilt only; no pupil gaze; auto uses scene.animation.explainImage or explicit image-explanation text",
+      "onset": "0..600 cue-local seconds",
+      "duration": "-1=cue end or 0..660 seconds",
+      "fadeIn": "0..60 seconds",
+      "fadeOut": "0..60 seconds",
+      "variants": "array of actual groupId/partId; direct children only; runtime visibility; no source edits"
+    },
+    "speakerFields": {
+      "id": "string",
+      "name": "display name",
+      "styleId": "from engine speakers catalog; -1 unselected",
+      "speed": "0.5..2",
+      "pitch": "-0.15..0.15",
+      "intonation": "0..2",
+      "volume": "0..2"
+    },
+    "audioPolicy": "fingerprint invalidation; no synthetic fallback speech",
+    "video": "MJPEG + PCM16 mono AVI or optional H264/AAC MP4 via existing ffmpeg.exe; every spoken cue must be ready",
+    "coordinates": "character centered in frame; subtitles below; time in seconds",
+    "outputPresets": {
+      "draft": {
+        "width": 640,
+        "height": 360,
+        "fps": 15
+      },
+      "hd": {
+        "width": 1280,
+        "height": 720,
+        "fps": 30
+      },
+      "fullhd": {
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "custom": "explicit dimensions and fps",
+      "encoding": {
+        "fast": "veryfast / CRF23 / JPEG80; smaller CPU budget",
+        "balanced": "medium / CRF20 / JPEG90",
+        "quality": "slow / CRF18 / JPEG95; larger staging and CPU time"
+      },
+      "threads": 4,
+      "limit": "MP4 streams raw frames to FFmpeg; AVI alone retains its legacy 2GB limit"
+    },
+    "pipeEnvelope": "schemaVersion=1, requestId, command, args",
+    "editing": "mutations require status.projectId + revision; snapshot job; generated audio is undoable; no RIGM edits",
+    "examples": [
+      {
+        "id": "fictional-short",
+        "title": "架空の短い紹介例",
+        "kind": "fictional_example",
+        "text": "# 架空の紹介例\r\nnarrator:これは架空の小さな喫茶店の紹介例です。\r\nnarrator:木の椅子と、静かな音楽のあるお店です。"
+      },
+      {
+        "id": "intro-three-minute",
+        "title": "3分紹介用の構成テンプレート",
+        "kind": "structure_template",
+        "suggestedSeconds": 180,
+        "durationGuaranteed": false,
+        "text": "# 0:00–0:15 導入\r\nnarrator:【紹介する対象と、この動画で伝えたいこと】\r\n# 0:15–0:45 概要\r\nnarrator:【対象の概要を、自分の言葉で説明】\r\n# 0:45–1:30 特徴\r\nnarrator:【特徴を二つか三つ、具体例とともに紹介】\r\n# 1:30–2:15 使い方・体験\r\nnarrator:【使い方や体験を、順序に沿って紹介】\r\n# 2:15–2:45 補足\r\nnarrator:【注意点や向いている場面】\r\n# 2:45–3:00 まとめ\r\nnarrator:【伝えたいことと、次にしてほしいこと】"
+      }
+    ],
+    "commands": {
+      "status": {},
+      "project": {
+        "offset": 0,
+        "limit": 20
+      },
+      "import-script": {
+        "text": "text or JSON",
+        "path": "optional local file",
+        "format": "text|json"
+      },
+      "update-project": {
+        "title": "string",
+        "character": "local .rigm or @sample",
+        "engineUrl": "loopback URL",
+        "width": 1920,
+        "height": 1080,
+        "fps": 30,
+        "outputPreset": "draft|hd|fullhd|custom",
+        "encodeProfile": "fast|balanced|quality",
+        "backgroundColor": 3156000,
+        "ffmpeg": "optional existing local ffmpeg.exe",
+        "outputTarget": "new .mp4 or .avi"
+      },
+      "update-cue": {
+        "id": "cue id",
+        "text": "string",
+        "subtitle": "string",
+        "pause": 0.3,
+        "expression": "neutral|smile|serious|sad",
+        "motion": "idle|still|nod|emphasis",
+        "background": "local image",
+        "parameters": {},
+        "acting": {}
+      },
+      "add-cue": {
+        "cue": {},
+        "index": 0
+      },
+      "delete-cue": {
+        "id": "cue id"
+      },
+      "move-cue": {
+        "id": "cue id",
+        "index": 0
+      },
+      "update-speaker": {
+        "id": "speaker id",
+        "styleId": 3,
+        "speed": 1,
+        "pitch": 0,
+        "intonation": 1,
+        "volume": 1
+      },
+      "speakers-refresh": {},
+      "speaker-list": {},
+      "audio-generate": {
+        "directory": "optional generated asset directory"
+      },
+      "job-status": {
+        "scope": "main (default)|diagnostics"
+      },
+      "job-cancel": {
+        "scope": "all (default)|main|diagnostics"
+      },
+      "job-retry": {},
+      "timeline": {},
+      "seek": {
+        "time": 0
+      },
+      "preview": {
+        "time": 0,
+        "path": "optional new PNG"
+      },
+      "export": {
+        "path": "new .avi or .mp4"
+      },
+      "save": {
+        "path": ".rigmovie"
+      },
+      "open": {
+        "path": ".rigmovie"
+      },
+      "undo": {},
+      "redo": {},
+      "play": {},
+      "pause": {},
+      "playback-audio": {
+        "time": 0,
+        "path": "optional new WAV"
+      },
+      "open-ui": {},
+      "assets-refresh": {},
+      "assets": {
+        "offset": 0,
+        "limit": 20
+      },
+      "waveform-refresh": {},
+      "waveform": {},
+      "preparation": {
+        "outputPath": "optional target override; read only"
+      },
+      "diagnostics-refresh": {},
+      "produce": {
+        "requestKey": "unique stable key",
+        "script": "optional text or JSON object; existing script retained when omitted",
+        "scriptPath": "optional local file",
+        "settings": {},
+        "voices": {
+          "speakerId": "styleId or voice settings"
+        },
+        "acting": {},
+        "outputPath": "optional new output; default derived from configured location",
+        "deliver": "video (default)|preview",
+        "previewPath": "optional new PNG",
+        "previewTime": 0.2
+      },
+      "production-status": {
+        "requestKey": "optional; defaults to latest"
+      },
+      "production-resume": {
+        "requestKey": "blocked/failed/cancelled key",
+        "settings": {},
+        "voices": {},
+        "outputPath": "optional corrected path"
+      },
+      "production-cancel": {
+        "requestKey": "optional; defaults to latest"
+      },
+      "workflow-status": {},
+      "workflow-next": {},
+      "workflow-back": {
+        "stage": "optional earlier script|setup|audio|preview|export"
+      },
+      "workflow-run": {
+        "text": "script stage only",
+        "path": "optional new preview/export path",
+        "time": "optional preview seconds",
+        "directory": "optional audio directory"
+      },
+      "composition-enable": {},
+      "add-character": {
+        "character": {
+          "file": ".rigm",
+          "speaker": "speaker id",
+          "x": 1370,
+          "y": 130,
+          "width": 520,
+          "height": 900
+        }
+      },
+      "update-character": {
+        "id": "character id",
+        "x": 0,
+        "y": 0,
+        "width": 520,
+        "height": 900,
+        "visible": true,
+        "rigSafe": true
+      },
+      "delete-character": {
+        "id": "character id"
+      },
+      "add-scene": {
+        "scene": {
+          "title": "string"
+        },
+        "text": "initial spoken line",
+        "subtitle": "display text",
+        "index": 0
+      },
+      "update-scene": {
+        "id": "scene id",
+        "image": "local image",
+        "description": "persistent scene text",
+        "imagePrompt": "generation prompt",
+        "chart": {
+          "kind": "none|radar|bar",
+          "title": "summary title",
+          "maximum": 5,
+          "color": "#5AB8E8",
+          "items": [
+            {
+              "label": "criterion",
+              "value": 4
+            }
+          ]
+        },
+        "animation": {
+          "explainImage": "optional boolean; enables image-direction head support, not pupil gaze"
+        }
+      },
+      "delete-scene": {
+        "id": "scene id"
+      },
+      "move-scene": {
+        "id": "scene id",
+        "index": 0
+      },
+      "resize-scene": {
+        "id": "scene id",
+        "duration": "seconds, cannot trim existing speech"
+      },
+      "register-expression": {
+        "id": "character id",
+        "emotion": "neutral|happy|sad|serious|angry|gentle|surprised|doubt|joy|confused",
+        "preset": {
+          "variants": [],
+          "blinkAnimate": true,
+          "mouthAnimate": true,
+          "rigSafe": true
+        }
+      },
+      "register-motion": {
+        "id": "character id",
+        "name": "motion name",
+        "motion": {
+          "loop": true,
+          "frames": [
+            {
+              "image": "local frame image",
+              "duration": 0.1
+            }
+          ]
+        }
+      },
+      "select-motion": {
+        "id": "character id",
+        "name": "registered motion name",
+        "start": "timeline seconds; default current seek",
+        "duration": "-1 until stopped or nonnegative seconds"
+      },
+      "stop-motion": {
+        "id": "character id"
+      },
+      "analyze-script": {
+        "id": "optional cue id; deterministic suggestion, explicit generation only"
+      },
+      "update-subtitle": {
+        "id": "cue id",
+        "subtitle": "display text; never changes speech"
+      },
+      "update-dialogue": {
+        "id": "cue id",
+        "text": "spoken text; no auto synthesis"
+      },
+      "composition-requests": {},
+      "edit-begin": {
+        "leaseSeconds": 60
+      },
+      "edit-status": {},
+      "edit-heartbeat": {
+        "editToken": "token",
+        "leaseSeconds": 60
+      },
+      "edit-end": {
+        "editToken": "token"
+      },
+      "edit-fail": {
+        "editToken": "token"
+      },
+      "edit-release": {
+        "manual": true
+      },
+      "image-transfer-begin": {
+        "sceneId": "existing scene",
+        "byteCount": "1..33554432",
+        "sha256": "64 hex characters",
+        "mimeType": "image/png"
+      },
+      "image-transfer-chunk": {
+        "transferId": "returned ID",
+        "offset": "next accepted byte offset",
+        "data": "canonical base64; at most 16384 decoded bytes"
+      },
+      "image-transfer-finish": {
+        "transferId": "ID; starts asynchronous hash/decode/publication"
+      },
+      "image-transfer-status": {
+        "transferId": "ID; state, acceptedBytes, receivedBytes, nextOffset, path"
+      },
+      "image-transfer-cancel": {
+        "transferId": "ID; asynchronous cancellation; completed valid assets retained"
+      },
+      "image-transfer-adopt": {
+        "transferId": "ready ID; latest projectId/revision required; no project autosave"
+      }
+    },
+    "pipes": {
+      "controlPipe": "RIGMMaker.33740.{4D383F28-4238-4245-826A-19CCEADA449B}.control",
+      "commandPipe": "RIGMMaker.33740.{4D383F28-4238-4245-826A-19CCEADA449B}.control",
+      "routing": "common-command",
+      "apiVersion": 2,
+      "pagePipe": "",
+      "page": "preview",
+      "epoch": 4,
+      "connectionFile": "D:\\DelphiProg\\MyApp\\RIGMMaker\\制作支援\\制作物\\金髪アンドロイド-20261005\\session\\pipes\\RIGMMaker.33740.{4D383F28-4238-4245-826A-19CCEADA449B}.control.json"
+    }
+  },
+  "requestId": "54ef9354-f51b-475e-8edf-2f9f7e99b843"
+}
