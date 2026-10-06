@@ -391,8 +391,8 @@ begin
       end;
       if C<>nil then begin
         var R := ScaleLayoutRect(MovieLayoutRegions(Project.Layout,Project.LDirection).Subtitle,Project.Width,Project.Height); Canvas.Brush.Style := bsSolid; Canvas.Brush.Color := $251E18; Canvas.FillRect(R);
-        InflateRect(R,-Round(30*Project.Width/1920),-Round(14*Project.Height/1080));
-        Canvas.Font.Name := 'Yu Gothic UI'; Canvas.Font.Height := -Max(16,Round(44*Project.Height/1080));
+        R := MovieSubtitleContentRect(Project);
+        MovieSubtitleStyle(Canvas,Project.Height);
         var Pages: Integer; var Subtitle := MovieSubtitlePage(C.Subtitle,Canvas,R.Width,Max(1,R.Height div Max(1,Canvas.TextHeight('国'))),Local/Max(0.001,Project.CueDuration(C)),Pages);
         Text(Subtitle,R,44,DT_CENTER);
       end;

@@ -2,28 +2,38 @@
 unit RigmMovieRendering;
 
 interface
-uses System.SysUtils, System.JSON, Vcl.Graphics, RigmModel, RigmMovieModel, RigmMovieAudio;
+uses System.SysUtils, System.JSON, System.Classes, System.Types, Vcl.Graphics, RigmModel, RigmMovieModel, RigmMovieAudio;
 
 procedure MoviePose(Project: TRigmMovieProject; Document: TRigmDocument; Seconds: Double;
   Audio: TRigmPcm; Pose: TRigmPose);
 function RenderMovieFrame(Project: TRigmMovieProject; Document: TRigmDocument;
   Seconds: Double; Audio: TRigmPcm = nil): Vcl.Graphics.TBitmap;
 
+function MovieSubtitleLines(const Text: string; Canvas: TCanvas; Width: Integer): TStringList; // 呼出側所有。合成と編集で同じ折返しを使う。
+procedure MovieSubtitleStyle(Canvas: TCanvas; VideoHeight: Integer); // 既存合成の44px字幕。
+function MovieSubtitleContentRect(Project: TRigmMovieProject): TRect; // 既存配置の内側字幕領域。
+
 function MovieSubtitlePage(const Text: string; Canvas: TCanvas; Width,Lines: Integer;
   Progress: Double; out PageCount: Integer): string;
 
 implementation
-uses System.Math, System.Types, System.Classes, Winapi.Windows, RigmRenderer, RigmJson,
+uses System.Math, Winapi.Windows, RigmRenderer, RigmJson,
   Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, RigmMoviePhonemes, RigmMovieCompositor, RigmMovieActing,
-  RigmCharacterCatalog, RigmMovieComposition, RigmMoviePsdRendering;
+  RigmCharacterCatalog, RigmMovieComposition, RigmMoviePsdRendering, RigmMovieLayout;
 
-function MovieSubtitlePage(const Text: string; Canvas: TCanvas; Width,Lines: Integer;
-  Progress: Double; out PageCount: Integer): string;
-var Wrapped,Pages: TStringList; Line,Page,Glyph: string; Used,I,Count: Integer;
-  procedure Emit;
-  begin Wrapped.Add(Line); Line := ''; Used := 0; end;
+procedure MovieSubtitleStyle(Canvas: TCanvas; VideoHeight: Integer);
+begin Canvas.Font.Name := 'Yu Gothic UI'; Canvas.Font.Height := -Max(16,Round(44*VideoHeight/1080)); Canvas.Font.Style := []; end;
+function MovieSubtitleContentRect(Project: TRigmMovieProject): TRect;
 begin
-  Wrapped := TStringList.Create; Pages := TStringList.Create;
+  Result := ScaleLayoutRect(MovieLayoutRegions(Project.Layout,Project.LDirection).Subtitle,Project.Width,Project.Height);
+  InflateRect(Result,-Round(30*Project.Width/1920),-Round(14*Project.Height/1080));
+end;
+function MovieSubtitleLines(const Text: string; Canvas: TCanvas; Width: Integer): TStringList;
+var Line,Glyph: string; Used,I,Count: Integer;
+  procedure Emit;
+  begin Result.Add(Line); Line := ''; Used := 0; end;
+begin
+  Result := TStringList.Create;
   try
     Line := ''; Used := 0; I := 1;
     while I<=Length(Text) do begin
@@ -37,16 +47,23 @@ begin
       if (Line<>'') and (Used+GWidth>Width) then Emit;
       Line := Line+Glyph; Inc(Used,GWidth);
     end;
-    if (Line<>'') or (Wrapped.Count=0) then Emit;
+    if (Line<>'') or (Result.Count=0) then Emit;
+  except Result.Free; raise; end;
+end;
+function MovieSubtitlePage(const Text: string; Canvas: TCanvas; Width,Lines: Integer;
+  Progress: Double; out PageCount: Integer): string;
+var Wrapped,Pages: TStringList; Page: string;
+begin
+  Wrapped := MovieSubtitleLines(Text,Canvas,Width); Pages := TStringList.Create;
+  try
     Page := '';
-    for I := 0 to Wrapped.Count-1 do begin
+    for var I := 0 to Wrapped.Count-1 do begin
       if Page<>'' then Page := Page+sLineBreak; Page := Page+Wrapped[I];
       if ((I+1) mod Max(1,Lines)=0) or (I=Wrapped.Count-1) then begin Pages.Add(Page); Page := ''; end;
     end;
     PageCount := Pages.Count; Result := Pages[EnsureRange(Floor(EnsureRange(Progress,0.0,0.999999)*PageCount),0,PageCount-1)];
   finally Pages.Free; Wrapped.Free; end;
 end;
-
 procedure MoviePose(Project: TRigmMovieProject; Document: TRigmDocument; Seconds: Double;
   Audio: TRigmPcm; Pose: TRigmPose);
 var Local, Start, Head, Body, Eyes, Gain, MouthTime,BlinkOpen: Double; C: TRigmMovieCue;

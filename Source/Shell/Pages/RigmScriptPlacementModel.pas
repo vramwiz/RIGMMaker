@@ -13,12 +13,12 @@ uses System.SysUtils, System.Math, System.Generics.Collections, RigmJson, PsdJso
 function ScriptStageName(const Stage: string): string;
 begin
   if Stage='title' then Result := '題名' else if Stage='characters' then Result := 'キャラ選択'
-  else if Stage='layout' then Result := 'レイアウト選択' else if Stage='placement' then Result := 'キャラ配置' else if Stage='text' then Result := '台本入力' else if Stage='review' then Result := '校正' else if Stage='casting' then Result := '配役' else Result := Stage;
+  else if Stage='layout' then Result := 'レイアウト選択' else if Stage='placement' then Result := 'キャラ配置' else if Stage='text' then Result := '台本入力' else if Stage='review' then Result := '校正' else if Stage='casting' then Result := '配役' else if Stage='subtitles' then Result := '字幕' else Result := Stage;
 end;
 function ScriptStageIndex(const Stage: string): Integer;
 begin
   if Stage='title' then Result := 0 else if Stage='characters' then Result := 1
-  else if Stage='layout' then Result := 2 else if Stage='placement' then Result := 3 else if Stage='text' then Result := 4 else if Stage='review' then Result := 5 else if Stage='casting' then Result := 6 else Result := -1;
+  else if Stage='layout' then Result := 2 else if Stage='placement' then Result := 3 else if Stage='text' then Result := 4 else if Stage='review' then Result := 5 else if Stage='casting' then Result := 6 else if Stage='subtitles' then Result := 7 else Result := -1;
 end;
 function Placement(Project: TRigmMovieProject; const Path: string): TJSONObject;
 begin

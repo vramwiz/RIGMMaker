@@ -17,6 +17,7 @@ type
   TRigmMovieCue = class
   public
     Id, Scene, SpeakerId, Text, Subtitle, Expression, Motion, Background, Emotion: string;
+    SubtitleNote: string; // 表示字幕のメモ。音声キーには含めない。
     VoiceStyleId: Integer;
     WaveFile, LabFile, AudioKey: string;
     Pause, AudioSeconds: Double;
@@ -95,7 +96,7 @@ begin Acting.Free; Parameters.Free; inherited; end;
 function TRigmMovieCue.Json: TJSONObject;
 begin
   Result := TJSONObject.Create; Result.AddPair('id',Id); Result.AddPair('scene',Scene);
-  Result.AddPair('speaker',SpeakerId); Result.AddPair('text',Text); Result.AddPair('subtitle',Subtitle);
+  Result.AddPair('speaker',SpeakerId); Result.AddPair('text',Text); Result.AddPair('subtitle',Subtitle); if SubtitleNote<>'' then Result.AddPair('subtitleNote',SubtitleNote);
   Result.AddPair('expression',Expression); Result.AddPair('motion',Motion); Result.AddPair('background',Background);
   AddN(Result,'pause',Pause); AddN(Result,'audioSeconds',AudioSeconds);
   Result.AddPair('waveFile',WaveFile); Result.AddPair('labFile',LabFile); Result.AddPair('audioKey',AudioKey);
@@ -109,7 +110,7 @@ begin
   Result := TRigmMovieCue.Create; var C := Result;
   try
       var Q := O; C.Id := JS(Q,'id',C.Id); C.Scene := JS(Q,'scene',C.Scene);
-      C.SpeakerId := JS(Q,'speaker','narrator'); C.Text := JS(Q,'text'); C.Subtitle := JS(Q,'subtitle',C.Text);
+      C.SpeakerId := JS(Q,'speaker','narrator'); C.Text := JS(Q,'text'); C.Subtitle := JS(Q,'subtitle',C.Text); C.SubtitleNote := JS(Q,'subtitleNote');
       C.Emotion := JS(Q,'emotion','neutral'); C.VoiceStyleId := JI(Q,'voiceStyleId',-1); C.Expression := JS(Q,'expression','neutral'); C.Motion := JS(Q,'motion','idle'); C.Background := JS(Q,'background');
       C.Pause := JN(Q,'pause',0.3); C.AudioSeconds := JN(Q,'audioSeconds');
       C.WaveFile := JS(Q,'waveFile'); C.LabFile := JS(Q,'labFile'); C.AudioKey := JS(Q,'audioKey');
