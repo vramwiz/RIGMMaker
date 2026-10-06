@@ -37,7 +37,7 @@ type
   end;
   TRigmMovieScene = class
   public
-    Id,Title,Image,Description,ImagePrompt: string;
+    Id,Title,Image,Description,ImagePrompt,DisplayMode: string;
     Padding: Double;
     // Reserved timing/animation metadata. No implicit animation is generated.
     Animation,Chart: TJSONObject;
@@ -168,13 +168,14 @@ begin
   end;
 end;
 constructor TRigmMovieScene.Create;
-begin inherited; Id := NewRigmId; Title := 'シーン'; Animation := TJSONObject.Create; Chart := TJSONObject.Create; end;
+begin inherited; Id := NewRigmId; Title := 'シーン'; DisplayMode := 'both'; Animation := TJSONObject.Create; Chart := TJSONObject.Create; end;
 destructor TRigmMovieScene.Destroy;
 begin Chart.Free; Animation.Free; inherited; end;
 function TRigmMovieScene.Json: TJSONObject;
 begin
   Result := TJSONObject.Create; Result.AddPair('id',Id); Result.AddPair('title',Title); Result.AddPair('image',Image);
   Result.AddPair('description',Description); Result.AddPair('imagePrompt',ImagePrompt); AddN(Result,'padding',Padding);
+  if DisplayMode<>'both' then Result.AddPair('displayMode',DisplayMode);
   Result.AddPair('animation',Animation.Clone as TJSONObject);
   if Chart.Count>0 then Result.AddPair('chart',Chart.Clone as TJSONObject);
 end;
@@ -184,6 +185,7 @@ begin
   try
     Result.Id := JS(O,'id',Result.Id); Result.Title := JS(O,'title','シーン'); Result.Image := JS(O,'image');
     Result.Description := JS(O,'description'); Result.ImagePrompt := JS(O,'imagePrompt'); Result.Padding := JN(O,'padding');
+    Result.DisplayMode := JS(O,'displayMode','both');
       if O.GetValue('animation')<>nil then begin Result.Animation.Free; Result.Animation := JO(O,'animation').Clone as TJSONObject; end;
       if O.GetValue('chart')<>nil then begin
         if not(O.GetValue('chart') is TJSONObject) then raise ERigm.Create('Scene chart must be an object');
@@ -195,6 +197,7 @@ end;
 procedure TRigmMovieScene.Validate;
 begin
   if (Id='') or (Length(Id)>128) or (Length(Title)>300) or (Length(Description)>3000) or (Length(ImagePrompt)>8000) then raise ERigm.Create('Invalid scene content');
+  if not MatchStr(DisplayMode,['both','image','text','none']) then raise ERigm.Create('Invalid scene display mode');
   if not Finite(Padding) or (Padding<0) or (Padding>600) then raise ERigm.Create('Scene padding must be 0..600 seconds');
   ValidateMovieChart(Chart);
 end;

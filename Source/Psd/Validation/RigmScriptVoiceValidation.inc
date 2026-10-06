@@ -41,7 +41,7 @@ begin
       WaitThumbnailLibrary(W); Next.Click; Check((W.CurrentScriptStage='voice') and not W.ScriptDraft.Modified,'Next saves voice destination before navigation',Results);
     end;
     var Frame: TRigmScriptVoiceFrame := nil; for var I := 0 to Creator.ComponentCount-1 do if Creator.Components[I] is TRigmScriptVoiceFrame then Frame := TRigmScriptVoiceFrame(Creator.Components[I]);
-    Check((Frame<>nil) and Frame.Showing and not Next.Visible,'lazy voice frame is retained in main form and stops before scenes',Results);
+    Check((Frame<>nil) and Frame.Showing and Next.Visible and not Next.Enabled,'lazy voice frame retains audio completion gate before scenes',Results);
     var List := TListView(Frame.FindComponent('ScriptVoiceRows')); var Reading := TMemo(Frame.FindComponent('ScriptVoiceReading')); var Style := TComboBox(Frame.FindComponent('ScriptVoiceStyle')); var Tools := TToolBar(Frame.FindComponent('ScriptVoiceToolbar'));
     if not Reopen then begin
       Check((Style.ItemIndex=-1) and (W.ScriptDraft.Speaker(W.ScriptDraft.Cues[0].SpeakerId).StyleId=-1),'unassigned character has no guessed default voice',Results);

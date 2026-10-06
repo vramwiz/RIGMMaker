@@ -27,6 +27,7 @@ type
     property Root: string read FRoot;
     property LastError: string read FError;
   end;
+function RigmDefaultDocumentsDirectory: string;
 function RigmDocumentsDirectory: string;
 function RigmSettingsDirectory: string;
 function AppSettings: TRigmAppSettings;
@@ -40,8 +41,15 @@ var Settings: TRigmAppSettings;
 
 function RigmDocumentsDirectory: string;
 begin
-  Result := 'D:\Users\take6\RIGMMaker';
+  Result := RigmDefaultDocumentsDirectory;
   for var I := 1 to ParamCount - 1 do if ParamStr(I)='--data-root' then Result := ExpandFileName(ParamStr(I+1));
+end;
+function RigmDefaultDocumentsDirectory: string;
+begin
+  // 既存PCで使われている旧既定rootは維持。不在の別PCパスを作らない。
+  if DirectoryExists('D:\Users\take6\RIGMMaker') then Exit('D:\Users\take6\RIGMMaker');
+  var Path: PWideChar := nil; OleCheck(SHGetKnownFolderPath(FOLDERID_Documents,0,0,Path));
+  try Result := TPath.Combine(string(Path),'RIGMMaker'); finally CoTaskMemFree(Path); end;
 end;
 function RigmSettingsDirectory: string;
 begin

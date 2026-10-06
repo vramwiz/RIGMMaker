@@ -320,9 +320,11 @@ begin
       if S<>nil then begin
         var SceneImage := S.Image;
         if (SceneImage='') and (C<>nil) then SceneImage := C.Background;
-        if MovieChartEnabled(S.Chart) then DrawMovieChart(Canvas,S.Chart,ImageRect)
-        else Image(SceneImage,ImageRect,False);
-        if S.Description<>'' then begin
+        if (S.DisplayMode='both') or (S.DisplayMode='image') then begin
+          if MovieChartEnabled(S.Chart) then DrawMovieChart(Canvas,S.Chart,ImageRect)
+          else Image(SceneImage,ImageRect,False);
+        end;
+        if ((S.DisplayMode='both') or (S.DisplayMode='text')) and (S.Description<>'') then begin
           Canvas.Brush.Style := bsSolid; Canvas.Brush.Color := $302820; Canvas.FillRect(DescriptionRect); InflateRect(DescriptionRect,-12,-8);
           Text(S.Description,DescriptionRect,32,DT_LEFT or DT_WORDBREAK);
         end;

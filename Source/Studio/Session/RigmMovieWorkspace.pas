@@ -6,7 +6,7 @@ function MovieWorkDirectory(Project: TRigmMovieProject): string;
 function MovieDefaultFile(Project: TRigmMovieProject): string;
 function MovieDefaultExport(Project: TRigmMovieProject): string;
 function IsMovieWorkPath(const Path: string): Boolean;
-function CopyMovieImage(Project: TRigmMovieProject; const Source: string): string;
+function CopyMovieImage(Project: TRigmMovieProject; const Source: string; const Directory: string=''): string;
 implementation
 uses System.SysUtils, System.IOUtils, System.Hash, System.StrUtils,
   RigmAppSettings, RigmModel;
@@ -34,11 +34,12 @@ function MovieDefaultFile(Project: TRigmMovieProject): string;
 begin Result := TPath.Combine(MovieWorkDirectory(Project),SafeName(Project.Title)+'.rigmovie'); end;
 function MovieDefaultExport(Project: TRigmMovieProject): string;
 begin Result := TPath.Combine(TPath.Combine(MovieWorkDirectory(Project),'Exports'),SafeName(Project.Title)+'.mp4'); end;
-function CopyMovieImage(Project: TRigmMovieProject; const Source: string): string;
+function CopyMovieImage(Project: TRigmMovieProject; const Source,Directory: string): string;
 begin
   if not FileExists(Source) then raise ERigm.Create('Image file is missing');
   var Hash := THashSHA2.GetHashStringFromFile(Source);
-  Result := TPath.Combine(TPath.Combine(MovieWorkDirectory(Project),'Images'),Hash+LowerCase(ExtractFileExt(Source)));
+  var TargetDirectory := Directory; if TargetDirectory='' then TargetDirectory := TPath.Combine(MovieWorkDirectory(Project),'Images');
+  ForceDirectories(TargetDirectory); Result := TPath.Combine(TargetDirectory,Hash+LowerCase(ExtractFileExt(Source)));
   if not FileExists(Result) then TFile.Copy(Source,Result,False);
   if THashSHA2.GetHashStringFromFile(Result)<>Hash then raise ERigm.Create('Image copy verification failed');
 end;
