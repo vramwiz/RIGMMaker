@@ -1,9 +1,9 @@
 ﻿unit RigmWizardMainForm;
 
 // 新シェルのメインフォームはページ所有・遷移・共通終了だけを扱う。
-// 旧シェルの機能移行が完了するまではRIGMWizard.dprの隔離入口を使用する。
+// 通常のRIGMMaker.dprと検証用RIGMWizard.dprが同じメインフォームを使用する。
 interface
-uses System.Classes, Vcl.Forms, Vcl.Controls, Vcl.ExtCtrls, Vcl.StdCtrls, RigmPageNavigation, RigmWizardWorkspace;
+uses System.Classes, System.JSON, Vcl.Forms, Vcl.Controls, Vcl.ExtCtrls, Vcl.StdCtrls, RigmPageNavigation, RigmWizardWorkspace;
 type
   TRigmWizardMainForm = class(TForm)
   private
@@ -12,6 +12,7 @@ type
     FCurrentPage: TRigmAppPage;
     FWorkspace: TRigmWizardWorkspace;
     function EnsureWorkspace: TRigmWizardWorkspace;
+    function ExecuteUiCommand(const Command: string; Args: TJSONObject): TJSONObject;
     procedure CommonKey(Sender: TObject; var Key: Word; Shift: TShiftState);
     function EnsurePage(Page: TRigmAppPage): TFrame;
     procedure NavigationRequested(Sender: TObject; Page: TRigmAppPage; const Path: string);
@@ -30,11 +31,13 @@ type
   end;
 var RigmWizardMain: TRigmWizardMainForm;
 implementation
-uses System.SysUtils, RigmAppSettings, RigmCharacterEditPage, RigmMovieWorkspaceFrame,
+uses System.SysUtils, Winapi.Windows, RigmAppSettings, RigmCharacterEditPage, RigmMovieWorkspaceFrame,
   RigmHomeFrame, RigmCharacterManagerFrame, RigmScriptManagerFrame, RigmScriptCreatorFrame;
 constructor TRigmWizardMainForm.Create(AOwner: TComponent);
 begin
-  inherited CreateNew(AOwner); Caption := 'RIGM Maker：PSD・共通ページ検証版'; Width := 1280; Height := 840;
+  inherited CreateNew(AOwner); Caption := 'RIGM Maker'; Width := 1280; Height := 840;
+  // CreateNewは通常のメインフォーム生成フラグを通らないため、タスクバー表示を明示する。
+  ShowInTaskBar := True; Icon.Assign(Application.Icon);
   Position := poScreenCenter; Font.Name := 'Yu Gothic UI'; Font.Size := 10; OnCloseQuery := Closing;
   KeyPreview := True; OnKeyDown := CommonKey;
   FRoot := RigmDocumentsDirectory;
@@ -42,7 +45,7 @@ begin
   var Button := TButton.Create(Self); Button.Parent := Header; Button.Align := alLeft; Button.Width := 140; Button.Caption := 'ホームへ戻る'; Button.Name := 'WizardHome'; Button.OnClick := Home;
   FTitle := TLabel.Create(Self); FTitle.Parent := Header; FTitle.Align := alClient; FTitle.Layout := tlCenter; FTitle.Font.Size := 16;
   FHost := TPanel.Create(Self); FHost.Parent := Self; FHost.Align := alClient; FHost.BevelOuter := bvNone;
-  NavigateTo(apHome);
+  EnsureWorkspace; NavigateTo(apHome);
 end;
 function TRigmWizardMainForm.EnsurePage(Page: TRigmAppPage): TFrame;
 begin
@@ -52,7 +55,7 @@ begin
       var Frame := TRigmHomeFrame.Create(Self); FPages[Page] := Frame; Frame.OnNavigate := NavigationRequested;
     end;
     apCharacters: begin
-      var Frame := TRigmCharacterManagerFrame.CreateForRoot(Self,FRoot); FPages[Page] := Frame; Frame.OnNavigate := NavigationRequested;
+      var Frame := TRigmCharacterManagerFrame.CreateForRoot(Self,FRoot,EnsureWorkspace); FPages[Page] := Frame; Frame.OnNavigate := NavigationRequested;
     end;
     apCharacterEdit: begin
       var Frame := TRigmCharacterEditPage.CreateForWorkspace(Self,EnsureWorkspace,FRoot); FPages[Page] := Frame; Frame.OnReturn := ReturnCharacters; Frame.OnSaved := SavedCharacter;
@@ -74,12 +77,29 @@ procedure TRigmWizardMainForm.NavigateTo(Page: TRigmAppPage; const Path: string)
 begin
   var Lifecycle: IRigmPageLifecycle;
   var Target := EnsurePage(Page);
-  if (Page=apCharacterEdit) and (Path<>'') then TRigmCharacterEditPage(Target).ActivateCharacter(Path);
+  var Loading := False;
+  if Page=apCharacterEdit then Loading := (Path<>'') or
+    ((TRigmCharacterEditPage(Target).PsdEditor=nil) and (TRigmCharacterEditPage(Target).LegacyEditor=nil));
+  if Loading then TRigmCharacterEditPage(Target).BeginCharacterLoad(Path);
   var Previous := FPages[FCurrentPage];
   if Previous<>nil then begin if Supports(Previous,IRigmPageLifecycle,Lifecycle) then Lifecycle.SetActive(False); Previous.Visible := False; end;
   FCurrentPage := Page; Target.Visible := True; Target.BringToFront; FTitle.Caption := '  '+RigmPageTitle(Page);
-  if Page=apScripts then TRigmScriptManagerFrame(Target).RefreshLibrary;
-  if Supports(Target,IRigmPageLifecycle,Lifecycle) then Lifecycle.SetActive(True);
+  if FWorkspace<>nil then FWorkspace.CurrentPage := Page;
+  try
+    if Loading then begin
+      // 読み込み前に新画面と案内のWM_PAINTだけを処理する。入力・パイプの再入を起こさない。
+      RedrawWindow(Handle,nil,0,RDW_INVALIDATE or RDW_UPDATENOW or RDW_ALLCHILDREN);
+      if (Path<>'') and not TRigmCharacterEditPage(Target).ActivateCharacter(Path) then
+        raise Exception.Create('キャラを開けません。編集中の入力とファイルを確認してください。');
+    end;
+    if Page=apScripts then TRigmScriptManagerFrame(Target).RefreshLibrary;
+  finally
+    try
+      if Supports(Target,IRigmPageLifecycle,Lifecycle) then Lifecycle.SetActive(True);
+    finally
+      if Loading then TRigmCharacterEditPage(Target).EndCharacterLoad;
+    end;
+  end;
 end;
 procedure TRigmWizardMainForm.NavigationRequested(Sender: TObject; Page: TRigmAppPage; const Path: string);
 begin NavigateTo(Page,Path); end;
@@ -99,8 +119,27 @@ begin
 end;
 function TRigmWizardMainForm.EnsureWorkspace: TRigmWizardWorkspace;
 begin
-  if FWorkspace=nil then begin FWorkspace := TRigmWizardWorkspace.Create(Self); FWorkspace.OnNavigate := NavigationRequested; end;
+  if FWorkspace=nil then begin
+    FWorkspace := TRigmWizardWorkspace.Create(Self); FWorkspace.OnNavigate := NavigationRequested;
+    FWorkspace.OnUiCommand := ExecuteUiCommand; FWorkspace.StartPipe(FRoot);
+  end;
   Result := FWorkspace;
+end;
+function TRigmWizardMainForm.ExecuteUiCommand(const Command: string; Args: TJSONObject): TJSONObject;
+begin
+  if Command='select-property-page' then begin
+    var Movie := TRigmMovieWorkspaceFrame(EnsurePage(apMovieEdit));
+    Movie.CurrentEditor.SelectPropertyPage(Args.GetValue<string>('propertyPage'));
+    Result := TJSONObject.Create; Result.AddPair('propertyPage',Movie.CurrentEditor.PropertyPageName); Exit;
+  end;
+  var Edit := TRigmCharacterEditPage(EnsurePage(apCharacterEdit));
+  if Command.StartsWith('psd-') then begin
+    Edit.ActivateCharacter(''); NavigateTo(apCharacterEdit);
+    Exit(Edit.PsdEditor.ExternalCommand(Command.Substring(4),Args));
+  end;
+  Edit.ActivateLegacyEditor; NavigateTo(apCharacterEdit);
+  var Name := Command; if Name.StartsWith('legacy-') then Name := Name.Substring(7);
+  Result := Edit.LegacyEditor.Editor.Execute(Name,Args);
 end;
 procedure TRigmWizardMainForm.CommonKey(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin

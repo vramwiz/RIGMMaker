@@ -6,12 +6,29 @@ uses System.SysUtils, System.JSON, PsdCharacter, PsdWorkspace;
 
 function ImportPrepared(Workspace: TPsdWorkspace; const ManifestPath: string): TPsdCharacter;
 function ImportExternalPsd(Workspace: TPsdWorkspace; const Path: string): TPsdCharacter;
+function CreateDraftCharacter(const Name, SupplementName: string): TPsdCharacter;
 // Codexが置いたPNGをハッシュ検証して取り込む。元ファイルは変更しない。
 procedure AddFrontLayer(Character: TPsdCharacter; Workspace: TPsdWorkspace; Args: TJSONObject);
 procedure AddNonFront(Character: TPsdCharacter; Workspace: TPsdWorkspace; Args: TJSONObject);
 
 implementation
 uses System.IOUtils, System.Classes, System.Hash, System.DateUtils, System.Generics.Collections, ArtDocument, ArtPng, ArtPsd, PsdJson;
+
+function CreateDraftCharacter(const Name, SupplementName: string): TPsdCharacter;
+begin
+  Result := TPsdCharacter.Create;
+  try
+    Result.Name := Name.Trim; Result.SupplementName := SupplementName.Trim;
+    if (Result.Name='') or (Length(Result.Name)>128) or (Length(Result.SupplementName)>128) then
+      raise Exception.Create('キャラ名・補足名は128文字以内で指定してください。');
+    Result.Document.Width := 1920; Result.Document.Height := 1080;
+    var Bounds := TArtBounds.Create(0,0,1920,1080);
+    var Front := Result.Document.AddLayer(alkGroup,'*正面',Bounds);
+    var NonFront := Result.Document.AddLayer(alkGroup,'*非正面・全身ポーズと連番',Bounds); NonFront.Visible := False;
+    Put(Result.Settings,'frontId',Front.Id); Put(Result.Settings,'nonFrontId',NonFront.Id);
+    Result.Validate;
+  except Result.Free; raise; end;
+end;
 
 procedure RecordTransfer(C: TPsdCharacter; W: TPsdWorkspace; const AssetId: string; Args: TJSONObject);
 begin

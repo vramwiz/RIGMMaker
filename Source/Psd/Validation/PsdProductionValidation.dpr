@@ -3,7 +3,7 @@
 uses System.SysUtils, System.Classes, System.IOUtils, System.JSON, System.Hash, System.Math, System.UITypes,
   Vcl.Forms, Vcl.Controls, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.Graphics, Vcl.Imaging.pngimage,
   PsdJson, PsdCharacter, PsdWorkspace, PsdPackage, PsdProduction, PsdSession,
-  PsdAnimation, PsdStudioForm, PsdMotionReferenceForm, RigmCharacterCatalog,
+  PsdAnimation, PsdStudioForm, PsdMotionReferenceForm, PsdPreviewControl, Winapi.Windows, Winapi.Messages, RigmCharacterCatalog,
   RigmMovieModel, RigmMovieComposition, RigmMovieCompositionCommands, RigmMovieSession, RigmMovieCreator;
 var Passed: Integer;
 procedure Check(Value: Boolean; const Name: string);
@@ -57,11 +57,8 @@ begin
       ValidateMotionReference(Session.Character,Form.Reference);
       Check(S(Form.Reference,'source')='ai','GUI displays AI-created reference without rewriting it');
       ReferenceEditor.Position := poDesigned; ReferenceEditor.SetBounds(-1400,-1000,1280,840); ReferenceEditor.Show; ReferenceEditor.Update; Application.ProcessMessages;
-      var Canvas := TPaintBox(Form.FindComponent('MotionReferenceCanvas'));
-      Canvas.OnPaint(Canvas); // 画面外の検証ではWindowsの描画通知を待たず配置を確定する。
-      var Scale := Min((Canvas.Width-24)/Session.Character.Document.Width,(Canvas.Height-24)/Session.Character.Document.Height);
-      var DrawWidth := Round(Session.Character.Document.Width*Scale); var DrawHeight := Round(Session.Character.Document.Height*Scale);
-      var Left := (Canvas.Width-DrawWidth) div 2; var Top := (Canvas.Height-DrawHeight) div 2;
+      var Canvas := TPsdPreviewControl(Form.FindComponent('MotionReferenceCanvas'));
+      Canvas.Update; var R := Canvas.ImageRect;
       for var Step := 0 to 5 do begin
         var X,Y: Double;
         case Step of
@@ -70,11 +67,12 @@ begin
           4: begin X:=0.7; Y:=0.37; end; else begin X:=0.5; Y:=0.65; end;
         end;
         TComboBox(Form.FindComponent('MotionReferenceStep')).ItemIndex := Step;
-        Canvas.OnMouseDown(Canvas,mbLeft,[],Left+Round(X*DrawWidth),Top+Round(Y*DrawHeight));
+        var Position := MakeLParam(R.Left+Round(X*R.Width),R.Top+Round(Y*R.Height));
+        Canvas.Perform(WM_LBUTTONDOWN,MK_LBUTTON,Position); Canvas.Perform(WM_LBUTTONUP,0,Position);
       end;
-      Canvas.OnPaint(Canvas); Form.Update; ValidateMotionReference(Session.Character,Form.Reference);
+      Canvas.Update; Form.Update; ValidateMotionReference(Session.Character,Form.Reference);
       Check(S(Form.Reference,'source')='manual','native GUI clicks produce valid shared motion reference');
-      var Bitmap := TBitmap.Create; var Png := TPngImage.Create;
+      var Bitmap := Vcl.Graphics.TBitmap.Create; var Png := TPngImage.Create;
       try Bitmap.SetSize(Form.ClientWidth,Form.ClientHeight); Form.PaintTo(Bitmap.Canvas.Handle,0,0);
         Png.Assign(Bitmap); Png.SaveToFile(TPath.Combine(Root,'motion-reference-gui.png'));
       finally Png.Free; Bitmap.Free; end;

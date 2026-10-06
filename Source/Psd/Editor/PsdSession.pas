@@ -13,6 +13,8 @@ type
     FRevision: UInt64; FDirty: Boolean; FEndpoint: TPsdPipeEndpoint; FProtocol: TArtPipeProtocol;
     FCompletedEditSession: Boolean; // 完成済み編集を開始した後は、再検査前も明示保存を維持する。
     FOnChanged: TNotifyEvent;
+    FReadinessChecks: UInt64;
+    FReadyValid,FReady: Boolean; FReadyReason: string;
     procedure Receive(const Request: string; out Response: string);
     procedure CheckRevision(Args: TJSONObject);
     procedure Adopt(Character: TPsdCharacter; const Path: string; Dirty: Boolean; ResetView: Boolean = True);
@@ -25,6 +27,9 @@ type
     function Command(const Name: string; Args: TJSONObject): TJSONObject;
     function Frame(Seconds: Double; Width: Integer = 1920; Height: Integer = 1080): TBytes;
     procedure SetView(const State: TPsdFrameState);
+    function ReadyForScript(out Reason: string): Boolean;
+    property ReadinessChecks: UInt64 read FReadinessChecks;
+    property Revision: UInt64 read FRevision;
     property Character: TPsdCharacter read FCharacter; // 借用。
     property Workspace: TPsdWorkspace read FWorkspace;
     property State: TPsdFrameState read FState;
@@ -75,7 +80,7 @@ begin
     raise Exception.Create('statusから現在のsessionId/revisionを指定してください。');
 end;
 procedure TPsdSession.Changed;
-begin Inc(FRevision); if Assigned(FOnChanged) then FOnChanged(Self); end;
+begin Inc(FRevision); FReadyValid := False; if Assigned(FOnChanged) then FOnChanged(Self); end;
 procedure TPsdSession.Adopt(Character: TPsdCharacter; const Path: string; Dirty, ResetView: Boolean);
 begin
   var Renderer := TPsdRenderer.Create(Character, FWorkspace);
@@ -104,11 +109,18 @@ begin
   if FCharacter = nil then Exit;
   Result.AddPair('characterId', FCharacter.Id); Result.AddPair('name', FCharacter.Name); Result.AddPair('editPolicy', FCharacter.Policy);
   Result.AddPair('supplementName',FCharacter.SupplementName);
-  var Reason: string; var Ready := PsdReadyForScript(FCharacter,Reason);
+  var Reason: string; var Ready := ReadyForScript(Reason);
   Result.AddPair('readyForScript',TJSONBool.Create(Ready)); Result.AddPair('productionReason',Reason);
   Result.AddPair('production',TJSONValue(FCharacter.Production.Clone));
   Result.AddPair('width', TJSONNumber.Create(FCharacter.Document.Width)); Result.AddPair('height', TJSONNumber.Create(FCharacter.Document.Height));
   Result.AddPair('settings', TJSONValue(FCharacter.Settings.Clone));
+end;
+function TPsdSession.ReadyForScript(out Reason: string): Boolean;
+begin
+  if not FReadyValid then begin
+    Inc(FReadinessChecks); FReady := PsdReadyForScript(FCharacter,FReadyReason); FReadyValid := True;
+  end;
+  Reason := FReadyReason; Result := FReady;
 end;
 procedure TPsdSession.SetView(const State: TPsdFrameState);
 begin
@@ -132,12 +144,22 @@ begin
   CheckRevision(Args);
   if (Name = 'open') or (Name = 'import-prepared') or (Name = 'import-psd') then begin
     if FDirty and not B(Args, 'discardChanges') then raise Exception.Create('未保存の変更を保存してください。');
-    var C: TPsdCharacter; var Path := '';
+    var C: TPsdCharacter; var Path := ''; var Dirty := Name<>'open';
     if Name = 'open' then begin Path := FWorkspace.Resolve(S(Args, 'path')); C := LoadCharacter(FWorkspace, Path); end
     else if Name = 'import-prepared' then C := ImportPrepared(FWorkspace, S(Args, 'path'))
     else C := ImportExternalPsd(FWorkspace, S(Args, 'path'));
-    var Reason: string; var Completed := (Name='open') and PsdReadyForScript(C,Reason);
-    try Adopt(C, Path, Name <> 'open'); FCompletedEditSession := Completed; C := nil; finally C.Free; end;
+    var Reason: string;
+    try
+      if (Name='import-prepared') and (FCharacter<>nil) and (FCharacter.Policy='managed') and
+        (Arr(FCharacter.Settings,'groups').Count=0) then begin
+        // 新規作成した空の下書きへ素材を入れても、一覧のUIDと入力済みの名前は維持する。
+        C.Id := FCharacter.Id; C.Name := FCharacter.Name; C.SupplementName := FCharacter.SupplementName;
+        Path := FPath;
+        if Path<>'' then begin SaveCharacter(C,FWorkspace,Path); Dirty := False; end;
+      end;
+      Adopt(C, Path, Dirty); C := nil;
+      FCompletedEditSession := (Name='open') and ReadyForScript(Reason);
+    finally C.Free; end;
     Exit(Status);
   end;
   if FCharacter = nil then raise Exception.Create('Open a character first');

@@ -37,6 +37,7 @@ begin
   inherited CreateNew(AOwner); Caption := 'PSD立ち絵スタジオ'; Width := 1280; Height := 840;
   Position := poScreenCenter; OnCloseQuery := Closing; OnClose := Closed;
   FEditor := TPsdStudioFrame.CreateForCharacter(Self,Root,Path,True); FEditor.Parent := Self;
+  FEditor.SetActive(True);
 end;
 function TPsdStudioForm.GetSession: TPsdSession;
 begin Result := FEditor.Session; end;

@@ -116,6 +116,9 @@ begin
   Result.AddPair('schemaVersion',TJSONNumber.Create(1)); Result.AddPair('requirementsVersion',TJSONNumber.Create(PSD_PRODUCTION_REQUIREMENTS_VERSION));
   Result.AddPair('checked',TJSONBool.Create(True));
   Check('structure','PSDと登録情報',procedure begin Character.Validate; end);
+  Check('frontImage','正面の表示素材',procedure begin
+    var State := TPsdFrameState.Default; State.Motion := 'none'; State.AutoBlink := False; Render(State);
+  end);
   Check('blink','目パチの通常・半開き・閉じ',procedure begin
     var Blink := Obj(Obj(Character.Settings,'animation'),'blink'); var GroupId := S(Blink,'groupId');
     for var Key in ['normalPartId','halfOpenPartId','closedPartId'] do ValidatePart(Character,GroupId,S(Blink,Key));

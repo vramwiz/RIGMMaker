@@ -8,6 +8,7 @@ uses System.SysUtils, System.Classes, System.Types, System.JSON, System.Generics
   SwitchProInput, RigmGamepadPreview, RigmPropertyScrollBox, RigmIconToolbar, RigmEditorProperties;
 
 type
+  TRigmLegacyCharacterLoadEvent = procedure(Sender: TObject; const Path: string; Loading: Boolean) of object;
   TRigmFramePreviewPaintBox = class(TPaintBox)
   public
     property MouseCapture;
@@ -17,7 +18,8 @@ type
   private
     FEditor        : TRigmEditor;                     // 画面が所有する文書・Undo/Redo・操作の入口。
     FPropertyEditor: TRigmEditorProperties;           // 画面が所有する属性部品。文書と入力コントロールは借用する。
-    FOnMovieRequested: TNotifyEvent; FRoot: string;
+    FRoot: string;
+    FOnCharacterLoad: TRigmLegacyCharacterLoadEvent;
     FPipe          : TRigmPipeHub;
     FPages         : array[TRigmPage] of TToolButton;
     FHeaderBar, FToolbar: TRigmIconToolbar;
@@ -90,7 +92,8 @@ type
     procedure SetActive(Value: Boolean);
     function RequestFinish: Boolean;
     function ActivateCharacter(const Path: string): Boolean;
-    property OnMovieRequested: TNotifyEvent read FOnMovieRequested write FOnMovieRequested;
+    property OnCharacterLoad: TRigmLegacyCharacterLoadEvent read FOnCharacterLoad write FOnCharacterLoad;
+    procedure PrepareForDisplay;
     // 動画子画面と入力監視を閉じ、借用参照を持つ属性部品を文書より先に破棄する。
     destructor Destroy; override;
     // RIGMを開き、推定可能な未分類レイヤーを補完する。失敗時は現在の編集を保持する。
@@ -103,8 +106,6 @@ type
     function OpenSeparatedPsd(const FileName: string): TRigmLegacyEditorFrame;
     // 保存先未指定ならダイアログで選ぶ。保存成功時に通知し、取消はFalseを返す。
     function SaveCharacter: Boolean;
-    // 現在のキャラクターで動画制作画面を開く。既存の子画面があれば再利用する。
-    procedure ShowMovieStudio(Sender: TObject);
     property Editor: TRigmEditor read FEditor; // 借用参照。フォームより長く保持しない。
     property OnSaved: TNotifyEvent read FOnSaved write FOnSaved; // 明示保存の成功後にライブラリ等を更新する通知。
     property PreviewRenderCount: UInt64 read FPreviewRenderCount; // 画像を生成した回数。オーバーレイだけの再描画は含まない。
@@ -137,7 +138,7 @@ begin
   Callbacks.GamepadOptionsChanged := GamepadOptionsChanged; Callbacks.RefreshParameterLabel := RefreshParameterLabel;
   FPropertyEditor := TRigmEditorProperties.Create(Self,FProperties,FEditor,Callbacks);
 
-  FEditor.OnChanged := RefreshView; FEditor.OnMovieOpen := ShowMovieStudio;
+  FEditor.OnChanged := RefreshView;
 
   var PipeDirectory := TPath.Combine(Root, 'Temp\RigmPipes');
   for var I := 1 to ParamCount do if ParamStr(I).StartsWith('--pipe-dir=') then PipeDirectory := ExpandFileName(ParamStr(I).Substring(11));
@@ -180,7 +181,6 @@ begin
   FHeaderBar.AddIcon('DirectModeButton', 'パラメータ / 直接操作', riDirect, acDirect, ToolbarClick, True);
   FHeaderBar.AddIcon('BoneOverlayButton', 'ボーン表示', riBoneOverlay, acBones, ToolbarClick, True);
   FHeaderBar.AddIcon('MeshOverlayButton', 'メッシュ表示', riMeshOverlay, acMeshes, ToolbarClick, True);
-  FHeaderBar.AddIcon('MovieStudioButton', '台本から動画を制作', riPreview, acMovie, ToolbarClick);
   FToolbar := TRigmIconToolbar.Create(Self); FToolbar.Name := 'PageToolbar';
   FToolbar.Parent := Self; FToolbar.Align := alTop; FToolbar.Top := FHeaderBar.Height;
   FToolbar.AddIcon('ImportPngButton', 'PNGパーツ追加', riPng, acPng, ToolbarClick);
@@ -666,7 +666,6 @@ begin
       end; Exit;
     end;
       if Action = acComplete then begin AdvanceStage; Exit; end;
-      if Action = acMovie then begin ShowMovieStudio(Self); Exit; end;
     if Action in [acMode, acBones, acMeshes, acDirect, acResetPose, acReference] then begin
       case Action of
         acMode: FPreviewMode := not FPreviewMode;
@@ -952,11 +951,6 @@ end;
 
 
 
-procedure TRigmLegacyEditorFrame.ShowMovieStudio(Sender: TObject);
-begin
-  if Assigned(FOnMovieRequested) then FOnMovieRequested(Self);
-end;
-
 procedure TRigmLegacyEditorFrame.SetActive(Value: Boolean);
 begin
   FTimer.Enabled := Value;
@@ -968,6 +962,12 @@ function TRigmLegacyEditorFrame.ActivateCharacter(const Path: string): Boolean;
 begin
   if SameText(ExpandFileName(Path),FEditor.FileName) then Exit(True);
   if FEditor.Modified then begin FStatus.Caption := '現在のRIGMの変更を保存してから別のキャラを開いてください。'; Exit(False); end;
-  try OpenFile(Path); Result := True; except on E: Exception do begin FStatus.Caption := E.Message; Result := False; end; end;
+  if Assigned(FOnCharacterLoad) then FOnCharacterLoad(Self,Path,True);
+  try
+    try OpenFile(Path); PrepareForDisplay; Result := True;
+    except on E: Exception do begin FStatus.Caption := E.Message; Result := False; end; end;
+  finally if Assigned(FOnCharacterLoad) then FOnCharacterLoad(Self,Path,False); end;
 end;
+procedure TRigmLegacyEditorFrame.PrepareForDisplay;
+begin Realign; if FPreviewDirty then RenderPreview; end;
 end.

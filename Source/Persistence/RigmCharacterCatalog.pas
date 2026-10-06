@@ -15,6 +15,7 @@ function CharacterFormat(const Path: string): string;
 function CharacterFormatLabel(const Path: string): string;
 function CharacterDataRoot(const Path: string): string;
 function ReadCharacterThumbnail(const Path: string; out Name: string; out Width,Height: Integer): TBytes;
+function ReadCharacterThumbnailStatus(const Path: string; out Name,ProductionState: string; out Width,Height: Integer): TBytes;
 function ReadPsdActorAssets(const Path: string): TJSONObject;
 function CharacterReadyForNewScript(const Path: string; out Reason: string): Boolean;
 implementation
@@ -53,16 +54,27 @@ const Keys: array[0..9] of string = ('neutral','happy','joy','angry','sad','surp
 begin
   Result := TJSONObject.Create;
   for var Index := 0 to High(Keys) do begin
-    var P := Obj(Character.Settings,'expressions').GetValue(Names[Index]); if P=nil then Continue;
-    var O := TJSONObject(P.Clone); O.AddPair('psdExpression',Names[Index]); Result.AddPair(Keys[Index],O);
+    var ExpressionName := Names[Index];
+    if Keys[Index]='joy' then for var Name in ['楽しみ','楽しい','楽'] do
+      if Obj(Character.Settings,'expressions').GetValue(Name)<>nil then begin ExpressionName := Name; Break; end;
+    var P := Obj(Character.Settings,'expressions').GetValue(ExpressionName); if P=nil then Continue;
+    var O := TJSONObject(P.Clone); O.AddPair('psdExpression',ExpressionName); Result.AddPair(Keys[Index],O);
   end;
 end;
 function ReadCharacterThumbnail(const Path: string; out Name: string; out Width,Height: Integer): TBytes;
+var ProductionState: string;
+begin Result := ReadCharacterThumbnailStatus(Path,Name,ProductionState,Width,Height); end;
+function ReadCharacterThumbnailStatus(const Path: string; out Name,ProductionState: string; out Width,Height: Integer): TBytes;
 begin
+  ProductionState := '';
   if CharacterFormat(Path)<>'psd' then Exit(ReadRigmThumbnail(Path,Name,Width,Height));
   var Asset := TPsdCharacterAsset.Create(Path,240);
   try
     Name := Asset.Character.Name; var State := TPsdFrameState.Default; State.AutoBlink := False; State.Motion := 'none';
+    // 一覧は保存された検査状態を表示する。台本追加と編集開始では実素材を検査する。
+    if B(Asset.Character.Production,'checked') and B(Asset.Character.Production,'ready') and
+      (I(Asset.Character.Production,'requirementsVersion')=PSD_PRODUCTION_REQUIREMENTS_VERSION) then ProductionState := '検査済み'
+    else ProductionState := '未完成';
     Result := Asset.Renderer.Composite(State); Width := Asset.Renderer.Document.Width; Height := Asset.Renderer.Document.Height;
   finally Asset.Free; end;
 end;

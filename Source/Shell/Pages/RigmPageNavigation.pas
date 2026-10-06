@@ -9,7 +9,11 @@ type
     function RequestFinish: Boolean;
   end;
 function RigmPageTitle(Page: TRigmAppPage): string;
+function RigmPageKey(Page: TRigmAppPage): string;
 implementation
+function RigmPageKey(Page: TRigmAppPage): string;
+const Keys: array[TRigmAppPage] of string = ('home','characters','character-edit','scripts','create','preview');
+begin Result := Keys[Page]; end;
 function RigmPageTitle(Page: TRigmAppPage): string;
 const Titles: array[TRigmAppPage] of string = ('ホーム','キャラ管理','キャラ制作・編集','台本管理','台本作成','動画編集');
 begin Result := Titles[Page]; end;

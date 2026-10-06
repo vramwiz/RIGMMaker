@@ -63,6 +63,7 @@ type
     procedure RefreshTransport;
     procedure PreviewKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure BuildUI;
+    procedure ShowOperations(Sender: TObject);
     procedure DraftEdited(Sender: TObject);
     procedure ActionClick(Sender: TObject);
     procedure SelectCue(Sender: TObject; Item: TListItem; Selected: Boolean);
@@ -138,6 +139,15 @@ begin
   FLayoutPPI := 96;
   FAssets := TJSONObject.Create; BuildUI; FUi.Preview.Session := Session;
   FUi.Toolbar.Visible := True; FUi.ScriptPanel.Visible := True; RefreshView;
+  var Operations := TButton.Create(Self); Operations.Parent := Self; Operations.Align := alTop; Operations.Height := 30;
+  Operations.Name := 'MovieOperations'; Operations.Caption := 'ファイル・編集・制作の操作'; Operations.OnClick := ShowOperations;
+  var Menu := TPopupMenu.Create(Self); Menu.Name := 'MovieOperationsMenu';
+  RigmMovieMenus.PopulateMovieMenus(Menu,ActionClick); Operations.PopupMenu := Menu;
+end;
+procedure TRigmMovieEditorFrame.ShowOperations(Sender: TObject);
+begin
+  var Button := TButton(Sender); var P := Button.ClientToScreen(Point(0,Button.Height));
+  Button.PopupMenu.Popup(P.X,P.Y);
 end;
 destructor TRigmMovieEditorFrame.Destroy;
 begin

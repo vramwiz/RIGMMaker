@@ -60,12 +60,12 @@ type
   end;
 implementation
 uses System.IOUtils, System.Math, System.Types, System.StrUtils, Vcl.Graphics, Vcl.Dialogs,
-  RigmJson, RigmModel, RigmMovieModel, RigmStorage, RigmToolbarIcons, RigmMovieComposition, RigmMovieCompositor, RigmMovieWorkspace, RigmMovieMotionLibrary, RigmCharacterCatalog;
+  RigmJson, RigmModel, RigmMovieModel, RigmStorage, RigmToolbarIcons, RigmMovieComposition, RigmMovieCompositor, RigmMovieWorkspace, RigmMovieMotionLibrary, RigmCharacterCatalog, Winapi.CommCtrl;
 constructor TRigmMovieCreator.CreateForWorkspace(AOwner: TComponent; const Directory: string);
   function Edit(Parent: TWinControl; const Name,Caption: string; Y: Integer): TEdit;
   begin
     var L := TLabel.Create(Self); L.Parent := Parent; L.Caption := Caption; L.SetBounds(12,Y,290,20);
-    Result := TEdit.Create(Self); Result.Parent := Parent; Result.Name := Name; Result.SetBounds(12,Y+20,290,26); Result.OnChange := DraftChanged;
+    Result := TEdit.Create(Self); Result.Parent := Parent; Result.Name := Name; Result.Text := ''; Result.SetBounds(12,Y+20,290,26); Result.OnChange := DraftChanged;
   end;
   procedure Button(Parent: TWinControl; const Name,Caption: string; Tag,Y: Integer);
   begin var B := TButton.Create(Self); B.Parent := Parent; B.Name := Name; B.Caption := Caption; B.Tag := Tag; B.SetBounds(12,Y,290,30); B.OnClick := Action; end;
@@ -88,9 +88,11 @@ begin
   FStatus.Caption := 'チェックで動画へ追加。選択行の設定だけを右側で編集します。配置はフルHD座標、10pxスナップです。';
   FImages := TImageList.Create(Self); FImages.Width := 96; FImages.Height := 96; FImages.ColorDepth := cd32Bit;
   FList := TListView.Create(Self); FList.Parent := Self; FList.Align := alLeft; FList.Width := 320;
-  FList.Name := 'CreationCharacters'; FList.ViewStyle := vsReport; FList.Checkboxes := True;
-  FList.SmallImages := FImages; FList.Columns.Add.Width := 300; FList.ShowColumnHeaders := False;
+  FList.Name := 'CreationCharacters'; FList.ViewStyle := vsIcon; FList.Checkboxes := True;
+  FList.LargeImages := FImages; FList.SmallImages := FImages; FList.IconOptions.AutoArrange := True;
+  FList.Columns.Add.Width := 300; FList.ShowColumnHeaders := False;
   FList.ReadOnly := True; FList.RowSelect := True; FList.HideSelection := False;
+  ListView_SetIconSpacing(FList.Handle,ScaleValue(144),ScaleValue(190));
   FList.OnSelectItem := Selection; FList.OnItemChecked := Checked;
   var Right := TScrollBox.Create(Self); Right.Parent := Self; Right.Align := alRight; Right.Width := 330;
   Right.Name := 'CreationSettings'; Right.HorzScrollBar.Visible := False;
@@ -112,7 +114,7 @@ begin
   FScenes := TListBox.Create(Self); FScenes.Parent := Right; FScenes.Name := 'CreationScenes'; FScenes.SetBounds(12,664,290,120); FScenes.OnClick := SceneSelection;
   FSceneTitle := Edit(Right,'CreationSceneTitle','シーン名（複数セリフをまとめる単位）',800);
   FSceneDuration := Edit(Right,'CreationSceneDuration','シーン長：末尾余白を調整（秒）',854);
-  FDescription := TMemo.Create(Self); FDescription.Parent := Right; FDescription.Name := 'CreationSceneDescription';
+  FDescription := TMemo.Create(Self); FDescription.Parent := Right; FDescription.Name := 'CreationSceneDescription'; FDescription.Clear;
   FDescription.SetBounds(12,916,290,90); FDescription.ScrollBars := ssVertical;
   FDescription.OnChange := DraftChanged;
   Button(Right,'CreationApplyScene','シーン説明と長さを適用',12,1016);
@@ -137,7 +139,7 @@ begin
   Button(Right,'CreationApplyPsd','PSDの表示設定を適用',10,1506);
   var Center := TPanel.Create(Self); Center.Parent := Self; Center.Align := alClient; Center.BevelOuter := bvNone;
   FScript := TMemo.Create(Self); FScript.Parent := Center; FScript.Align := alBottom; FScript.Height := 150;
-  FScript.Name := 'CreationScript'; FScript.ScrollBars := ssVertical;
+  FScript.Name := 'CreationScript'; FScript.Clear; FScript.ScrollBars := ssVertical;
   FPreview := TRigmMoviePreview.Create(Self); FPreview.Parent := Center; FPreview.Align := alClient; FPreview.Name := 'CreationPreview';
   FPreview.OnCharacterSelected := PreviewSelection;
   FTimer := TTimer.Create(Self); FTimer.Interval := 100; FTimer.OnTimer := Timer;
@@ -202,7 +204,7 @@ procedure TRigmMovieCreator.LoadLibrary;
     var E := TCreationEntry.Create; E.FileName := Path; E.Name := Name; var Item := FList.Items.Add; Item.Caption := Name; Item.Data := E;
     FEntries.Add(E); LoadThumbnail(Item,Path);
     E.CanAdd := CharacterReadyForNewScript(Path,E.ProductionReason);
-    if not E.CanAdd then Item.Caption := Item.Caption+'（未完成・追加不可）';
+    if not E.CanAdd then Item.Caption := '['+CharacterFormatLabel(Path)+' / 未完成] '+E.Name;
   end;
 begin
   FRefreshing := True; FList.Items.BeginUpdate;

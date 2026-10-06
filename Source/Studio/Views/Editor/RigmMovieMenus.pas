@@ -3,12 +3,12 @@ unit RigmMovieMenus;
 interface
 uses System.Classes, Vcl.Menus;
 // Menuへ操作項目を追加する。クリックはHandlerへ通知し、作品データは変更しない。
-procedure PopulateMovieMenus(Menu: TMainMenu; Handler: TNotifyEvent);
+procedure PopulateMovieMenus(Menu: TMenu; Handler: TNotifyEvent);
 implementation
 uses System.SysUtils;
-function CreateMovieMenuGroup(Menu: TMainMenu; const Name,Caption: string): TMenuItem;
+function CreateMovieMenuGroup(Menu: TMenu; const Name,Caption: string): TMenuItem;
 begin Result := TMenuItem.Create(Menu.Owner); Result.Name := Name; Result.Caption := Caption; Menu.Items.Add(Result); end;
-procedure AddMovieMenuItem(Menu: TMainMenu; Parent: TMenuItem; const Caption: string; Action: Integer;
+procedure AddMovieMenuItem(Menu: TMenu; Parent: TMenuItem; const Caption: string; Action: Integer;
   Handler: TNotifyEvent; const Shortcut: string='');
 var M: TMenuItem;
 begin
@@ -16,7 +16,7 @@ begin
   M.Caption := Caption; M.Tag := Action; M.OnClick := Handler;
   if Shortcut<>'' then M.ShortCut := TextToShortCut(Shortcut); Parent.Add(M);
 end;
-procedure PopulateMovieMenus(Menu: TMainMenu; Handler: TNotifyEvent);
+procedure PopulateMovieMenus(Menu: TMenu; Handler: TNotifyEvent);
 begin
   var FileMenu := CreateMovieMenuGroup(Menu,'MovieFileMenu','ファイル(&F)');
   AddMovieMenuItem(Menu,FileMenu,'作品を開く...',1,Handler,'Ctrl+O'); AddMovieMenuItem(Menu,FileMenu,'保存',2,Handler,'Ctrl+S');

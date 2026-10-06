@@ -1,6 +1,6 @@
 ﻿# PSD立ち絵編集と共通動画
 
-操作手順、実際の登録名/件数、比較作品は[OPERATIONS.md](OPERATIONS.md)。統合の実装/検証/配置は[INTEGRATION.md](INTEGRATION.md)を参照。
+最新の再開後の実装・配備・保全先は[RESUMED-20261005.md](RESUMED-20261005.md)、1メインフォームと共通パイプは[WIZARD.md](WIZARD.md)、操作手順は[OPERATIONS.md](OPERATIONS.md)を参照。[INTEGRATION.md](INTEGRATION.md)は先行した共通動画統合の記録です。
 
 通常は D:\DelphiProg\MyApp\RIGMMaker\RIGMMaker.exe を起動します。共通一覧から形式別の編集画面を開き、PSDも共通動画制作で使えます。PsdStudio.exe/PsdStudio.dprは補助の独立入口として保持しています。
 
@@ -95,7 +95,7 @@ Charactersはキャラ、Scriptsは台本/音素情報、Exchangeは大容量フ
 
 アプリ内のAI生成直接接続、自動肌補完、外部PSD名編集は未実装です。台本/タイムライン/音声制作は共通画面を使えますが、実音声/LABは未配置で、PSDの実録音との同期を確認済みとはしません。長尺MP4は今回出力していません。
 
-詳細は VALIDATION.md。この環境の内部画面キャプチャは標準Windows部品の文字/枠を収録できません。モデル、パイプ、実キャラ描画、部品のハンドル/可視性/配置は確認しています。マウスによる全GUI動作と標準部品の実画面は未確認です。
+詳細は VALIDATION.md と RESUMED-20261005.md。PaintToによる内部キャプチャでは暗色スタイルの標準部品を正しく収録できませんが、再開後にDPI対応のPrintWindowで通常Release版のホーム・PSD・動画・既存キャラ編集の実ウィンドウを確認しました。全操作を物理マウスやファイルダイアログで検証したわけではありません。
 
 追加仕上げで、GUIの実部品/既存イベントによる開く→表情/視線/非正面選択→保存→再読込→新Sessionの限定回帰9項目がDebug/Releaseとも成功しました。Source/Psd/Validation/Invoke-GuiFlow.ps1で、実キャラを検証ルートへコピーして再実行できます。ファイル選択ダイアログや物理マウスの自動操作はしていません。画像のWindows保存経路と未採用の輪郭清掃候補は IMAGE_TRANSFER.md に記録しました。
 

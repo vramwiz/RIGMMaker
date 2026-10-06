@@ -18,8 +18,10 @@ begin
   var W := TPsdWorkspace.Create(Root); var C: TPsdCharacter := nil; var Session: TPsdSession := nil;
   try
     W.Initialize; var Path := W.Resolve('Characters\fixture.psdchar',False); TFile.Copy(Original,Path,False); C := LoadCharacter(W,Path);
+    for var Name in ['楽しみ','楽しい','楽'] do Obj(C.Settings,'expressions').RemovePair(Name).Free;
+    C.Settings.RemovePair('motionReference').Free;
     var Report := CheckPsdProduction(C);
-    try Check(not PassedCheck(Report,'emotions'),'real registration identifies missing fun emotion'); Check(PassedCheck(Report,'blink') and PassedCheck(Report,'lipSync'),'real normal expression visibly blinks and switches vowel images'); finally Report.Free; end;
+    try Check(not PassedCheck(Report,'emotions'),'copied fixture identifies missing fun emotion'); Check(PassedCheck(Report,'blink') and PassedCheck(Report,'lipSync'),'real normal expression visibly blinks and switches vowel images'); finally Report.Free; end;
     var Fun := TJSONObject(Obj(Obj(C.Settings,'expressions'),'喜び').Clone); Put(Obj(C.Settings,'expressions'),'楽しみ',Fun);
     Report := CheckPsdProduction(C); try Check(not PassedCheck(Report,'emotions'),'renaming identical emotion pixels cannot satisfy completion'); finally Report.Free; end;
     for var V in Arr(Fun,'variants') do begin
@@ -43,8 +45,12 @@ begin
     Report := CheckPsdProduction(C); try Check(not PassedCheck(Report,'blink'),'valid but invisible eye layers cannot satisfy functional blink'); finally Report.Free; end; BlinkGroup.Opacity := Opacity;
     SaveCharacter(C,W,Path); Session := TPsdSession.Create(Root,False); var A := Args(Session); A.AddPair('path',Path); Run(Session,'open',A);
     Check(Session.CompletedEditSession,'reopened complete character enters explicit-save editing mode');
+    var ReadinessChecks := Session.ReadinessChecks; var Status := Session.Status;
+    try Check(B(Status,'readyForScript') and (Session.ReadinessChecks=ReadinessChecks),'unchanged status reuses the fully validated completion result'); finally Status.Free; end;
     var Before := THashSHA2.GetHashStringFromFile(Path); A := Args(Session); A.AddPair('name','明示保存の検証'); Run(Session,'set-info',A);
     Check(Session.Dirty and (THashSHA2.GetHashStringFromFile(Path)=Before),'complete edit does not autosave or change saved bytes');
+    Status := Session.Status;
+    try Check(not B(Status,'readyForScript') and (Session.ReadinessChecks>ReadinessChecks),'editing invalidates cached readiness and blocks new script selection'); finally Status.Free; end;
     Run(Session,'save',Args(Session)); Check(not Session.Dirty and (THashSHA2.GetHashStringFromFile(Path)<>Before),'explicit save persists completed-session edit');
     A := Args(Session); A.AddPair('path',Path); Run(Session,'open',A); Check(Session.Character.Name='明示保存の検証','saved edit survives reopening');
     Check(THashSHA2.GetHashStringFromFile(Original)=OriginalHash,'user original registration remains unchanged');

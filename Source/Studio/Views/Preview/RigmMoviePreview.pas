@@ -94,7 +94,7 @@ var R: TRect;
 begin
 
   Target.Brush.Color := $181818; Target.FillRect(ClientRect);
-  if FFrame.Empty then begin Target.Font.Color := clSilver; Target.Font.Assign(Font); Target.TextOut(ScaleValue(12),ScaleValue(12),'キャラクターと台本を選び、プレビューを開始してください。'); Exit; end;
+  if FFrame.Empty then begin Target.Font.Assign(Font); Target.Font.Color := clSilver; Target.TextOut(ScaleValue(12),ScaleValue(12),'キャラクターと台本を選び、プレビューを開始してください。'); Exit; end;
   R := VideoRect; Target.StretchDraw(R,FFrame);
   if (FSession<>nil) and (FSelectedCharacter<>'') then begin
     Target.Pen.Color := $00FFC060; Target.Pen.Width := ScaleValue(2); Target.Brush.Style := bsClear;

@@ -26,7 +26,7 @@ begin
   Entry('HomeCharacters','キャラ管理・PSD制作',apCharacters,114);
   Entry('HomeScripts','台本・作品管理',apScripts,194);
   Entry('HomeMovie','動画編集',apMovieEdit,274);
-  var Note := TLabel.Create(Self); Note.Parent := Self; Note.SetBounds(48,370,930,130); Note.WordWrap := True;
+  var Note := TLabel.Create(Self); Note.Parent := Self; Note.AutoSize := False; Note.SetBounds(48,370,930,130); Note.WordWrap := True;
   Note.Caption := 'キャラの登録・編集と、既存の台本・動画制作を選んでください。'+#13#10+
     '作品を保存すると台本・作品管理から再開できます。'+#13#10+
     'ページは初回選択時に作り、戻った後も編集中の状態を保持します。';
