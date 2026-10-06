@@ -37,3 +37,5 @@ summaryでは『総評なし／あり』を未選択から人間が選ぶ。値�
 標準RIGMMaker.dproj Win64 Debug / Releaseで確認する。Invoke-ScriptScenes.ps1は明示所有markerの架空作品だけをコピーし、既存VOICEVOX 0.25.2の本物の短い音声を使用する。画像はtest-fixtureと明示した600×200 PNGであり、AI生成画像ではない。
 
 GUI編集、入力lock、ローカルコピー、外部要求取消、保存中の未完了要求保持、実分割PNG/hash/decode、順序違反・未完了finish拒否、最新revisionでも古いscene指紋の採用拒否、新要求採用、元文章・字幕・音声・話者UUID・2人分の保存配置保持を確認する。中央/L/逆Lで複数セリフ全期間の描画、画像/説明/非表示と比率fitを確認する。Next先summary保存、選択保存、普通終了と再開、実サムネイル・プレビュー・音声ready保持を確認する。元の架空作品とRIGMのhash不変を確認する。長尺動画encodeは行わない。
+
+総評の次工程は [SCRIPT-STAGE11-20261006.md](SCRIPT-STAGE11-20261006.md) を参照。

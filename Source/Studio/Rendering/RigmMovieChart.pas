@@ -24,6 +24,7 @@ begin
   if Kind='none' then Exit;
   if Length(JS(Chart,'title'))>120 then raise ERigm.Create('総評チャートの題名は120文字以内です。');
   var Maximum := JN(Chart,'maximum',5);
+  var MinimumValue := JN(Chart,'minimum',0); if not Finite(MinimumValue) or (MinimumValue< -10000) or (MinimumValue>=Maximum) then raise ERigm.Create('チャートの最小値は-10000以上、最大値未満です。');
   if not Finite(Maximum) or (Maximum<0.1) or (Maximum>10000) then raise ERigm.Create('チャートの満点は0.1から10000です。');
   var Color := JS(Chart,'color','#5AB8E8'); var Number: Integer;
   if (Length(Color)<>7) or (Color[1]<>'#') or not TryStrToInt('$'+Copy(Color,2,6),Number) then
@@ -35,7 +36,7 @@ begin
     if not(Item is TJSONObject) then raise ERigm.Create('チャートの項目はオブジェクトです。');
     var O := TJSONObject(Item); var Value := JN(O,'value',-1); var LabelText := JS(O,'label').Trim;
     if (LabelText='') or (Length(LabelText)>24) then raise ERigm.Create('項目名は1から24文字です。');
-    if not Finite(Value) or (Value<0) or (Value>Maximum) then raise ERigm.Create('項目の値は0以上、満点以下にしてください。');
+    if not Finite(Value) or (Value<MinimumValue) or (Value>Maximum) then raise ERigm.Create('項目の値は最小値以上、最大値以下にしてください。');
   end;
 end;
 
@@ -60,7 +61,7 @@ begin
   Canvas.Brush.Style := bsSolid; Canvas.Brush.Color := $302820; Canvas.Pen.Color := $75695D;
   Canvas.Pen.Width := Px(2); Canvas.Rectangle(Bounds);
   Text(JS(Chart,'title','総評'),Rect(Bounds.Left+Px(16),Bounds.Top+Px(12),Bounds.Right-Px(16),Bounds.Top+Px(65)),36,True);
-  var Items := JA(Chart,'items'); var Maximum := JN(Chart,'maximum',5);
+  var Items := JA(Chart,'items'); var Maximum := JN(Chart,'maximum',5); var MinimumValue := JN(Chart,'minimum',0); var RangeValue := Maximum-MinimumValue;
   var Plot := Rect(Bounds.Left+Px(24),Bounds.Top+Px(80),Bounds.Right-Px(24),Bounds.Bottom-Px(22));
   if SameText(JS(Chart,'kind'),'bar') then begin
     var RowHeight := Plot.Height div Items.Count; var LabelWidth := Round(Plot.Width*0.26);
@@ -70,7 +71,7 @@ begin
       Text(JS(O,'label'),Rect(Plot.Left,Y,StartX-Px(10),Y+RowHeight),29,False);
       var Bar := Rect(StartX,Y+RowHeight div 4,EndX,Y+RowHeight*3 div 4);
       Canvas.Brush.Style := bsSolid; Canvas.Brush.Color := $554C43; Canvas.FillRect(Bar);
-      Bar.Right := StartX+Round((EndX-StartX)*JN(O,'value')/Maximum);
+      Bar.Right := StartX+Round((EndX-StartX)*(JN(O,'value')-MinimumValue)/RangeValue);
       Canvas.Brush.Color := Accent; Canvas.FillRect(Bar);
       Text(FormatFloat('0.#',JN(O,'value'),TFormatSettings.Invariant)+' / '+FormatFloat('0.#',Maximum,TFormatSettings.Invariant),
         Rect(EndX+Px(8),Y,Plot.Right,Y+RowHeight),27,False);
@@ -91,7 +92,7 @@ begin
     for var I := 0 to Items.Count-1 do begin
       var P := Geometry.PointAt(-90+I*360/Items.Count,1);
       Canvas.Pen.Color := $75695D; Canvas.MoveTo(Round(Geometry.Center.X),Round(Geometry.Center.Y)); Canvas.LineTo(Round(P.X),Round(P.Y));
-      var O := TJSONObject(Items[I]); P := Geometry.PointAt(-90+I*360/Items.Count,JN(O,'value')/Maximum);
+      var O := TJSONObject(Items[I]); P := Geometry.PointAt(-90+I*360/Items.Count,(JN(O,'value')-MinimumValue)/RangeValue);
       Points[I] := Point(Round(P.X),Round(P.Y));
     end;
     Canvas.Pen.Color := Accent; Canvas.Pen.Width := Px(4); Canvas.Brush.Style := bsClear; Canvas.Polygon(Points);

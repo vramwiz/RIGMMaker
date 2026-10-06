@@ -48,7 +48,9 @@ begin var C := FScriptDraft.Cue(JS(JO(FScriptDraft.ScriptWizard,'voice'),'select
 procedure TRigmWizardWorkspace.EditVoice(const CueId,Reading: string; Settings: TJSONObject);
 begin
   if CurrentScriptStage<>'voice' then raise Exception.Create('音声工程で操作してください。');
-  EditScriptVoice(FScriptDraft,CueId,Reading,Settings); StopVoice; FScriptDraft.Changed; ScriptChanged;
+  EditScriptVoice(FScriptDraft,CueId,Reading,Settings);
+  if FScriptDraft.Cue(CueId)=ScriptSummaryCue(FScriptDraft) then begin var O := JO(FScriptDraft.ScriptWizard,'summaryData'); PsdJson.Put(JO(O,'draft'),'reading',FScriptDraft.Cue(CueId).VoiceReading); PsdJson.Put(JO(O,'appliedDraft'),'reading',FScriptDraft.Cue(CueId).VoiceReading); end;
+  StopVoice; FScriptDraft.Changed; ScriptChanged;
 end;
 procedure TRigmWizardWorkspace.SetVoiceEngine(const Url: string);
 begin
@@ -107,7 +109,7 @@ begin
   var A := TJSONArray.Create; Result.AddPair('rows',A); var Offset := EnsureRange(JI(Args,'offset'),0,FScriptDraft.Cues.Count);
   if Offset<FScriptDraft.Cues.Count then begin
     var C := FScriptDraft.Cues[Offset]; var O := TJSONObject.Create; A.AddElement(O); O.AddPair('cueId',C.Id); O.AddPair('sourceText',C.Text); O.AddPair('reading',C.SpokenText); O.AddPair('subtitle',C.Subtitle);
-    O.AddPair('settings',C.VoiceSettings.Clone as TJSONObject); O.AddPair('sceneId',C.Scene); var Row := CastingRow(FScriptDraft,C.Id); AddN(O,'role',JI(Row,'role'));
+    O.AddPair('settings',C.VoiceSettings.Clone as TJSONObject); O.AddPair('sceneId',C.Scene); AddN(O,'role',ScriptCueRole(FScriptDraft,C.Id));
     var S := FScriptDraft.Speaker(C.SpeakerId); O.AddPair('speaker',S.Json); AddB(O,'ready',FScriptDraft.AudioReady(C)); AddB(O,'stored',FScriptDraft.HasStoredAudio(C));
     O.AddPair('waveFile',C.WaveFile); O.AddPair('labFile',C.LabFile); AddN(O,'audioSeconds',C.AudioSeconds); O.AddPair('audioKey',C.AudioKey);
   end;

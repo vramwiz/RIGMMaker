@@ -3,6 +3,7 @@
 // 表示字幕とメモのみを既存セリフ正本へ反映する。原稿・音声・配役は変更しない。
 interface
 uses System.JSON, RigmMovieModel;
+procedure ValidateSubtitleText(const Text: string; Limit: Integer = 3000);
 procedure PrepareScriptSubtitles(Project: TRigmMovieProject); // 配役確認後、既存表示文を保持して準備する。
 procedure SelectSubtitle(Project: TRigmMovieProject; const CueId: string); // 選択を保存する。
 procedure MoveSubtitle(Project: TRigmMovieProject; Delta: Integer); // 発話順で選択する。
@@ -35,7 +36,7 @@ begin
   var Cue := Project.Cue(JS(JO(Project.ScriptWizard,'subtitles'),'selectedCue'));
   SelectSubtitle(Project,Project.Cues[EnsureRange(Project.Cues.IndexOf(Cue)+Delta,0,Project.Cues.Count-1)].Id);
 end;
-procedure ValidateText(const Text: string; Limit: Integer);
+procedure ValidateSubtitleText(const Text: string; Limit: Integer);
 begin
   if Length(Text)>Limit then raise Exception.CreateFmt('表示字幕は3000文字、メモは2048文字以内にしてください（上限%d）。',[Limit]);
   for var C in Text do if (Ord(C)<32) and not CharInSet(C,[#9,#10,#13]) then raise Exception.Create('無効な制御文字が含まれています。');
@@ -52,7 +53,7 @@ begin
   if (JS(Cast,'state')='stale') or (JS(Cast,'fingerprint')<>CastingFingerprint(Project)) then
     raise Exception.Create('前工程が変わりました。校正・配役を確認し、Nextで字幕へ進んでください。');
   var Cue := Project.Cue(CueId); if Cue=nil then raise Exception.Create('字幕のセリフがありません。');
-  var Value := NormalizeScriptText(Text); var Memo := NormalizeScriptText(Note); ValidateText(Value,3000); ValidateText(Memo,2048);
+  var Value := NormalizeScriptText(Text); var Memo := NormalizeScriptText(Note); ValidateSubtitleText(Value,3000); ValidateSubtitleText(Memo,2048);
   Cue.Subtitle := Value; Cue.SubtitleNote := Memo; PsdJson.Put(Project.ScriptWizard,'subtitlesStatus','in-progress');
 end;
 function WithoutFirstBreak(const Text: string; out Position: Integer): string;
@@ -80,7 +81,7 @@ begin
   var O := JO(Project.ScriptWizard,'subtitles');
   if (JS(O,'format')<>'RIGMMaker.ScriptSubtitles') or (JI(O,'schemaVersion')<>1) or
     (Project.Cue(JS(O,'selectedCue'))=nil) then raise Exception.Create('字幕工程の保存形式が不正です。');
-  for var C in Project.Cues do begin ValidateText(C.Subtitle,3000); ValidateText(C.SubtitleNote,2048); end;
+  for var C in Project.Cues do begin ValidateSubtitleText(C.Subtitle,3000); ValidateSubtitleText(C.SubtitleNote,2048); end;
 end;
 function ScriptSubtitleSummary(Project: TRigmMovieProject): TJSONObject;
 begin

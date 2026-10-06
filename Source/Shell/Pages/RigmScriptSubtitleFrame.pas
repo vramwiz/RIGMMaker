@@ -148,8 +148,8 @@ begin
   try
     FList.Items.Clear;
     for var Cue in P.Cues do begin
-      var Row := CastingRow(P,Cue.Id); var Item := FList.Items.Add;
-      Item.Caption := JI(Row,'role').ToString; Item.SubItems.Add(Cue.Subtitle.Replace(#13#10,' / ')); Item.SubItems.Add(Cue.Id);
+      var Item := FList.Items.Add;
+      Item.Caption := ScriptCueRole(P,Cue.Id).ToString; Item.SubItems.Add(Cue.Subtitle.Replace(#13#10,' / ')); Item.SubItems.Add(Cue.Id);
       if Cue.Id=Id then begin Item.Selected := True; Item.Focused := True; end;
     end;
     if FList.Selected<>nil then FList.Selected.MakeVisible(False);
@@ -157,7 +157,7 @@ begin
       if FLoaded<>Id then FEditing := False; FEditor.Text := C.Subtitle; FNote.Text := C.SubtitleNote;
       FEditor.ReadOnly := not FEditing; FNote.ReadOnly := not FEditing; FLoaded := Id;
     end;
-    FVoice.Text := C.Text; var Row := CastingRow(P,Id); FActor.Caption := JI(Row,'role').ToString+' / '+JS(CastingRole(P,JI(Row,'role')),'name');
+    FVoice.Text := C.Text; var RoleNumber := ScriptCueRole(P,Id); FActor.Caption := RoleNumber.ToString+' / '+JS(CastingRole(P,RoleNumber),'name');
     FGuide.Caption := '↑↓：セリフ選択 / ←→：最初の折返し移動 / Enter：表示文・改行・メモの編集。'+#13#10+'Ctrl+Enter / Esc：入力完了。原稿と音声文は保持します。';
     var Stale := JS(JO(P.ScriptWizard,'casting'),'state')='stale';
     TToolButton(FToolbar.FindComponent('ScriptSubtitleEdit')).Enabled := not Stale;

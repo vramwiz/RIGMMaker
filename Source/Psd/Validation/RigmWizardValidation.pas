@@ -16,6 +16,7 @@ procedure VerifyScriptCasting(Main: TRigmWizardMainForm; const ResultPath: strin
 procedure VerifyScriptSemantic(Main: TRigmWizardMainForm; const ResultPath: string; Reopen: Boolean);
 procedure VerifyScriptVoice(Main: TRigmWizardMainForm; const ResultPath: string; Reopen: Boolean);
 procedure VerifyScriptScenes(Main: TRigmWizardMainForm; const ResultPath: string; Reopen: Boolean);
+procedure VerifyScriptSummary(Main: TRigmWizardMainForm; const ResultPath: string; Reopen: Boolean);
 implementation
 uses System.SysUtils, System.Classes, System.JSON, System.IOUtils, System.Hash, System.Math, System.Types, System.DateUtils, System.Generics.Collections,
   Vcl.Forms, Vcl.Controls, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls, System.UITypes,
@@ -26,7 +27,7 @@ uses System.SysUtils, System.Classes, System.JSON, System.IOUtils, System.Hash, 
   PsdPackage, RigmLegacyEditorFrame, Winapi.ShellAPI, Winapi.ShlObj, Winapi.KnownFolders, Winapi.ActiveX, System.Win.ComObj, System.StrUtils, ArtLayerList, RigmModel, ArtDocument,
   RigmWizardWorkspace, RigmMovieModel, RigmScriptManagerFrame, RigmThumbnailCache, RigmScriptLayoutFrame, RigmMovieLayout,
   RigmScriptPlacementFrame, RigmScriptPlacementModel, RigmScriptTextFrame, RigmScriptTextModel,
-  RigmMovieComposition, RigmMovieCompositionCommands, RigmMovieCompositor, RigmScriptReviewFrame, RigmScriptReviewModel, RigmScriptCastingFrame, RigmScriptCastingModel, RigmScriptSubtitleFrame, RigmScriptSubtitleModel, RigmScriptVoiceModel, RigmScriptVoiceFrame, RigmMovieJobs, RigmMovieAudio, RigmScriptScenesFrame, RigmScriptScenesModel, RigmAppSettings;
+  RigmMovieComposition, RigmMovieCompositionCommands, RigmMovieCompositor, RigmScriptReviewFrame, RigmScriptReviewModel, RigmScriptCastingFrame, RigmScriptCastingModel, RigmScriptSubtitleFrame, RigmScriptSubtitleModel, RigmScriptVoiceModel, RigmScriptVoiceFrame, RigmMovieJobs, RigmMovieAudio, RigmScriptScenesFrame, RigmScriptScenesModel, RigmAppSettings, RigmScriptSummaryFrame, RigmScriptSummaryModel, Vcl.Grids;
 type
   TReturnDialogAnswer = class
   public
@@ -1357,6 +1358,7 @@ end;
 {$I RigmScriptCastingValidation.inc}
 {$I RigmScriptVoiceValidation.inc}
 {$I RigmScriptScenesValidation.inc}
+{$I RigmScriptSummaryValidation.inc}
 {$I RigmScriptSemanticValidation.inc}
 {$I RigmScriptSubtitleValidation.inc}
 end.

@@ -76,7 +76,7 @@ end;
 function TRigmScriptVoiceFrame.SelectedId: string;
 begin Result := JS(JO(FWorkspace.ScriptDraft.ScriptWizard,'voice'),'selectedCue'); end;
 function TRigmScriptVoiceFrame.Number: Integer;
-begin Result := JI(CastingRow(FWorkspace.ScriptDraft,SelectedId),'role'); end;
+begin Result := ScriptCueRole(FWorkspace.ScriptDraft,SelectedId); end;
 function TRigmScriptVoiceFrame.ApplyCurrent: Boolean;
 begin
   Result := False; var O := TJSONObject.Create;

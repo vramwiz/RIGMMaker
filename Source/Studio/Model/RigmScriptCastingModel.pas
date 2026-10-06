@@ -7,6 +7,7 @@ procedure PrepareScriptCasting(Project: TRigmMovieProject); // 未変更区分�
 function CastingFingerprint(Project: TRigmMovieProject): string; // 原稿・セリフ境界・キャラ番号の指紋。
 function CastingRow(Project: TRigmMovieProject; const CueId: string): TJSONObject; // 借用。未登録ならnil。
 function CastingRole(Project: TRigmMovieProject; Number: Integer): TJSONObject; // 借用。無効番号ならnil。
+function ScriptCueRole(Project: TRigmMovieProject; const CueId: string): Integer;
 procedure RequestScriptCasting(Project: TRigmMovieProject); // 人の確定配役を保持して新しい依頼を作る。
 procedure SubmitScriptCasting(Project: TRigmMovieProject; Args: TJSONObject); // 現原稿への提案を原子的に反映する。
 procedure AssignScriptCasting(Project: TRigmMovieProject; const CueId: string; Number: Integer; Confirm: Boolean);
@@ -30,6 +31,11 @@ begin
   Result := nil; if not (Project.ScriptWizard.GetValue('casting') is TJSONObject) then Exit;
   for var V in JA(JO(Project.ScriptWizard,'casting'),'roles') do
     if (JI(TJSONObject(V),'number')=Number) and JB(TJSONObject(V),'active') then Exit(TJSONObject(V));
+end;
+function ScriptCueRole(Project: TRigmMovieProject; const CueId: string): Integer;
+begin
+  Result := 0; var Row := CastingRow(Project,CueId); if Row<>nil then Exit(JI(Row,'role'));
+  if Project.ScriptWizard.GetValue('summaryData') is TJSONObject then begin var O := JO(Project.ScriptWizard,'summaryData'); if JB(O,'materialized') and (JS(O,'cueId')=CueId) then Result := JI(JO(O,'appliedDraft'),'role'); end;
 end;
 function CastingFingerprint(Project: TRigmMovieProject): string;
 begin
@@ -244,9 +250,11 @@ end;
 procedure ValidateScriptCasting(Project: TRigmMovieProject);
 begin
   var Cast := JO(Project.ScriptWizard,'casting');
+  var PrimaryCount := Project.Cues.Count;
+  if Project.ScriptWizard.GetValue('summaryData') is TJSONObject then begin var O := JO(Project.ScriptWizard,'summaryData'); if JB(O,'materialized') and (Project.Cue(JS(O,'cueId'))<>nil) and (CastingRow(Project,JS(O,'cueId'))=nil) then Dec(PrimaryCount); end;
   if (JS(Cast,'format')<>'RIGMMaker.ScriptCasting') or (JI(Cast,'schemaVersion')<>1) or
     not MatchText(JS(Cast,'state'),['requested','ready','stale']) or (JA(Cast,'roles').Count>9) or
-    (JA(Cast,'rows').Count<>Project.Cues.Count) or (Project.Cues.Count=0) then raise Exception.Create('配役データの形式が不正です。');
+    (JA(Cast,'rows').Count<>PrimaryCount) or (PrimaryCount=0) then raise Exception.Create('配役データの形式が不正です。');
   var Seen := TDictionary<string,Boolean>.Create;
   try
     for var V in JA(Cast,'roles') do begin

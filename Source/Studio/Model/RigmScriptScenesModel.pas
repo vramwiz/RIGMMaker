@@ -16,7 +16,7 @@ function RequestScriptSceneImage(Project: TRigmMovieProject; const Id: string): 
 procedure RequireSceneImageRequest(Project: TRigmMovieProject; const Id,RequestId: string);
 function ScriptScenesSummary(Project: TRigmMovieProject): TJSONObject;
 implementation
-uses System.SysUtils, System.Hash, System.Generics.Collections, RigmJson, PsdJson, RigmScriptCastingModel, RigmScriptVoiceModel, RigmScriptTextModel;
+uses System.SysUtils, System.Hash, System.Generics.Collections, RigmJson, PsdJson, RigmScriptCastingModel, RigmScriptVoiceModel, RigmScriptTextModel, RigmMovieChart;
 procedure ValidateText(const Text: string; Limit: Integer);
 begin
   if Length(Text)>Limit then raise Exception.Create('シーンの文章が長すぎます。');
@@ -79,7 +79,7 @@ end;
 function ScriptSceneReady(Project: TRigmMovieProject; Scene: TRigmMovieScene): Boolean;
 begin
   Result := True;
-  if (Scene.DisplayMode='both') or (Scene.DisplayMode='image') then Result := (Scene.Image<>'') and FileExists(ResolveMoviePath(Project.FileName,Scene.Image));
+  if (Scene.DisplayMode='both') or (Scene.DisplayMode='image') then Result := MovieChartEnabled(Scene.Chart) or ((Scene.Image<>'') and FileExists(ResolveMoviePath(Project.FileName,Scene.Image)));
   if (Scene.DisplayMode='both') or (Scene.DisplayMode='text') then Result := Result and (Scene.Description.Trim<>'');
 end;
 function ScriptScenesReady(Project: TRigmMovieProject): Boolean;

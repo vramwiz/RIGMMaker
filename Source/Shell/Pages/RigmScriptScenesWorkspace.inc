@@ -130,5 +130,24 @@ end;
 procedure TRigmWizardWorkspace.SetScriptSummaryChoice(const Choice: string);
 begin
   if (CurrentScriptStage<>'summary') or not MatchStr(Choice,['none','yes']) then raise Exception.Create('総評の有無を選択してください。');
-  if JS(FScriptDraft.ScriptWizard,'summaryChoice')=Choice then Exit; PsdJson.Put(FScriptDraft.ScriptWizard,'summaryChoice',Choice); FScriptDraft.Changed; ScriptChanged;
+  if JS(FScriptDraft.ScriptWizard,'summaryChoice')=Choice then Exit;
+  if Choice='none' then begin DisableScriptSummary(FScriptDraft); FScriptDraft.ScriptWizard.RemovePair('voiceReturnStage').Free; end;
+  PsdJson.Put(FScriptDraft.ScriptWizard,'summaryChoice',Choice); FScriptDraft.Changed; ScriptChanged;
+end;
+procedure TRigmWizardWorkspace.SetScriptSummaryDraft(Draft: TJSONObject);
+begin
+  if CurrentScriptStage<>'summary-edit' then raise Exception.Create('総評入力工程で操作してください。');
+  var Before := JO(FScriptDraft.ScriptWizard,'summaryData').ToJSON; RigmScriptSummaryModel.SetScriptSummaryDraft(FScriptDraft,Draft); if Before=JO(FScriptDraft.ScriptWizard,'summaryData').ToJSON then Exit; FScriptDraft.Changed; ScriptChanged;
+end;
+procedure TRigmWizardWorkspace.CompleteScriptSummary;
+begin
+  if (CurrentScriptStage<>'summary-edit') or FScriptTextEditing then raise Exception.Create('総評入力を完了してください。'); var Copy := FScriptDraft.Clone;
+  try MaterializeScriptSummary(Copy); finally Copy.Free; end; PsdJson.Put(JO(FScriptDraft.ScriptWizard,'summaryData'),'status','complete'); FScriptDraft.Changed; ScriptChanged;
+end;
+function TRigmWizardWorkspace.ReadScriptSummary(Args: TJSONObject): TJSONObject;
+begin
+  if (FScriptDraft=nil) or (JS(Args,'projectId')<>FScriptDraft.Id) or (JI(Args,'revision',-1)<>FScriptDraft.Revision) then raise Exception.Create('最新projectId/revisionで総評を取得してください。');
+  Result := TJSONObject.Create; Result.AddPair('projectId',FScriptDraft.Id); AddN(Result,'revision',FScriptDraft.Revision); Result.AddPair('choice',JS(FScriptDraft.ScriptWizard,'summaryChoice'));
+  if FScriptDraft.ScriptWizard.GetValue('summaryData') is TJSONObject then begin var Data := JO(FScriptDraft.ScriptWizard,'summaryData').Clone as TJSONObject; for var Key in ['appliedDraft','archivedCue','archivedScene'] do Data.RemovePair(Key).Free; Result.AddPair('data',Data); end;
+  var Cue := ScriptSummaryCue(FScriptDraft); if Cue<>nil then begin var Brief := TJSONObject.Create; Brief.AddPair('cueId',Cue.Id); Brief.AddPair('sceneId',Cue.Scene); AddN(Brief,'role',ScriptCueRole(FScriptDraft,Cue.Id)); Brief.AddPair('waveFile',Cue.WaveFile); Brief.AddPair('labFile',Cue.LabFile); AddN(Brief,'audioSeconds',Cue.AudioSeconds); Result.AddPair('cue',Brief); AddB(Result,'audioReady',FScriptDraft.AudioReady(Cue)); end;
 end;
