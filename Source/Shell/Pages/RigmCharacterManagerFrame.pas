@@ -72,6 +72,7 @@ begin
   var New := TButton.Create(Self); New.Parent := Header; New.Align := alLeft; New.Width := 160; New.Caption := '新規作成'; New.Name := 'CharacterNew'; New.OnClick := NewCharacter;
   var Reload := TButton.Create(Self); Reload.Parent := Header; Reload.Align := alLeft; Reload.Width := 140; Reload.Caption := '一覧を更新'; Reload.OnClick := RefreshLibrary;
   FStatus := TLabel.Create(Self); FStatus.Parent := Self; FStatus.Align := alBottom; FStatus.Height := 76; FStatus.WordWrap := True;
+  FStatus.Name := 'CharacterLibraryStatus';
   FImages := TImageList.Create(Self); FImages.ColorDepth := cd32Bit; FImages.Width := ScaleValue(144); FImages.Height := ScaleValue(176);
   FList := TListView.Create(Self); FList.Parent := Self; FList.Align := alClient; FList.ViewStyle := vsIcon; FList.ReadOnly := True; FList.HideSelection := False; FList.Name := 'CharacterLibrary';
   FList.LargeImages := FImages; FList.DoubleBuffered := True; FList.IconOptions.AutoArrange := True;

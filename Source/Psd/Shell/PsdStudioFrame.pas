@@ -22,12 +22,12 @@ type
     FNameEdit, FSupplementEdit: TEdit; FProductionMemo: TMemo; FPrevious,FNext: TButton;
     FPresetName: TEdit; FPresetBlink,FPresetMouth: TCheckBox;
     FLayerX,FLayerY: TEdit;
-    FInfoDirty,FPageChanging: Boolean; FUiCharacterId,FSelectedLayerId: string;
+    FInfoDirty,FPageChanging: Boolean; FUiCharacterId,FSelectedLayerId,FPreviewLayerId: string;
     FUiBuilds,FPreviewFrames: UInt64;
     FUiRevision: UInt64; FUiInitialized,FPreviewDirty,FActive: Boolean;
     FStageChecks: TJSONObject; FStageRevision,FStageValidations: UInt64; FStageChecked: Boolean;
     FStageReady: array[0..3] of Boolean; FStageReason: array[0..3] of string;
-    FNavigationPage: Integer; FStepStatus: TLabel;
+    FNavigationPage: Integer; FStepStatus: TLabel; FPreviewHash: string;
     procedure UpdateNavigation(Sender: TObject);
     function CanAdvance(Stage: Integer; out Reason: string): Boolean;
     procedure SyncView;
@@ -42,10 +42,6 @@ type
     procedure ViewChanged(Sender: TObject);
     procedure TreeChoice(Sender: TObject);
     procedure OpenCharacterPath(const Path: string);
-    procedure OpenPackage(Sender: TObject);
-    procedure ImportPrepared(Sender: TObject);
-    procedure ImportPsd(Sender: TObject);
-    procedure AddLayer(Sender: TObject);
     procedure AddPose(Sender: TObject);
     procedure AddSequence(Sender: TObject);
     procedure Save(Sender: TObject);
@@ -110,8 +106,6 @@ begin
   Font.Name := 'Yu Gothic UI'; Font.Size := 10;
   FSync := True; // 名前付けなどの初期値設定をユーザーの下書き変更として扱わない。
   FSession := PsdSession.TPsdSession.Create(Root); FSession.OnChanged := Refresh; FBitmap := Vcl.Graphics.TBitmap.Create;
-  var Header := TPanel.Create(Self); Header.Parent := Self; Header.Align := alTop; Header.Height := 38; Header.BevelOuter := bvNone;
-  var ReturnButton := Button(Header,'キャラ管理へ戻る',ReturnToManagement); ReturnButton.Align := alRight; ReturnButton.Width := 170; ReturnButton.Name := 'PsdReturnToManagement';
   FStatus := TLabel.Create(Self); FStatus.Parent := Self; FStatus.Align := alBottom; FStatus.Height := 62; FStatus.WordWrap := True;
   FStatus.Caption := '分離済み素材を登録するか、キャラを開いてください。';
   var Navigation := TPanel.Create(Self); Navigation.Parent := Self; Navigation.Align := alBottom; Navigation.Height := 38; Navigation.BevelOuter := bvNone;
@@ -127,7 +121,9 @@ begin
     var Page := TTabSheet.Create(Self); Page.PageControl := FPages; Page.Caption := Text; Page.TabVisible := False;
   end;
   FPageToolbar := TRigmIconToolbar.Create(Self); FPageToolbar.Name := 'PsdStageToolbar';
-  FPageToolbar.Parent := Self; FPageToolbar.Align := alTop; FPageToolbar.Top := Header.Height;
+  FPageToolbar.Parent := Self; FPageToolbar.Align := alTop;
+  FPageToolbar.AddIcon('PsdReturnToManagement','キャラ管理へ戻る',riLayer,0,ReturnToManagement);
+  FPageToolbar.AddSeparator;
   for var Index := 0 to 3 do begin
     FPageButtons[Index] := FPageToolbar.AddIcon('PsdStage'+Index.ToString,FPages.Pages[Index].Caption,
       PageIcons[Index],Index,SelectPage,True);
@@ -143,12 +139,11 @@ begin
   FSupplementEdit := Layers.AddEdit('補足名（衣装など）'); FSupplementEdit.OnChange := InfoChanged; FSupplementEdit.Name := 'PsdCharacterSupplement';
   Layers.AddButton('基本情報を反映',EditCharacterInfo).Name := 'PsdInfoApply';
   Layers.AddLabel('レイヤー');
-  FEmptyGuidance := Layers.AddLabel('素材はまだありません。Codexにキャラ画像と表情差分の制作・レイヤー分離を依頼し、管理フォルダに保存したmanifestを下のボタンで登録してください。',96);
+  FEmptyGuidance := Layers.AddLabel('素材はまだありません。Codexにキャラ画像と表情差分の制作・レイヤー分離と、このキャラへの登録を依頼してください。素材は管理フォルダに保存し、既存の制作・パイプ経路で登録できます。',96);
   FEmptyGuidance.Name := 'PsdEmptyLayerGuidance'; FEmptyGuidance.Parent.Visible := False;
   FTree := TTreeView.Create(Self); FTree.Parent := Layers.AddRow(220); FTree.Align := alClient;
   FTree.OnDblClick := TreeChoice; FTree.OnChange := TreeSelectionChanged;
-  Layers.AddButton('分離済み素材のmanifestを登録',ImportPrepared);
-  Layers.AddButton('外部PSDを参照登録',ImportPsd); Layers.AddButton('選択部位に透過PNGを追加',AddLayer);
+  FTree.Name := 'PsdLayerTree';
   Layers.AddButton('非正面の全身ポーズを追加',AddPose); Layers.AddButton('全身PNG連番を追加（24fps）',AddSequence);
   Layers.AddButton('PSDを書き出す',ExportPsd);
   FLayerX := Layers.AddEdit('追加PNGの配置 X（元キャンバス）'); FLayerX.Text := '0';
@@ -216,7 +211,7 @@ begin
       var R := RunSessionCommand(Command, A); R.Free;
       Result := True;
       if (FSession.SavedPath<>'') and not FSession.Dirty and
-        MatchText(Command,['check-production','set-info','set-motion-reference','select-part','set-expression','add-layer-file','add-nonfront-file']) and Assigned(FOnSaved) then FOnSaved(Self);
+        MatchText(Command,['import-prepared','check-production','set-info','set-motion-reference','select-part','set-expression','add-layer-file','add-nonfront-file']) and Assigned(FOnSaved) then FOnSaved(Self);
     except on E: Exception do FStatus.Caption := E.Message; end;
   finally A.Free; end;
 end;
@@ -241,7 +236,7 @@ end;
 function TPsdStudioFrame.ExternalCommand(const Name: string; A: TJSONObject): TJSONObject;
 begin
   Result := RunSessionCommand(Name,A);
-  if MatchText(Name,['save','check-production','set-info','set-motion-reference','select-part','set-expression','add-layer-file','add-nonfront-file']) and
+  if MatchText(Name,['import-prepared','save','check-production','set-info','set-motion-reference','select-part','set-expression','add-layer-file','add-nonfront-file']) and
     (FSession.SavedPath<>'') and not FSession.Dirty and Assigned(FOnSaved) then FOnSaved(Self);
 end;
 procedure TPsdStudioFrame.Refresh(Sender: TObject);
@@ -260,8 +255,8 @@ begin
     FTree.Items.Clear; FExpression.Clear; FGaze.Clear; FBranch.Clear;
     if FSession.Character = nil then Exit;
     var C := FSession.Character;
-    if (FUiCharacterId<>C.Id) and (C.Policy='managed') and (Arr(C.Settings,'groups').Count=0) then
-      FPages.ActivePageIndex := 0;
+    if FUiCharacterId<>C.Id then begin FPages.ActivePageIndex := 0; FNavigationPage := 0; FPreviewLayerId := ''; end;
+    if C.Document.FindLayer(FPreviewLayerId)=nil then FPreviewLayerId := '';
     FEmptyGuidance.Parent.Visible := (C.Policy='managed') and (Arr(C.Settings,'groups').Count=0);
     if FUiCharacterId<>C.Id then FPreview.Fit;
     if (FUiCharacterId<>C.Id) or not FInfoDirty then begin
@@ -374,17 +369,20 @@ end;
 procedure TPsdStudioFrame.Tick(Sender: TObject);
 begin
   if (FSession.Character = nil) or not Showing or not FPreview.Showing then Exit;
+  if (FPreviewLayerId<>'') and not FPreviewDirty then begin FTimer.Enabled := False; Exit; end;
   if not FPlay.Checked and not FPreviewDirty then Exit;
   if FPlay.Checked then FTime := (GetTickCount64 - FStart) / 1000 else FStart := GetTickCount64 - UInt64(Round(FTime * 1000));
   try
     RenderPreview;
-    if not FPlay.Checked then FTimer.Enabled := False;
+    if not FPlay.Checked or (FPreviewLayerId<>'') then FTimer.Enabled := False;
   except on E: Exception do begin FTimer.Enabled := False; MessageDlg(E.Message, mtError, [mbOK], 0); end; end;
 end;
 procedure TPsdStudioFrame.RenderPreview;
 begin
   if FSession.Character=nil then Exit;
-  var Pixels := FSession.Frame(FTime, 960, 540); Inc(FPreviewFrames); FBitmap.PixelFormat := pf32bit; FBitmap.SetSize(960, 540);
+  var Pixels := FSession.Frame(FTime, 960, 540,FPreviewLayerId); Inc(FPreviewFrames); FBitmap.PixelFormat := pf32bit; FBitmap.SetSize(960, 540);
+  FPreviewHash := '';
+  if FPreviewLayerId<>'' then begin var Hash := THashSHA2.Create; Hash.Update(Pixels); FPreviewHash := Hash.HashAsString; end;
   for var Y := 0 to 539 do begin
     // VCLのScanLineは画像上端を0として返す。RGBAの行番号をそのまま対応させる。
     var Row := PByte(FBitmap.ScanLine[Y]);
@@ -403,6 +401,8 @@ begin
   Result := TJSONObject.Create;
   Result.AddPair('uiBuilds',TJSONNumber.Create(FUiBuilds));
   Result.AddPair('previewFrames',TJSONNumber.Create(FPreviewFrames));
+  Result.AddPair('previewLayerId',FPreviewLayerId);
+  Result.AddPair('previewDigest',FPreviewHash);
   Result.AddPair('previewPaints',TJSONNumber.Create(FPreview.PaintCount));
   Result.AddPair('readinessChecks',TJSONNumber.Create(FSession.ReadinessChecks));
   Result.AddPair('stageValidationChecks',TJSONNumber.Create(FStageValidations));
@@ -417,29 +417,8 @@ begin
   try Dialog.InitialDir := Root; Dialog.Filter := Filter; Dialog.Options := [ofFileMustExist, ofPathMustExist]; if Dialog.Execute then Result := Dialog.FileName;
   finally Dialog.Free; end;
 end;
-procedure TPsdStudioFrame.OpenPackage(Sender: TObject);
-begin var Path := ChooseFile(Self, FSession.Workspace.Root + '\Characters', 'PSDキャラ|*.psdchar'); if Path <> '' then ActivateCharacter(Path); end;
 procedure TPsdStudioFrame.OpenCharacterPath(const Path: string);
 begin var A := Args; A.AddPair('path', Path); Execute('open', A); end;
-procedure TPsdStudioFrame.ImportPrepared(Sender: TObject);
-begin var Path := ChooseFile(Self, FSession.Workspace.Root + '\Work', '素材manifest|manifest.json'); if Path = '' then Exit; var A := Args; A.AddPair('path', Path); Execute('import-prepared', A); end;
-procedure TPsdStudioFrame.ImportPsd(Sender: TObject);
-begin var Path := ChooseFile(Self, FSession.Workspace.Root, '外部PSD（参照）|*.psd'); if Path = '' then Exit; var A := Args; A.AddPair('path', Path); Execute('import-psd', A); end;
-procedure TPsdStudioFrame.AddLayer(Sender: TObject);
-begin
-  if (FSession.Character = nil) or (FTree.Selected = nil) then Exit;
-  var Node := FTree.Selected; if Node.Parent <> nil then Node := Node.Parent;
-  var Path := ChooseFile(Self, FSession.Workspace.Root + '\Exchange', '分離済み透過PNG|*.png'); if Path = '' then Exit;
-  var X,Y: Integer;
-  if not TryStrToInt(FLayerX.Text,X) or not TryStrToInt(FLayerY.Text,Y) then begin FStatus.Caption := 'PNG配置のXとYを整数で入力してください。'; Exit; end;
-  var G := FSession.Character.Group(TArtLayer(Node.Data).Id);
-  var A := Args;
-  try
-    A.AddPair('groupId', S(G, 'id')); A.AddPair('name', TPath.GetFileNameWithoutExtension(Path)); A.AddPair('path', Path);
-    A.AddPair('sha256', THashSHA2.GetHashStringFromFile(Path)); A.AddPair('x', TJSONNumber.Create(X)); A.AddPair('y', TJSONNumber.Create(Y));
-  except A.Free; raise; end;
-  Execute('add-layer-file', A);
-end;
 procedure TPsdStudioFrame.AddPose(Sender: TObject);
 begin
   if FSession.Character = nil then Exit; var Path := ChooseFile(Self, FSession.Workspace.Root + '\Exchange', '非正面の全身透過PNG|*.png'); if Path = '' then Exit;
@@ -634,6 +613,7 @@ begin
   if FSync or (Node=nil) or (Node.Data=nil) then Exit;
   var L := TArtLayer(Node.Data); FSelectedLayerId := L.Id;
   if L.Kind=alkImage then begin FLayerX.Text := L.Bounds.Left.ToString; FLayerY.Text := L.Bounds.Top.ToString; end;
+  FPreviewLayerId := L.Id; RequestPreview;
 end;
 function TPsdStudioFrame.ApplyReference(Sender: TObject): Boolean;
 begin
@@ -658,6 +638,7 @@ begin
       if not FReferencePage.TryApply then begin FPages.ActivePageIndex := 2; FStatus.Caption := '動作確認へ進む前にボーン基準を設定してください。'; end;
     end;
     var Index := FPages.ActivePageIndex;
+    if Index<>FNavigationPage then FPreviewLayerId := '';
     FNavigationPage := Index;
     for var ButtonIndex := 0 to 3 do FPageButtons[ButtonIndex].Down := ButtonIndex=Index;
     FPreview.Visible := Index<>2; FReferencePage.Preview.Visible := Index=2;
@@ -770,10 +751,24 @@ begin
   Result := (Choice=mrNo) or ((Choice=mrYes) and not FSession.Dirty and not HasPageDraft);
 end;
 procedure TPsdStudioFrame.ReturnToManagement(Sender: TObject);
-begin if Assigned(FOnReturn) then FOnReturn(Self); end;
+begin
+  if FSession.Dirty or HasPageDraft then begin
+    var Choice := MessageDlg('編集内容を保存してキャラ管理へ戻りますか？'+#13#10+
+      '「いいえ」は未保存の変更・未反映の入力をこの編集画面に保持して戻ります。同じキャラを開くと再開できます。'+#13#10+
+      '「キャンセル」は編集を続けます。',mtConfirmation,[mbYes,mbNo,mbCancel],0);
+    if Choice=mrCancel then Exit;
+    if Choice=mrYes then begin
+      if FPresetName.Text<>'' then begin FStatus.Caption := '入力中の表情を登録してから保存してください。'; Exit; end;
+      Save(Self); if FSession.Dirty or HasPageDraft then Exit;
+    end;
+  end;
+  FPreviewLayerId := ''; RequestPreview;
+  if Assigned(FOnReturn) then FOnReturn(Self);
+end;
 procedure TPsdStudioFrame.SetActive(Value: Boolean);
 begin
   FActive := Value; FTimer.Enabled := Value and (FPages.ActivePageIndex<>2);
+  if not Value then FPreviewLayerId := '';
   if Value then begin FStart := GetTickCount64-UInt64(Round(FTime*1000)); PageChanged(Self); end;
 end;
 end.

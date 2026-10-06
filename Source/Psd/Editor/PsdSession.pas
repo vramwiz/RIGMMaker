@@ -25,7 +25,7 @@ type
     destructor Destroy; override;
     function Status: TJSONObject; // 呼び出し側所有。
     function Command(const Name: string; Args: TJSONObject): TJSONObject;
-    function Frame(Seconds: Double; Width: Integer = 1920; Height: Integer = 1080): TBytes;
+    function Frame(Seconds: Double; Width: Integer = 1920; Height: Integer = 1080; const SelectionLayerId: string = ''): TBytes;
     procedure SetView(const State: TPsdFrameState);
     function ReadyForScript(out Reason: string): Boolean;
     property ReadinessChecks: UInt64 read FReadinessChecks;
@@ -128,12 +128,13 @@ begin
   // キャッシュされた試験合成が成功した場合だけ表示状態を切替。
   FRenderer.Composite(State); FState := State; if Assigned(FOnChanged) then FOnChanged(Self);
 end;
-function TPsdSession.Frame(Seconds: Double; Width, Height: Integer): TBytes;
+function TPsdSession.Frame(Seconds: Double; Width, Height: Integer; const SelectionLayerId: string): TBytes;
 begin
   if FRenderer = nil then begin Result := nil; Exit; end;
   var V := FState; V.Seconds := Seconds;
   if FTrack.Available then begin V.HasPhoneme := True; V.Phoneme := FTrack.Sample(Seconds); end;
-  Result := FRenderer.Frame(V, Width, Height);
+  if SelectionLayerId<>'' then Result := FRenderer.SelectionFrame(V,SelectionLayerId,Width,Height)
+  else Result := FRenderer.Frame(V, Width, Height);
 end;
 function TPsdSession.Command(const Name: string; Args: TJSONObject): TJSONObject;
 begin

@@ -5,19 +5,21 @@ interface
 uses System.SysUtils, System.Classes, System.Types, System.JSON, System.Generics.Collections,
   Vcl.Controls, Vcl.Forms, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.ComCtrls, Vcl.Graphics,
   Vcl.Menus, RigmModel, RigmEditor, RigmValidation, RigmPipe, ArtDocument, ArtLayerList,
-  SwitchProInput, RigmGamepadPreview, RigmPropertyScrollBox, RigmIconToolbar, RigmEditorProperties;
+  SwitchProInput, RigmGamepadPreview, RigmPropertyScrollBox, RigmIconToolbar, RigmEditorProperties, PsdPreviewControl;
 
 type
   TRigmLegacyCharacterLoadEvent = procedure(Sender: TObject; const Path: string; Loading: Boolean) of object;
-  TRigmFramePreviewPaintBox = class(TPaintBox)
+  TRigmFramePreviewPaintBox = class(TPsdPreviewControl)
   public
-    property MouseCapture;
+    property MouseCapture; property OnMouseDown; property OnMouseMove; property OnMouseUp;
+    property OnResize; property PopupMenu;
   end;
 
   TRigmLegacyEditorFrame = class(TFrame)
   private
     FEditor        : TRigmEditor;                     // 画面が所有する文書・Undo/Redo・操作の入口。
     FPropertyEditor: TRigmEditorProperties;           // 画面が所有する属性部品。文書と入力コントロールは借用する。
+    FEditorCenter,FLists: TPanel;
     FRoot: string;
     FOnCharacterLoad: TRigmLegacyCharacterLoadEvent;
     FPipe          : TRigmPipeHub;
@@ -32,7 +34,7 @@ type
     FLog       : TMemo;
     FIssueList : TListBox;
     FIssues    : TRigmIssues;
-    FStatus, FPsdHint: TLabel;
+    FStatus: TLabel;
     FBitmap, FPreviewBuffer: TBitmap; // 描画済みキャラクターと、ちらつき防止用の合成バッファ。
     FPreviewDirty      : Boolean; // 再描画時にキャラクター画像の再生成が必要か。
     FPreviewRenderCount: UInt64;
@@ -52,10 +54,10 @@ type
     FOnSaved: TNotifyEvent;
     function GetPropertyBuildCount: UInt64;
     procedure BuildUI;
+    procedure LayoutEditor(Sender: TObject);
     procedure RefreshView(Sender: TObject);
     procedure RefreshStatus;
     procedure RefreshToolbars;
-    procedure RefreshLayerGuide;
     function CanSelectPage(Page: TRigmPage): Boolean;
     function AdvanceStage: Boolean;
     procedure BuildProperties;
@@ -63,7 +65,7 @@ type
     procedure RenderPreview;
     procedure PreviewResize(Sender: TObject);
     procedure RefreshParameterLabel(Track: TTrackBar);
-    procedure PaintPreview(Sender: TObject);
+    procedure PaintPreview(Sender: TObject; Canvas: TCanvas; const ImageRect: TRect);
     procedure PageClick(Sender: TObject);
     procedure ToolbarClick(Sender: TObject);
     procedure SelectionChanged(Sender: TObject);
@@ -114,7 +116,7 @@ type
 
 implementation
 {$R *.dfm}
-uses System.Math, System.StrUtils, System.IOUtils, System.UITypes, Winapi.Windows,
+uses System.Math, System.StrUtils, System.IOUtils, System.UITypes, Winapi.Windows, Winapi.Messages,
   Vcl.Dialogs, RigmJson, RigmRenderer, RigmSample, GamepadState, RigmToolbarIcons, RigmEditorActions, RigmCharacterPreviewRendering, RigmAppSettings;
 
 constructor TRigmLegacyEditorFrame.Create(AOwner: TComponent);
@@ -155,7 +157,7 @@ begin
   FPipe.Free;
   if FEditor <> nil then FEditor.OnChanged := nil;
   if FLayerList <> nil then begin FLayerList.OnSelect := nil; FLayerList.SetRoots(nil); end;
-  FPropertyEditor.Free; FIssues.Free; FPreviewBuffer.Free; FBitmap.Free; FEditor.Free; inherited;
+  FPropertyEditor.Free; FIssues.Free; FPaint.Free; FPaint := nil; FPreviewBuffer.Free; FBitmap.Free; FEditor.Free; inherited;
 end;
 
 procedure TRigmLegacyEditorFrame.BuildUI;
@@ -182,26 +184,15 @@ begin
   FHeaderBar.AddIcon('BoneOverlayButton', 'ボーン表示', riBoneOverlay, acBones, ToolbarClick, True);
   FHeaderBar.AddIcon('MeshOverlayButton', 'メッシュ表示', riMeshOverlay, acMeshes, ToolbarClick, True);
   FToolbar := TRigmIconToolbar.Create(Self); FToolbar.Name := 'PageToolbar';
-  FToolbar.Parent := Self; FToolbar.Align := alTop; FToolbar.Top := FHeaderBar.Height;
+  FToolbar.Parent := Self; FToolbar.Align := alTop;
   FToolbar.AddIcon('ImportPngButton', 'PNGパーツ追加', riPng, acPng, ToolbarClick);
   FToolbar.AddIcon('ImportPsdButton', '分解済みPSDを読込', riPsd, acPsd, ToolbarClick);
   FToolbar.AddIcon('AddGroupButton', 'グループ追加', riGroup, acGroup, ToolbarClick);
-  FToolbar.AddIcon('ReferenceButton', '元画像を表示（任意の比較）', riReference, acReference, ToolbarClick, True);
   FToolbar.AddIcon('ClassifyLayersButton', '未分類を再判定', riClassify, acClassify, ToolbarClick);
   FToolbar.AddIcon('ToolbarLayerUp', '選択レイヤーを上へ', riUp, acLayerUp, ToolbarClick);
   FToolbar.AddIcon('ToolbarLayerDown', '選択レイヤーを下へ', riDown, acLayerDown, ToolbarClick);
   FToolbar.AddIcon('ToolbarReplacePng', '選択パーツのPNGを置換', riPng, acReplace, ToolbarClick);
   FToolbar.AddIcon('ToolbarDeleteLayer', '選択レイヤーを削除', riDelete, acDeleteLayer, ToolbarClick);
-  FToolbar.AddIcon('AddBoneButton', 'ボーン追加 / 子を復活', riAddBone, acRestoreBone, ToolbarClick);
-  FToolbar.AddIcon('HideBoneButton', '子ボーンと一緒に非表示', riHideBone, acHideBone, ToolbarClick);
-  FToolbar.AddIcon('ResetBoneButton', 'ボーンを初期位置へ', riResetBone, acResetBone, ToolbarClick);
-  FToolbar.AddIcon('GenerateMeshesButton', '全パーツにメッシュ生成', riGenerate, acGenerate, ToolbarClick);
-  FToolbar.AddIcon('AddVertexButton', '頂点追加（面を分割）', riAddVertex, acAddVertex, ToolbarClick);
-  FToolbar.AddIcon('DeleteVertexButton', '選択頂点を削除', riDeleteVertex, acDeleteVertex, ToolbarClick);
-  FPsdHint := TLabel.Create(Self); FPsdHint.Parent := Self; FPsdHint.Align := alTop;
-  FPsdHint.Name := 'PsdImportHint'; FPsdHint.AutoSize := True; FPsdHint.Height := 52;
-  FPsdHint.WordWrap := True; FPsdHint.Layout := tlCenter;
-  FPsdHint.AlignWithMargins := True; FPsdHint.Margins.SetBounds(12, 4, 12, 4);
   FBottom := TPanel.Create(Self); FBottom.Parent := Self; FBottom.Align := alBottom; FBottom.Height := 176; FBottom.BevelOuter := bvNone;
   BottomBar := TPanel.Create(Self); BottomBar.Parent := FBottom; BottomBar.Align := alTop; BottomBar.Height := 32; BottomBar.BevelOuter := bvNone;
   Button := TButton.Create(Self); Button.Parent := BottomBar; Button.Caption := 'AIログ'; Button.SetBounds(12, 2, 84, 28);
@@ -219,19 +210,36 @@ begin
   FIssueList.PopupMenu := FIssuePopup;
   FStatus := TLabel.Create(Self); FStatus.Parent := Self; FStatus.Align := alBottom; FStatus.Height := 25; FStatus.Layout := tlCenter;
   Center := TPanel.Create(Self); Center.Parent := Self; Center.Align := alClient; Center.BevelOuter := bvNone;
+  FEditorCenter := Center; Center.Name := 'RigmEditorBody';
   Center.DoubleBuffered := True; Center.ParentBackground := False;
   FRight := TPanel.Create(Self); FRight.Parent := Center; FRight.Align := alRight; FRight.Width := 380; FRight.BevelOuter := bvNone;
-  FLayerList := TArtLayerList.Create(Self); FLayerList.Parent := FRight; FLayerList.Align := alTop; FLayerList.Height := 225;
+  FRight.DoubleBuffered := True; FRight.Name := 'RigmInspectorPane';
+  FLists := TPanel.Create(Self); FLists.Parent := FRight; FLists.Align := alLeft; FLists.Width := 230; FLists.BevelOuter := bvNone;
+  FLists.DoubleBuffered := True; FLists.Name := 'RigmLayerPane';
+  FLists.Caption := ''; FLists.ShowCaption := False;
+  FToolbar.Parent := FLists; FToolbar.Align := alTop; FToolbar.Top := 0;
+  FLayerList := TArtLayerList.Create(Self); FLayerList.Parent := FLists; FLayerList.Align := alClient;
   FLayerList.Name := 'LayerList'; FLayerList.OnSelect := SelectionChanged; FLayerList.OnRename := LayerRename; FLayerList.OnAttributes := LayerAttributes;
-  FObjectList := TListBox.Create(Self); FObjectList.Parent := FRight; FObjectList.Align := alTop; FObjectList.Height := 175;
+  FObjectList := TListBox.Create(Self); FObjectList.Parent := FLists; FObjectList.Align := alClient;
   FObjectList.Name := 'BoneMeshList'; FObjectList.OnClick := SelectionChanged;
   FProperties := TRigmPropertyScrollBox.Create(Self); FProperties.Parent := FRight; FProperties.Align := alClient;
   FProperties.Name := 'PropertyScrollBox'; FProperties.HorzScrollBar.Visible := False;
+  FProperties.DoubleBuffered := True;
   FPaint := TRigmFramePreviewPaintBox.Create(Self); FPaint.Parent := Center; FPaint.Align := alClient; FPaint.Name := 'CharacterPreview';
-  FPaint.OnPaint := PaintPreview; FPaint.OnMouseDown := PreviewMouseDown; FPaint.OnMouseMove := PreviewMouseMove; FPaint.OnMouseUp := PreviewMouseUp;
+  FPaint.OnOverlay := PaintPreview; FPaint.OnMouseDown := PreviewMouseDown; FPaint.OnMouseMove := PreviewMouseMove; FPaint.OnMouseUp := PreviewMouseUp;
+  FPaint.Hint := 'ホイールで拡大・縮小。レイヤー画面は左ドラッグ、ボーン・メッシュ画面は中ボタンドラッグで表示を移動します。';
   FPaint.OnResize := PreviewResize;
   FPopup := TPopupMenu.Create(Self); FPaint.PopupMenu := FPopup;
   FTimer := TTimer.Create(Self); FTimer.Interval := 33; FTimer.OnTimer := TimerTick;
+  Center.OnResize := LayoutEditor; LayoutEditor(Self);
+end;
+procedure TRigmLegacyEditorFrame.LayoutEditor(Sender: TObject);
+begin
+  if (FEditorCenter=nil) or (FLists=nil) then Exit;
+  if (FEditor<>nil) and (FEditor.Document.LastPage=rpPreview) then
+    FRight.Width := Min(ScaleValue(320),Max(1,Round(FEditorCenter.ClientWidth*0.4)))
+  else FRight.Width := Min(ScaleValue(620),Max(1,Round(FEditorCenter.ClientWidth*0.54)));
+  FLists.Width := Max(1,Round(FRight.ClientWidth*0.46));
 end;
 
 procedure TRigmLegacyEditorFrame.OpenFile(const FileName: string);
@@ -424,7 +432,6 @@ begin
   FStatus.Caption := '  ' + IfThen(FEditor.Document.Usable, '使用可能', '未完成') + '  |  ' +
     PageName(FEditor.Document.LastPage) + '  |  ' + IfThen(FPreviewMode, 'プレビューモード', '編集モード') +
     '  |  保存先: ' + IfThen(FEditor.FileName = '', '未保存', FEditor.FileName);
-  RefreshLayerGuide;
   RefreshToolbars;
 end;
 
@@ -432,6 +439,7 @@ procedure TRigmLegacyEditorFrame.RefreshToolbars;
 var Page: TRigmPage; B: TToolButton; Layer: TArtLayer; Part: TRigmPart; Bone: TRigmBone; Mesh: TRigmMesh;
 begin
   Page := FEditor.Document.LastPage;
+  FPaint.LeftPanEnabled := Page=rpLayer;
   Layer := FEditor.Document.Art.FindLayer(FEditor.SelectedId);
   FEditor.Document.Parts.TryGetValue(FEditor.SelectedId, Part);
   Bone := FEditor.Document.Bone(FEditor.SelectedId); Mesh := FEditor.Document.Mesh(FEditor.SelectedId);
@@ -481,63 +489,23 @@ begin
         acDeleteVertex: B.Enabled := (Mesh <> nil) and not Mesh.Locked and (FVertex >= 0) and (FVertex < Length(Mesh.Vertices));
       end;
     end;
-    FToolbar.Visible := Page <> rpPreview;
+    FToolbar.Visible := Page=rpLayer;
   finally FToolbar.EnableAlign; end;
+  FLists.Visible := Page<>rpPreview; LayoutEditor(Self);
 end;
-
-procedure TRigmLegacyEditorFrame.RefreshLayerGuide;
-var Prefix, Next: string; Missing: Boolean; Page: TRigmPage; Blocking: TRigmIssue;
-begin
-  Page := FEditor.Document.LastPage;
-  FPsdHint.Visible := Page <> rpPreview;
-  if not FPsdHint.Visible then Exit;
-  if Page <> rpLayer then begin
-    Blocking := nil;
-    for var Issue in FIssues do if Issue.Error and (Issue.Page <= Page) then begin Blocking := Issue; Break; end;
-    if Blocking <> nil then
-      FPsdHint.Caption := '次へ進めません: ' + Blocking.Message + sLineBreak +
-        '異常リストの項目をダブルクリックして対象を修正してください。'
-    else FPsdHint.Caption := PageName(Page) + 'の検証エラーはありません。' +
-      '上部の「' + PageName(TRigmPage(Ord(Page) + 1)) + '」アイコン、または右向き矢印で自動検証して進めます。';
-    Exit;
-  end;
-  if FEditor.Document.Parts.Count = 0 then begin
-    FPsdHint.Caption := '分解済みPSDを読み込むと、画像生成を省略してレイヤー分類から開始できます。'; Exit;
-  end;
-  if FEditor.Document.PsdSourceName <> '' then
-    Prefix := '分解済みPSD: ' + FEditor.Document.PsdSourceName + '（画像生成を省略）。'
-  else Prefix := '';
-  Prefix := Prefix + 'RIGM読込時にも未分類を自動推定します。手動指定・ロックは保持します。';
-  Missing := False;
-  for var Issue in FIssues do
-    if (Issue.Page = rpLayer) and Issue.Error and (Issue.Code.StartsWith('required-') or
-      (Issue.Code = 'empty') or (Issue.Code = 'missing-image')) then Missing := True;
-  if Missing then Next := '次に：異常リストの必須パーツ種別・画像内容を確認してください。名前や親を調整した後は「未分類を再判定」で更新できます。'
-  else Next := '上部の「ボーン」アイコン、または右向き矢印で自動検証して進めます。元画像との見た目の比較は任意です。';
-  FPsdHint.Caption := Prefix + sLineBreak + Next;
-  if FEditor.Document.PsdImportNotes <> '' then FPsdHint.Caption := FPsdHint.Caption + sLineBreak + FEditor.Document.PsdImportNotes;
-end;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 function TRigmLegacyEditorFrame.GetPropertyBuildCount: UInt64;
 begin Result := FPropertyEditor.BuildCount; end;
 procedure TRigmLegacyEditorFrame.BuildProperties;
 begin
   if FPropertyEditor=nil then Exit;
-  FPropertyEditor.Refresh(FPreviewMode,FDirect,FGamepadEnabled,FGamepad,FGamepadPreview.Target,FVertex);
+  var Native := FProperties.Handle;
+  SendMessage(Native,WM_SETREDRAW,0,0);
+  try FPropertyEditor.Refresh(FPreviewMode,FDirect,FGamepadEnabled,FGamepad,FGamepadPreview.Target,FVertex);
+  finally
+    SendMessage(Native,WM_SETREDRAW,1,0);
+    RedrawWindow(Native,nil,0,RDW_INVALIDATE or RDW_ALLCHILDREN);
+  end;
 end;
 procedure AppendEditorOperation(List: TJSONArray; const Name: string; var Arguments: TJSONObject);
 var O: TJSONObject;
@@ -724,12 +692,8 @@ begin
 end;
 
 function TRigmLegacyEditorFrame.PreviewRect: TRect;
-var Scale: Double; W, H: Integer;
 begin
-  if (FBitmap.Width < 1) or (FBitmap.Height < 1) then Exit(TRect.Empty);
-  Scale := Min((FPaint.Width - ScaleValue(48)) / FBitmap.Width, (FPaint.Height - ScaleValue(48)) / FBitmap.Height);
-  W := Max(1, Round(FBitmap.Width * Scale)); H := Max(1, Round(FBitmap.Height * Scale));
-  Result := Rect((FPaint.Width - W) div 2, (FPaint.Height - H) div 2, (FPaint.Width + W) div 2, (FPaint.Height + H) div 2);
+  Result := FPaint.ImageRect;
 end;
 
 function TRigmLegacyEditorFrame.ToWorld(X, Y: Integer): TPointF;
@@ -755,7 +719,7 @@ begin
   if FPreviewMode or (FEditor.Document.LastPage = rpPreview) then Pose := FEditor.Pose;
   if FShowReference and (Length(FEditor.Document.ReferencePixels) > 0) then begin
     Pixels := FEditor.Document.ReferencePixels; W := FEditor.Document.Art.Width; H := FEditor.Document.Art.Height;
-  end else Pixels := RenderRigm(FEditor.Document, Pose, Min(1024,Max(16,Max(PreviewRect.Width,PreviewRect.Height))), W, H);
+  end else Pixels := RenderRigm(FEditor.Document, Pose, Min(1024,Max(16,Max(FPaint.ClientWidth,FPaint.ClientHeight))), W, H);
   FBitmap.PixelFormat := pf32bit;
   if (FBitmap.Width <> W) or (FBitmap.Height <> H) then FBitmap.SetSize(W, H);
   for Y := 0 to H - 1 do begin
@@ -768,23 +732,21 @@ begin
     end;
   end;
   FPreviewDirty := False; Inc(FPreviewRenderCount);
+  FPaint.Present(FBitmap);
 end;
 
-procedure TRigmLegacyEditorFrame.PaintPreview(Sender: TObject);
+procedure TRigmLegacyEditorFrame.PaintPreview(Sender: TObject; Canvas: TCanvas; const ImageRect: TRect);
 var State: TRigmCharacterPreviewState;
 begin
   if (FPaint.Width<1) or (FPaint.Height<1) then Exit;
   if FPreviewDirty then RenderPreview;
-  if (FPreviewBuffer.Width<>FPaint.Width) or (FPreviewBuffer.Height<>FPaint.Height) then
-    FPreviewBuffer.SetSize(FPaint.Width,FPaint.Height);
-  FPreviewBuffer.Canvas.Font.Assign(Font);
+  Canvas.Font.Assign(Font);
   State.Document := FEditor.Document; State.Pose := FEditor.Pose;
-  State.ImageRect := PreviewRect; State.PPI := ScaleValue(96); State.SelectedId := FEditor.SelectedId;
+  State.ImageRect := ImageRect; State.PPI := ScaleValue(96); State.SelectedId := FEditor.SelectedId;
   State.PreviewMode := FPreviewMode; State.Direct := FDirect; State.ShowReference := FShowReference;
   State.ShowMeshes := FShowMeshes; State.ShowBones := FShowBones; State.Dragging := FDragging;
   State.Vertex := FVertex; State.DragId := FDragId; State.DragPoint := FDragPoint;
-  try PaintCharacterPreview(FPreviewBuffer.Canvas,FPaint.ClientRect,FBitmap,State);
-  finally FPaint.Canvas.Draw(0,0,FPreviewBuffer); end;
+  PaintCharacterPreview(Canvas,FPaint.ClientRect,FBitmap,State);
 end;
 
 procedure TRigmLegacyEditorFrame.PreviewMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);

@@ -20,6 +20,7 @@ type
     FDocument: TArtDocument; // 所有。縮小した表示専用文書。保存状態を変更しない。
     FCache: TDictionary<string, TBytes>; // 合成画像を64MB以内で保持。
     FScale: Double;
+    function FramePixels(const State: TPsdFrameState; const Source: TBytes; Width,Height: Integer): TBytes;
   public
     constructor Create(Character: TPsdCharacter; Workspace: TPsdWorkspace; MaxHeight: Integer = 960);
     destructor Destroy; override;
@@ -27,6 +28,7 @@ type
     function Choices(const State: TPsdFrameState): TDictionary<string, string>;
     function Composite(const State: TPsdFrameState): TBytes; // 直線alphaのキャラキャンバス。
     function Frame(const State: TPsdFrameState; Width: Integer = 1920; Height: Integer = 1080): TBytes;
+    function SelectionFrame(const State: TPsdFrameState; const LayerId: string; Width,Height: Integer): TBytes;
     property Document: TArtDocument read FDocument;
   end;
   TPsdPhonemeTrack = class
@@ -175,9 +177,48 @@ begin
   Result := H + (Segmented - H) * Flex;
 end;
 function TPsdRenderer.Frame(const State: TPsdFrameState; Width, Height: Integer): TBytes;
+begin Result := FramePixels(State,Composite(State),Width,Height); end;
+function TPsdRenderer.SelectionFrame(const State: TPsdFrameState; const LayerId: string; Width,Height: Integer): TBytes;
+  function Isolate(Layers: TList<TArtLayer>): Boolean;
+  begin
+    Result := False;
+    for var L in Layers do begin
+      if L.Id=LayerId then L.Visible := True
+      else L.Visible := Isolate(L.Children);
+      Result := Result or L.Visible;
+    end;
+  end;
+begin
+  // 保存文書には触れない。管理素材は既存の排他的な部位選択合成を使う。
+  var V := State; V.Motion := 'none'; V.NonFrontId := '';
+  if FCharacter.Policy='external' then begin
+    var D := FDocument.Clone;
+    try Isolate(D.Roots); Result := FramePixels(V,RenderPsdLayers(D),Width,Height);
+    finally D.Free; end;
+    Exit;
+  end;
+  var GroupId := ''; var PartId := LayerId;
+  for var Item in Arr(FCharacter.Settings,'groups') do begin
+    var G := TJSONObject(Item);
+    if S(G,'id')=LayerId then begin GroupId := LayerId; PartId := S(G,'defaultPartId'); Break; end;
+    for var P in Arr(G,'partIds') do if P.Value=LayerId then begin GroupId := S(G,'id'); Break; end;
+    if GroupId<>'' then Break;
+  end;
+  if GroupId='' then Exit(Frame(State,Width,Height));
+  var Selected := Choices(V); var Variants := TJSONArray.Create;
+  try
+    Selected.AddOrSetValue(GroupId,PartId);
+    for var Pair in Selected do begin
+      var O := TJSONObject.Create; O.AddPair('groupId',Pair.Key); O.AddPair('partId',Pair.Value); Variants.AddElement(O);
+    end;
+    V.Expression := ''; V.Gaze := 'front'; V.AutoBlink := False; V.HasPhoneme := False; V.Variants := Variants;
+    Result := Frame(V,Width,Height);
+  finally Variants.Free; Selected.Free; end;
+end;
+function TPsdRenderer.FramePixels(const State: TPsdFrameState; const Source: TBytes; Width,Height: Integer): TBytes;
 begin
   if (Width < 1) or (Height < 1) then raise Exception.Create('Frame size required');
-  var Source := Composite(State); SetLength(Result, PixelByteCount(Width, Height, 4));
+  SetLength(Result, PixelByteCount(Width, Height, 4));
   var W := FDocument.Width; var H := FDocument.Height;
   var Fit := Min(Width * 0.9 / W, Height * 0.9 / H);
   var T: TRhythmTransform; CalculateRhythmTransform(rmtNone, 0, 2, 0, T);

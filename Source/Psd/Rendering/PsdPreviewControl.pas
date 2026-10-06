@@ -14,6 +14,7 @@ type
     FZoom: Double; FPan,FDragPan: TPointF; // 表示だけの倍率と中心からの移動量。素材へ保存しない。
     FPressPoint: TPoint; FPressed,FDragging: Boolean; FPressButton: TMouseButton;
     FWheelRemainder: Integer; // 120未満のホイール入力を持ち越す。
+    FLeftPanEnabled: Boolean; // 部位を直接編集するホストでは中ボタンだけでパンする。
     FOnOverlay: TPsdPreviewOverlayEvent; FOnImageClick: TPsdPreviewImageClickEvent;
     procedure ClampPan;
     procedure CancelDrag;
@@ -39,6 +40,7 @@ type
     property PaintCount: UInt64 read FPaintCount;
     property Zoom: Double read FZoom;
     property Pan: TPointF read FPan;
+    property LeftPanEnabled: Boolean read FLeftPanEnabled write FLeftPanEnabled;
     property OnOverlay: TPsdPreviewOverlayEvent read FOnOverlay write FOnOverlay;
     property OnImageClick: TPsdPreviewImageClickEvent read FOnImageClick write FOnImageClick;
   end;
@@ -51,7 +53,7 @@ begin
   ControlStyle := (ControlStyle+[csOpaque])-[csCaptureMouse];
   ParentDoubleBuffered := False; // 親の背景消去・子コントロール合成から表示面を独立させる。
   FSurface := Vcl.Graphics.TBitmap.Create; FSurface.PixelFormat := pf32bit;
-  FZoom := 1; ShowHint := True;
+  FZoom := 1; FLeftPanEnabled := True; ShowHint := True;
   Hint := 'ホイールで拡大・縮小、左ドラッグで表示を移動。画面に合わせるアイコンで戻せます。';
 end;
 destructor TPsdPreviewControl.Destroy;
@@ -100,6 +102,7 @@ procedure TPsdPreviewControl.MouseDown(Button: TMouseButton; Shift: TShiftState;
 begin
   inherited;
   if not (Button in [mbLeft,mbMiddle]) then Exit;
+  if (Button=mbLeft) and not FLeftPanEnabled then Exit;
   FPressed := True; FDragging := False; FPressButton := Button;
   FPressPoint := Point(X,Y); FDragPan := FPan; MouseCapture := True;
 end;

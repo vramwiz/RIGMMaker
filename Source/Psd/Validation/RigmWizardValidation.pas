@@ -6,12 +6,24 @@ procedure VerifyUiResponsiveness(Main: TRigmWizardMainForm; const ResultPath: st
 procedure VerifyCharacterCreate(Main: TRigmWizardMainForm; const ResultPath: string);
 implementation
 uses System.SysUtils, System.Classes, System.JSON, System.IOUtils, System.Hash, System.Math, System.Types,
-  Vcl.Forms, Vcl.Controls, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls,
+  Vcl.Forms, Vcl.Controls, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls, System.UITypes,
   RigmPageNavigation, PsdStudioFrame, PsdJson, RigmCharacterEditPage,
   RigmScriptCreatorFrame, RigmMovieWorkspaceFrame, RigmJson, Winapi.Windows, Winapi.Messages,
   PsdPreviewControl, PsdSettingsPanel, PsdMotionReferenceForm, Vcl.Graphics, Vcl.Imaging.pngimage,
-  PsdSession, PsdProduction, RigmCharacterCatalog;
+  PsdSession, PsdProduction, RigmCharacterCatalog, RigmCharacterManagerFrame, PsdWorkspace,
+  PsdPackage, RigmLegacyEditorFrame, Winapi.ShellAPI, Winapi.ShlObj, System.StrUtils, ArtLayerList, RigmModel, ArtDocument;
 type
+  TReturnDialogAnswer = class
+  public
+    Answer: Integer; Seen: Boolean;
+    procedure Tick(Sender: TObject);
+  end;
+  TLegacyLoadingProbe = class
+  public
+    Host: TRigmCharacterEditPage; Forward: TRigmLegacyCharacterLoadEvent;
+    Starts,Finishes: Integer; FramesBefore: UInt64; OnVisible: TProc;
+    procedure LoadingChanged(Sender: TObject; const Path: string; Loading: Boolean);
+  end;
   // 実際の読込通知をホストへ転送し、その前後の可視性と初回フレームを検査する。
   TCharacterLoadingProbe = class
   public
@@ -20,6 +32,44 @@ type
     ExpectFrame: Boolean; FramesBefore: Double; Starts,Finishes: Integer;
     procedure LoadingChanged(Sender: TObject; const Path: string; Loading: Boolean);
   end;
+procedure TReturnDialogAnswer.Tick(Sender: TObject);
+begin
+  // この所有検証プロセスのモーダルダイアログだけを操作する。
+  for var Index := 0 to Screen.FormCount-1 do begin
+    var Form := Screen.Forms[Index];
+    if not (fsModal in Form.FormState) then Continue;
+    for var I := 0 to Form.ComponentCount-1 do
+      if (Form.Components[I] is TButton) and (TButton(Form.Components[I]).ModalResult=Answer) then begin
+        Seen := True; TTimer(Sender).Enabled := False; TButton(Form.Components[I]).Click; Exit;
+      end;
+  end;
+end;
+procedure ClickReturn(Editor: TPsdStudioFrame; Answer: Integer);
+begin
+  var Timer := TTimer.Create(nil); var Probe := TReturnDialogAnswer.Create;
+  try
+    Probe.Answer := Answer; Timer.Interval := 50; Timer.OnTimer := Probe.Tick;
+    TToolButton(TToolBar(Editor.FindComponent('PsdStageToolbar')).FindComponent('PsdReturnToManagement')).Click;
+    if not Probe.Seen then raise Exception.Create('Expected return confirmation was not shown');
+  finally Timer.Free; Probe.Free; end;
+end;
+function PreviewDigest(const Pixels: TBytes): string;
+begin var Hash := THashSHA2.Create; Hash.Update(Pixels); Result := Hash.HashAsString; end;
+procedure TLegacyLoadingProbe.LoadingChanged(Sender: TObject; const Path: string; Loading: Boolean);
+begin
+  var Panel := TRigmCharacterLoadingPanel(Host.FindComponent('CharacterLoading'));
+  if Loading then begin
+    Forward(Sender,Path,True); Inc(Starts); FramesBefore := Host.LegacyEditor.PreviewRenderCount;
+    if not Panel.Showing or Host.LegacyEditor.Visible or not Host.LoadPaintedBeforeActivation then
+      raise Exception.Create(Format('RIGM preparation must be painted while editor remains hidden (panel=%d, editor=%d, painted=%d)',
+        [Ord(Panel.Showing),Ord(Host.LegacyEditor.Visible),Ord(Host.LoadPaintedBeforeActivation)]));
+    if Assigned(OnVisible) then OnVisible();
+  end else begin
+    if not Panel.Showing or Host.LegacyEditor.Visible or (Host.LegacyEditor.PreviewRenderCount<=FramesBefore) then
+      raise Exception.Create('RIGM preview must be ready before preparation ends');
+    Inc(Finishes); Forward(Sender,Path,False);
+  end;
+end;
 procedure TCharacterLoadingProbe.LoadingChanged(Sender: TObject; const Path: string; Loading: Boolean);
 begin
   var Panel := TRigmCharacterLoadingPanel(Host.FindComponent('CharacterLoading'));
@@ -162,18 +212,127 @@ procedure CaptureUiWindow(Main: TRigmWizardMainForm; const ResultPath,Suffix: st
     until GetTickCount64>Deadline;
     raise Exception.Create('Owned native capture timed out');
   end;
+procedure Drop(Manager: TFrame; const Path: string);
+  begin
+    // Explorerと同じWM_DROPFILES経路をアプリ所有のファイルで検証する。
+    var DropHandle := GlobalAlloc(GHND,SizeOf(TDropFiles)+(Length(Path)+2)*SizeOf(Char));
+    if DropHandle=0 then RaiseLastOSError;
+    var Data := GlobalLock(DropHandle);
+    if Data=nil then begin GlobalFree(DropHandle); RaiseLastOSError; end;
+    PDropFiles(Data).pFiles := SizeOf(TDropFiles); PDropFiles(Data).fWide := True;
+    Move(PChar(Path)^,PByte(Data)[SizeOf(TDropFiles)],Length(Path)*SizeOf(Char));
+    GlobalUnlock(DropHandle); Manager.Perform(WM_DROPFILES,WPARAM(DropHandle),0);
+  end;
+procedure VerifyRigmSelection(Main: TRigmWizardMainForm; Manager: TFrame; List: TListView;
+  const RigSourcePath,ResultPath: string; Results: TJSONArray);
+  procedure Check(Value: Boolean; const Text: string; Results: TJSONArray);
+  begin if not Value then raise Exception.Create('RIGM selection validation failed: '+Text); Results.Add(Text); end;
+begin
+    // RIGMも準備表示の背後で初回フレームを作り、同じホストで開く。
+    var RigSource := RigSourcePath; Drop(Manager,RigSource); var RigPath := List.Selected.SubItems[1];
+    var BeforeRigCount := List.Items.Count; Drop(Manager,RigSource);
+    Check((List.Items.Count=BeforeRigCount) and (List.Selected.SubItems[1]=RigPath),'RIGM duplicate drop selects existing UID',Results);
+    var A := TJSONObject.Create;
+    try var R := Main.Workspace.Command('legacy-status',A); R.Free; finally A.Free; end;
+    var Host := TRigmCharacterEditPage(Main.PageInstance(apCharacterEdit)); Main.NavigateTo(apCharacters);
+    var Probe := TLegacyLoadingProbe.Create;
+    try
+      Probe.Host := Host; Probe.Forward := Host.LegacyEditor.OnCharacterLoad;
+      Probe.OnVisible := procedure begin CaptureUiWindow(Main,ResultPath,'.rigm-loading'); end;
+      Host.LegacyEditor.OnCharacterLoad := Probe.LoadingChanged; List.OnDblClick(List);
+      Check((Probe.Starts=1) and (Probe.Finishes=1) and Host.LegacyEditor.Showing and not
+        TPanel(Host.FindComponent('CharacterLoading')).Visible,'RIGM loading prepares preview behind one existing loading page: '+
+        Probe.Starts.ToString+'/'+Probe.Finishes.ToString+'; '+TLabel(Manager.FindComponent('CharacterLibraryStatus')).Caption,Results);
+    finally Host.LegacyEditor.OnCharacterLoad := Probe.Forward; Probe.Free; end;
+    var HasMovieButton := False;
+    for var Index := 0 to Host.LegacyEditor.ComponentCount-1 do if Host.LegacyEditor.Components[Index] is TToolBar then begin
+      var Bar := TToolBar(Host.LegacyEditor.Components[Index]);
+      if Bar.FindComponent('MovieStudioButton')<>nil then HasMovieButton := True;
+    end;
+    Check(not HasMovieButton and not Assigned(Host.LegacyEditor.Editor.OnMovieOpen),'character movie shortcut and its dedicated callback removed',Results);
+    Check(Host.FindComponent('CharacterEditorToolbar')=nil,'removed host return and format-switch icon row',Results);
+    var Legacy := Host.LegacyEditor; Legacy.Editor.SwitchPage(rpLayer); Application.ProcessMessages;
+    var LayerList := TArtLayerList(Legacy.FindComponent('LayerList'));
+    var LayerPane := TPanel(Legacy.FindComponent('RigmLayerPane'));
+    var Properties := TScrollBox(Legacy.FindComponent('PropertyScrollBox'));
+    var LayerToolbar := TToolBar(Legacy.FindComponent('PageToolbar'));
+    Check((LayerToolbar.Parent=LayerPane) and (LayerToolbar.Top<LayerList.Top) and (LayerToolbar.ButtonCount=8),'eight layer tools placed directly above layer list',Results);
+    Check((Properties.Parent=LayerPane.Parent) and (Properties.Left>=LayerPane.Left+LayerPane.Width) and
+      (Properties.ClientWidth>0) and not Properties.HorzScrollBar.Visible,'selected-layer properties positioned right of layer list with vertical scroll',Results);
+    Check((Legacy.FindComponent('PsdImportHint')=nil) and (LayerToolbar.FindComponent('AddBoneButton')=nil) and
+      (LayerToolbar.FindComponent('GenerateMeshesButton')=nil) and (Legacy.FindComponent('EditorToolbar')<>nil),'removed explanatory row and non-layer tools while preserving stage navigation',Results);
+    var Preview := TRigmFramePreviewPaintBox(Legacy.FindComponent('CharacterPreview')); var Revision := Legacy.Editor.Document.Art.Revision;
+    var Cursor := Point(Preview.ClientWidth div 2+10,Preview.ClientHeight div 2+10);
+    var OldRect := Preview.ImageRect; var U := (Cursor.X-OldRect.Left)/OldRect.Width; var V := (Cursor.Y-OldRect.Top)/OldRect.Height;
+    var ScreenPoint := Preview.ClientToScreen(Cursor); var Renders := Legacy.PreviewRenderCount;
+    Preview.Perform(WM_MOUSEWHEEL,MakeWParam(0,120),MakeLParam(ScreenPoint.X,ScreenPoint.Y));
+    var NewRect := Preview.ImageRect;
+    Check((Preview.Zoom>1) and (Abs(U-(Cursor.X-NewRect.Left)/NewRect.Width)<0.01) and
+      (Abs(V-(Cursor.Y-NewRect.Top)/NewRect.Height)<0.01),'RIGM wheel zoom stays centred under cursor',Results);
+    var OldPan := Preview.Pan;
+    Preview.Perform(WM_LBUTTONDOWN,MK_LBUTTON,MakeLParam(Cursor.X,Cursor.Y));
+    Preview.Perform(WM_MOUSEMOVE,MK_LBUTTON,MakeLParam(Cursor.X+25,Cursor.Y+18));
+    Preview.Perform(WM_LBUTTONUP,0,MakeLParam(Cursor.X+25,Cursor.Y+18));
+    Check(Preview.LeftPanEnabled and (Abs(Preview.Pan.X-OldPan.X-25)<1) and
+      (Abs(Preview.Pan.Y-OldPan.Y-18)<1),'RIGM layer-page left drag pans the preview',Results);
+    Preview.LeftPanEnabled := False; OldPan := Preview.Pan;
+    Preview.Perform(WM_MBUTTONDOWN,MK_MBUTTON,MakeLParam(Cursor.X,Cursor.Y));
+    Preview.Perform(WM_MOUSEMOVE,MK_MBUTTON,MakeLParam(Cursor.X+15,Cursor.Y+12));
+    Preview.Perform(WM_MBUTTONUP,0,MakeLParam(Cursor.X+15,Cursor.Y+12));
+    Check((Abs(Preview.Pan.X-OldPan.X-15)<1) and (Abs(Preview.Pan.Y-OldPan.Y-12)<1) and
+      (Legacy.Editor.Document.Art.Revision=Revision) and (Legacy.PreviewRenderCount=Renders),'middle drag pans without changing parts or regenerating character image',Results);
+    var Builds := Legacy.PropertyBuildCount;
+    if LayerList.Selected<>nil then LayerList.Selected := LayerList.Selected;
+    Check(Legacy.PropertyBuildCount=Builds,'same layer selection does not rebuild property controls',Results);
+    for var PPI in [144,96] do begin
+      Main.ScaleForPPI(PPI); Main.SetBounds(40,40,900,740); Application.ProcessMessages;
+      Check((Properties.Left>=LayerPane.Left+LayerPane.Width) and (Properties.ClientWidth>0) and
+        (Preview.ClientWidth>0),'RIGM narrow layout remains separate at '+PPI.ToString+' DPI',Results);
+    end;
+    Main.SetBounds(40,40,1280,840); Application.ProcessMessages;
+    CaptureUiWindow(Main,ResultPath,'.rigm-editor');
+    // 入力のコピーで工程のレイアウトだけを確認する。ユーザー作品へ保存しない。
+    Legacy.Editor.Document.LayerComplete := True; Legacy.Editor.Document.BoneComplete := True; Legacy.Editor.Document.MeshComplete := True;
+    for var Page in [rpBone,rpMesh,rpPreview] do begin
+      Legacy.Editor.SwitchPage(Page); Application.ProcessMessages;
+      Check(not LayerToolbar.Visible and not LayerPane.ShowCaption and (LayerPane.Caption=''),
+        'no residual layer toolbar or panel caption on stage '+IntToStr(Ord(Page)),Results);
+      if Page=rpPreview then Check(not LayerPane.Visible and (Properties.Left=0) and Properties.Showing,
+        'preview keeps parameter controls without empty list pane',Results)
+      else begin
+        var Objects := TListBox(Legacy.FindComponent('BoneMeshList'));
+        Check(LayerPane.Showing and Objects.Showing and (Objects.Align=alClient) and (Objects.Top=0) and
+          (Objects.Height=LayerPane.ClientHeight) and Properties.Showing and
+          (((Page=rpBone) and (Preview.PopupMenu.Items.Count>0)) or
+            ((Page=rpMesh) and (Properties.FindComponent('ApplyMeshPropertiesButton')<>nil))),
+          'bone or mesh list fills pane and retains properties and editing actions on stage '+IntToStr(Ord(Page)),Results);
+      end;
+      CaptureUiWindow(Main,ResultPath,'.rigm-'+IntToStr(Ord(Page)));
+    end;
+    Main.NavigateTo(apCharacters); var Broken := List.Items.Add; Broken.Caption := 'broken'; Broken.SubItems.Add('RIGM'); Broken.SubItems.Add(TPath.Combine(Main.DataRoot,'missing.rigm')); List.Selected := Broken;
+    List.OnDblClick(List);
+    Check((Main.CurrentPage=apCharacters) and not TPanel(Host.FindComponent('CharacterLoading')).Visible and
+      (Host.LegacyEditor.Editor.FileName=RigPath),'failed RIGM load returns to library without losing previous editor',Results);
+    Check(Screen.FormCount=1,'complete wizard and drop flows keep a single main form',Results);
+end;
 procedure VerifyCharacterCreate(Main: TRigmWizardMainForm; const ResultPath: string);
   procedure Check(Value: Boolean; const Text: string; Results: TJSONArray);
   begin if not Value then raise Exception.Create('Character create validation failed: '+Text); Results.Add(Text); end;
 begin
   var Owner := ObjectText(TFile.ReadAllText(TPath.Combine(Main.DataRoot,'gui-validation-owner.json'),TEncoding.UTF8));
+  var FixturePath := S(Owner,'fixturePath');
   try if S(Owner,'owner')<>'RIGMMaker.GuiValidation.v1' then raise Exception.Create('Owned GUI validation root required'); finally Owner.Free; end;
-  Main.Position := poDesigned; Main.SetBounds(40,40,1280,840); Main.Show; Main.Update; Application.ProcessMessages;
+  Main.Position := poDesigned; Main.SetBounds(40,40,1280,840); Main.Show;
+  ShowWindow(Main.Handle,SW_SHOWNOACTIVATE); Main.Update; Application.ProcessMessages;
   var Results := TJSONArray.Create;
   try
     Main.NavigateTo(apCharacters);
     var Manager := Main.PageInstance(apCharacters); var List := TListView(Manager.FindComponent('CharacterLibrary'));
     var NewButton := TButton(Manager.FindComponent('CharacterNew'));
+    for var Index := 1 to ParamCount do if ParamStr(Index)='--rigm-only' then begin
+      VerifyRigmSelection(Main,Manager,List,TPath.Combine(ExtractFileDir(FixturePath),'fixture.rigm'),ResultPath,Results);
+      Main.NavigateTo(apHome); TFile.WriteAllText(ResultPath,Results.ToJSON,TEncoding.UTF8); Exit;
+    end;
     Check((Manager.FindComponent('CharacterOpen')=nil) and (NewButton.Caption='新規作成'),'new menu replaces material registration and removes redundant open button',Results);
     var Count := List.Items.Count; NewButton.Click;
     Check((Main.CurrentPage=apCharacters) and (Main.PageInstance(apCharacterEdit)=nil) and (List.Items.Count=Count+1),'new creates a library entry without opening the editor',Results);
@@ -195,7 +354,22 @@ begin
     Check(not CharacterReadyForNewScript(Path,Reason) and (Reason<>''),'actual script catalog rejects incomplete character',Results);
     var Previous := TButton(Editor.FindComponent('PsdPrevious')); var Next := TButton(Editor.FindComponent('PsdNext'));
     Application.ProcessMessages;
-    Check((Previous.Align=alLeft) and (Next.Align=alRight) and (Previous.Left+Previous.Width<=Next.Left),'back is left and next is right',Results);
+    Check((Previous.Align=alLeft) and (Next.Align=alRight),'back is left and next is right',Results);
+    var StageToolbar := TToolBar(Editor.FindComponent('PsdStageToolbar'));
+    Check((StageToolbar.Buttons[0].Name='PsdReturnToManagement') and not StageToolbar.ShowCaptions and
+      (StageToolbar.Buttons[0].Hint='キャラ管理へ戻る'),'return icon is first in existing stage toolbar with hint',Results);
+    var ReturnHash := THashSHA2.GetHashStringFromFile(Path);
+    TEdit(Editor.FindComponent('PsdCharacterName')).Text := '戻る確認の下書き';
+    ClickReturn(Editor,mrCancel);
+    Check((Main.CurrentPage=apCharacterEdit) and (TEdit(Editor.FindComponent('PsdCharacterName')).Text='戻る確認の下書き') and
+      (THashSHA2.GetHashStringFromFile(Path)=ReturnHash),'return cancellation retains unapplied draft and saved package',Results);
+    ClickReturn(Editor,mrNo); List.OnDblClick(List);
+    Check((Main.CurrentPage=apCharacterEdit) and (TEdit(Editor.FindComponent('PsdCharacterName')).Text='戻る確認の下書き') and
+      (THashSHA2.GetHashStringFromFile(Path)=ReturnHash),'return without save resumes the same retained draft',Results);
+    ClickReturn(Editor,mrYes);
+    Check((Main.CurrentPage=apCharacters) and (Editor.Session.Character.Name='戻る確認の下書き') and not Editor.Session.Dirty,
+      'return with save applies and saves draft before returning',Results);
+    List.OnDblClick(List);
     CaptureUiWindow(Main,ResultPath,'.layers');
     TEdit(Editor.FindComponent('PsdCharacterName')).Text := '新規作成の保存確認';
     TEdit(Editor.FindComponent('PsdCharacterSupplement')).Text := '衣装の補足';
@@ -206,7 +380,7 @@ begin
     var FileHash := THashSHA2.GetHashStringFromFile(Path);
     Next.Click; Check((Pages.ActivePageIndex=0) and not Next.Visible,'empty draft cannot advance before layer validation',Results);
     Previous.Click; Check(Pages.ActivePageIndex=0,'back remains at first layer page',Results);
-    TButton(Editor.FindComponent('PsdReturnToManagement')).Click;
+    TToolButton(TToolBar(Editor.FindComponent('PsdStageToolbar')).FindComponent('PsdReturnToManagement')).Click;
     Check((Main.CurrentPage=apCharacters) and (List.Selected.SubItems[1]=Path) and (Pos('新規作成の保存確認',List.Selected.Caption)>0),'return to library retains and refreshes the new entry',Results);
     List.OnDblClick(List);
     Check((Host.PsdEditor=Editor) and (Pages.ActivePageIndex=0) and (Editor.Session.Character.Id=Id),'double click reopens the same draft at layer page',Results);
@@ -223,6 +397,106 @@ begin
     var SecondPath := List.Selected.SubItems[1]; List.OnDblClick(List);
     Check((SecondPath<>Path) and (Editor.Session.Character.Id<>Id) and (Pages.ActivePageIndex=0),'second new draft has unique UID and starts at layer page despite prior expression page',Results);
     Check((Screen.FormCount=1) and (Length(TDirectory.GetFiles(TPath.Combine(Main.DataRoot,'Characters'),'*.psdchar',TSearchOption.soAllDirectories))=Count+2),'flow keeps one form and one package per character',Results);
+    Main.NavigateTo(apCharacters); var SourceHash := THashSHA2.GetHashStringFromFile(FixturePath);
+    Drop(Manager,FixturePath); var RegisteredPath := List.Selected.SubItems[1];
+    Check((List.Items.Count=Count+3) and FileExists(RegisteredPath) and (RegisteredPath<>FixturePath),'native file drop registers package from outside data root',Results);
+    var RegisteredHash := THashSHA2.GetHashStringFromFile(RegisteredPath);
+    Drop(Manager,FixturePath);
+    Check((List.Items.Count=Count+3) and (List.Selected.SubItems[1]=RegisteredPath) and
+      (THashSHA2.GetHashStringFromFile(RegisteredPath)=RegisteredHash),'repeat drop selects existing package without overwriting',Results);
+    var SourceRoot := TPsdWorkspace.Create(ExtractFileDir(FixturePath)); SourceRoot.Initialize;
+    try
+      var Clone := LoadCharacter(SourceRoot,FixturePath);
+      try
+        Clone.Name := Clone.Name+'（同じUID）'; var SameUid := SourceRoot.Resolve('same-uid.psdchar',False); SaveCharacter(Clone,SourceRoot,SameUid);
+        Drop(Manager,SameUid);
+        Check((List.Items.Count=Count+3) and (List.Selected.SubItems[1]=RegisteredPath) and
+          (THashSHA2.GetHashStringFromFile(RegisteredPath)=RegisteredHash),'same UID with different file bytes selects original without overwriting',Results);
+        Clone.Id := NewId; Clone.Name := '新規キャラ'; var Twin := SourceRoot.Resolve('same-name.psdchar',False); SaveCharacter(Clone,SourceRoot,Twin);
+        Drop(Manager,Twin);
+        Check((List.Items.Count=Count+4) and (List.Selected.SubItems[1]<>RegisteredPath),'same display name with different UID can be registered',Results);
+        var TwinPath := List.Selected.SubItems[1]; List.OnDblClick(List);
+        Check((Pages.ActivePageIndex=0) and Next.Visible,'valid layers automatically enable next',Results);
+        var HasRemovedAction := False;
+        for var Index := 0 to Editor.ComponentCount-1 do if Editor.Components[Index] is TButton then
+          if MatchText(TButton(Editor.Components[Index]).Caption,['キャラを開く','キャラを保存','PSDの必須仕様を検査',
+            'キャラ管理へ戻る','分離済み素材のmanifestを登録','外部PSDを参照登録','選択部位に透過PNGを追加']) then HasRemovedAction := True;
+        Check(not HasRemovedAction,'editor header has no open manual save or inspection buttons',Results);
+        TCheckBox(Editor.FindComponent('PsdPlay')).Checked := False;
+        var View := Editor.Session.State; View.AutoBlink := False; View.HasPhoneme := False; View.Motion := 'none';
+        View.Expression := ''; View.Gaze := 'front'; Editor.Session.SetView(View);
+        var ViewRevision := Editor.Session.Revision; var SettingsBefore := Editor.Session.Character.Settings.ToJSON;
+        var PreviewBefore := PreviewDigest(Editor.Session.Frame(0,960,540));
+        var ClosedId := S(Obj(Obj(Editor.Session.Character.Settings,'animation'),'blink'),'closedPartId');
+        var Tree := TTreeView(Editor.FindComponent('PsdLayerTree'));
+        for var I := 0 to Tree.Items.Count-1 do if TArtLayer(Tree.Items[I].Data).Id=ClosedId then Tree.Selected := Tree.Items[I];
+        var Deadline := GetTickCount64+1000; var Rendered: Boolean;
+        var SelectedDigest := PreviewDigest(Editor.Session.Frame(0,960,540,ClosedId));
+        repeat Application.ProcessMessages; Sleep(5); var D := Editor.Diagnostics;
+          Rendered := (S(D,'previewLayerId')=ClosedId) and (S(D,'previewDigest')=SelectedDigest);
+          D.Free;
+        until Rendered or (GetTickCount64>Deadline);
+        Check(Rendered and (PreviewDigest(Editor.Session.Frame(0,960,540,ClosedId))<>PreviewBefore),
+          'hidden closed-eye selection changes actual preview pixels',Results);
+        Check((Editor.Session.Revision=ViewRevision) and (Editor.Session.Character.Settings.ToJSON=SettingsBefore),
+          'single layer selection preserves saved exclusive choices and revision',Results);
+        CaptureUiWindow(Main,ResultPath,'.layer-selection');
+        Next.Click;
+        var D := Editor.Diagnostics;
+        try Check((S(D,'previewLayerId')='') and (Editor.Session.State.Expression=View.Expression) and
+          (Editor.Session.Character.Settings.ToJSON=SettingsBefore),'page navigation resets only temporary layer preview',Results);
+        finally D.Free; end;
+        Previous.Click;
+        var Before := Editor.Diagnostics;
+        try
+          var A := Editor.Session.Status; try A.AddPair('expression','喜び'); var R := Editor.ExternalCommand('set-view',A); R.Free; finally A.Free; end;
+          var After := Editor.Diagnostics;
+          try Check(N(Before,'stageValidationChecks')=N(After,'stageValidationChecks'),'view-only changes do not repeat stage validation',Results); finally After.Free; end;
+        finally Before.Free; end;
+        Next.Click; Check((Pages.ActivePageIndex=1) and Next.Visible,'valid expressions blink and phonemes enable next',Results);
+        Main.NavigateTo(apCharacters); List.OnDblClick(List);
+        Check(Pages.ActivePageIndex=1,'registered character resumes its previous stage',Results);
+        Next.Click; Check((Pages.ActivePageIndex=2) and Next.Visible,'valid motion reference enables next',Results);
+        var Reference := TPsdMotionReferencePage(Editor.FindComponent('PsdMotionReferenceEditor'));
+        TButton(Reference.FindComponent('MotionReferenceReset')).Click; Next.Click;
+        Check((Pages.ActivePageIndex=2) and not Next.Visible,'partial motion reference prevents advancement',Results);
+        Reference.ReloadCharacter(Editor.Session.Character,Editor.Session.Workspace);
+        Check(Next.Visible,'restoring saved motion reference restores next',Results);
+        Next.Click; Check((Pages.ActivePageIndex=3) and Next.Visible and (Next.Caption='保存') and
+          (Previous.Left+Previous.Width<=Next.Left),'final stage changes next caption to save at right of back',Results);
+        CaptureUiWindow(Main,ResultPath,'.final-save');
+        TEdit(Editor.FindComponent('PsdCharacterName')).Text := '';
+        Next.Click; Check((Main.CurrentPage=apCharacterEdit) and not Next.Visible,'invalid name prevents final save and keeps editor open',Results);
+        TEdit(Editor.FindComponent('PsdCharacterName')).Text := '最終保存の確認';
+        var BeforeSaveHash := THashSHA2.GetHashStringFromFile(TwinPath);
+        var Guard := TFileStream.Create(TwinPath,fmOpenRead or fmShareDenyWrite);
+        try
+          Next.Click; Check((Main.CurrentPage=apCharacterEdit) and Editor.Session.Dirty and
+            (THashSHA2.GetHashStringFromFile(TwinPath)=BeforeSaveHash),'failed final save keeps dirty editor and existing file intact',Results);
+        finally Guard.Free; end;
+        Next.Click;
+        Check((Main.CurrentPage=apCharacters) and not Editor.Session.Dirty and CharacterReadyForNewScript(TwinPath,Reason),'successful final save returns to library with completed character',Results);
+        Clone.Id := NewId; Clone.Production.Free; Clone.Production := ObjectText('{"stage":"draft","checked":false}');
+        Clone.Settings.RemovePair('animation').Free; var MissingAnimation := SourceRoot.Resolve('missing-animation.psdchar',False); SaveCharacter(Clone,SourceRoot,MissingAnimation);
+        Drop(Manager,MissingAnimation); List.OnDblClick(List); Next.Click;
+        TToolButton(TToolBar(Editor.FindComponent('PsdStageToolbar')).FindComponent('PsdStage3')).Click;
+        Check((Pages.ActivePageIndex=1) and not Next.Visible,'missing blink or phonemes blocks next and direct stage bypass',Results);
+        Main.NavigateTo(apCharacters);
+      finally Clone.Free; end;
+      // 外部PSDは既存の参照専用規則で登録し、同名のPSDキャラと混同しない。
+      var Complete := LoadCharacter(SourceRoot,FixturePath);
+      try ExportPsd(Complete,SourceRoot,'reference.psd'); finally Complete.Free; end;
+      var PsdPath := SourceRoot.Resolve('reference.psd'); var PsdHash := THashSHA2.GetHashStringFromFile(PsdPath);
+      var BeforeCount := List.Items.Count; Drop(Manager,PsdPath); var ExternalPath := List.Selected.SubItems[1];
+      var Imported := LoadCharacter(Editor.Session.Workspace,ExternalPath);
+      try Check((List.Items.Count=BeforeCount+1) and (Imported.Policy='external'),'PSD file drop preserves external read-only policy and distinct format',Results); finally Imported.Free; end;
+      Drop(Manager,PsdPath); Check((List.Items.Count=BeforeCount+1) and (List.Selected.SubItems[1]=ExternalPath),'same PSD source is not registered twice',Results);
+      var Invalid := SourceRoot.Resolve('invalid.psd',False); TFile.WriteAllText(Invalid,'invalid image',TEncoding.UTF8);
+      Drop(Manager,Invalid); Drop(Manager,SourceRoot.Resolve('unsupported.png',False));
+      Check(List.Items.Count=BeforeCount+1,'invalid image and unsupported file drop leave library unchanged',Results);
+      Check((THashSHA2.GetHashStringFromFile(FixturePath)=SourceHash) and (THashSHA2.GetHashStringFromFile(PsdPath)=PsdHash),'all drop sources remain unchanged',Results);
+    finally SourceRoot.Free; end;
+    VerifyRigmSelection(Main,Manager,List,TPath.Combine(ExtractFileDir(FixturePath),'fixture.rigm'),ResultPath,Results);
     Main.NavigateTo(apHome); TFile.WriteAllText(ResultPath,Results.ToJSON,TEncoding.UTF8);
   finally Results.Free; end;
 end;
@@ -402,7 +676,7 @@ begin
     var Name := TEdit(Editor.FindComponent('PsdCharacterName')); Name.Text := Name.Text+'（保持する下書き）';
     var Draft := Name.Text; var Id := Editor.Session.Character.Id;
     var Pages := TPageControl(Editor.FindComponent('PsdCharacterPages')); Pages.ActivePageIndex := 2; Pages.OnChange(Pages);
-    TButton(Editor.FindComponent('PsdReturnToManagement')).Click;
+    ClickReturn(Editor,mrNo);
     Check((Main.CurrentPage=apCharacters) and (Main.PageInstance(apCharacters)=Manager),'editor returns to existing management frame',Results);
     TButton(Main.FindComponent('WizardHome')).Click;
     TButton(Main.PageInstance(apHome).FindComponent('HomeCharacters')).Click; List.OnDblClick(List);
@@ -444,7 +718,7 @@ begin
     TButton(Main.PageInstance(apHome).FindComponent('HomeScripts')).Click;
     Check((Main.PageInstance(apScripts)=Scripts) and (Main.CreatedPageCount=6) and (Screen.FormCount=1),'repeated navigation reuses owned frames without additional forms',Results);
     Main.NavigateTo(apCharacterEdit);
-    TToolButton(TToolBar(EditHost.FindComponent('CharacterEditorToolbar')).FindComponent('CharacterLegacyEditor')).Click;
+    EditHost.ActivateLegacyEditor;
     var Legacy := EditHost.LegacyEditor;
     Check((Legacy<>nil) and (Screen.FormCount=1),'legacy character editor created lazily in same form',Results);
     Legacy.OpenSample; var RigPath := TPath.Combine(Main.DataRoot,'RIGM\legacy-frame-fixture.rigm'); ForceDirectories(ExtractFileDir(RigPath)); Legacy.Editor.Save(RigPath);
