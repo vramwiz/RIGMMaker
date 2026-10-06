@@ -19,7 +19,7 @@ begin
   Application.Title := 'RIGM Maker';
   Application.CreateForm(TRigmWizardMainForm, RigmWizardMain);
   var ResultPath := ''; var SmokePath := ''; var UiCheck := False; var CreateCheck := False; var ScriptCheck := False; var ScriptReopen := False; var CharactersCheck := False;
-  var SemanticCheck := False; var SubtitleCheck := False; var CastingCheck := False; var ReviewCheck := False; var ThumbnailCheck := False; var LayoutCheck := False; var PlacementCheck := False; var TextCheck := False;
+  var VoiceCheck := False; var SemanticCheck := False; var SubtitleCheck := False; var CastingCheck := False; var ReviewCheck := False; var ThumbnailCheck := False; var LayoutCheck := False; var PlacementCheck := False; var TextCheck := False;
   for var Index := 1 to ParamCount-1 do begin
     if ParamStr(Index)='--verify-wizard' then ResultPath := ParamStr(Index+1);
     if ParamStr(Index)='--smoke' then SmokePath := ParamStr(Index+1);
@@ -35,6 +35,8 @@ begin
     if ParamStr(Index)='--verify-script-layout-reopen' then begin ResultPath := ParamStr(Index+1); LayoutCheck := True; ScriptReopen := True; end;
     if ParamStr(Index)='--verify-script-placement' then begin ResultPath := ParamStr(Index+1); PlacementCheck := True; end;
     if ParamStr(Index)='--verify-script-placement-reopen' then begin ResultPath := ParamStr(Index+1); PlacementCheck := True; ScriptReopen := True; end;
+    if ParamStr(Index)='--verify-script-voice' then begin ResultPath := ParamStr(Index+1); VoiceCheck := True; end;
+    if ParamStr(Index)='--verify-script-voice-reopen' then begin ResultPath := ParamStr(Index+1); VoiceCheck := True; ScriptReopen := True; end;
     if ParamStr(Index)='--verify-script-semantic' then begin ResultPath := ParamStr(Index+1); SemanticCheck := True; end;
     if ParamStr(Index)='--verify-script-semantic-reopen' then begin ResultPath := ParamStr(Index+1); SemanticCheck := True; ScriptReopen := True; end;
     if ParamStr(Index)='--verify-script-subtitles' then begin ResultPath := ParamStr(Index+1); SubtitleCheck := True; end;
@@ -48,7 +50,8 @@ begin
   end;
   if ResultPath<>'' then begin
     try
-      try if SemanticCheck then VerifyScriptSemantic(RigmWizardMain,ResultPath,ScriptReopen)
+      try if VoiceCheck then VerifyScriptVoice(RigmWizardMain,ResultPath,ScriptReopen)
+      else if SemanticCheck then VerifyScriptSemantic(RigmWizardMain,ResultPath,ScriptReopen)
       else if SubtitleCheck then VerifyScriptSubtitles(RigmWizardMain,ResultPath,ScriptReopen)
       else if CastingCheck then VerifyScriptCasting(RigmWizardMain,ResultPath,ScriptReopen)
       else if ReviewCheck then VerifyScriptReview(RigmWizardMain,ResultPath,ScriptReopen)

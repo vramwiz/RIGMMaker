@@ -47,7 +47,9 @@ for($phase=0;$phase -lt 2;$phase++){
    $connection=Get-Content (Join-Path $root ('Exchange\workspace-'+$process.Id+'.json')) -Raw -Encoding utf8 | ConvertFrom-Json
    if($connection.pid -ne $process.Id -or $connection.dataRoot -ne $root){throw 'Owned connection identity mismatch'}
    $pipe=$connection.commandPipe;$status=Invoke-Pipe $pipe 'app-script-status' @{}
-   if(-not $status.ok -or $status.data.wizard.stage -ne 'subtitles' -or $status.data.canAdvance){throw 'Subtitle voice boundary invalid'}
+   if(-not $status.ok -or $status.data.wizard.stage -ne 'subtitles'){throw 'Subtitle stage invalid'}
+   $expectedAdvance=($status.data.wizard.subtitlesStatus -eq 'complete' -and -not $status.data.textEditing)
+   if($status.data.canAdvance -ne $expectedAdvance){throw 'Subtitle completion gate differs from voice Next'}
    $common=@{projectId=$status.data.projectId;revision=$status.data.revision};$rows=Read-Subtitles $pipe $common
    if($rows.Count -ne 4 -or $null -ne $status.data.wizard.subtitles.rows){throw 'Subtitle pagination or summary invalid'}
    $checks.Add('bounded subtitle reads show cast display voice and note separately')

@@ -14,6 +14,7 @@ procedure VerifyScriptReview(Main: TRigmWizardMainForm; const ResultPath: string
 procedure VerifyScriptSubtitles(Main: TRigmWizardMainForm; const ResultPath: string; Reopen: Boolean);
 procedure VerifyScriptCasting(Main: TRigmWizardMainForm; const ResultPath: string; Reopen: Boolean);
 procedure VerifyScriptSemantic(Main: TRigmWizardMainForm; const ResultPath: string; Reopen: Boolean);
+procedure VerifyScriptVoice(Main: TRigmWizardMainForm; const ResultPath: string; Reopen: Boolean);
 implementation
 uses System.SysUtils, System.Classes, System.JSON, System.IOUtils, System.Hash, System.Math, System.Types, System.DateUtils, System.Generics.Collections,
   Vcl.Forms, Vcl.Controls, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls, System.UITypes,
@@ -24,7 +25,7 @@ uses System.SysUtils, System.Classes, System.JSON, System.IOUtils, System.Hash, 
   PsdPackage, RigmLegacyEditorFrame, Winapi.ShellAPI, Winapi.ShlObj, System.StrUtils, ArtLayerList, RigmModel, ArtDocument,
   RigmWizardWorkspace, RigmMovieModel, RigmScriptManagerFrame, RigmThumbnailCache, RigmScriptLayoutFrame, RigmMovieLayout,
   RigmScriptPlacementFrame, RigmScriptPlacementModel, RigmScriptTextFrame, RigmScriptTextModel,
-  RigmMovieComposition, RigmMovieCompositionCommands, RigmMovieCompositor, RigmScriptReviewFrame, RigmScriptReviewModel, RigmScriptCastingFrame, RigmScriptCastingModel, RigmScriptSubtitleFrame, RigmScriptSubtitleModel;
+  RigmMovieComposition, RigmMovieCompositionCommands, RigmMovieCompositor, RigmScriptReviewFrame, RigmScriptReviewModel, RigmScriptCastingFrame, RigmScriptCastingModel, RigmScriptSubtitleFrame, RigmScriptSubtitleModel, RigmScriptVoiceModel, RigmScriptVoiceFrame, RigmMovieJobs, RigmMovieAudio;
 type
   TReturnDialogAnswer = class
   public
@@ -1353,6 +1354,7 @@ end;
 {$I RigmScriptTextValidation.inc}
 {$I RigmScriptReviewValidation.inc}
 {$I RigmScriptCastingValidation.inc}
+{$I RigmScriptVoiceValidation.inc}
 {$I RigmScriptSemanticValidation.inc}
 {$I RigmScriptSubtitleValidation.inc}
 end.

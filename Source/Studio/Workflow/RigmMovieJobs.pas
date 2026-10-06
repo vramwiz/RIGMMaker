@@ -199,18 +199,24 @@ var Values: TSerifVoicevoxAudioValues; Wave,TextFile,Lab,Error,Directory: string
 begin
   Directory := FOutput; if Directory='' then Directory := TPath.Combine(TPath.GetTempPath,'RIGMMaker\MovieAudio\'+FProject.Id);
   Directory := ExpandFileName(Directory);
-  ForceDirectories(Directory); Report(0,FProject.Cues.Count);
+  var Selected := JS(FProductionOptions,'cueId');
+  if (Selected<>'') and (FProject.Cue(Selected)=nil) then raise ERigm.Create('生成対象のセリフがありません。');
+  var Total := FProject.Cues.Count; if Selected<>'' then Total := 1;
+  var Completed := 0; ForceDirectories(Directory); Report(0,Total);
   for var I := 0 to FProject.Cues.Count-1 do begin
-    CheckCancel; var C := FProject.Cues[I];
-    if (C.Text='') and not FProject.AudioReady(C) then begin
+    CheckCancel; var C := FProject.Cues[I]; if (Selected<>'') and (C.Id<>Selected) then Continue;
+    if (C.SpokenText='') and not FProject.AudioReady(C) then begin
       C.WaveFile := ''; C.LabFile := ''; C.AudioSeconds := 0; C.AudioKey := FProject.AudioFingerprint(C);
     end;
-    if (C.Text<>'') and not FProject.AudioReady(C) then begin
+    if (C.SpokenText<>'') and not FProject.AudioReady(C) then begin
       var S := FProject.Speaker(C.SpeakerId);
       if FProject.EffectiveStyle(C)<0 then raise ERigm.Create('VOICEVOX話者一覧から音声を選択してください: '+S.Name);
       Values := TSerifVoicevoxAudioValues.Defaults; Values.SpeedScale := S.Speed; Values.PitchScale := S.Pitch;
       Values.IntonationScale := S.Intonation; Values.VolumeScale := S.Volume;
-      if not TSerifVoicevoxApi.CreateInputFiles(C.Text,S.Name,IntToStr(FProject.EffectiveStyle(C)),FProject.EffectiveStyle(C),Values,'',Wave,TextFile,Lab,Error) then
+      Values.SpeedScale := JN(C.VoiceSettings,'speedScale',Values.SpeedScale); Values.PitchScale := JN(C.VoiceSettings,'pitchScale',Values.PitchScale);
+      Values.IntonationScale := JN(C.VoiceSettings,'intonationScale',Values.IntonationScale); Values.VolumeScale := JN(C.VoiceSettings,'volumeScale',Values.VolumeScale);
+      Values.PrePhonemeLength := JN(C.VoiceSettings,'prePhonemeLength',Values.PrePhonemeLength); Values.PostPhonemeLength := JN(C.VoiceSettings,'postPhonemeLength',Values.PostPhonemeLength);
+      if not TSerifVoicevoxApi.CreateInputFiles(C.SpokenText,S.Name,IntToStr(FProject.EffectiveStyle(C)),FProject.EffectiveStyle(C),Values,'',Wave,TextFile,Lab,Error) then
         raise ERigm.Create('音声生成 '+C.Id+': '+Error);
       try
         CheckCancel; Pcm := TRigmPcm.Load(Wave);
@@ -224,7 +230,7 @@ begin
         if FileExists(Wave) then TFile.Delete(Wave); if FileExists(TextFile) then TFile.Delete(TextFile); if FileExists(Lab) then TFile.Delete(Lab);
       end;
     end;
-    Report(I+1,FProject.Cues.Count);
+    Inc(Completed); Report(Completed,Total);
   end;
 end;
 function LoadActor(Project: TRigmMovieProject): TRigmDocument;

@@ -1,4 +1,6 @@
-﻿# 第9段階：VOICEVOX接続前の確認（未実装）
+# 第9段階：VOICEVOX接続前の確認（12:57 UTCの記録）
+
+> 13:52 UTC追記：以下は12:57時点の履歴です。Syncroh2の既存LauncherList.iniから V:\voicevox-windows-directml-0.25.2\VOICEVOX\vv-engine\run.exe を特定し、0.25.2の実API・短い音声生成を確認しました。ローカルPrograms側の配布は変更していません。現在の実装は SCRIPT-STAGE9-20261006.md を参照。
 
 2026-10-06 12:57 UTC時点、既存エンジンは `C:\Users\zan12\AppData\Local\Programs\VOICEVOX\vv-engine\run.exe`。新規導入はしていない。起動中のVOICEVOX/RIGMMakerとlocalhost:50021の待受はなく、`/version` は接続拒否。
 

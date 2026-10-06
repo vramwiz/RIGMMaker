@@ -167,5 +167,5 @@ begin
   finally FList.Items.EndUpdate; FSync := False; end;
 end;
 procedure TRigmScriptSubtitleFrame.SetActive(Value: Boolean);
-begin if not Value then begin FEditing := False; FWorkspace.EndScriptTextEdit; end; end;
+begin if not Value and FEditing then begin FEditing := False; FWorkspace.EndScriptTextEdit; end; end;
 end.

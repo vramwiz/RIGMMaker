@@ -33,7 +33,7 @@ begin
     end;
     var Frame: TRigmScriptSubtitleFrame := nil;
     for var I := 0 to Creator.ComponentCount-1 do if Creator.Components[I] is TRigmScriptSubtitleFrame then Frame := TRigmScriptSubtitleFrame(Creator.Components[I]);
-    Check((Frame<>nil) and Frame.Showing and not Next.Visible,'lazy subtitle frame stays within main form and stops before voice',Results);
+    Check((Frame<>nil) and Frame.Showing and Next.Visible,'lazy subtitle frame stays within main form and exposes saved Next to voice',Results);
     var List := TListView(Frame.FindComponent('ScriptSubtitleRows')); var Editor := TMemo(Frame.FindComponent('ScriptSubtitleText')); var Note := TMemo(Frame.FindComponent('ScriptSubtitleNote'));
     var Tools := TToolBar(Frame.FindComponent('ScriptSubtitleToolbar')); var Ready := TToolButton(Tools.FindComponent('ScriptSubtitleReady'));
     if not Reopen then begin
