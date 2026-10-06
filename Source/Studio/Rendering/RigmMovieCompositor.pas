@@ -14,7 +14,7 @@ procedure ValidateCompositionMaterials(Project: TRigmMovieProject);
 implementation
 uses System.Classes, System.Types, System.Math, System.IOUtils, System.StrUtils,
   System.Generics.Collections, Winapi.Windows, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg,
-  ArtDocument, RigmJson, RigmStorage, RigmSample, RigmRenderer, RigmMovieRendering, RigmMovieActing, RigmMovieChart, RigmMoviePsdRendering, RigmMovieLayout;
+  ArtDocument, RigmJson, RigmStorage, RigmSample, RigmRenderer, RigmMovieRendering, RigmMovieActing, RigmMovieChart, RigmMoviePsdRendering, RigmMovieLayout, RigmMovieEndCards;
 type
   TActorEntry = class
     Stamp: string;
@@ -257,6 +257,8 @@ begin
     end;
     for var S in Project.Scenes do if (S.Image<>'') and not FileExists(ResolveMoviePath(Project.FileName,S.Image)) then
       raise ERigm.Create('Scene image is missing: '+S.Image);
+    for var V in Project.EndCards do if not FileExists(ResolveMoviePath(Project.FileName,JS(TJSONObject(V),'image'))) then raise ERigm.Create('終了画像・サムネイルが見つかりません。');
+    for var S in Project.Scenes do if S.Animation.GetValue('closingCard') is TJSONObject then begin var Card := JO(S.Animation,'closingCard'); if (JS(Card,'representativeChoice')='use') and not FileExists(ResolveMoviePath(Project.FileName,JS(Card,'image'))) then raise ERigm.Create('締め代表画像が見つかりません。'); end;
     if (Project.Layout='theme') and (Project.ThemeBackground<>'') and not FileExists(ResolveMoviePath(Project.FileName,Project.ThemeBackground)) then
       raise ERigm.Create('Theme image is missing: '+Project.ThemeBackground);
   finally TMonitor.Exit(CacheLock); end;
@@ -312,7 +314,9 @@ begin
       if (DC=0) or (Dib=0) or (Bits=nil) then RaiseLastOSError;
       Previous := SelectObject(DC,Dib); Canvas := TCanvas.Create; Canvas.Handle := DC;
       Canvas.Brush.Color := TColor(Project.BackgroundColor); Canvas.FillRect(Rect(0,0,Project.Width,Project.Height));
-      if Project.Layout='theme' then Image(Project.ThemeBackground,Rect(0,0,Project.Width,Project.Height),True);
+      var Tail := MovieEndCardAt(Project.EndCards,Seconds-Project.StoryDuration);
+      if (Tail=nil) and (Project.Layout='theme') then Image(Project.ThemeBackground,Rect(0,0,Project.Width,Project.Height),True);
+      if Tail<>nil then Image(JS(Tail,'image'),CardRect(JO(Tail,'rect'),Project.Width,Project.Height),False);
       var SceneStart,SceneLocal,Local,Start: Double; var S := Project.SceneAt(Seconds,SceneStart,SceneLocal);
       var C := Project.CueAt(Seconds,Local,Start); var ImageBounds := SceneImageBounds(Project);
       var ImageRect := BaseRect(ImageBounds.Left,ImageBounds.Top,ImageBounds.Right,ImageBounds.Bottom);
@@ -320,7 +324,11 @@ begin
       if S<>nil then begin
         var SceneImage := S.Image;
         if (SceneImage='') and (C<>nil) then SceneImage := C.Background;
-        if (S.DisplayMode='both') or (S.DisplayMode='image') then begin
+        var Closing: TJSONObject := nil; if S.Animation.GetValue('closingCard') is TJSONObject then Closing := JO(S.Animation,'closingCard');
+        if Closing<>nil then begin
+          if JS(Closing,'representativeChoice')='use' then Image(JS(Closing,'image'),ImageRect,False);
+          Text(JS(Closing,'title'),BaseRect(400,60,1520,190),48,DT_CENTER or DT_WORDBREAK);
+        end else if (S.DisplayMode='both') or (S.DisplayMode='image') then begin
           if MovieChartEnabled(S.Chart) then DrawMovieChart(Canvas,S.Chart,ImageRect)
           else Image(SceneImage,ImageRect,False);
         end;
@@ -331,7 +339,7 @@ begin
         Text(S.Title,BaseRect(55,20,1850,90),36,DT_LEFT or DT_WORDBREAK);
       end;
       GdiFlush;
-      for var Character in Project.Characters do if Character.Visible then begin
+      for var Character in Project.Characters do if (Tail=nil) and Character.Visible then begin
         var Box := BaseRect(Character.X,Character.Y,Character.X+Character.Width,Character.Y+Character.Height);
         if Character.RenderFormat='psd' then begin
           var Pixels := RenderPsdMovieCharacter(Project,Character,Seconds,Audio,Max(1,Box.Width),Max(1,Box.Height));

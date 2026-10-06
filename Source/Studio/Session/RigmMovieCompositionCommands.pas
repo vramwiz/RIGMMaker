@@ -13,12 +13,12 @@ function CompositionRequests(Project: TRigmMovieProject): TJSONObject;
 
 implementation
 uses System.SysUtils, System.IOUtils, System.Math, System.StrUtils,
-  RigmJson, RigmModel, RigmMovieComposition, RigmMovieCompositor, RigmStorage, RigmSample, RigmMovieMotionLibrary, RigmMoviePsdRendering, RigmCharacterCatalog;
+  RigmScriptClosingModel, RigmJson, RigmModel, RigmMovieComposition, RigmMovieCompositor, RigmStorage, RigmSample, RigmMovieMotionLibrary, RigmMoviePsdRendering, RigmCharacterCatalog;
 function IsCompositionCommand(const Name: string): Boolean;
 begin
   Result := MatchText(Name,['composition-enable','add-character','update-character','delete-character','add-scene','update-scene',
     'delete-scene','move-scene','resize-scene','register-expression','analyze-script','update-subtitle','update-dialogue',
-    'register-motion','select-motion','stop-motion']);
+    'register-motion','select-motion','stop-motion','update-ending']);
 end;
 procedure ApplyCompositionCommand(Project: TRigmMovieProject; const Name: string; Args: TJSONObject; AvailableStyles: TJSONArray);
   procedure StringValue(var Value: string; const Key: string);
@@ -49,6 +49,11 @@ procedure ApplyCompositionCommand(Project: TRigmMovieProject; const Name: string
     C.VoiceStyleId := Selected;
   end;
 begin
+  if Name='update-ending' then begin
+    if Project.ScriptWizard=nil then raise ERigm.Create('締め設定を持つ台本作品が必要です。');
+    RigmScriptClosingModel.SetScriptClosingDraft(Project,JO(Args,'draft'));
+    MaterializeScriptClosing(Project); ValidateCompositionMaterials(Project); Exit;
+  end;
   if Name='composition-enable' then begin Project.EnableComposition; Exit; end;
   if MatchText(Name,['update-subtitle','update-dialogue']) then begin
     var C := Project.Cue(JS(Args,'id')); if C=nil then raise ERigm.Create('Cue identifier not found');

@@ -38,6 +38,7 @@ type
     Revision: Integer;
     Modified: Boolean;
     ScriptWizard: TJSONObject; // 任意の段階式台本情報。旧作品ではnilのまま。
+    EndCards: TJSONArray; // 発話sceneの後の独立した無音画像区間。
     WorkflowStage, PreviewKey, PreviewPath, PreviewHash, VideoKey, VideoPath, VideoHash: string;
     Layout,ThemeBackground,LDirection: string;
     Characters: TObjectList<TRigmMovieCharacter>;
@@ -66,6 +67,7 @@ type
     function AudioReady(C: TRigmMovieCue): Boolean;
     function CueDuration(C: TRigmMovieCue): Double;
     function Duration: Double;
+    function StoryDuration: Double;
     function CueAt(Seconds: Double; out LocalTime, Start: Double): TRigmMovieCue;
     procedure Changed;
     procedure Validate;
@@ -80,7 +82,7 @@ function ResolveMoviePath(const BaseFile, Path: string): string;
 
 implementation
 
-uses System.IOUtils, System.Math, System.StrUtils, System.Hash, Winapi.Windows, RigmJson, RigmMovieOutput;
+uses System.IOUtils, System.Math, System.StrUtils, System.Hash, Winapi.Windows, RigmJson, RigmMovieOutput, RigmMovieEndCards;
 
 constructor TRigmMovieSpeaker.Create;
 begin inherited; Id := 'narrator'; Name := 'ナレーター'; StyleId := -1; Speed := 1; Intonation := 1; Volume := 1; end;
@@ -140,11 +142,12 @@ begin
   WorkflowStage := 'script'; Layout := 'theme'; LDirection := 'right';
   Characters := TObjectList<TRigmMovieCharacter>.Create(True); Scenes := TObjectList<TRigmMovieScene>.Create(True);
   EncodeProfile := 'balanced';
+  EndCards := TJSONArray.Create;
   Speakers := TObjectList<TRigmMovieSpeaker>.Create(True); Cues := TObjectList<TRigmMovieCue>.Create(True);
   Speakers.Add(TRigmMovieSpeaker.Create); Revision := 1;
 end;
 destructor TRigmMovieProject.Destroy;
-begin ScriptWizard.Free; Scenes.Free; Characters.Free; Cues.Free; Speakers.Free; inherited; end;
+begin EndCards.Free; ScriptWizard.Free; Scenes.Free; Characters.Free; Cues.Free; Speakers.Free; inherited; end;
 procedure TRigmMovieProject.Changed;
 begin Inc(Revision); Modified := True; end;
 function TRigmMovieProject.Speaker(const SpeakerId: string): TRigmMovieSpeaker;
@@ -166,6 +169,7 @@ begin
   Workflow.AddPair('videoKey',VideoKey); Workflow.AddPair('videoPath',VideoPath); Workflow.AddPair('videoHash',VideoHash);
   Result.AddPair('workflow',Workflow);
   if ScriptWizard<>nil then Result.AddPair('scriptWizard',ScriptWizard.Clone as TJSONObject);
+  if EndCards.Count>0 then Result.AddPair('endCards',EndCards.Clone as TJSONArray);
   AddN(Result,'backgroundColor',BackgroundColor); AddN(Result,'revision',Revision);
   A := TJSONArray.Create; Result.AddPair('speakers',A); for var S in Speakers do A.AddElement(S.Json);
   A := TJSONArray.Create; Result.AddPair('cues',A); for var C in Cues do A.AddElement(C.Json);
@@ -188,6 +192,7 @@ begin
     if JI(O,'formatVersion',1) <> 1 then raise ERigm.Create('未対応の動画プロジェクト版です。');
     Result.Id := JS(O,'projectId',Result.Id); Result.Title := JS(O,'title',Result.Title);
     if O.GetValue('scriptWizard')<>nil then Result.ScriptWizard := JO(O,'scriptWizard').Clone as TJSONObject;
+    if O.GetValue('endCards')<>nil then begin if not(O.GetValue('endCards') is TJSONArray) then raise ERigm.Create('末尾カードは配列です。'); Result.EndCards.Free; Result.EndCards := JA(O,'endCards').Clone as TJSONArray; end;
     Result.FfmpegExe := JS(O,'ffmpeg'); Result.CharacterFile := JS(O,'character'); Result.EngineUrl := JS(O,'engineUrl',Result.EngineUrl);
     var Preset := JS(O,'outputPreset','custom'); var PW,PH,PF: Integer; MoviePresetDimensions(Preset,PW,PH,PF);
     if PW>0 then begin Result.Width := PW; Result.Height := PH; Result.Fps := PF; end;
@@ -271,6 +276,7 @@ procedure TRigmMovieProject.Validate;
 var Seen: TDictionary<string,Boolean>;
 begin
   BindCharacterPlacements;
+  ValidateMovieEndCards(EndCards);
   if not MatchText(WorkflowStage,['script','setup','audio','preview','export','complete']) then raise ERigm.Create('Invalid movie workflow stage');
   MovieEncoderOptions(EncodeProfile);
   if (Width < 160) or (Width > 3840) or Odd(Width) or (Height < 120) or (Height > 2160) or Odd(Height) or
@@ -351,12 +357,14 @@ function TRigmMovieProject.EffectiveStyle(C: TRigmMovieCue): Integer;
 begin Result := C.VoiceStyleId; if Result<0 then Result := Speaker(C.SpeakerId).StyleId; end;
 function TRigmMovieProject.SceneDuration(S: TRigmMovieScene): Double;
 begin Result := S.Padding; for var C in Cues do if C.Scene=S.Id then Result := Result+CueDuration(C); end;
-function TRigmMovieProject.Duration: Double;
+function TRigmMovieProject.StoryDuration: Double;
 begin
   Result := 0;
   if Scenes.Count>0 then begin for var S in Scenes do Result := Result+SceneDuration(S); end
   else for var C in Cues do Result := Result+CueDuration(C);
 end;
+function TRigmMovieProject.Duration: Double;
+begin Result := StoryDuration+MovieEndCardsDuration(EndCards); end;
 function TRigmMovieProject.SceneAt(Seconds: Double; out Start,Local: Double): TRigmMovieScene;
 begin
   Result := nil; Start := 0; Local := 0;
@@ -487,13 +495,21 @@ begin
         var Frame := TJSONObject(V); var Image := Asset(JS(Frame,'image')); Frame.RemovePair('image').Free; Frame.AddPair('image',Image);
       end;
     end;
-    for var I := 0 to Saved.Scenes.Count-1 do Saved.Scenes[I].Image := Asset(Project.Scenes[I].Image);
+    for var I := 0 to Saved.Scenes.Count-1 do begin
+      Saved.Scenes[I].Image := Asset(Project.Scenes[I].Image);
+      if Saved.Scenes[I].Animation.GetValue('closingCard') is TJSONObject then begin var Card := JO(Saved.Scenes[I].Animation,'closingCard'); var Path := Asset(JS(Card,'image')); Card.RemovePair('image').Free; Card.AddPair('image',Path); end;
+    end;
+    for var V in Saved.EndCards do begin var Card := TJSONObject(V); var Path := Asset(JS(Card,'image')); Card.RemovePair('image').Free; Card.AddPair('image',Path); end;
+    if (Saved.ScriptWizard<>nil) and (Saved.ScriptWizard.GetValue('closingData') is TJSONObject) then begin var D := JO(JO(Saved.ScriptWizard,'closingData'),'draft'); for var Key in ['representative','endImage','thumbnailImage'] do begin var Path := Asset(JS(D,Key)); D.RemovePair(Key).Free; D.AddPair(Key,Path); end; end;
     Saved.PreviewPath := Asset(Project.PreviewPath);
     Saved.VideoPath := ResolveMoviePath(Project.FileName,Project.VideoPath);
     for var I := 0 to Saved.Cues.Count-1 do begin
       Saved.Cues[I].WaveFile := Asset(Project.Cues[I].WaveFile); Saved.Cues[I].LabFile := Asset(Project.Cues[I].LabFile);
       Saved.Cues[I].Background := Asset(Project.Cues[I].Background);
     end;
+    // 同じ保存後モデルをメモリにも反映する。JSONの親キー順も再開前後で一致させる。
+    if (Saved.ScriptWizard<>nil) and (Saved.ScriptWizard.GetValue('closingData') is TJSONObject) then
+      begin var Closing := JO(Saved.ScriptWizard,'closingData').Clone as TJSONObject; Saved.ScriptWizard.RemovePair('closingData').Free; Saved.ScriptWizard.AddPair('closingData',Closing); end;
     O := Saved.Json;
     TFile.WriteAllText(Temp,O.ToJSON,TEncoding.UTF8);
     if not MoveFileEx(PChar(Temp),PChar(TargetFile),MOVEFILE_REPLACE_EXISTING or MOVEFILE_WRITE_THROUGH) then RaiseLastOSError;
@@ -503,7 +519,9 @@ begin
       Project.Characters[I].Expressions.Free; Project.Characters[I].Expressions := Saved.Characters[I].Expressions.Clone as TJSONObject;
       Project.Characters[I].Motions.Free; Project.Characters[I].Motions := Saved.Characters[I].Motions.Clone as TJSONObject;
     end;
-    for var I := 0 to Project.Scenes.Count-1 do Project.Scenes[I].Image := Saved.Scenes[I].Image;
+    for var I := 0 to Project.Scenes.Count-1 do begin Project.Scenes[I].Image := Saved.Scenes[I].Image; Project.Scenes[I].Animation.Free; Project.Scenes[I].Animation := Saved.Scenes[I].Animation.Clone as TJSONObject; end;
+    Project.EndCards.Free; Project.EndCards := Saved.EndCards.Clone as TJSONArray;
+    if (Saved.ScriptWizard<>nil) and (Saved.ScriptWizard.GetValue('closingData') is TJSONObject) then begin Project.ScriptWizard.RemovePair('closingData').Free; Project.ScriptWizard.AddPair('closingData',JO(Saved.ScriptWizard,'closingData').Clone as TJSONObject); end;
     Project.PreviewPath := Saved.PreviewPath; Project.VideoPath := Saved.VideoPath;
     for var I := 0 to Project.Cues.Count-1 do begin
       Project.Cues[I].WaveFile := Saved.Cues[I].WaveFile; Project.Cues[I].LabFile := Saved.Cues[I].LabFile; Project.Cues[I].Background := Saved.Cues[I].Background;

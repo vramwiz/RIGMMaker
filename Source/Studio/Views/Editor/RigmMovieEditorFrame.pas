@@ -64,6 +64,7 @@ type
     procedure PreviewKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure BuildUI;
     procedure ShowOperations(Sender: TObject);
+    procedure EditEnding(Sender: TObject);
     procedure DraftEdited(Sender: TObject);
     procedure ActionClick(Sender: TObject);
     procedure SelectCue(Sender: TObject; Item: TListItem; Selected: Boolean);
@@ -123,7 +124,7 @@ implementation
 uses System.IOUtils, System.Math, System.StrUtils, System.UITypes,
   Winapi.Messages, Winapi.MMSystem, Winapi.ShellAPI, Vcl.Dialogs, RigmModel, RigmJson, RigmMovieModel,
   RigmMovieAudio, RigmToolbarIcons, RigmMovieOutput, RigmMoviePreparation, RigmAppSettings, RigmMovieWorkspace,
-  RigmMovieActing, RigmMovieChart, RigmMovieMenus, RigmMovieUiValues, RigmMovieJobPresentation;
+  RigmMovieActing, RigmMovieChart, RigmMovieMenus, RigmMovieUiValues, RigmMovieJobPresentation, RigmMovieEndingDialog;
 
 procedure PopulateMovieMenus(Menu: TMainMenu; Handler: TNotifyEvent);
 begin RigmMovieMenus.PopulateMovieMenus(Menu,Handler); end;
@@ -143,6 +144,22 @@ begin
   Operations.Name := 'MovieOperations'; Operations.Caption := 'ファイル・編集・制作の操作'; Operations.OnClick := ShowOperations;
   var Menu := TPopupMenu.Create(Self); Menu.Name := 'MovieOperationsMenu';
   RigmMovieMenus.PopulateMovieMenus(Menu,ActionClick); Operations.PopupMenu := Menu;
+  if (Session.Project.ScriptWizard<>nil) and (Session.Project.ScriptWizard.GetValue('closingData')<>nil) then
+    FUi.Toolbar.AddIcon('MovieEndingEdit','締め画像・終了区間を編集',riPreview,0,EditEnding);
+end;
+procedure TRigmMovieEditorFrame.EditEnding(Sender: TObject);
+begin
+  if (FDraftRevision<>0) or FSession.GuiLocked then begin ShowMessage('入力を適用し、編集ロックを完了してから締め設定を開いてください。'); Exit; end;
+  StopPlayback; var P := FSession.Project.Clone; var D := TRigmMovieEndingDialog.CreateForProject(Self,P);
+  try
+    while D.ShowModal=mrOk do begin
+      var A := TJSONObject.Create;
+      try A.AddPair('projectId',P.Id); AddN(A,'revision',P.Revision); A.AddPair('draft',D.Draft);
+        try var R := FSession.Execute('update-ending',A); R.Free; RefreshView; Break;
+        except on E: Exception do ShowMessage(E.Message); end;
+      finally A.Free; end;
+    end;
+  finally D.Free; P.Free; end;
 end;
 procedure TRigmMovieEditorFrame.ShowOperations(Sender: TObject);
 begin

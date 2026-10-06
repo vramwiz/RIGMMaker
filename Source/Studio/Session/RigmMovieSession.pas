@@ -418,6 +418,8 @@ begin
     var O := S.Json; AddN(O,'start',Start); AddN(O,'duration',FProject.SceneDuration(S)); A.AddElement(O);
     Start := Start+FProject.SceneDuration(S);
   end;
+  A := TJSONArray.Create; Result.AddPair('endCards',A); Start := FProject.StoryDuration;
+  for var V in FProject.EndCards do begin var Card := TJSONObject(V); var O := Card.Clone as TJSONObject; O.AddPair('id','endcard-'+JS(Card,'kind')); O.RemovePair('image').Free; O.AddPair('image',ResolveMoviePath(FProject.FileName,JS(Card,'image'))); AddN(O,'start',Start); A.AddElement(O); Start := Start+JN(Card,'duration'); end;
 end;
 procedure ReplacePair(O: TJSONObject; const Key: string; Value: TJSONValue);
 begin O.RemovePair(Key).Free; O.AddPair(Key,Value); end;
@@ -651,6 +653,7 @@ begin
       '"composition-requests":{},"edit-begin":{"leaseSeconds":60},"edit-status":{},"edit-heartbeat":{"editToken":"token","leaseSeconds":60},'+
       '"edit-end":{"editToken":"token"},"edit-fail":{"editToken":"token"},"edit-release":{"manual":true}}');
     try for var Pair in Extra do JO(Result,'commands').AddPair(Pair.JsonString.Value,Pair.JsonValue.Clone as TJSONValue);
+    JO(Result,'commands').AddPair('update-ending',ParseObject('{"draft":"human closing draft; validates images geometry choices and preserves dialogue/audio"}'));
     var Transfers := MovieImageTransferSchema;
     try for var Pair in Transfers do JO(Result,'commands').AddPair(Pair.JsonString.Value,Pair.JsonValue.Clone as TJSONValue); finally Transfers.Free; end; finally Extra.Free; end;
     Exit;

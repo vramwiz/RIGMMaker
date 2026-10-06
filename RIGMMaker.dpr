@@ -19,8 +19,10 @@ begin
   Application.Title := 'RIGM Maker';
   Application.CreateForm(TRigmWizardMainForm, RigmWizardMain);
   var ResultPath := ''; var SmokePath := ''; var UiCheck := False; var CreateCheck := False; var ScriptCheck := False; var ScriptReopen := False; var CharactersCheck := False;
-  var SummaryCheck := False; var ScenesCheck := False; var VoiceCheck := False; var SemanticCheck := False; var SubtitleCheck := False; var CastingCheck := False; var ReviewCheck := False; var ThumbnailCheck := False; var LayoutCheck := False; var PlacementCheck := False; var TextCheck := False;
+  var SummaryCheck := False; var ClosingCheck := False; var ScenesCheck := False; var VoiceCheck := False; var SemanticCheck := False; var SubtitleCheck := False; var CastingCheck := False; var ReviewCheck := False; var ThumbnailCheck := False; var LayoutCheck := False; var PlacementCheck := False; var TextCheck := False;
   for var Index := 1 to ParamCount-1 do begin
+    if ParamStr(Index)='--verify-script-closing' then begin ResultPath := ParamStr(Index+1); ClosingCheck := True; end;
+    if ParamStr(Index)='--verify-script-closing-reopen' then begin ResultPath := ParamStr(Index+1); ClosingCheck := True; ScriptReopen := True; end;
     if ParamStr(Index)='--verify-script-summary' then begin ResultPath := ParamStr(Index+1); SummaryCheck := True; end;
     if ParamStr(Index)='--verify-script-summary-reopen' then begin ResultPath := ParamStr(Index+1); SummaryCheck := True; ScriptReopen := True; end;
     if ParamStr(Index)='--verify-script-scenes' then begin ResultPath := ParamStr(Index+1); ScenesCheck := True; end;
@@ -54,7 +56,8 @@ begin
   end;
   if ResultPath<>'' then begin
     try
-      try if SummaryCheck then VerifyScriptSummary(RigmWizardMain,ResultPath,ScriptReopen)
+      try if ClosingCheck then VerifyScriptClosing(RigmWizardMain,ResultPath,ScriptReopen)
+      else if SummaryCheck then VerifyScriptSummary(RigmWizardMain,ResultPath,ScriptReopen)
       else if ScenesCheck then VerifyScriptScenes(RigmWizardMain,ResultPath,ScriptReopen)
       else if VoiceCheck then VerifyScriptVoice(RigmWizardMain,ResultPath,ScriptReopen)
       else if SemanticCheck then VerifyScriptSemantic(RigmWizardMain,ResultPath,ScriptReopen)

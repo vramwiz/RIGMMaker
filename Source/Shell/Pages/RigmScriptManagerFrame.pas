@@ -70,6 +70,8 @@ begin
             end;
             if JS(Entry,'stage')='placement' then Stage := 'キャラ配置：調整中';
             if JS(Entry,'stage')='text' then Stage := '台本入力：編集中';
+            if JS(Entry,'stage')='closing' then Stage := '締め：設定中';
+            if JS(Entry,'stage')='editor' then Stage := '動画編集';
           end else if JS(Entry,'kind')='unreadable' then Stage := '読込不可';
           Item.SubItems.Add(Stage); Item.SubItems.Add(ScriptUpdatedAtLocal(JS(Entry,'updatedAt')));
           Item.SubItems.Add(Copy(JS(Entry,'projectId').Replace('{','').Replace('}',''),1,8));
@@ -92,8 +94,7 @@ begin
   if FList.Selected=nil then Exit;
   try
     if FList.Selected.SubItems[4]='wizard' then begin
-      FWorkspace.OpenScriptDraft(FList.Selected.SubItems[3]);
-      if Assigned(FOnNavigate) then FOnNavigate(Self,apScriptCreate,'');
+      FWorkspace.OpenWork(FList.Selected.SubItems[3]);
     end else if FList.Selected.SubItems[4]='legacy' then FWorkspace.OpenWork(FList.Selected.SubItems[3])
     else FStatus.Caption := '読込不可のファイルは変更せず保持しています。';
   except on E: Exception do FStatus.Caption := E.Message; end;

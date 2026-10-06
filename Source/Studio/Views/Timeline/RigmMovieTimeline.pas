@@ -297,6 +297,10 @@ begin
     else Clip(2,$404050,'音声未更新 / '+JS(CurrentCue,'text'),Right);
     Clip(3,$665040,JS(CurrentCue,'subtitle'),Right);
   end;
+  if FTimeline.GetValue('endCards') is TJSONArray then for var V in JA(FTimeline,'endCards') do begin
+    CurrentCue := TJSONObject(V); var Start := JN(CurrentCue,'start'); var Finish := Start+JN(CurrentCue,'duration'); if (Finish<FOffset) or (Start>FOffset+Span) then Continue;
+    Left := Max(Header,Position(Start)); Right := Min(ViewWidth,Position(Finish)); var Caption := '終了画像'; if JS(CurrentCue,'kind')='thumbnail' then Caption := 'サムネイル'; Clip(0,$645038,Caption,Right); Clip(2,$404040,'無音',Right);
+  end;
   var WaveTop := RulerHeight+RowHeight*2+FTextHeight+UiScale(6)-FVertical.Position;
   var WaveBottom := RulerHeight+RowHeight*3-UiScale(3)-FVertical.Position;
   Center := (WaveTop+WaveBottom) div 2;
