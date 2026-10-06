@@ -28,7 +28,7 @@ type
     function RequestFinish: Boolean;
   end;
 implementation
-uses System.SysUtils, System.Types, System.Math, Winapi.Windows, Vcl.Graphics,
+uses System.Generics.Collections, System.SysUtils, System.Types, System.Math, Winapi.Windows, Vcl.Graphics,
   RigmJson, PsdJson, RigmMovieChart, RigmScriptSummaryModel, RigmScriptCastingModel, RigmToolbarIcons;
 {$R *.dfm}
 constructor TRigmSummaryChartPreview.CreateForWorkspace(AOwner: TComponent; Workspace: TRigmWizardWorkspace);
