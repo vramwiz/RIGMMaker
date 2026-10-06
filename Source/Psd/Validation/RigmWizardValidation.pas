@@ -13,6 +13,7 @@ procedure VerifyScriptText(Main: TRigmWizardMainForm; const ResultPath: string; 
 procedure VerifyScriptReview(Main: TRigmWizardMainForm; const ResultPath: string; Reopen: Boolean);
 procedure VerifyScriptSubtitles(Main: TRigmWizardMainForm; const ResultPath: string; Reopen: Boolean);
 procedure VerifyScriptCasting(Main: TRigmWizardMainForm; const ResultPath: string; Reopen: Boolean);
+procedure VerifyScriptSemantic(Main: TRigmWizardMainForm; const ResultPath: string; Reopen: Boolean);
 implementation
 uses System.SysUtils, System.Classes, System.JSON, System.IOUtils, System.Hash, System.Math, System.Types, System.DateUtils, System.Generics.Collections,
   Vcl.Forms, Vcl.Controls, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls, System.UITypes,
@@ -1352,5 +1353,6 @@ end;
 {$I RigmScriptTextValidation.inc}
 {$I RigmScriptReviewValidation.inc}
 {$I RigmScriptCastingValidation.inc}
+{$I RigmScriptSemanticValidation.inc}
 {$I RigmScriptSubtitleValidation.inc}
 end.
