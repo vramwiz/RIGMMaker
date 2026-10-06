@@ -76,6 +76,8 @@ end;
 procedure TRigmWizardMainForm.NavigateTo(Page: TRigmAppPage; const Path: string);
 begin
   var Lifecycle: IRigmPageLifecycle;
+  if (Page<>FCurrentPage) and (FCurrentPage=apScriptCreate) and (FPages[apScriptCreate]<>nil) and
+    not TRigmScriptCreatorFrame(FPages[apScriptCreate]).RequestFinish then Exit;
   var Target := EnsurePage(Page);
   var Loading := False;
   if Page=apCharacterEdit then Loading := (Path<>'') or

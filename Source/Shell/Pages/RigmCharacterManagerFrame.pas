@@ -1,20 +1,22 @@
 ﻿unit RigmCharacterManagerFrame;
 interface
 uses System.Classes, System.Types, System.Generics.Collections, Vcl.Controls, Vcl.Forms, Vcl.ComCtrls, Vcl.StdCtrls,
-  Vcl.Graphics, Vcl.ImgList, PsdWorkspace, RigmPageNavigation, RigmWizardWorkspace, Winapi.Messages;
+  System.JSON, Vcl.Graphics, Vcl.ImgList, PsdWorkspace, RigmPageNavigation, RigmWizardWorkspace, Winapi.Messages,
+  RigmThumbnailCache, RigmThumbnailList;
 type
   TRigmLibraryThumbnail = class
   public
     Bitmap: TBitmap; Name,ProductionState: string; FileSize: Int64; Modified: TDateTime;
     destructor Destroy; override;
   end;
-  TRigmCharacterManagerFrame = class(TFrame)
+  TRigmCharacterManagerFrame = class(TFrame,IRigmPageLifecycle)
   private
     FWorkspace: TPsdWorkspace;
     FRegistration: TRigmWizardWorkspace;
     FList: TListView; FStatus: TLabel; FOnNavigate: TRigmNavigateEvent;
-    FImages: TImageList; FCache: TObjectDictionary<string,TRigmLibraryThumbnail>;
-    function Thumbnail(const Path: string): TRigmLibraryThumbnail;
+    FImages: TImageList; FThumbnails: TRigmThumbnailCache; FOwnThumbnails: Boolean; FLoader: TRigmThumbnailList;
+    function ThumbnailPath(Item: TListItem): string;
+    procedure ThumbnailApplied(Sender: TObject; Item: TListItem; Metadata: TJSONObject);
     procedure OpenSelected(Sender: TObject);
     procedure NewCharacter(Sender: TObject);
     procedure WMDropFiles(var Message: TWMDropFiles); message WM_DROPFILES;
@@ -27,6 +29,8 @@ type
     destructor Destroy; override;
     procedure RefreshLibrary(Sender: TObject);
     procedure RegisterDroppedFile(const Path: string);
+    procedure SetActive(Value: Boolean);
+    function RequestFinish: Boolean;
     property OnNavigate: TRigmNavigateEvent read FOnNavigate write FOnNavigate;
   end;
 implementation
@@ -35,38 +39,20 @@ uses System.SysUtils, System.IOUtils, System.Math, Vcl.ExtCtrls,
 {$R *.dfm}
 destructor TRigmLibraryThumbnail.Destroy;
 begin Bitmap.Free; inherited; end;
-function TRigmCharacterManagerFrame.Thumbnail(const Path: string): TRigmLibraryThumbnail;
+function TRigmCharacterManagerFrame.ThumbnailPath(Item: TListItem): string;
+begin Result := Item.SubItems[1]; end;
+procedure TRigmCharacterManagerFrame.ThumbnailApplied(Sender: TObject; Item: TListItem; Metadata: TJSONObject);
 begin
-  var Modified := TFile.GetLastWriteTimeUtc(Path); var Size := TFile.GetSize(Path);
-  if FCache.TryGetValue(Path,Result) then begin
-    if (Result.Modified=Modified) and (Result.FileSize=Size) then Exit;
-    FCache.Remove(Path);
-  end;
-  Result := TRigmLibraryThumbnail.Create;
-  try
-    Result.Modified := Modified; Result.FileSize := Size; Result.Bitmap := TBitmap.Create;
-    Result.Bitmap.PixelFormat := pf32bit; Result.Bitmap.SetSize(FImages.Width,FImages.Height);
-    Result.Bitmap.Canvas.Brush.Color := $002A2A2A; Result.Bitmap.Canvas.FillRect(Rect(0,0,FImages.Width,FImages.Height));
-    var W,H: Integer; var Pixels := ReadCharacterThumbnailStatus(Path,Result.Name,Result.ProductionState,W,H);
-    var K := Min((FImages.Width-12)/Max(1,W),(FImages.Height-12)/Max(1,H));
-    var TW := Max(1,Round(W*K)); var TH := Max(1,Round(H*K));
-    var OX := (FImages.Width-TW) div 2; var OY := (FImages.Height-TH) div 2;
-    for var Y := 0 to TH-1 do begin
-      var Row := PByte(Result.Bitmap.ScanLine[Y+OY]);
-      for var X := 0 to TW-1 do begin
-        var P := (Min(H-1,Y*H div TH)*W+Min(W-1,X*W div TW))*4; var A := Pixels[P+3];
-        for var C := 0 to 2 do Row[(X+OX)*4+2-C] := (Pixels[P+C]*A+42*(255-A)+127) div 255;
-        Row[(X+OX)*4+3] := 255;
-      end;
-    end;
-    FCache.Add(Path,Result);
-  except Result.Free; raise; end;
+  var Name := S(Metadata,'name'); if Name='' then Name := TPath.GetFileNameWithoutExtension(ThumbnailPath(Item));
+  var LabelText := CharacterFormatLabel(ThumbnailPath(Item));
+  if S(Metadata,'productionState')<>'' then LabelText := LabelText+' / '+S(Metadata,'productionState');
+  Item.Caption := '['+LabelText+'] '+Name;
 end;
 constructor TRigmCharacterManagerFrame.CreateForRoot(AOwner: TComponent; const Root: string; Registration: TRigmWizardWorkspace);
 begin
   inherited Create(AOwner); Align := alClient; DoubleBuffered := True;
   FRegistration := Registration;
-  FCache := TObjectDictionary<string,TRigmLibraryThumbnail>.Create([doOwnsValues]);
+  FOwnThumbnails := Registration=nil; if FOwnThumbnails then FThumbnails := TRigmThumbnailCache.Create(Root) else FThumbnails := Registration.Thumbnails;
   FWorkspace := TPsdWorkspace.Create(Root); FWorkspace.Initialize;
   var Header := TPanel.Create(Self); Header.Parent := Self; Header.Align := alTop; Header.Height := 42; Header.BevelOuter := bvNone;
   var New := TButton.Create(Self); New.Parent := Header; New.Align := alLeft; New.Width := 160; New.Caption := '新規作成'; New.Name := 'CharacterNew'; New.OnClick := NewCharacter;
@@ -80,39 +66,38 @@ begin
   FList.Columns.Add.Caption := '形式'; FList.Columns[1].Width := 90;
   FList.Columns.Add.Caption := '保存先'; FList.Columns[2].Width := 680; FList.OnDblClick := OpenSelected;
   ListView_SetIconSpacing(FList.Handle,ScaleValue(220),ScaleValue(255));
+  FLoader := TRigmThumbnailList.CreateForList(Self,FThumbnails,FList,FImages); FLoader.OnPath := ThumbnailPath; FLoader.OnApplied := ThumbnailApplied;
   RefreshLibrary(Self);
 end;
 destructor TRigmCharacterManagerFrame.Destroy;
-begin FCache.Free; FWorkspace.Free; inherited; end;
+begin FLoader.Free; if FOwnThumbnails then FThumbnails.Free; FWorkspace.Free; inherited; end;
 procedure TRigmCharacterManagerFrame.RefreshLibrary(Sender: TObject);
   procedure Add(const Path: string);
   begin
     var Item := FList.Items.Add; Item.Caption := '['+CharacterFormatLabel(Path)+'] '+TPath.GetFileNameWithoutExtension(Path);
     Item.SubItems.Add(CharacterFormatLabel(Path)); Item.SubItems.Add(Path);
-    try
-      var T := Thumbnail(Path); Item.ImageIndex := FImages.Add(T.Bitmap,nil);
-      var LabelText := CharacterFormatLabel(Path);
-      if T.ProductionState<>'' then LabelText := LabelText+' / '+T.ProductionState;
-      Item.Caption := '['+LabelText+'] '+T.Name;
-    except on E: Exception do begin Item.ImageIndex := -1; Item.Caption := Item.Caption+'（読込不可）'; end; end;
+    Item.ImageIndex := -1; Item.Caption := Item.Caption+'（準備中）';
   end;
 begin
   var SelectedPath := ''; if FList.Selected<>nil then SelectedPath := FList.Selected.SubItems[1];
   FList.Items.BeginUpdate;
   try
-    FList.Items.Clear; FImages.Clear;
-    for var Path in TDirectory.GetFiles(FWorkspace.Resolve('Characters',False),'*.psdchar',TSearchOption.soAllDirectories) do begin
-      Add(Path);
-    end;
-    var RigmRoot := FWorkspace.Resolve('RIGM',False);
-    if DirectoryExists(RigmRoot) then for var Path in TDirectory.GetFiles(RigmRoot,'*.rigm') do begin
-      Add(Path);
+    FLoader.Reset; FList.Items.Clear;
+    if FRegistration<>nil then begin
+      var Catalog := FRegistration.ScriptCharacterLibrary(False);
+      try for var V in Arr(Catalog,'characters') do Add(FWorkspace.Resolve(S(TJSONObject(V),'path')));
+      finally Catalog.Free; end;
+    end else begin
+      for var Path in TDirectory.GetFiles(FWorkspace.Resolve('Characters',False),'*.psdchar',TSearchOption.soAllDirectories) do Add(Path);
+      var RigmRoot := FWorkspace.Resolve('RIGM',False);
+      if DirectoryExists(RigmRoot) then for var Path in TDirectory.GetFiles(RigmRoot,'*.rigm') do Add(Path);
     end;
     for var Item in FList.Items do if SameText(Item.SubItems[1],SelectedPath) then Item.Selected := True;
     if (FList.Selected=nil) and (FList.Items.Count>0) then FList.Items[0].Selected := True;
     FStatus.Caption := FList.Items.Count.ToString+'件。新規作成で追加し、ダブルクリックで編集します。'+#13#10+
       'PSD・PSDキャラ（.psdchar）・RIGMをここへドロップして登録できます。重複は追加しません。未完成キャラは台本へ追加できません。';
   finally FList.Items.EndUpdate; end;
+  FLoader.Refresh;
 end;
 procedure TRigmCharacterManagerFrame.OpenSelected(Sender: TObject);
 begin
@@ -123,6 +108,10 @@ begin
     FOnNavigate(Self,apCharacters,''); FStatus.Caption := 'キャラを開けませんでした: '+E.Message;
   end; end;
 end;
+procedure TRigmCharacterManagerFrame.SetActive(Value: Boolean);
+begin if Value then FLoader.Refresh; end;
+function TRigmCharacterManagerFrame.RequestFinish: Boolean;
+begin Result := True; end;
 procedure TRigmCharacterManagerFrame.NewCharacter(Sender: TObject);
 begin
   try
@@ -165,7 +154,7 @@ begin
     if FRegistration=nil then raise Exception.Create('登録先が準備されていません。');
     var R := FRegistration.RegisterDroppedCharacter(Path);
     try
-      RefreshLibrary(Self); SelectPath(S(R,'path'));
+    RefreshLibrary(Self); SelectPath(S(R,'path'));
       if B(R,'duplicate') then FStatus.Caption := '登録済みのキャラを選択しました。重複したファイルは追加していません。'
       else FStatus.Caption := 'キャラを登録しました。ダブルクリックで編集できます。';
     finally R.Free; end;

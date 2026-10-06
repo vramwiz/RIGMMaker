@@ -23,7 +23,7 @@ type
     FScenes: TListBox;
     FName,FSpeaker,FStyle,FX,FY,FW,FH,FSceneTitle,FSceneDuration: TEdit;
     FPosition,FLayout,FMotions: TComboBox;
-    FRigSafe,FGenerated: TCheckBox;
+    FRigSafe,FGenerated,FFlip: TCheckBox;
     FStatus: TLabel;
     FTimer: TTimer;
     FRevision,FPreviewRevision: Integer;
@@ -107,6 +107,9 @@ begin
   FRigSafe := TCheckBox.Create(Self); FRigSafe.Parent := Right; FRigSafe.Caption := '小さな動きを併用'; FRigSafe.SetBounds(12,470,290,24);
   FGenerated := TCheckBox.Create(Self); FGenerated.Parent := Right; FGenerated.Caption := '生成表情の追加を許可'; FGenerated.SetBounds(12,500,290,24);
   FRigSafe.OnClick := DraftChanged; FGenerated.OnClick := DraftChanged;
+  FRigSafe.Width := 145;
+  FFlip := TCheckBox.Create(Self); FFlip.Parent := Right; FFlip.Caption := '左右反転'; FFlip.Name := 'CreationFlipX';
+  FFlip.SetBounds(160,470,142,24); FFlip.OnClick := DraftChanged;
   Button(Right,'CreationApplyCharacter','選択キャラクターの設定を適用',10,534);
   FLayout := TComboBox.Create(Self); FLayout.Parent := Right; FLayout.Style := csDropDownList;
   FLayout.Name := 'CreationLayout'; FLayout.SetBounds(12,582,290,28); FLayout.Items.AddStrings(['共通背景＋中央画像','L字：左にキャラクター','L字：右にキャラクター']); FLayout.ItemIndex := 0;
@@ -255,7 +258,7 @@ begin
   FName.Text := C.Name; FSpeaker.Text := C.SpeakerId; FStyle.Text := FSession.Project.Speaker(C.SpeakerId).StyleId.ToString;
   FX.Text := FloatToStr(C.X,TFormatSettings.Invariant); FY.Text := FloatToStr(C.Y,TFormatSettings.Invariant);
   FW.Text := FloatToStr(C.Width,TFormatSettings.Invariant); FH.Text := FloatToStr(C.Height,TFormatSettings.Invariant);
-  FRigSafe.Checked := C.RigSafe; FGenerated.Checked := C.AllowGeneratedExpressions;
+  FRigSafe.Checked := C.RigSafe; FGenerated.Checked := C.AllowGeneratedExpressions; FFlip.Checked := C.FlipX;
   var Psd := C.RenderFormat='psd'; FPsdGaze.Enabled := Psd; FPsdMotion.Enabled := Psd; FPsdPose.Enabled := Psd;
   FMotions.Enabled := not Psd;
   TButton(FindComponent('CreationSelectMotion')).Enabled := not Psd;
@@ -282,7 +285,7 @@ begin
   if FCharacterDrafts.TryGetValue(DraftKey(FViewedCharacter),Draft) then begin
     FCharacterRevision := JI(Draft,'revision'); FName.Text := JS(Draft,'name'); FSpeaker.Text := JS(Draft,'speaker'); FStyle.Text := JS(Draft,'styleText');
     FX.Text := JS(Draft,'xText'); FY.Text := JS(Draft,'yText'); FW.Text := JS(Draft,'widthText'); FH.Text := JS(Draft,'heightText');
-    FRigSafe.Checked := JB(Draft,'rigSafe',C.RigSafe); FGenerated.Checked := JB(Draft,'allowGeneratedExpressions',C.AllowGeneratedExpressions);
+    FRigSafe.Checked := JB(Draft,'rigSafe',C.RigSafe); FGenerated.Checked := JB(Draft,'allowGeneratedExpressions',C.AllowGeneratedExpressions); FFlip.Checked := JB(Draft,'flipX',C.FlipX);
     if Psd then begin FPsdGaze.ItemIndex := Max(0,FPsdGaze.Items.IndexOf(JS(Draft,'psdGaze',FPsdGaze.Text)));
       FPsdMotion.ItemIndex := Max(0,FPsdMotion.Items.IndexOf(JS(Draft,'psdMotion',FPsdMotion.Text)));
       FPsdPose.ItemIndex := Max(0,FPsdPoseIds.IndexOf(JS(Draft,'psdNonFrontId',FPsdPoseIds[FPsdPose.ItemIndex]))); end;
@@ -342,7 +345,7 @@ begin
   end else begin
     AddN(O,'revision',FCharacterRevision); O.AddPair('name',FName.Text); O.AddPair('speaker',FSpeaker.Text); O.AddPair('styleText',FStyle.Text);
     O.AddPair('xText',FX.Text); O.AddPair('yText',FY.Text); O.AddPair('widthText',FW.Text); O.AddPair('heightText',FH.Text);
-    AddB(O,'rigSafe',FRigSafe.Checked); AddB(O,'allowGeneratedExpressions',FGenerated.Checked);
+    AddB(O,'rigSafe',FRigSafe.Checked); AddB(O,'allowGeneratedExpressions',FGenerated.Checked); AddB(O,'flipX',FFlip.Checked);
     if FPsdGaze.Enabled then begin O.AddPair('psdGaze',FPsdGaze.Text); O.AddPair('psdMotion',FPsdMotion.Text); O.AddPair('psdNonFrontId',FPsdPoseIds[Max(0,FPsdPose.ItemIndex)]); end;
     FCharacterDrafts.AddOrSetValue(DraftKey(FViewedCharacter),O);
   end;
@@ -441,7 +444,7 @@ begin
           AddN(O,'revision',FCharacterRevision);
           O.AddPair('name',FName.Text); O.AddPair('speaker',FSpeaker.Text); AddN(O,'x',StrToFloat(FX.Text,TFormatSettings.Invariant));
           AddN(O,'y',StrToFloat(FY.Text,TFormatSettings.Invariant)); AddN(O,'width',StrToFloat(FW.Text,TFormatSettings.Invariant)); AddN(O,'height',StrToFloat(FH.Text,TFormatSettings.Invariant));
-          AddB(O,'rigSafe',FRigSafe.Checked); AddB(O,'allowGeneratedExpressions',FGenerated.Checked);
+          AddB(O,'rigSafe',FRigSafe.Checked); AddB(O,'allowGeneratedExpressions',FGenerated.Checked); AddB(O,'flipX',FFlip.Checked);
           if C.RenderFormat='psd' then begin var V := TJSONObject(C.PsdView.Clone);
             V.RemovePair('gaze').Free; V.AddPair('gaze',FPsdGaze.Text); V.RemovePair('motion').Free; V.AddPair('motion',FPsdMotion.Text);
             V.RemovePair('nonFrontId').Free; V.AddPair('nonFrontId',FPsdPoseIds[Max(0,FPsdPose.ItemIndex)]); O.AddPair('psdView',V); end;

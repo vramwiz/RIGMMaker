@@ -62,7 +62,7 @@ type
     function HandleRect(const Id: string; Index: Integer): TRect;
   end;
 implementation
-uses System.Math, System.JSON, RigmModel, RigmJson;
+uses System.Math, System.JSON, RigmModel, RigmJson, RigmPlacementGeometry, RigmMovieLayout;
 constructor TRigmMoviePreview.Create(AOwner: TComponent);
 begin
   inherited; DoubleBuffered := True; ControlStyle := ControlStyle+[csOpaque]; FFrame := Vcl.Graphics.TBitmap.Create; FZoom := 1;
@@ -189,17 +189,7 @@ end;
 
 function TRigmMoviePreview.HandleRect(const Id: string; Index: Integer): TRect;
 begin
-  var R := CharacterBounds(Id); var X := R.Left; var Y := R.Top;
-  case Index of
-    1: X := (R.Left+R.Right) div 2;
-    2: X := R.Right;
-    3: begin X := R.Right; Y := (R.Top+R.Bottom) div 2; end;
-    4: begin X := R.Right; Y := R.Bottom; end;
-    5: begin X := (R.Left+R.Right) div 2; Y := R.Bottom; end;
-    6: Y := R.Bottom;
-    7: Y := (R.Top+R.Bottom) div 2;
-  end;
-  var Size := ScaleValue(5); Result := Rect(X-Size,Y-Size,X+Size+1,Y+Size+1);
+  Result := PlacementHandle(CharacterBounds(Id),Index,ScaleValue(5));
 end;
 
 procedure TRigmMoviePreview.MouseDown(Button: TMouseButton; Shift: TShiftState; X,Y: Integer);
@@ -235,8 +225,20 @@ begin
     ClampViewport; FViewDirty := True; Invalidate; Exit;
   end;
   if not FDragging then Exit;
-  var P := ScreenToBase(X,Y); var DX := P.X-FDragStart.X; var DY := P.Y-FDragStart.Y;
-  FWorking := FOriginal;
+    var P := ScreenToBase(X,Y); var DX := P.X-FDragStart.X; var DY := P.Y-FDragStart.Y;
+    var Actor := FSession.Project.Character(FSelectedCharacter);
+    if (Actor<>nil) and (Actor.PlacementRef<>'') then begin
+      var Area := RectF(0,0,1920,1080);
+      if FSession.Project.Layout='l' then begin
+        var Regions := MovieLayoutRegions(FSession.Project.Layout,FSession.Project.LDirection);
+        var Ratio := Regions.LeftCharacters;
+        if Ratio.IsEmpty then Ratio := Regions.RightCharacters;
+        Area := RectF(Ratio.Left*1920,Ratio.Top*1080,Ratio.Right*1920,Ratio.Bottom*1080);
+      end;
+      FWorking := DragPlacement(FOriginal,Area,FDragHandle,DX,DY,True,True);
+      FViewDirty := True; Invalidate; Exit;
+    end;
+    FWorking := FOriginal;
   if FDragHandle<0 then begin FWorking.Offset(DX,DY); end else begin
     if FDragHandle in [0,6,7] then FWorking.Left := FOriginal.Left+DX;
     if FDragHandle in [2,3,4] then FWorking.Right := FOriginal.Right+DX;

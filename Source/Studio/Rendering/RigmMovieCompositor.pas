@@ -1,5 +1,6 @@
 ﻿// 複数キャラクター、場面画像、説明、字幕とチャートを合成する。保存済み素材の読込キャッシュも管理する。
 unit RigmMovieCompositor;
+{$POINTERMATH ON}
 
 interface
 uses System.SysUtils, System.JSON, Vcl.Graphics, RigmModel, RigmMovieModel,
@@ -13,7 +14,7 @@ procedure ValidateCompositionMaterials(Project: TRigmMovieProject);
 implementation
 uses System.Classes, System.Types, System.Math, System.IOUtils, System.StrUtils,
   System.Generics.Collections, Winapi.Windows, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg,
-  ArtDocument, RigmJson, RigmStorage, RigmSample, RigmRenderer, RigmMovieRendering, RigmMovieActing, RigmMovieChart, RigmMoviePsdRendering;
+  ArtDocument, RigmJson, RigmStorage, RigmSample, RigmRenderer, RigmMovieRendering, RigmMovieActing, RigmMovieChart, RigmMoviePsdRendering, RigmMovieLayout;
 type
   TActorEntry = class
     Stamp: string;
@@ -144,11 +145,8 @@ begin
 end;
 function SceneImageBounds(Project: TRigmMovieProject): TRectF;
 begin
-  Result := RectF(470,100,1450,650);
-  if Project.Layout='l' then begin
-    if Project.LDirection='left' then Result := RectF(800,120,1860,670)
-    else Result := RectF(60,120,1120,670);
-  end;
+  var Ratio := MovieLayoutRegions(Project.Layout,Project.LDirection).Image;
+  Result := RectF(Ratio.Left*1920,Ratio.Top*1080,Ratio.Right*1920,Ratio.Bottom*1080);
 end;
 procedure ApplyImageHeadAttention(Project: TRigmMovieProject; Character: TRigmMovieCharacter;
   Cue: TRigmMovieCue; Acting: TRigmMovieActing; Seconds,Local: Double; Pose: TRigmPose);
@@ -265,7 +263,7 @@ begin
 end;
 function RenderComposition(Project: TRigmMovieProject; Seconds: Double; Audio: TRigmPcm): Vcl.Graphics.TBitmap;
 var Info: TBitmapInfo; DC: HDC; Dib,Previous: HGDIOBJ; Bits: Pointer; Canvas: TCanvas;
-  procedure Image(const Path: string; R: TRect; Cover: Boolean);
+  procedure Image(const Path: string; R: TRect; Cover: Boolean; Flip: Boolean = False);
   begin
     if Path='' then Exit;
     var Picture := TPicture.Create;
@@ -275,7 +273,19 @@ var Info: TBitmapInfo; DC: HDC; Dib,Previous: HGDIOBJ; Bits: Pointer; Canvas: TC
       var K := Min(R.Width/Picture.Width,R.Height/Picture.Height);
       if Cover then K := Max(R.Width/Picture.Width,R.Height/Picture.Height);
       var W := Round(Picture.Width*K); var H := Round(Picture.Height*K);
-      Canvas.StretchDraw(Rect(R.Left+(R.Width-W) div 2,R.Top+(R.Height-H) div 2,R.Left+(R.Width+W) div 2,R.Top+(R.Height+H) div 2),Picture.Graphic);
+      var Target := Rect(R.Left+(R.Width-W) div 2,R.Top+(R.Height-H) div 2,R.Left+(R.Width+W) div 2,R.Top+(R.Height+H) div 2);
+      if not Flip then Canvas.StretchDraw(Target,Picture.Graphic)
+      else begin
+        var B := Vcl.Graphics.TBitmap.Create;
+        try
+          B.Assign(Picture.Graphic); B.PixelFormat := pf32bit;
+          for var Y := 0 to B.Height-1 do begin
+            var Row := PCardinal(B.ScanLine[Y]);
+            for var X := 0 to B.Width div 2-1 do begin var Pixel := Row[X]; Row[X] := Row[B.Width-1-X]; Row[B.Width-1-X] := Pixel; end;
+          end;
+          Canvas.StretchDraw(Target,B);
+        finally B.Free; end;
+      end;
     finally Picture.Free; end;
   end;
   function BaseRect(L,T,R,B: Double): TRect;
@@ -306,11 +316,7 @@ begin
       var SceneStart,SceneLocal,Local,Start: Double; var S := Project.SceneAt(Seconds,SceneStart,SceneLocal);
       var C := Project.CueAt(Seconds,Local,Start); var ImageBounds := SceneImageBounds(Project);
       var ImageRect := BaseRect(ImageBounds.Left,ImageBounds.Top,ImageBounds.Right,ImageBounds.Bottom);
-      var DescriptionRect := BaseRect(500,670,1420,800);
-      if Project.Layout='l' then begin
-        if Project.LDirection='left' then DescriptionRect := BaseRect(830,690,1830,820)
-        else DescriptionRect := BaseRect(90,690,1090,820);
-      end;
+      var DescriptionRect := ScaleLayoutRect(MovieLayoutRegions(Project.Layout,Project.LDirection).Description,Project.Width,Project.Height);
       if S<>nil then begin
         var SceneImage := S.Image;
         if (SceneImage='') and (C<>nil) then SceneImage := C.Background;
@@ -329,7 +335,8 @@ begin
           var Pixels := RenderPsdMovieCharacter(Project,Character,Seconds,Audio,Max(1,Box.Width),Max(1,Box.Height));
           for var Y := 0 to Box.Height-1 do if (Y+Box.Top>=0) and (Y+Box.Top<Project.Height) then
             for var X := 0 to Box.Width-1 do if (X+Box.Left>=0) and (X+Box.Left<Project.Width) then begin
-              var P := (Y*Box.Width+X)*4; var Q := ((Y+Box.Top)*Project.Width+X+Box.Left)*4; var A := Pixels[P+3];
+              var SX := X; if Character.FlipX then SX := Box.Width-1-X;
+              var P := (Y*Box.Width+SX)*4; var Q := ((Y+Box.Top)*Project.Width+X+Box.Left)*4; var A := Pixels[P+3];
               for var Channel := 0 to 2 do PByte(Bits)[Q+2-Channel] := (Pixels[P+Channel]*A+PByte(Bits)[Q+2-Channel]*(255-A)+127) div 255;
               PByte(Bits)[Q+3] := 255;
             end;
@@ -357,14 +364,14 @@ begin
             var L := Box.Left+(Box.Width-Round(W*K)) div 2-Round(Margin*K);
             MotionBox := Rect(L,Box.Bottom-Round((H+Margin)*K),L+Round((W+Margin*2)*K),Box.Bottom+Round(Margin*K));
           end;
-          Image(MotionImage,MotionBox,False); GdiFlush; Continue;
+          Image(MotionImage,MotionBox,False,Character.FlipX); GdiFlush; Continue;
         end;
         var Preset: TJSONObject := nil;
         if (C<>nil) and (C.SpeakerId=Character.SpeakerId) then Preset := Character.Expressions.GetValue(C.Emotion) as TJSONObject;
         if Preset=nil then Preset := Character.Expressions.GetValue('neutral') as TJSONObject;
         if (Preset<>nil) and (JS(Preset,'image')<>'') then begin
           // A generated complete pose is a separate sprite, without reusing the original rig.
-          Image(JS(Preset,'image'),Box,False); GdiFlush; Continue;
+          Image(JS(Preset,'image'),Box,False,Character.FlipX); GdiFlush; Continue;
         end;
         var D := Actor(Project,Character.FileName); var Pose := TRigmPose.Create;
         try
@@ -374,7 +381,8 @@ begin
           var L := Box.Left+(Box.Width-TW) div 2; var T := Box.Bottom-TH;
           for var Y := 0 to TH-1 do if (Y+T>=0) and (Y+T<Project.Height) then
             for var X := 0 to TW-1 do if (X+L>=0) and (X+L<Project.Width) then begin
-              var P := (Min(H-1,Y*H div TH)*W+Min(W-1,X*W div TW))*4;
+              var SX := Min(W-1,X*W div TW); if Character.FlipX then SX := W-1-SX;
+              var P := (Min(H-1,Y*H div TH)*W+SX)*4;
               var Q := ((Y+T)*Project.Width+X+L)*4; var A := Pixels[P+3];
               for var Channel := 0 to 2 do PByte(Bits)[Q+2-Channel] := (Pixels[P+Channel]*A+PByte(Bits)[Q+2-Channel]*(255-A)+127) div 255;
               PByte(Bits)[Q+3] := 255;
@@ -382,7 +390,7 @@ begin
         finally Pose.Free; end;
       end;
       if C<>nil then begin
-        var R := BaseRect(40,855,1880,1045); Canvas.Brush.Style := bsSolid; Canvas.Brush.Color := $251E18; Canvas.FillRect(R);
+        var R := ScaleLayoutRect(MovieLayoutRegions(Project.Layout,Project.LDirection).Subtitle,Project.Width,Project.Height); Canvas.Brush.Style := bsSolid; Canvas.Brush.Color := $251E18; Canvas.FillRect(R);
         InflateRect(R,-Round(30*Project.Width/1920),-Round(14*Project.Height/1080));
         Canvas.Font.Name := 'Yu Gothic UI'; Canvas.Font.Height := -Max(16,Round(44*Project.Height/1080));
         var Pages: Integer; var Subtitle := MovieSubtitlePage(C.Subtitle,Canvas,R.Width,Max(1,R.Height div Max(1,Canvas.TextHeight('国'))),Local/Max(0.001,Project.CueDuration(C)),Pages);

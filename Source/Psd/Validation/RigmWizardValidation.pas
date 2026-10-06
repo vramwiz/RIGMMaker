@@ -4,18 +4,32 @@ uses RigmWizardMainForm;
 procedure VerifyWizard(Main: TRigmWizardMainForm; const ResultPath,SmokePath: string);
 procedure VerifyUiResponsiveness(Main: TRigmWizardMainForm; const ResultPath: string);
 procedure VerifyCharacterCreate(Main: TRigmWizardMainForm; const ResultPath: string);
+procedure VerifyScriptTitle(Main: TRigmWizardMainForm; const ResultPath: string; Reopen: Boolean);
+procedure VerifyScriptCharacters(Main: TRigmWizardMainForm; const ResultPath: string; Reopen: Boolean);
+procedure VerifyThumbnailCache(Main: TRigmWizardMainForm; const ResultPath: string; Reopen: Boolean);
+procedure VerifyScriptLayout(Main: TRigmWizardMainForm; const ResultPath: string; Reopen: Boolean);
+procedure VerifyScriptPlacement(Main: TRigmWizardMainForm; const ResultPath: string; Reopen: Boolean);
+procedure VerifyScriptText(Main: TRigmWizardMainForm; const ResultPath: string; Reopen: Boolean);
 implementation
-uses System.SysUtils, System.Classes, System.JSON, System.IOUtils, System.Hash, System.Math, System.Types,
+uses System.SysUtils, System.Classes, System.JSON, System.IOUtils, System.Hash, System.Math, System.Types, System.DateUtils,
   Vcl.Forms, Vcl.Controls, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls, System.UITypes,
   RigmPageNavigation, PsdStudioFrame, PsdJson, RigmCharacterEditPage,
   RigmScriptCreatorFrame, RigmMovieWorkspaceFrame, RigmJson, Winapi.Windows, Winapi.Messages,
   PsdPreviewControl, PsdSettingsPanel, PsdMotionReferenceForm, Vcl.Graphics, Vcl.Imaging.pngimage,
   PsdSession, PsdProduction, RigmCharacterCatalog, RigmCharacterManagerFrame, PsdWorkspace,
-  PsdPackage, RigmLegacyEditorFrame, Winapi.ShellAPI, Winapi.ShlObj, System.StrUtils, ArtLayerList, RigmModel, ArtDocument;
+  PsdPackage, RigmLegacyEditorFrame, Winapi.ShellAPI, Winapi.ShlObj, System.StrUtils, ArtLayerList, RigmModel, ArtDocument,
+  RigmWizardWorkspace, RigmMovieModel, RigmScriptManagerFrame, RigmThumbnailCache, RigmScriptLayoutFrame, RigmMovieLayout,
+  RigmScriptPlacementFrame, RigmScriptPlacementModel, RigmScriptTextFrame, RigmScriptTextModel,
+  RigmMovieComposition, RigmMovieCompositionCommands, RigmMovieCompositor;
 type
   TReturnDialogAnswer = class
   public
     Answer: Integer; Seen: Boolean;
+    procedure Tick(Sender: TObject);
+  end;
+  TThumbnailHeartbeat = class
+  public
+    Count: Integer; Last,MaxGap: UInt64;
     procedure Tick(Sender: TObject);
   end;
   TLegacyLoadingProbe = class
@@ -32,6 +46,23 @@ type
     ExpectFrame: Boolean; FramesBefore: Double; Starts,Finishes: Integer;
     procedure LoadingChanged(Sender: TObject; const Path: string; Loading: Boolean);
   end;
+procedure TThumbnailHeartbeat.Tick(Sender: TObject);
+begin
+  var Current := GetTickCount64;
+  if Last<>0 then MaxGap := Max(MaxGap,Current-Last);
+  Last := Current; Inc(Count);
+end;
+procedure WaitThumbnailLibrary(W: TRigmWizardWorkspace);
+begin
+  var Deadline := GetTickCount64+20000;
+  repeat
+    var LibraryState := W.ScriptCharacterLibrary(False); var Loading := False;
+    try for var V in JA(LibraryState,'characters') do Loading := Loading or JB(TJSONObject(V),'loading');
+    finally LibraryState.Free; end;
+    Application.ProcessMessages; if not Loading then Exit; Sleep(5);
+  until GetTickCount64>Deadline;
+  raise Exception.Create('Thumbnail completion timeout');
+end;
 procedure TReturnDialogAnswer.Tick(Sender: TObject);
 begin
   // この所有検証プロセスのモーダルダイアログだけを操作する。
@@ -201,17 +232,382 @@ procedure CaptureUiWindow(Main: TRigmWizardMainForm; const ResultPath,Suffix: st
       TFile.WriteAllText(RequestPath+'.pending',Request.ToJSON,TEncoding.UTF8);
       if not MoveFileEx(PChar(RequestPath+'.pending'),PChar(RequestPath),MOVEFILE_REPLACE_EXISTING) then RaiseLastOSError;
     finally Request.Free; end;
-    var Deadline := GetTickCount64+15000;
+    var Deadline := GetTickCount64+45000;
     repeat
       Application.ProcessMessages; Sleep(10);
       if FileExists(ResultPath+'.capture-ack.txt') then try
-        if TFile.ReadAllText(ResultPath+'.capture-ack.txt',TEncoding.UTF8).Trim=Token then Exit;
-      except on E: EOSError do
-        if not (E.ErrorCode in [ERROR_FILE_NOT_FOUND,ERROR_ACCESS_DENIED,ERROR_SHARING_VIOLATION]) then raise;
+        var Ack := TFileStream.Create(ResultPath+'.capture-ack.txt',fmOpenRead or fmShareDenyNone);
+        var Data: TBytes;
+        try
+          if (Ack.Size>0) and (Ack.Size<256) then begin SetLength(Data,Ack.Size); Ack.ReadBuffer(Data[0],Length(Data)); end;
+        finally Ack.Free; end;
+        if TEncoding.UTF8.GetString(Data).Trim.TrimLeft([#$FEFF])=Token then Exit;
+      except on E: Exception do
+        if not ((E is EOSError) or (E is EFOpenError) or (E is EInOutError)) then raise;
       end;
     until GetTickCount64>Deadline;
     raise Exception.Create('Owned native capture timed out');
   end;
+procedure VerifyScriptTitle(Main: TRigmWizardMainForm; const ResultPath: string; Reopen: Boolean);
+  procedure Check(Value: Boolean; const Name: string; Results: TJSONArray);
+  begin if not Value then raise Exception.Create('Script title validation failed: '+Name); Results.Add(Name); end;
+begin
+  var Marker := ParseObject(TFile.ReadAllText(TPath.Combine(Main.DataRoot,'gui-validation-owner.json'),TEncoding.UTF8));
+  try if JS(Marker,'owner')<>'RIGMMaker.ScriptStage1.Validation.v1' then raise Exception.Create('Owned script validation root required'); finally Marker.Free; end;
+  Main.Position := poDesigned; Main.SetBounds(40,40,1280,840); Main.Show; ShowWindow(Main.Handle,SW_SHOWNOACTIVATE);
+  Main.Update; Application.ProcessMessages;
+  var Results := TJSONArray.Create; var Report := TJSONObject.Create;
+  try
+    Report.AddPair('checks',Results);
+    Check(ScriptUpdatedAtLocal('2026-10-06T02:49:47.196Z')=ScriptUpdatedAtLocal('2026-10-06T11:49:47.196+09:00'),
+      'UTC and explicit Japanese offset display the same local time without double conversion',Results);
+    Check((ScriptUpdatedAtLocal('')='') and (ScriptUpdatedAtLocal('invalid')='日時不明'),'empty and invalid timestamps are safe',Results);
+    if TTimeZone.Local.GetUtcOffset(Now).TotalMinutes=540 then begin
+      Check(ScriptUpdatedAtLocal('2026-10-06T02:49:47.196Z')='2026-10-06 11:49:47','Japanese local time matches the actual saved user timestamp',Results);
+      Check(ScriptUpdatedAtLocal('2026-10-05T16:01:00Z')='2026-10-06 01:01:00','local conversion handles date rollover',Results);
+    end;
+    TButton(Main.PageInstance(apHome).FindComponent('HomeScripts')).Click;
+    var Manager := Main.PageInstance(apScripts); var List := TListView(Manager.FindComponent('ScriptLibrary'));
+    var Bar := TToolBar(Manager.FindComponent('ScriptLibraryToolbar'));
+    var W := Main.Workspace;
+    if Reopen then begin
+      var State := ParseObject(TFile.ReadAllText(ResultPath+'.resume.json',TEncoding.UTF8));
+      try
+        var Path := JS(State,'path');
+        for var Item in List.Items do if SameText(Item.SubItems[3],Path) then Item.Selected := True;
+        Check((List.Selected<>nil) and SameText(List.Selected.SubItems[3],Path),'persisted title draft appears after process restart',Results);
+        List.OnDblClick(List);
+        var Frame := Main.PageInstance(apScriptCreate); var Title := TEdit(Frame.FindComponent('ScriptTitle'));
+        Check((W.ScriptDraft.Id=JS(State,'projectId')) and (Title.Text='終了時の途中入力') and not W.ScriptDraft.Modified,
+          'fresh process resumes same UID and interrupted input',Results);
+        Check((Main.CurrentPage=apScriptCreate) and (Main.PageInstance(apMovieEdit)=nil) and (W.Sessions.Count=0),
+          'restart stays at title without creating movie production',Results);
+        CaptureUiWindow(Main,ResultPath,'.reopened');
+      finally State.Free; end;
+    end else begin
+      Check((Main.CreatedPageCount=2) and (Screen.FormCount=1) and (W.Sessions.Count=0),
+        'home and library use one form and only requested frames',Results);
+      Check(not Bar.ShowCaptions and (Bar.Buttons[0].Name='ScriptNew') and (Bar.Buttons[0].Hint<>''),
+        'compact library icons have hints',Results);
+      CaptureUiWindow(Main,ResultPath,'.library');
+      var NewButton := TToolButton(Bar.FindComponent('ScriptNew')); NewButton.Click;
+      var Id := W.ScriptDraft.Id; var Path := W.ScriptDraft.FileName;
+      var Frame := Main.PageInstance(apScriptCreate); var Title := TEdit(Frame.FindComponent('ScriptTitle'));
+      var TitleBar := TToolBar(Frame.FindComponent('ScriptTitleToolbar'));
+      var Save := TToolButton(TitleBar.FindComponent('ScriptSave')); var Back := TToolButton(TitleBar.FindComponent('ScriptReturn'));
+      Check((Main.CurrentPage=apScriptCreate) and FileExists(Path) and (Title.Text='') and not Save.Enabled,
+        'new creates saved empty title draft in UID folder',Results);
+      Check(SameText(ExtractFileName(ExtractFileDir(Path)),Id) and (ExtractFileName(Path)='project.rigmovie'),
+        'physical directory uses UID rather than title',Results);
+      NewButton.Click;
+      Check((W.ScriptDraft.Id=Id) and (Length(TDirectory.GetFiles(TPath.Combine(Main.DataRoot,'Projects'),'*.rigmovie',TSearchOption.soAllDirectories))=1),
+        'rapid repeated new reuses the just-created draft',Results);
+      var Failed := False;
+      try W.SaveScriptDraft(True); except on E: Exception do Failed := True; end;
+      Check(Failed and (Main.CurrentPage=apScriptCreate),'empty title cannot be confirmed',Results);
+      Title.Text := '同じ題名'; Save.Click;
+      Check(not W.ScriptDraft.Modified and (JS(W.ScriptDraft.ScriptWizard,'titleStatus')='complete') and (W.ScriptDraft.Title='同じ題名'),
+        'human save confirms title and persists it',Results);
+      Check((Main.CurrentPage=apScriptCreate) and (Frame.FindComponent('ScriptNext')=nil) and (Frame.FindComponent('CreationGoMovie')=nil) and
+        (Main.PageInstance(apMovieEdit)=nil) and (Main.PageInstance(apCharacterEdit)=nil) and (W.Sessions.Count=0),
+        'save cannot advance or launch legacy production',Results);
+      CaptureUiWindow(Main,ResultPath,'.title');
+      Back.Click; List.OnDblClick(List);
+      Check((Main.PageInstance(apScriptCreate)=Frame) and (W.ScriptDraft.Id=Id) and (Title.Text='同じ題名'),
+        'library double click resumes same frame and UID',Results);
+      Title.Text := '戻る時の途中入力'; Back.Click; List.OnDblClick(List);
+      Check((Title.Text='戻る時の途中入力') and (JS(W.ScriptDraft.ScriptWizard,'titleStatus')='in-progress') and not W.ScriptDraft.Modified,
+        'return saves unfinished input without confirming title',Results);
+      var FileHash := THashSHA2.GetHashStringFromFile(Path); Title.Text := '保存失敗でも保持';
+      var Guard := TFileStream.Create(Path,fmOpenRead or fmShareDenyWrite);
+      try
+        Save.Click; TButton(Main.FindComponent('WizardHome')).Click;
+        var CanClose := True; Main.OnCloseQuery(Main,CanClose);
+        Check(not CanClose and (Main.CurrentPage=apScriptCreate) and W.ScriptDraft.Modified and (Title.Text='保存失敗でも保持') and
+          (THashSHA2.GetHashStringFromFile(Path)=FileHash),'failed save blocks return and closing while retaining input and original file',Results);
+      finally Guard.Free; end;
+      TButton(Main.FindComponent('WizardHome')).Click;
+      Check((Main.CurrentPage=apHome) and not W.ScriptDraft.Modified,'home saves unfinished input after write lock released',Results);
+      TButton(Main.PageInstance(apHome).FindComponent('HomeScripts')).Click; NewButton.Click;
+      var SecondId := W.ScriptDraft.Id; Title.Text := '同じ題名'; Save.Click; Back.Click;
+      Check((SecondId<>Id) and (List.Items.Count=2),'same display title can use separate UID folders',Results);
+      for var Item in List.Items do if SameText(Item.SubItems[3],Path) then Item.Selected := True;
+      List.OnDblClick(List);
+      Check((W.ScriptDraft.Id=Id) and (Title.Text='保存失敗でも保持'),'selecting another draft restores its own title',Results);
+      CaptureUiWindow(Main,ResultPath,'.pipe');
+      Check((Title.Text='AIの題名案') and not W.ScriptDraft.Modified and (JS(W.ScriptDraft.ScriptWizard,'titleStatus')='in-progress'),
+        'real workspace pipe updates GUI and saves without human confirmation',Results);
+      Save.Click;
+      Check((JS(W.ScriptDraft.ScriptWizard,'titleStatus')='complete') and (Main.CurrentPage=apScriptCreate),
+        'human confirms AI title and remains at stage one',Results);
+      // 旧作品と除外素材は、この所有Temp内の小さな模擬ファイルだけで確認する。
+      var Legacy := TRigmMovieProject.Create;
+      try
+        Legacy.Title := '従来作品'; SaveMovie(Legacy,TPath.Combine(Main.DataRoot,'Scripts\従来.rigmovie'),False);
+        SaveMovie(Legacy,TPath.Combine(Main.DataRoot,'Scripts\Documents\保護作品.rigmovie'),False);
+        SaveMovie(Legacy,TPath.Combine(Main.DataRoot,'Scripts\ignored\除外作品.rigmovie'),False);
+      finally Legacy.Free; end;
+      TFile.WriteAllText(TPath.Combine(Main.DataRoot,'Scripts\ignored\.rigmignore'),'owned excluded fixture',TEncoding.UTF8);
+      var LegacyHash := THashSHA2.GetHashStringFromFile(TPath.Combine(Main.DataRoot,'Scripts\従来.rigmovie'));
+      var Listing := W.ScriptLibrary;
+      try
+        Check((JI(Listing,'total')=3) and (JA(Listing,'scripts').Count=3),'library separates legacy while excluding Documents and rigmignore folders',Results);
+        var LegacyFound := False;
+        for var V in JA(Listing,'scripts') do if JS(TJSONObject(V),'title')='従来作品' then LegacyFound := JS(TJSONObject(V),'kind')='legacy';
+        Check(LegacyFound,'legacy project is distinguished from wizard titles',Results);
+      finally Listing.Free; end;
+      Failed := False;
+      try W.OpenScriptDraft(TPath.Combine(Main.DataRoot,'Scripts\従来.rigmovie')); except on E: Exception do Failed := True; end;
+      Check(Failed and (W.ScriptDraft.Id=Id) and (THashSHA2.GetHashStringFromFile(TPath.Combine(Main.DataRoot,'Scripts\従来.rigmovie'))=LegacyHash),
+        'title-only open rejects legacy without modifying it or current draft',Results);
+      Failed := False;
+      try W.OpenScriptDraft('..\outside.rigmovie'); except on E: Exception do Failed := True; end;
+      Check(Failed and (W.ScriptDraft.Id=Id),'path outside data root is rejected and active title retained',Results);
+      Title.Text := '終了時の途中入力'; var CanClose := True; Main.OnCloseQuery(Main,CanClose);
+      Check(CanClose and not W.ScriptDraft.Modified and (JS(W.ScriptDraft.ScriptWizard,'titleStatus')='in-progress'),
+        'window close query saves interrupted title',Results);
+      var Loaded := LoadMovie(Path);
+      try Check((Loaded.Id=Id) and (JS(Loaded.ScriptWizard,'titleInput')='終了時の途中入力') and
+        (JS(Loaded.ScriptWizard,'createdAt')<>'') and (JS(Loaded.ScriptWizard,'updatedAt')<>''),'saved title includes identity state and timestamps',Results);
+      finally Loaded.Free; end;
+      var Resume := TJSONObject.Create;
+      try Resume.AddPair('projectId',Id); Resume.AddPair('path',Path); TFile.WriteAllText(ResultPath+'.resume.json',Resume.ToJSON,TEncoding.UTF8);
+      finally Resume.Free; end;
+      Check((Screen.FormCount=1) and (Main.CreatedPageCount=3) and (W.Sessions.Count=0),'whole stage stays in one main form with no production sessions',Results);
+    end;
+    Report.AddPair('reopened',TJSONBool.Create(Reopen)); Report.AddPair('state',W.ScriptStatus);
+    var Output := ResultPath; if Reopen then Output := Output+'.reopened.json';
+    TFile.WriteAllText(Output,Report.ToJSON,TEncoding.UTF8);
+  finally Report.Free; end;
+end;
+procedure VerifyScriptCharacters(Main: TRigmWizardMainForm; const ResultPath: string; Reopen: Boolean);
+  procedure Check(Value: Boolean; const Text: string; Results: TJSONArray);
+  begin if not Value then raise Exception.Create('Script character validation failed: '+Text); Results.Add(Text); end;
+begin
+  var Marker := ParseObject(TFile.ReadAllText(TPath.Combine(Main.DataRoot,'gui-validation-owner.json'),TEncoding.UTF8));
+  try if JS(Marker,'owner')<>'RIGMMaker.ScriptStage2.Validation.v1' then raise Exception.Create('Owned stage two validation root required'); finally Marker.Free; end;
+  Main.Position := poDesigned; Main.SetBounds(40,40,1280,840); Main.Show; ShowWindow(Main.Handle,SW_SHOWNOACTIVATE);
+  Main.Update; Application.ProcessMessages;
+  var Results := TJSONArray.Create; var Report := TJSONObject.Create;
+  try
+    Report.AddPair('checks',Results); var W := Main.Workspace;
+    TButton(Main.PageInstance(apHome).FindComponent('HomeScripts')).Click;
+    var Manager := Main.PageInstance(apScripts); var LibraryList := TListView(Manager.FindComponent('ScriptLibrary'));
+    var Bar := TToolBar(Manager.FindComponent('ScriptLibraryToolbar'));
+    if Reopen then begin
+      var Resume := ParseObject(TFile.ReadAllText(ResultPath+'.resume.json',TEncoding.UTF8));
+      try
+        W.OpenScriptDraft(JS(Resume,'path')); Main.NavigateTo(apScriptCreate);
+        var Frame := Main.PageInstance(apScriptCreate); var List := TListView(Frame.FindComponent('ScriptCharacters'));
+        Check((W.ScriptDraft.Id=JS(Resume,'projectId')) and (JS(W.ScriptDraft.ScriptWizard,'stage')='characters') and List.Showing,
+          'fresh process restores UID and character stage',Results);
+        var Count := 0; for var Item in List.Items do if Item.Checked then Inc(Count);
+        Check((Count=1) and (JA(W.ScriptDraft.ScriptWizard,'selectedCharacters').Count=1) and not W.ScriptDraft.Modified,
+          'fresh process restores checked character selection',Results);
+        Check(JS(JO(TJSONObject(JA(W.ScriptDraft.ScriptWizard,'selectedCharacters').Items[0]),'voiceBinding'),'speakerId')='retained-test-speaker',
+          'existing voice binding metadata survives restart',Results);
+        CaptureUiWindow(Main,ResultPath,'.reopened');
+      finally Resume.Free; end;
+    end else begin
+      TToolButton(Bar.FindComponent('ScriptNew')).Click;
+      var Frame := Main.PageInstance(apScriptCreate); var Toolbar := TToolBar(Frame.FindComponent('ScriptTitleToolbar'));
+      var Title := TEdit(Frame.FindComponent('ScriptTitle')); var Save := TToolButton(Toolbar.FindComponent('ScriptSave'));
+      var Next := TToolButton(Toolbar.FindComponent('ScriptNext')); var Back := TToolButton(Toolbar.FindComponent('ScriptReturn'));
+      var Id := W.ScriptDraft.Id; var Path := W.ScriptDraft.FileName;
+      Check(not Next.Enabled,'unconfirmed title cannot advance',Results);
+      W.ScriptDraft.ScriptWizard.RemovePair('selectedCharacters').Free;
+      W.ScriptDraft.ScriptWizard.RemovePair('charactersStatus').Free;
+      Title.Text := 'キャラ選択の所有検証'; Save.Click;
+      W.OpenScriptDraft(Path);
+      Check(W.ScriptDraft.ScriptWizard.GetValue('selectedCharacters')=nil,'existing title-only wizard opens without forced metadata migration',Results);
+      Check(Next.Enabled and (JS(W.ScriptDraft.ScriptWizard,'stage')='title'),'title confirmation enables manual next and stays at title',Results);
+      Next.Click; var List := TListView(Frame.FindComponent('ScriptCharacters'));
+      Check(List.Showing and (JS(W.ScriptDraft.ScriptWizard,'stage')='characters') and Next.Visible,
+        'manual next opens only character stage',Results);
+      var Failed := False; try W.SaveScriptDraft(True); except on E: Exception do Failed := True; end;
+      Check(Failed and not Save.Enabled,'minimum one selected character required for confirmation',Results);
+      WaitThumbnailLibrary(W); Sleep(100); Application.ProcessMessages;
+      var PsdItem,RigItem,IncompleteItem: TListItem; PsdItem := nil; RigItem := nil; IncompleteItem := nil;
+      for var Item in List.Items do begin
+        var E := TJSONObject(Item.Data);
+        if JB(E,'readyForScript') then begin
+          if JS(E,'renderFormat')='psd' then PsdItem := Item else RigItem := Item;
+        end else IncompleteItem := Item;
+      end;
+      Check((PsdItem<>nil) and (RigItem<>nil) and (IncompleteItem<>nil) and (PsdItem.ImageIndex>=0) and (RigItem.ImageIndex>=0),
+        'registered PSD and RIGM share thumbnail rendering with format labels and completion checks',Results);
+      var RigPath := W.Pipe.Workspace.Resolve(JS(TJSONObject(RigItem.Data),'path'));
+      var OriginalRig := TFile.ReadAllBytes(RigPath);
+      try
+        TFile.WriteAllBytes(RigPath,TFile.ReadAllBytes(W.Pipe.Workspace.Resolve(JS(TJSONObject(IncompleteItem.Data),'path'))));
+        var Paths := TJSONArray.Create; Failed := False;
+        try
+          Paths.Add(JS(TJSONObject(RigItem.Data),'path'));
+          try W.SetScriptCharacters(Paths); except on E: Exception do Failed := True; end;
+        finally Paths.Free; end;
+        Check(Failed and (JA(W.ScriptDraft.ScriptWizard,'selectedCharacters').Count=0),
+          'source version invalidates cached completion when a registered file changes',Results);
+      finally TFile.WriteAllBytes(RigPath,OriginalRig); end;
+      WaitThumbnailLibrary(W); Sleep(100); Application.ProcessMessages;
+      IncompleteItem.Checked := True; Application.ProcessMessages;
+      Check(not IncompleteItem.Checked and (JA(W.ScriptDraft.ScriptWizard,'selectedCharacters').Count=0),'incomplete character checkbox is rejected',Results);
+      PsdItem.Checked := True; Application.ProcessMessages; RigItem.Checked := True; Application.ProcessMessages;
+      Check((JA(W.ScriptDraft.ScriptWizard,'selectedCharacters').Count=2) and Save.Enabled,'multiple complete characters update shared state',Results);
+      var ProjectJson := W.ScriptDraft.Json; var SpeakersBefore: string;
+      try SpeakersBefore := JA(ProjectJson,'speakers').ToJSON; finally ProjectJson.Free; end;
+      // 所有検証だけの既存配役を模擬し、選択変更で削られないことを確かめる。
+      TJSONObject(JA(W.ScriptDraft.ScriptWizard,'selectedCharacters').Items[0]).AddPair('voiceBinding',
+        PsdJson.ObjectText('{"speakerId":"retained-test-speaker","styleId":12345}'));
+      Save.Click;
+      Check((JS(W.ScriptDraft.ScriptWizard,'charactersStatus')='complete') and not W.ScriptDraft.Modified,
+        'human confirmation saves character stage',Results);
+      ProjectJson := W.ScriptDraft.Json;
+      try Check((JA(ProjectJson,'speakers').ToJSON=SpeakersBefore) and (W.ScriptDraft.Characters.Count=0) and (W.ScriptDraft.Cues.Count=0) and
+        (W.ScriptDraft.Scenes.Count=0),'selection preserves existing speakers and creates no voice layout or script body',Results); finally ProjectJson.Free; end;
+      CaptureUiWindow(Main,ResultPath,'.characters');
+      TToolButton(Toolbar.FindComponent('ScriptTitleStage')).Click;
+      Check(Title.Showing and (JA(W.ScriptDraft.ScriptWizard,'selectedCharacters').Count=2),'returning to title retains selections',Results);
+      Title.Text := '題名を修正してもキャラを保持'; Save.Click; Next.Click;
+      Check(PsdItem.Checked and RigItem.Checked and (JA(W.ScriptDraft.ScriptWizard,'selectedCharacters').Count=2),'title editing and returning restore selections',Results);
+      var Hash := THashSHA2.GetHashStringFromFile(Path); RigItem.Checked := False; Application.ProcessMessages;
+      var Guard := TFileStream.Create(Path,fmOpenRead or fmShareDenyWrite);
+      try
+        Back.Click;
+        Check((Main.CurrentPage=apScriptCreate) and W.ScriptDraft.Modified and (JA(W.ScriptDraft.ScriptWizard,'selectedCharacters').Count=1) and
+          (THashSHA2.GetHashStringFromFile(Path)=Hash),'failed selection save retains input original file and current page',Results);
+      finally Guard.Free; end;
+      RigItem.Checked := True; Application.ProcessMessages; Back.Click;
+      Check((Main.CurrentPage=apScripts) and not W.ScriptDraft.Modified,'return saves character selection without confirmation',Results);
+      for var Item in LibraryList.Items do if SameText(Item.SubItems[3],Path) then LibraryList.Selected := Item;
+      Check(LibraryList.Selected.SubItems[0]='キャラ：選択中','library displays persisted character stage',Results);
+      LibraryList.OnDblClick(LibraryList);
+      Check(List.Showing and PsdItem.Checked and RigItem.Checked and (W.ScriptDraft.Id=Id),'library resumes character stage on same UID',Results);
+      CaptureUiWindow(Main,ResultPath,'.pipechars');
+      Check((JA(W.ScriptDraft.ScriptWizard,'selectedCharacters').Count=1) and (JS(W.ScriptDraft.ScriptWizard,'charactersStatus')='in-progress') and
+        not W.ScriptDraft.Modified,'actual pipe updates and saves same character state without human confirmation',Results);
+      var Count := 0; for var Item in List.Items do if Item.Checked then Inc(Count);
+      Check(Count=1,'actual pipe change appears in GUI checkboxes',Results);
+      var FirstPath := JS(TJSONObject(JA(W.ScriptDraft.ScriptWizard,'selectedCharacters').Items[0]),'path');
+      var AddedPath := TPath.Combine(Main.DataRoot,'Characters\owned-late-registration.psdchar');
+      TFile.Copy(W.Pipe.Workspace.Resolve(FirstPath),AddedPath,False);
+      WaitThumbnailLibrary(W);
+      var Paths := TJSONArray.Create;
+      try Paths.Add(FirstPath); Paths.Add('Characters\owned-late-registration.psdchar'); W.SetScriptCharacters(Paths); finally Paths.Free; end;
+      var AddedChecked := False;
+      for var Item in List.Items do if SameText(JS(TJSONObject(Item.Data),'path'),'Characters\owned-late-registration.psdchar') then AddedChecked := Item.Checked;
+      Check(AddedChecked,'character registered after opening appears when shared state selects it',Results);
+      // 所有fixtureを作業領域へ移して一覧から外す。元素材は触らない。
+      ForceDirectories(TPath.Combine(Main.DataRoot,'Work'));
+      TFile.Move(AddedPath,TPath.Combine(Main.DataRoot,'Work\owned-late-registration.psdchar'));
+      Paths := TJSONArray.Create;
+      try Paths.Add(FirstPath); W.SetScriptCharacters(Paths); finally Paths.Free; end;
+      TToolButton(Toolbar.FindComponent('ScriptCharactersRefresh')).Click;
+      Save.Click; var CanClose := True; Main.OnCloseQuery(Main,CanClose);
+      Check(CanClose and (JS(W.ScriptDraft.ScriptWizard,'charactersStatus')='complete'),'confirmation and close keep character state saved',Results);
+      var Resume := TJSONObject.Create;
+      try Resume.AddPair('projectId',Id); Resume.AddPair('path',Path); TFile.WriteAllText(ResultPath+'.resume.json',Resume.ToJSON,TEncoding.UTF8); finally Resume.Free; end;
+    end;
+    Check((Screen.FormCount=1) and (W.Sessions.Count=0) and (Main.PageInstance(apMovieEdit)=nil),'stage two creates no movie production or extra forms',Results);
+    Report.AddPair('state',W.ScriptStatus); var Output := ResultPath; if Reopen then Output := Output+'.reopened.json';
+    TFile.WriteAllText(Output,Report.ToJSON,TEncoding.UTF8);
+  finally Report.Free; end;
+end;
+procedure VerifyThumbnailCache(Main: TRigmWizardMainForm; const ResultPath: string; Reopen: Boolean);
+  procedure Check(Value: Boolean; const Text: string; Results: TJSONArray);
+  begin if not Value then raise Exception.Create('Thumbnail validation failed: '+Text); Results.Add(Text); end;
+  function Counter(W: TRigmWizardWorkspace; const Name: string): Integer;
+  begin var S := W.Thumbnails.Stats; try Result := JI(S,Name); finally S.Free; end; end;
+begin
+  var Marker := ParseObject(TFile.ReadAllText(TPath.Combine(Main.DataRoot,'gui-validation-owner.json'),TEncoding.UTF8));
+  try if JS(Marker,'owner')<>'RIGMMaker.ThumbnailCache.Validation.v1' then raise Exception.Create('Owned cache validation root required'); finally Marker.Free; end;
+  Main.Position := poDesigned; Main.SetBounds(40,40,1280,840); Main.Show; ShowWindow(Main.Handle,SW_SHOWNOACTIVATE);
+  Main.Update; Application.ProcessMessages;
+  var Report := TJSONObject.Create; var Results := TJSONArray.Create; var Times := TJSONObject.Create;
+  var Probe := TThumbnailHeartbeat.Create; var Timer := TTimer.Create(nil);
+  try
+    Report.AddPair('checks',Results); Report.AddPair('timesMs',Times);
+    Timer.Interval := 40; Timer.OnTimer := Probe.Tick; Probe.Last := GetTickCount64;
+    var W := Main.Workspace; var Started := GetTickCount64;
+    Main.NavigateTo(apCharacters);
+    var Manager := TRigmCharacterManagerFrame(Main.PageInstance(apCharacters)); var List := TListView(Manager.FindComponent('CharacterLibrary'));
+    Times.AddPair('grid',TJSONNumber.Create(GetTickCount64-Started));
+    Check((List.Items.Count=3) and Manager.Showing,'list shell and rows are visible before generation completes',Results);
+    if not Reopen then begin
+      var Pending := Counter(W,'pending'); Check(Pending>0,'cold list returns while background generation is pending',Results);
+      Manager.RefreshLibrary(Main); Manager.RefreshLibrary(Main);
+      // 所有中の別一覧を生成直後に破棄し、結果が破棄済みUIへ通知されないことを確認。
+      var Transient := TRigmCharacterManagerFrame.CreateForRoot(nil,Main.DataRoot,W);
+      Transient.RefreshLibrary(Main); Transient.Free;
+      Main.NavigateTo(apHome); Main.NavigateTo(apCharacters);
+    end;
+    WaitThumbnailLibrary(W); Sleep(100); Application.ProcessMessages;
+    Times.AddPair('allImages',TJSONNumber.Create(GetTickCount64-Started));
+    var Images := 0; for var Item in List.Items do if Item.ImageIndex>=0 then Inc(Images);
+    Check(Images=3,'all thumbnails eventually appear through UI polling',Results);
+    Check(Probe.MaxGap<500,'UI heartbeat remains responsive during generation',Results);
+    Check(not W.Thumbnails.Stats.ToJSON.Contains('Temp\PsdJobs'),'persistent cache is outside ordinary work cleanup',Results);
+    if Reopen then begin
+      Check(Counter(W,'packageReads')=0,'fresh process uses persistent thumbnails without reading packages',Results);
+      Check(Counter(W,'diskHits')=3,'fresh process restores three disk cache entries',Results);
+      CaptureUiWindow(Main,ResultPath,'.reopened');
+    end else begin
+      Check((Counter(W,'packageReads')=3) and (Counter(W,'generated')=3),'refresh and multiple lists deduplicate source generation',Results);
+      CaptureUiWindow(Main,ResultPath,'.cold');
+      Started := GetTickCount64; Manager.RefreshLibrary(Main); Application.ProcessMessages;
+      Times.AddPair('warmRefresh',TJSONNumber.Create(GetTickCount64-Started));
+      Check(Counter(W,'packageReads')=3,'warm refresh does not read or hash full packages',Results);
+      W.NewScriptDraft; W.SetScriptTitle('サムネイルの所有検証'); W.SaveScriptDraft(True); W.SetScriptStage('characters');
+      Started := GetTickCount64; Main.NavigateTo(apScriptCreate); Application.ProcessMessages;
+      Times.AddPair('scriptList',TJSONNumber.Create(GetTickCount64-Started));
+      var Frame := Main.PageInstance(apScriptCreate); var Actors := TListView(Frame.FindComponent('ScriptCharacters'));
+      Images := 0; for var Item in Actors.Items do if Item.ImageIndex>=0 then Inc(Images);
+      Check((Images=3) and (Counter(W,'packageReads')=3),'character selection reuses the same cached pixels and metadata',Results);
+      var PsdItem: TListItem := nil; var RigPath,IncompletePath: string;
+      for var Item in Actors.Items do begin
+        var E := TJSONObject(Item.Data);
+        if JS(E,'renderFormat')='psd' then PsdItem := Item
+        else if JB(E,'readyForScript') then RigPath := W.Pipe.Workspace.Resolve(JS(E,'path'))
+        else IncompletePath := W.Pipe.Workspace.Resolve(JS(E,'path'));
+      end;
+      Check(PsdItem<>nil,'PSD row contains completed cached registration metadata',Results);
+      PsdItem.Checked := True; Application.ProcessMessages;
+      Check(JA(W.ScriptDraft.ScriptWizard,'selectedCharacters').Count=1,'completed cached character can still be selected',Results);
+      var RigBytes := TFile.ReadAllBytes(RigPath); var OriginalTime := TFile.GetLastWriteTimeUtc(RigPath);
+      var Signature := CharacterSourceSignature(RigPath); var Reads := Counter(W,'packageReads');
+      try
+        TFile.WriteAllBytes(RigPath,TFile.ReadAllBytes(IncompletePath)); TFile.SetLastWriteTimeUtc(RigPath,OriginalTime);
+        Check(CharacterSourceSignature(RigPath)<>Signature,'source identity detects changes even when timestamp is restored',Results);
+        Started := GetTickCount64; Manager.RefreshLibrary(Main); WaitThumbnailLibrary(W); Sleep(100); Application.ProcessMessages;
+        Times.AddPair('changedSource',TJSONNumber.Create(GetTickCount64-Started));
+        var E := W.Thumbnails.Request(RigPath);
+        Check((E<>nil) and not JB(E.Metadata,'readyForScript') and (Counter(W,'packageReads')=Reads+1),
+          'only changed source is regenerated with updated completion state',Results);
+      finally TFile.WriteAllBytes(RigPath,RigBytes); end;
+      WaitThumbnailLibrary(W); Sleep(100); Application.ProcessMessages;
+      var PsdPath := W.Pipe.Workspace.Resolve(JS(TJSONObject(PsdItem.Data),'path'));
+      var Cached := W.Thumbnails.Request(PsdPath); var Expected := PreviewDigest(Cached.Pixels);
+      TFile.WriteAllBytes(W.Thumbnails.CachePath(PsdPath),TEncoding.UTF8.GetBytes('broken-owned-cache'));
+      var Recovery := TRigmThumbnailCache.Create(Main.DataRoot);
+      try
+        Started := GetTickCount64; var Deadline := Started+20000; var E: TRigmThumbnailEntry;
+        repeat E := Recovery.Request(PsdPath); Application.ProcessMessages; if E<>nil then Break; Sleep(5); until GetTickCount64>Deadline;
+        Check((E<>nil) and (PreviewDigest(E.Pixels)=Expected),'corrupt cache is safely recreated from unchanged source',Results);
+        var S := Recovery.Stats; try Check(JI(S,'packageReads')=1,'corrupt cache regenerates only its own source',Results); finally S.Free; end;
+        Times.AddPair('corruptRecovery',TJSONNumber.Create(GetTickCount64-Started));
+        var Bitmap := TBitmap.Create;
+        try
+          PaintCharacterPixels(E.Pixels,E.Width,E.Height,Bitmap,288,352);
+          Check((Bitmap.Width=288) and (Bitmap.Height=352),'cached original aspect ratio can render at higher DPI',Results);
+        finally Bitmap.Free; end;
+      finally Recovery.Free; end;
+      CaptureUiWindow(Main,ResultPath,'.shared');
+    end;
+    Check((Screen.FormCount=1) and (W.Sessions.Count=0) and (Main.PageInstance(apMovieEdit)=nil),'cache work does not enter later production stages',Results);
+    Times.AddPair('heartbeatMaxGap',TJSONNumber.Create(Probe.MaxGap)); Report.AddPair('stats',W.Thumbnails.Stats);
+    var Output := ResultPath; if Reopen then Output := Output+'.reopened.json';
+    TFile.WriteAllText(Output,Report.ToJSON,TEncoding.UTF8);
+  finally Timer.Free; Probe.Free; Report.Free; end;
+end;
 procedure Drop(Manager: TFrame; const Path: string);
   begin
     // Explorerと同じWM_DROPFILES経路をアプリ所有のファイルで検証する。
@@ -732,4 +1128,223 @@ begin
     TFile.WriteAllText(ResultPath,Results.ToJSON,TEncoding.UTF8);
   finally Results.Free; end;
 end;
+procedure VerifyScriptLayout(Main: TRigmWizardMainForm; const ResultPath: string; Reopen: Boolean);
+  procedure Check(Value: Boolean; const Text: string; Results: TJSONArray);
+  begin if not Value then raise Exception.Create('Script layout validation failed: '+Text); Results.Add(Text); end;
+begin
+  var Marker := ParseObject(TFile.ReadAllText(TPath.Combine(Main.DataRoot,'gui-validation-owner.json'),TEncoding.UTF8));
+  try if JS(Marker,'owner')<>'RIGMMaker.ScriptStage3.Validation.v1' then raise Exception.Create('Owned stage three root required'); finally Marker.Free; end;
+  Main.Position := poDesigned; Main.SetBounds(40,40,1280,840); Main.Show; ShowWindow(Main.Handle,SW_SHOWNOACTIVATE);
+  Main.Update; Application.ProcessMessages;
+  var Report := TJSONObject.Create; var Results := TJSONArray.Create; Report.AddPair('checks',Results);
+  try
+    var W := Main.Workspace;
+    TButton(Main.PageInstance(apHome).FindComponent('HomeScripts')).Click;
+    var Manager := Main.PageInstance(apScripts); var List := TListView(Manager.FindComponent('ScriptLibrary'));
+    if Reopen then begin
+      var Resume := ParseObject(TFile.ReadAllText(ResultPath+'.resume.json',TEncoding.UTF8));
+      try
+        W.OpenScriptDraft(JS(Resume,'path')); Main.NavigateTo(apScriptCreate);
+        Check((W.ScriptDraft.Id=JS(Resume,'projectId')) and (JS(W.ScriptDraft.ScriptWizard,'stage')='layout'),
+          'fresh process restores same UID and layout stage',Results);
+      finally Resume.Free; end;
+    end else begin
+      TToolButton(TToolBar(Manager.FindComponent('ScriptLibraryToolbar')).FindComponent('ScriptNew')).Click;
+    end;
+    var Creator := Main.PageInstance(apScriptCreate); var Toolbar := TToolBar(Creator.FindComponent('ScriptTitleToolbar'));
+    var Save := TToolButton(Toolbar.FindComponent('ScriptSave')); var Next := TToolButton(Toolbar.FindComponent('ScriptNext'));
+    if not Reopen then begin
+      Check(Creator.FindComponent('RigmScriptLayoutFrame')=nil,'layout page is not eagerly created',Results);
+      TEdit(Creator.FindComponent('ScriptTitle')).Text := 'レイアウト構図の所有検証'; Save.Click; Next.Click;
+      WaitThumbnailLibrary(W); Sleep(120); Application.ProcessMessages;
+      var Characters := TListView(Creator.FindComponent('ScriptCharacters'));
+      for var Item in Characters.Items do if JB(TJSONObject(Item.Data),'readyForScript') then Item.Checked := True;
+      Application.ProcessMessages; Save.Click;
+      Check((JA(W.ScriptDraft.ScriptWizard,'selectedCharacters').Count=2) and Next.Visible and Next.Enabled,
+        'confirmed multiple characters enable manual next',Results);
+      Next.Click;
+      Check((JS(W.ScriptDraft.ScriptWizard,'stage')='layout') and not Next.Visible,'manual next opens layout and stops at stage three',Results);
+    end;
+    var LayoutFrame: TRigmScriptLayoutFrame := nil;
+    for var I := 0 to Creator.ComponentCount-1 do if Creator.Components[I] is TRigmScriptLayoutFrame then LayoutFrame := TRigmScriptLayoutFrame(Creator.Components[I]);
+    Check(LayoutFrame<>nil,'layout frame exists on first entry',Results);
+    var Choice := TRadioGroup(LayoutFrame.FindComponent('ScriptLayoutChoices'));
+    var Background := TComboBox(LayoutFrame.FindComponent('ScriptLayoutBackground'));
+    if Reopen then begin
+      Check((Choice.ItemIndex=0) and (Background.ItemIndex=2) and (JS(W.ScriptDraft.ScriptWizard,'layoutStatus')='complete') and
+        (JA(W.ScriptDraft.ScriptWizard,'selectedCharacters').Count=2) and not W.ScriptDraft.Modified,
+        'fresh process restores GUI choice background confirmation and selections',Results);
+      Check((W.ScriptDraft.Layout='theme') and (W.ScriptDraft.BackgroundColor=LayoutBackgroundColor('blue')),
+        'persisted movie model agrees with wizard layout',Results);
+      WaitThumbnailLibrary(W); Application.ProcessMessages; CaptureUiWindow(Main,ResultPath,'.reopened');
+    end else begin
+      var Id := W.ScriptDraft.Id; var Path := W.ScriptDraft.FileName;
+      var Selected := JA(W.ScriptDraft.ScriptWizard,'selectedCharacters').ToJSON;
+      for var I := 0 to 2 do begin
+        Choice.ItemIndex := I; Choice.OnClick(Choice); Application.ProcessMessages;
+        Check((W.ScriptDraft.Id=Id) and (JA(W.ScriptDraft.ScriptWizard,'selectedCharacters').ToJSON=Selected),
+          'layout switch '+I.ToString+' preserves UID and selected character metadata',Results);
+        Check(Background.Enabled=(I=0),'background control follows common background '+I.ToString,Results);
+        CaptureUiWindow(Main,ResultPath,'.layout'+I.ToString);
+      end;
+      Check((W.ScriptDraft.Layout='l') and (W.ScriptDraft.LDirection='right') and
+        (JA(W.ScriptDraft.ScriptWizard,'selectedCharacters').Count=2),'reverse L accepts multiple characters',Results);
+      var Left := MovieLayoutRegions('l','left'); var Right := MovieLayoutRegions('l','right');
+      var FHD := ScaleLayoutRect(Left.Image,1920,1080); var HD := ScaleLayoutRect(Left.Image,1280,720);
+      Check((FHD.Left=800) and (FHD.Right=1860) and (HD.Left=533) and (HD.Bottom=447) and
+        (Abs(Left.Image.Left-(1-Right.Image.Right))<0.0001),'existing FHD layout scales by ratio and mirrors horizontally',Results);
+      TToolButton(Toolbar.FindComponent('ScriptCharactersStage')).Click;
+      Check((JS(W.ScriptDraft.ScriptWizard,'charactersStatus')='complete') and TListView(Creator.FindComponent('ScriptCharacters')).Showing,
+        'back to character stage keeps confirmed selection',Results);
+      TToolButton(Toolbar.FindComponent('ScriptLayoutStage')).Click;
+      Check((Choice.ItemIndex=2) and (W.ScriptDraft.Id=Id),'returning to layout retains reverse L choice',Results);
+      Save.Click;
+      Check((JS(W.ScriptDraft.ScriptWizard,'layoutStatus')='complete') and not W.ScriptDraft.Modified,'human confirms layout without advancing',Results);
+      TToolButton(Toolbar.FindComponent('ScriptReturn')).Click;
+      for var Item in List.Items do if SameText(Item.SubItems[3],Path) then List.Selected := Item;
+      Check((List.Selected<>nil) and (List.Selected.SubItems[0]='レイアウト：確認済み'),'library displays saved layout stage',Results);
+      List.OnDblClick(List);
+      Check((Choice.ItemIndex=2) and (W.ScriptDraft.Id=Id),'library reopens saved layout in same cached frame',Results);
+      CaptureUiWindow(Main,ResultPath,'.pipe');
+      Check((Choice.ItemIndex=0) and (Background.ItemIndex=2) and (JS(W.ScriptDraft.ScriptWizard,'layoutStatus')='in-progress') and
+        not W.ScriptDraft.Modified,'actual pipe change and save update same GUI without human confirmation',Results);
+      Save.Click;
+      var Resume := TJSONObject.Create;
+      try Resume.AddPair('projectId',Id); Resume.AddPair('path',Path); TFile.WriteAllText(ResultPath+'.resume.json',Resume.ToJSON,TEncoding.UTF8); finally Resume.Free; end;
+    end;
+    Check((Screen.FormCount=1) and (W.Sessions.Count=0) and (Main.PageInstance(apMovieEdit)=nil) and
+      (W.ScriptDraft.Characters.Count=0) and (W.ScriptDraft.Cues.Count=0) and (W.ScriptDraft.Scenes.Count=0),
+      'no character placement voice script production or additional forms',Results);
+    var State := W.ScriptStatus;
+    try Check(not JB(State,'canAdvance'),'stage four is unavailable',Results); Report.AddPair('state',State); except State.Free; raise; end;
+    var Output := ResultPath; if Reopen then Output := Output+'.reopened.json';
+    TFile.WriteAllText(Output,Report.ToJSON,TEncoding.UTF8);
+  finally Report.Free; end;
+end;
+procedure VerifyScriptPlacement(Main: TRigmWizardMainForm; const ResultPath: string; Reopen: Boolean);
+  procedure Check(Value: Boolean; const Text: string; Results: TJSONArray);
+  begin if not Value then raise Exception.Create('Script placement validation failed: '+Text); Results.Add(Text); end;
+  function DragPoint(const R: TRect): TPoint;
+  begin Result := Point((R.Left+R.Right) div 2,(R.Top+R.Bottom) div 2); end;
+  procedure Mouse(Control: TControl; Message: Cardinal; const P: TPoint);
+  begin Control.Perform(Message,MK_LBUTTON,NativeInt(Cardinal(P.X and $FFFF) or (Cardinal(P.Y and $FFFF) shl 16))); end;
+begin
+  var Marker := ParseObject(TFile.ReadAllText(TPath.Combine(Main.DataRoot,'gui-validation-owner.json'),TEncoding.UTF8));
+  try if JS(Marker,'owner')<>'RIGMMaker.ScriptStage4.Validation.v1' then raise Exception.Create('Owned stage four root required'); finally Marker.Free; end;
+  Main.Position := poDesigned; Main.SetBounds(40,40,1280,840); Main.Show; ShowWindow(Main.Handle,SW_SHOWNOACTIVATE); Application.ProcessMessages;
+  var Report := TJSONObject.Create; var Results := TJSONArray.Create; Report.AddPair('checks',Results);
+  try
+    var W := Main.Workspace; TButton(Main.PageInstance(apHome).FindComponent('HomeScripts')).Click;
+    var Manager := Main.PageInstance(apScripts); var LibraryList := TListView(Manager.FindComponent('ScriptLibrary'));
+    if Reopen then begin
+      var Resume := ParseObject(TFile.ReadAllText(ResultPath+'.resume.json',TEncoding.UTF8));
+      try W.OpenScriptDraft(JS(Resume,'path')); Main.NavigateTo(apScriptCreate);
+        Check((W.ScriptDraft.Id=JS(Resume,'projectId')) and (W.CurrentScriptStage='placement'),'restart resumes last Next destination and same UID',Results);
+      finally Resume.Free; end;
+    end else TToolButton(TToolBar(Manager.FindComponent('ScriptLibraryToolbar')).FindComponent('ScriptNew')).Click;
+    var Creator := Main.PageInstance(apScriptCreate); var Toolbar := TToolBar(Creator.FindComponent('ScriptTitleToolbar'));
+    var Title := TEdit(Creator.FindComponent('ScriptTitle')); var Next := TToolButton(Toolbar.FindComponent('ScriptNext'));
+    var Back := TToolButton(Toolbar.FindComponent('ScriptReturn')); var Path := W.ScriptDraft.FileName; var Id := W.ScriptDraft.Id;
+    if not Reopen then begin
+      Check(not Next.Enabled,'empty title cannot advance',Results);
+      Title.Text := 'Next保存とキャラ配置の所有検証'; Check(Next.Enabled,'title input alone enables Next without Save confirmation',Results);
+      Next.Click;
+      var Saved := LoadMovie(Path);
+      try Check((Saved.Id=Id) and (JS(Saved.ScriptWizard,'stage')='characters') and (Saved.Title=Title.Text) and not W.ScriptDraft.Modified,
+        'title Next saves content and destination together',Results); finally Saved.Free; end;
+      Check(W.CurrentScriptStage='characters','title Next displays characters only after save',Results);
+      Back.Click; W.OpenScriptDraft(Path); Main.NavigateTo(apScriptCreate);
+      Check(W.CurrentScriptStage='characters','exit and reopen resumes character destination',Results);
+      WaitThumbnailLibrary(W); Sleep(120); Application.ProcessMessages;
+      var Characters := TListView(Creator.FindComponent('ScriptCharacters'));
+      for var Item in Characters.Items do if JB(TJSONObject(Item.Data),'readyForScript') then Item.Checked := True;
+      Check((JA(W.ScriptDraft.ScriptWizard,'selectedCharacters').Count=2) and Next.Enabled,'multiple character selection needs no separate Save',Results);
+      var Hash := THashSHA2.GetHashStringFromFile(Path); var Guard := TFileStream.Create(Path,fmOpenRead or fmShareDenyWrite);
+      try Next.Click;
+        Check((W.CurrentScriptStage='characters') and Characters.Showing and W.ScriptDraft.Modified and
+          (JA(W.ScriptDraft.ScriptWizard,'selectedCharacters').Count=2) and (THashSHA2.GetHashStringFromFile(Path)=Hash),
+          'failed Next retains source stage input and disk project',Results);
+      finally Guard.Free; end;
+      Next.Click; Saved := LoadMovie(Path);
+      try Check((JS(Saved.ScriptWizard,'stage')='layout') and (JA(Saved.ScriptWizard,'selectedCharacters').Count=2),
+        'character Next persists layout destination with selection',Results); finally Saved.Free; end;
+      TToolButton(Toolbar.FindComponent('ScriptTitleStage')).Click; Title.Text := '戻った題名の下書きを保全'; Back.Click;
+      W.OpenScriptDraft(Path); Main.NavigateTo(apScriptCreate);
+      Check((W.CurrentScriptStage='layout') and (JS(W.ScriptDraft.ScriptWizard,'titleInput')='戻った題名の下書きを保全'),
+        'backward draft saves preserve edits and last Next resume destination',Results);
+      Next.Click; Check((W.CurrentScriptStage='placement') and not Next.Visible and not W.ScriptDraft.Modified,
+        'layout Next saves and displays placement with stage five unavailable',Results);
+    end;
+    var Frame: TRigmScriptPlacementFrame := nil;
+    for var I := 0 to Creator.ComponentCount-1 do if Creator.Components[I] is TRigmScriptPlacementFrame then Frame := TRigmScriptPlacementFrame(Creator.Components[I]);
+    Check((Frame<>nil) and Frame.Showing,'placement uses lazy frame within main form',Results);
+    var Preview := Frame.Preview; var List := TListView(Frame.FindComponent('ScriptPlacementCharacters'));
+    WaitThumbnailLibrary(W); Sleep(120); Application.ProcessMessages;
+    var First := JS(TJSONObject(JA(W.ScriptDraft.ScriptWizard,'selectedCharacters')[0]),'path');
+    if Reopen then begin
+      Check((JA(W.ScriptDraft.ScriptWizard,'placements').Count=2) and (List.Items.Count=2) and (List.Items[0].ImageIndex>=0),
+        'restart restores multiple format-neutral placements and cached list images',Results);
+      Check(JB(Placement(W.ScriptDraft,First),'flipX'),'restart restores common horizontal reflection',Results);
+      Check((W.ScriptDraft.Layout='l') and (W.ScriptDraft.LDirection='left'),'restart restores selected L guide',Results);
+      CaptureUiWindow(Main,ResultPath,'.reopened');
+    end else begin
+      Check((JA(W.ScriptDraft.ScriptWizard,'placements').Count=2) and (List.Items.Count=2) and (List.Items[0].ImageIndex>=0),
+        'PSD and RIGM placements use existing shared thumbnail cache',Results);
+      W.SelectScriptPlacement(First); var O := TJSONObject.Create;
+      try O.AddPair('path',First); AddN(O,'x',200/1920); AddN(O,'y',200/1080); AddN(O,'width',200/1920); AddN(O,'height',500/1080); W.SetScriptPlacement(O); finally O.Free; end;
+      var Start := DragPoint(Preview.CharacterBounds(First)); Mouse(Preview,WM_LBUTTONDOWN,Start);
+      Check(Preview.Dragging and W.PlacementEditing,'GUI drag obtains shared edit guard',Results);
+      Mouse(Preview,WM_MOUSEMOVE,Point(Start.X+20,Start.Y+10)); CaptureUiWindow(Main,ResultPath,'.drag');
+      Mouse(Preview,WM_LBUTTONUP,Point(Start.X+20,Start.Y+10)); var B := PlacementRect(Placement(W.ScriptDraft,First));
+      Check(not Preview.Dragging and not W.PlacementEditing and (Abs(B.Left/10-Round(B.Left/10))<0.001) and
+        (Abs(B.Width-200)<0.01) and (Abs(B.Left-200)>5),'move snaps in FullHD coordinates and preserves size',Results);
+      for var I := 0 to 7 do begin
+        var Before := PlacementRect(Placement(W.ScriptDraft,First)); Start := DragPoint(Preview.HandleRect(I));
+        Mouse(Preview,WM_LBUTTONDOWN,Start); Mouse(Preview,WM_MOUSEMOVE,Point(Start.X+5,Start.Y+5)); Mouse(Preview,WM_LBUTTONUP,Point(Start.X+5,Start.Y+5));
+        B := PlacementRect(Placement(W.ScriptDraft,First));
+        Check((Abs(B.Width/B.Height-Before.Width/Before.Height)<0.0001) and ((Abs(B.Width-Before.Width)>0.1) or (Abs(B.Height-Before.Height)>0.1)),
+          'handle '+I.ToString+' resizes while preserving aspect ratio',Results);
+      end;
+      var Flip := TCheckBox(Frame.FindComponent('ScriptPlacementFlip')); Flip.Checked := True; Application.ProcessMessages;
+      Check(JB(Placement(W.ScriptDraft,First),'flipX'),'horizontal reflection is common saved display state',Results);
+      var StoredRect := Placement(W.ScriptDraft,First).ToJSON; Main.SetBounds(40,40,1460,900); Application.ProcessMessages;
+      var Center := DragPoint(Preview.CharacterBounds(First)); var BasePoint := Preview.ScreenToBase(Center.X,Center.Y);
+      B := PlacementRect(Placement(W.ScriptDraft,First));
+      Check((Abs(BasePoint.X-(B.Left+B.Right)/2)<4) and (Abs(BasePoint.Y-(B.Top+B.Bottom)/2)<4) and
+        (Placement(W.ScriptDraft,First).ToJSON=StoredRect),'preview resize changes display only and maps back to FullHD coordinates',Results);
+      Main.SetBounds(40,40,1280,840); Application.ProcessMessages;
+      CaptureUiWindow(Main,ResultPath,'.placement');
+      TToolButton(Toolbar.FindComponent('ScriptLayoutStage')).Click;
+      var LayoutFrame: TRigmScriptLayoutFrame := nil;
+      for var I := 0 to Creator.ComponentCount-1 do if Creator.Components[I] is TRigmScriptLayoutFrame then LayoutFrame := TRigmScriptLayoutFrame(Creator.Components[I]);
+      var Choice := TRadioGroup(LayoutFrame.FindComponent('ScriptLayoutChoices')); Choice.ItemIndex := 1; Choice.OnClick(Choice);
+      CaptureUiWindow(Main,ResultPath,'.pipe-next');
+      Check((W.CurrentScriptStage='placement') and (W.ScriptDraft.Id=Id) and not W.ScriptDraft.Modified,
+        'actual pipe Next saves layout and destination then changes GUI',Results);
+      var Area := PlacementArea(W.ScriptDraft); B := PlacementRect(Placement(W.ScriptDraft,First));
+      Check((JA(W.ScriptDraft.ScriptWizard,'placements').Count=2) and (B.Left>=Area.Left-0.01) and (B.Right<=Area.Right+0.01),
+        'L layout retains multiple placements and fits them to character guide',Results);
+      CaptureUiWindow(Main,ResultPath,'.pipe-placement');
+      Check((JS(W.ScriptDraft.ScriptWizard,'placementSelected')=First) and JB(Placement(W.ScriptDraft,First),'flipX') and
+        not W.ScriptDraft.Modified and Flip.Checked,'actual pipe placement updates selection and visible controls',Results);
+      Check((List.Selected<>nil) and SameText(List.Selected.SubItems[0],First) and
+        (Abs(JN(Placement(W.ScriptDraft,First),'x')-0.1)<0.0001) and
+        (Pos('324',TLabel(Frame.FindComponent('ScriptPlacementBounds')).Caption)>0),'pipe coordinates update bounds readout and selected list row',Results);
+      Start := DragPoint(Preview.CharacterBounds(First)); Mouse(Preview,WM_LBUTTONDOWN,Start); Mouse(Preview,WM_MOUSEMOVE,Point(Start.X-2000,Start.Y-2000));
+      Mouse(Preview,WM_LBUTTONUP,Point(Start.X-2000,Start.Y-2000)); B := PlacementRect(Placement(W.ScriptDraft,First));
+      Check((B.Left>=Area.Left-0.01) and (B.Top>=Area.Top-0.01),'drag is clamped to L character area',Results);
+      TToolButton(Toolbar.FindComponent('ScriptCharactersStage')).Click; Back.Click;
+      W.OpenScriptDraft(Path); Main.NavigateTo(apScriptCreate);
+      Check((W.CurrentScriptStage='placement') and Frame.Showing,'back and exit resume last Next placement destination',Results);
+      var CanClose := True; Main.OnCloseQuery(Main,CanClose); Check(CanClose,'close saves current draft',Results);
+      var Resume := TJSONObject.Create; try Resume.AddPair('projectId',Id); Resume.AddPair('path',Path); TFile.WriteAllText(ResultPath+'.resume.json',Resume.ToJSON,TEncoding.UTF8); finally Resume.Free; end;
+    end;
+    Check((Screen.FormCount=1) and (W.Sessions.Count=0) and (Main.PageInstance(apMovieEdit)=nil) and
+      (W.ScriptDraft.Characters.Count=0) and (W.ScriptDraft.Cues.Count=0) and (W.ScriptDraft.Scenes.Count=0),
+      'placement creates no old movie sessions voice script or production',Results);
+    var State := W.ScriptStatus; Check(not JB(State,'canAdvance'),'unimplemented script input remains blocked',Results); Report.AddPair('state',State);
+    var Output := ResultPath; if Reopen then Output := Output+'.reopened.json'; TFile.WriteAllText(Output,Report.ToJSON,TEncoding.UTF8);
+  finally Report.Free; end;
+end;
+{$I RigmScriptTextValidation.inc}
 end.

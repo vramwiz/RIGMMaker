@@ -33,6 +33,7 @@ type
     BackgroundColor: Cardinal;
     Revision: Integer;
     Modified: Boolean;
+    ScriptWizard: TJSONObject; // 任意の段階式台本情報。旧作品ではnilのまま。
     WorkflowStage, PreviewKey, PreviewPath, PreviewHash, VideoKey, VideoPath, VideoHash: string;
     Layout,ThemeBackground,LDirection: string;
     Characters: TObjectList<TRigmMovieCharacter>;
@@ -51,6 +52,8 @@ type
     function HasStoredAudio(C: TRigmMovieCue): Boolean;
     function EffectiveStyle(C: TRigmMovieCue): Integer;
     procedure EnableComposition;
+    function Placement(const Path: string): TJSONObject;
+    procedure BindCharacterPlacements;
     function Json: TJSONObject;
     function Clone: TRigmMovieProject;
     class function FromJson(O: TJSONObject): TRigmMovieProject; static;
@@ -111,7 +114,7 @@ begin
   Speakers.Add(TRigmMovieSpeaker.Create); Revision := 1;
 end;
 destructor TRigmMovieProject.Destroy;
-begin Scenes.Free; Characters.Free; Cues.Free; Speakers.Free; inherited; end;
+begin ScriptWizard.Free; Scenes.Free; Characters.Free; Cues.Free; Speakers.Free; inherited; end;
 procedure TRigmMovieProject.Changed;
 begin Inc(Revision); Modified := True; end;
 function TRigmMovieProject.Speaker(const SpeakerId: string): TRigmMovieSpeaker;
@@ -132,10 +135,12 @@ begin
   Workflow.AddPair('previewPath',PreviewPath); Workflow.AddPair('previewHash',PreviewHash);
   Workflow.AddPair('videoKey',VideoKey); Workflow.AddPair('videoPath',VideoPath); Workflow.AddPair('videoHash',VideoHash);
   Result.AddPair('workflow',Workflow);
+  if ScriptWizard<>nil then Result.AddPair('scriptWizard',ScriptWizard.Clone as TJSONObject);
   AddN(Result,'backgroundColor',BackgroundColor); AddN(Result,'revision',Revision);
   A := TJSONArray.Create; Result.AddPair('speakers',A); for var S in Speakers do A.AddElement(S.Json);
   A := TJSONArray.Create; Result.AddPair('cues',A); for var C in Cues do A.AddElement(C.Json);
-  if (Scenes.Count>0) or (Characters.Count>0) then begin
+  if (Scenes.Count>0) or (Characters.Count>0) or
+    ((ScriptWizard<>nil) and (ScriptWizard.GetValue('layoutChoice')<>nil)) then begin
     Result.AddPair('layout',Layout); Result.AddPair('themeBackground',ThemeBackground); Result.AddPair('lDirection',LDirection);
     A := TJSONArray.Create; Result.AddPair('characters',A); for var Character in Characters do A.AddElement(Character.Json);
     A := TJSONArray.Create; Result.AddPair('scenes',A); for var Scene in Scenes do A.AddElement(Scene.Json);
@@ -152,6 +157,7 @@ begin
     if JS(O,'format','RIGM-MOVIE') <> 'RIGM-MOVIE' then raise ERigm.Create('動画プロジェクト形式が違います。');
     if JI(O,'formatVersion',1) <> 1 then raise ERigm.Create('未対応の動画プロジェクト版です。');
     Result.Id := JS(O,'projectId',Result.Id); Result.Title := JS(O,'title',Result.Title);
+    if O.GetValue('scriptWizard')<>nil then Result.ScriptWizard := JO(O,'scriptWizard').Clone as TJSONObject;
     Result.FfmpegExe := JS(O,'ffmpeg'); Result.CharacterFile := JS(O,'character'); Result.EngineUrl := JS(O,'engineUrl',Result.EngineUrl);
     var Preset := JS(O,'outputPreset','custom'); var PW,PH,PF: Integer; MoviePresetDimensions(Preset,PW,PH,PF);
     if PW>0 then begin Result.Width := PW; Result.Height := PH; Result.Fps := PF; end;
@@ -189,7 +195,7 @@ begin
       if Q.GetValue('parameters') <> nil then begin C.Parameters.Free; C.Parameters := JO(Q,'parameters').Clone as TJSONObject; end;
       if Q.GetValue('acting')<>nil then begin C.Acting.Free; C.Acting := TRigmMovieActing.FromJson(JO(Q,'acting')); end;
     end;
-    Result.Validate;
+    Result.BindCharacterPlacements; Result.Validate;
   except Result.Free; raise; end;
 end;
 class function TRigmMovieProject.FromText(const Script: string): TRigmMovieProject;
@@ -217,6 +223,7 @@ end;
 procedure TRigmMovieProject.Validate;
 var Seen: TDictionary<string,Boolean>;
 begin
+  BindCharacterPlacements;
   if not MatchText(WorkflowStage,['script','setup','audio','preview','export','complete']) then raise ERigm.Create('Invalid movie workflow stage');
   MovieEncoderOptions(EncodeProfile);
   if (Width < 160) or (Width > 3840) or Odd(Width) or (Height < 120) or (Height > 2160) or Odd(Height) or
@@ -243,7 +250,7 @@ begin
     for var Character in Characters do begin
       Character.Validate; if Seen.ContainsKey(Character.Id) then raise ERigm.Create('Duplicate character identifier'); Seen.Add(Character.Id,True);
       if Speaker(Character.SpeakerId)=nil then raise ERigm.Create('Character speaker does not exist');
-      if (Layout='l') and Character.Visible and (((LDirection='left') and (Character.X+Character.Width/2>720)) or
+      if (Layout='l') and (Character.PlacementRef='') and Character.Visible and (((LDirection='left') and (Character.X+Character.Width/2>720)) or
         ((LDirection='right') and (Character.X+Character.Width/2<1200))) then raise ERigm.Create('L layout characters must remain on the selected side');
     end;
     Seen.Clear;
@@ -333,8 +340,40 @@ begin
     Start := Start+D;
   end;
 end;
+function TRigmMovieProject.Placement(const Path: string): TJSONObject;
+begin
+  Result := nil; if (ScriptWizard=nil) or not (ScriptWizard.GetValue('placements') is TJSONArray) then Exit;
+  for var V in JA(ScriptWizard,'placements') do if (V is TJSONObject) and SameText(JS(TJSONObject(V),'path'),Path) then Exit(TJSONObject(V));
+end;
+procedure TRigmMovieProject.BindCharacterPlacements;
+begin
+  for var C in Characters do begin
+    C.BindPlacement(nil);
+    if C.PlacementRef<>'' then begin
+      var O := Placement(C.PlacementRef); if O=nil then raise ERigm.Create('Character placement reference is missing: '+C.PlacementRef);
+      C.BindPlacement(O);
+    end;
+  end;
+end;
 procedure TRigmMovieProject.EnableComposition;
 begin
+  if (ScriptWizard<>nil) and (ScriptWizard.GetValue('placements') is TJSONArray) then begin
+    if (FileName='') or not SameText(ExtractFileName(ExtractFileDir(FileName)),Id) or
+      not SameText(ExtractFileName(ExtractFileDir(ExtractFileDir(FileName))),'Projects') then
+      raise ERigm.Create('Wizard composition must use its canonical project folder');
+    var Root := ExtractFileDir(ExtractFileDir(ExtractFileDir(FileName)));
+    for var V in JA(ScriptWizard,'selectedCharacters') do begin
+      var S := TJSONObject(V); var Path := JS(S,'path'); var Found := False;
+      if (Path='') or TPath.IsPathRooted(Path) or
+        not StartsText(IncludeTrailingPathDelimiter(Root),TPath.GetFullPath(TPath.Combine(Root,Path))) then
+        raise ERigm.Create('Wizard character reference must remain within its data root');
+      for var C in Characters do if SameText(C.PlacementRef,Path) then Found := True;
+      if Found then Continue;
+      var C := TRigmMovieCharacter.Create; C.Name := JS(S,'name'); C.RenderFormat := JS(S,'renderFormat'); C.PlacementRef := Path;
+      C.FileName := ExtractRelativePath(ExtractFilePath(FileName),TPath.Combine(Root,Path)); Characters.Add(C);
+    end;
+    BindCharacterPlacements;
+  end;
   if Scenes.Count=0 then for var C in Cues do begin
     var S: TRigmMovieScene := nil;
     for var Existing in Scenes do if Existing.Title=C.Scene then S := Existing;

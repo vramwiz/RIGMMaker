@@ -84,7 +84,11 @@ begin
       StringValue(C.Name,'name'); StringValue(C.FileName,'file'); StringValue(C.SpeakerId,'speaker'); StringValue(C.InitialPosition,'initialPosition');
       StringValue(C.RenderFormat,'renderFormat');
       if Args.GetValue('psdView')<>nil then begin C.PsdView.Free; C.PsdView := JO(Args,'psdView').Clone as TJSONObject; end;
-    NumberValue(C.X,'x'); NumberValue(C.Y,'y'); NumberValue(C.Width,'width'); NumberValue(C.Height,'height');
+    if Args.GetValue('x')<>nil then C.X := JN(Args,'x');
+    if Args.GetValue('y')<>nil then C.Y := JN(Args,'y');
+    if Args.GetValue('width')<>nil then C.Width := JN(Args,'width');
+    if Args.GetValue('height')<>nil then C.Height := JN(Args,'height');
+    if Args.GetValue('flipX')<>nil then C.FlipX := JB(Args,'flipX');
     if Args.GetValue('visible')<>nil then C.Visible := JB(Args,'visible');
     if Args.GetValue('rigSafe')<>nil then C.RigSafe := JB(Args,'rigSafe');
     if Args.GetValue('allowGeneratedExpressions')<>nil then C.AllowGeneratedExpressions := JB(Args,'allowGeneratedExpressions');

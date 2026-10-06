@@ -18,16 +18,35 @@ begin
   Application.MainFormOnTaskbar := True;
   Application.Title := 'RIGM Maker';
   Application.CreateForm(TRigmWizardMainForm, RigmWizardMain);
-  var ResultPath := ''; var SmokePath := ''; var UiCheck := False; var CreateCheck := False;
+  var ResultPath := ''; var SmokePath := ''; var UiCheck := False; var CreateCheck := False; var ScriptCheck := False; var ScriptReopen := False; var CharactersCheck := False;
+  var ThumbnailCheck := False; var LayoutCheck := False; var PlacementCheck := False; var TextCheck := False;
   for var Index := 1 to ParamCount-1 do begin
     if ParamStr(Index)='--verify-wizard' then ResultPath := ParamStr(Index+1);
     if ParamStr(Index)='--smoke' then SmokePath := ParamStr(Index+1);
     if ParamStr(Index)='--verify-ui-responsiveness' then begin ResultPath := ParamStr(Index+1); UiCheck := True; end;
     if ParamStr(Index)='--verify-character-create' then begin ResultPath := ParamStr(Index+1); CreateCheck := True; end;
+    if ParamStr(Index)='--verify-script-title' then begin ResultPath := ParamStr(Index+1); ScriptCheck := True; end;
+    if ParamStr(Index)='--verify-script-title-reopen' then begin ResultPath := ParamStr(Index+1); ScriptCheck := True; ScriptReopen := True; end;
+    if ParamStr(Index)='--verify-script-characters' then begin ResultPath := ParamStr(Index+1); CharactersCheck := True; end;
+    if ParamStr(Index)='--verify-script-characters-reopen' then begin ResultPath := ParamStr(Index+1); CharactersCheck := True; ScriptReopen := True; end;
+    if ParamStr(Index)='--verify-thumbnail-cache' then begin ResultPath := ParamStr(Index+1); ThumbnailCheck := True; end;
+    if ParamStr(Index)='--verify-thumbnail-cache-reopen' then begin ResultPath := ParamStr(Index+1); ThumbnailCheck := True; ScriptReopen := True; end;
+    if ParamStr(Index)='--verify-script-layout' then begin ResultPath := ParamStr(Index+1); LayoutCheck := True; end;
+    if ParamStr(Index)='--verify-script-layout-reopen' then begin ResultPath := ParamStr(Index+1); LayoutCheck := True; ScriptReopen := True; end;
+    if ParamStr(Index)='--verify-script-placement' then begin ResultPath := ParamStr(Index+1); PlacementCheck := True; end;
+    if ParamStr(Index)='--verify-script-placement-reopen' then begin ResultPath := ParamStr(Index+1); PlacementCheck := True; ScriptReopen := True; end;
+    if ParamStr(Index)='--verify-script-text' then begin ResultPath := ParamStr(Index+1); TextCheck := True; end;
+    if ParamStr(Index)='--verify-script-text-reopen' then begin ResultPath := ParamStr(Index+1); TextCheck := True; ScriptReopen := True; end;
   end;
   if ResultPath<>'' then begin
     try
-      try if CreateCheck then VerifyCharacterCreate(RigmWizardMain,ResultPath)
+      try if TextCheck then VerifyScriptText(RigmWizardMain,ResultPath,ScriptReopen)
+      else if PlacementCheck then VerifyScriptPlacement(RigmWizardMain,ResultPath,ScriptReopen)
+      else if LayoutCheck then VerifyScriptLayout(RigmWizardMain,ResultPath,ScriptReopen)
+      else if ThumbnailCheck then VerifyThumbnailCache(RigmWizardMain,ResultPath,ScriptReopen)
+      else if CharactersCheck then VerifyScriptCharacters(RigmWizardMain,ResultPath,ScriptReopen)
+      else if ScriptCheck then VerifyScriptTitle(RigmWizardMain,ResultPath,ScriptReopen)
+      else if CreateCheck then VerifyCharacterCreate(RigmWizardMain,ResultPath)
       else if UiCheck then VerifyUiResponsiveness(RigmWizardMain,ResultPath) else VerifyWizard(RigmWizardMain,ResultPath,SmokePath);
       except on E: Exception do begin TFile.WriteAllText(ResultPath+'.error.txt',E.ClassName+': '+E.Message,TEncoding.UTF8); ExitCode := 1; end; end;
     finally RigmWizardMain.Free; end;

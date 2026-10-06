@@ -5,16 +5,29 @@ interface
 uses System.SysUtils, System.JSON, RigmModel;
 type
   TRigmMovieCharacter = class
+  private
+    FRectangle: array[0..3] of Double;
+    FFlipX: Boolean; FPlacement: TJSONObject;
+    function GetRectangle(Index: Integer): Double;
+    procedure SetRectangle(Index: Integer; Value: Double);
+    function GetFlipX: Boolean;
+    procedure SetFlipX(Value: Boolean);
   public
     Id,Name,FileName,SpeakerId,InitialPosition: string;
     RenderFormat: string; // rigm/psd。旧作品は拡張子から補完する。
     PsdView: TJSONObject; // 所有。PSD固有の視線/ポーズ/小動作。共通作品内へ保存。
-    X,Y,Width,Height: Double;
+    PlacementRef: string;
     Visible,RigSafe,AllowGeneratedExpressions: Boolean;
     Expressions: TJSONObject;
     Motions: TJSONObject;
     ActiveMotion: string;
     MotionStart,MotionDuration: Double;
+    property X: Double index 0 read GetRectangle write SetRectangle;
+    property Y: Double index 1 read GetRectangle write SetRectangle;
+    property Width: Double index 2 read GetRectangle write SetRectangle;
+    property Height: Double index 3 read GetRectangle write SetRectangle;
+    property FlipX: Boolean read GetFlipX write SetFlipX;
+    procedure BindPlacement(Value: TJSONObject);
     constructor Create;
     destructor Destroy; override;
     function Json: TJSONObject;
@@ -36,6 +49,26 @@ type
   end;
 implementation
 uses System.Math, System.StrUtils, RigmJson, RigmMovieChart;
+const RectangleKeys: array[0..3] of string = ('x','y','width','height');
+function TRigmMovieCharacter.GetRectangle(Index: Integer): Double;
+begin
+  Result := FRectangle[Index];
+  if FPlacement<>nil then begin Result := JN(FPlacement,RectangleKeys[Index]); if Index in [0,2] then Result := Result*1920 else Result := Result*1080; end;
+end;
+procedure TRigmMovieCharacter.SetRectangle(Index: Integer; Value: Double);
+begin
+  FRectangle[Index] := Value;
+  if FPlacement<>nil then begin
+    if Index in [0,2] then Value := Value/1920 else Value := Value/1080;
+    FPlacement.RemovePair(RectangleKeys[Index]).Free; AddN(FPlacement,RectangleKeys[Index],Value);
+  end;
+end;
+function TRigmMovieCharacter.GetFlipX: Boolean;
+begin Result := FFlipX; if FPlacement<>nil then Result := JB(FPlacement,'flipX'); end;
+procedure TRigmMovieCharacter.SetFlipX(Value: Boolean);
+begin FFlipX := Value; if FPlacement<>nil then begin FPlacement.RemovePair('flipX').Free; AddB(FPlacement,'flipX',Value); end; end;
+procedure TRigmMovieCharacter.BindPlacement(Value: TJSONObject);
+begin FPlacement := Value; end;
 constructor TRigmMovieCharacter.Create;
 begin
   inherited; Id := NewRigmId; Name := 'キャラクター'; SpeakerId := 'narrator'; InitialPosition := 'right';
@@ -52,6 +85,8 @@ begin
   Result.AddPair('renderFormat',RenderFormat); if RenderFormat='psd' then Result.AddPair('psdView',PsdView.Clone as TJSONObject);
   Result.AddPair('speaker',SpeakerId); Result.AddPair('initialPosition',InitialPosition);
   AddN(Result,'x',X); AddN(Result,'y',Y); AddN(Result,'width',Width); AddN(Result,'height',Height);
+  if PlacementRef<>'' then Result.AddPair('placementRef',PlacementRef);
+  if FlipX then AddB(Result,'flipX',True);
   AddB(Result,'visible',Visible); AddB(Result,'rigSafe',RigSafe); AddB(Result,'allowGeneratedExpressions',AllowGeneratedExpressions);
   Result.AddPair('expressions',Expressions.Clone as TJSONObject);
   if (Motions.Count>0) or (ActiveMotion<>'') then begin
@@ -68,6 +103,7 @@ begin
     if O.GetValue('psdView')<>nil then begin Result.PsdView.Free; Result.PsdView := JO(O,'psdView').Clone as TJSONObject; end;
     Result.SpeakerId := JS(O,'speaker','narrator'); Result.InitialPosition := JS(O,'initialPosition','right');
     Result.X := JN(O,'x',1370); Result.Y := JN(O,'y',130); Result.Width := JN(O,'width',520); Result.Height := JN(O,'height',900);
+    Result.PlacementRef := JS(O,'placementRef'); Result.FlipX := JB(O,'flipX');
     Result.Visible := JB(O,'visible',True); Result.RigSafe := JB(O,'rigSafe',True); Result.AllowGeneratedExpressions := JB(O,'allowGeneratedExpressions');
     if O.GetValue('expressions')<>nil then begin Result.Expressions.Free; Result.Expressions := JO(O,'expressions').Clone as TJSONObject; end;
     if O.GetValue('motions')<>nil then begin Result.Motions.Free; Result.Motions := JO(O,'motions').Clone as TJSONObject; end;
@@ -77,6 +113,10 @@ begin
 end;
 procedure TRigmMovieCharacter.Validate;
 begin
+  if FPlacement<>nil then begin
+    if (X<0) or (Y<0) or (Width<20) or (Height<20) or (X+Width>1920.01) or (Y+Height>1080.01) then
+      raise ERigm.Create('Linked placement must stay within the FullHD canvas');
+  end;
   if (Id='') or (Length(Id)>128) or (Length(Name)>300) or (Length(FileName)>32760) then raise ERigm.Create('Invalid character identity');
   if not MatchText(RenderFormat,['rigm','psd']) or ((RenderFormat='psd')<>SameText(ExtractFileExt(FileName),'.psdchar')) then
     raise ERigm.Create('Character render format does not match its source');

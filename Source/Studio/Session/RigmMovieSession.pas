@@ -639,7 +639,7 @@ begin
       '"workflow-status":{},"workflow-next":{},"workflow-back":{"stage":"optional earlier script|setup|audio|preview|export"},'+
       '"workflow-run":{"text":"script stage only","path":"optional new preview/export path","time":"optional preview seconds","directory":"optional audio directory"}}'));
     var Extra := ParseObject('{"composition-enable":{},"add-character":{"character":{"file":".rigm","speaker":"speaker id","x":1370,"y":130,"width":520,"height":900}},'+
-      '"update-character":{"id":"character id","x":0,"y":0,"width":520,"height":900,"visible":true,"rigSafe":true},"delete-character":{"id":"character id"},'+
+      '"update-character":{"id":"character id","x":0,"y":0,"width":520,"height":900,"flipX":false,"visible":true,"rigSafe":true},"delete-character":{"id":"character id"},'+
       '"add-scene":{"scene":{"title":"string"},"text":"initial spoken line","subtitle":"display text","index":0},'+
       '"update-scene":{"id":"scene id","image":"local image","description":"persistent scene text","imagePrompt":"generation prompt","chart":{"kind":"none|radar|bar","title":"summary title","maximum":5,"color":"#5AB8E8","items":[{"label":"criterion","value":4}]},"animation":{"explainImage":"optional boolean; enables image-direction head support, not pupil gaze"}},'+
       '"delete-scene":{"id":"scene id"},"move-scene":{"id":"scene id","index":0},"resize-scene":{"id":"scene id","duration":"seconds, cannot trim existing speech"},'+

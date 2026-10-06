@@ -1,55 +1,251 @@
 ﻿unit RigmScriptCreatorFrame;
 interface
-uses System.Classes, Vcl.Forms, RigmWizardWorkspace, RigmMovieCreator, RigmMovieSession, RigmPageNavigation;
+uses System.Classes, System.JSON, Vcl.Controls, Vcl.Forms, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls, Vcl.ImgList, RigmWizardWorkspace,
+  RigmMovieCreator, RigmPageNavigation, RigmIconToolbar, RigmThumbnailList, RigmScriptLayoutFrame, RigmScriptPlacementFrame, RigmScriptTextFrame;
 type
   TRigmScriptCreatorFrame = class(TFrame,IRigmPageLifecycle)
   private
-    FWorkspace: TRigmWizardWorkspace; FCreator: TRigmMovieCreator; FBound: TRigmMovieSession; FRoot: string;
-    procedure Movie(Sender: TObject);
-    procedure NewWork(Sender: TObject);
+    FWorkspace: TRigmWizardWorkspace; FRoot: string; FTitle: TEdit; FStatus,FProgress: TLabel;
+    FToolbar: TRigmIconToolbar; FSave: TToolButton; FSync: Boolean;
+    FTitleStage,FCharactersStage,FLayoutStage,FPlacementStage,FTextStage,FNext: TToolButton;
+    FText: TRigmScriptTextFrame;
+    FPlacement: TRigmScriptPlacementFrame;
+    FLayout: TRigmScriptLayoutFrame; FActive: Boolean;
+    FTitleBody,FCharactersBody: TPanel; FCharacters: TListView; FImages: TImageList;
+    FCatalog: TJSONObject; FCatalogProject: string; FCharactersGuide: TLabel;
+    FLoader: TRigmThumbnailList;
+    FCreator: TRigmMovieCreator; // 旧コードの明示利用用。通常は生成・表示しない。
+    procedure SelectStage(Sender: TObject);
+    procedure ReloadCharacters(Sender: TObject);
+    procedure CharacterChecked(Sender: TObject; Item: TListItem);
+    function ThumbnailPath(Item: TListItem): string;
+    procedure ThumbnailApplied(Sender: TObject; Item: TListItem; Metadata: TJSONObject);
+    function GetCreator: TRigmMovieCreator;
+    procedure Changed(Sender: TObject);
+    procedure RefreshScript(Sender: TObject);
     procedure SaveWork(Sender: TObject);
+    procedure ReturnToLibrary(Sender: TObject);
   public
     constructor CreateForWorkspace(AOwner: TComponent; Workspace: TRigmWizardWorkspace; const Root: string);
+    destructor Destroy; override;
     procedure SetActive(Value: Boolean);
     function RequestFinish: Boolean;
-    property Creator: TRigmMovieCreator read FCreator;
+    property Creator: TRigmMovieCreator read GetCreator;
   end;
 implementation
-uses System.SysUtils, System.JSON, System.IOUtils, System.UITypes, Vcl.Controls, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.Dialogs, RigmJson;
+uses System.SysUtils, System.IOUtils, Vcl.Graphics, Winapi.CommCtrl,
+  RigmJson, RigmToolbarIcons, RigmCharacterCatalog, PsdJson, RigmScriptPlacementModel;
 {$R *.dfm}
 constructor TRigmScriptCreatorFrame.CreateForWorkspace(AOwner: TComponent; Workspace: TRigmWizardWorkspace; const Root: string);
 begin
-  inherited Create(AOwner); Align := alClient; FWorkspace := Workspace; FRoot := Root;
-  var Header := TPanel.Create(Self); Header.Parent := Self; Header.Align := alTop; Header.Height := 40; Header.BevelOuter := bvNone;
-  var Button := TButton.Create(Self); Button.Parent := Header; Button.Align := alLeft; Button.Width := 180; Button.Caption := '動画編集へ'; Button.Name := 'CreationGoMovie'; Button.OnClick := Movie;
-  Button := TButton.Create(Self); Button.Parent := Header; Button.Align := alLeft; Button.Width := 180; Button.Caption := '新しい作品'; Button.Name := 'CreationNewWork'; Button.OnClick := NewWork;
-  Button := TButton.Create(Self); Button.Parent := Header; Button.Align := alLeft; Button.Width := 180; Button.Caption := '作品を保存'; Button.OnClick := SaveWork;
-  FCreator := TRigmMovieCreator.CreateForWorkspace(Self,TPath.Combine(Root,'RIGM')); FCreator.Parent := Self; FCreator.Align := alClient;
+  inherited Create(AOwner); Align := alClient; FWorkspace := Workspace; FRoot := Root; DoubleBuffered := True;
+  FToolbar := TRigmIconToolbar.Create(Self); FToolbar.Parent := Self; FToolbar.Align := alTop; FToolbar.Name := 'ScriptTitleToolbar';
+  FToolbar.AddIcon('ScriptReturn','保存して台本管理へ戻る',riLayer,0,ReturnToLibrary);
+  FToolbar.AddSeparator;
+  FSave := FToolbar.AddIcon('ScriptSave','下書きを保存する',riSave,0,SaveWork);
+  FToolbar.AddSeparator;
+  FTitleStage := FToolbar.AddIcon('ScriptTitleStage','第1段階：題名へ戻る',riEditPreview,0,SelectStage,True);
+  FCharactersStage := FToolbar.AddIcon('ScriptCharactersStage','第2段階：キャラ選択',riGroup,0,SelectStage,True);
+  FLayoutStage := FToolbar.AddIcon('ScriptLayoutStage','第3段階：レイアウト選択',riLayer,0,SelectStage,True);
+  FPlacementStage := FToolbar.AddIcon('ScriptPlacementStage','第4段階：キャラ配置',riEditPreview,0,SelectStage,True);
+  FTextStage := FToolbar.AddIcon('ScriptTextStage','第5段階：台本入力',riEditPreview,0,SelectStage,True);
+  FNext := FToolbar.AddIcon('ScriptNext','確認済みの題名からキャラ選択へ進む',riComplete,0,SelectStage);
+  FToolbar.AddIcon('ScriptCharactersRefresh','登録キャラを更新',riRefresh,0,ReloadCharacters);
+  FStatus := TLabel.Create(Self); FStatus.Parent := Self; FStatus.Align := alBottom; FStatus.Height := 38;
+  FStatus.AutoSize := False; FStatus.WordWrap := True; FStatus.Name := 'ScriptTitleStatus';
+  var Body := TPanel.Create(Self); Body.Parent := Self; Body.Align := alClient; Body.BevelOuter := bvNone;
+  FTitleBody := Body;
+  Body.Caption := ''; Body.ShowCaption := False; Body.Padding.SetBounds(32,24,32,24);
+  var LabelTitle := TLabel.Create(Self); LabelTitle.Parent := Body; LabelTitle.Align := alTop; LabelTitle.Height := 40;
+  LabelTitle.AutoSize := False; LabelTitle.Font.Size := 18; LabelTitle.Caption := '台本の題名';
+  FTitle := TEdit.Create(Self); FTitle.Parent := Body; FTitle.Align := alTop; FTitle.Height := 42;
+  FTitle.Font.Size := 16; FTitle.MaxLength := 128; FTitle.Name := 'ScriptTitle'; FTitle.TextHint := 'あとで見つけやすい題名を入力'; FTitle.OnChange := Changed;
+  var Guide := TLabel.Create(Self); Guide.Parent := Body; Guide.Align := alTop; Guide.Top := FTitle.Top+FTitle.Height;
+  Guide.AutoSize := False; Guide.Height := 94; Guide.WordWrap := True;
+  Guide.Caption := '題名を入力し、Nextのチェックアイコンでキャラ選択へ進んでください。'+#13#10+
+    '戻る・ホーム・終了でも途中の題名を保存し、台本管理から続けられます。'+#13#10+
+    'Nextは内容と移動先を一緒に保存します。再開時は最後にNextで到達した画面を開きます。';
+  FProgress := TLabel.Create(Self); FProgress.Parent := Body; FProgress.Align := alTop; FProgress.Top := Guide.Top+Guide.Height;
+  FProgress.AutoSize := False; FProgress.Height := 40; FProgress.Name := 'ScriptTitleProgress';
+  FCharactersBody := TPanel.Create(Self); FCharactersBody.Parent := Self; FCharactersBody.Align := alClient;
+  FCharactersBody.BevelOuter := bvNone; FCharactersBody.Caption := ''; FCharactersBody.ShowCaption := False;
+  FCharactersBody.Padding.SetBounds(32,24,32,24); FCharactersBody.Visible := False;
+  FCharactersGuide := TLabel.Create(Self); FCharactersGuide.Parent := FCharactersBody; FCharactersGuide.Align := alTop;
+  FCharactersGuide.AutoSize := False; FCharactersGuide.Height := 74; FCharactersGuide.WordWrap := True;
+  FCharactersGuide.Name := 'ScriptCharactersProgress';
+  FImages := TImageList.Create(Self); FImages.ColorDepth := cd32Bit; FImages.Width := ScaleValue(144); FImages.Height := ScaleValue(176);
+  FCharacters := TListView.Create(Self); FCharacters.Parent := FCharactersBody; FCharacters.Align := alClient;
+  FCharacters.Name := 'ScriptCharacters'; FCharacters.ViewStyle := vsIcon; FCharacters.ReadOnly := True;
+  FCharacters.Checkboxes := True; FCharacters.HideSelection := False; FCharacters.LargeImages := FImages;
+  FCharacters.IconOptions.AutoArrange := True; FCharacters.DoubleBuffered := True;
+  ListView_SetIconSpacing(FCharacters.Handle,ScaleValue(220),ScaleValue(255));
+  FCharacters.OnItemChecked := CharacterChecked;
+  FLoader := TRigmThumbnailList.CreateForList(Self,FWorkspace.Thumbnails,FCharacters,FImages);
+  FLoader.OnPath := ThumbnailPath; FLoader.OnApplied := ThumbnailApplied;
+  FWorkspace.OnScriptChanged := RefreshScript;
+end;
+destructor TRigmScriptCreatorFrame.Destroy;
+begin FWorkspace.OnScriptChanged := nil; FLoader.Free; FCatalog.Free; inherited; end;
+function TRigmScriptCreatorFrame.GetCreator: TRigmMovieCreator;
+begin
+  if FCreator=nil then begin
+    FCreator := TRigmMovieCreator.CreateForWorkspace(Self,TPath.Combine(FRoot,'RIGM'));
+    FCreator.Visible := False; FCreator.Bind(FWorkspace.ActiveSession,nil); FCreator.SetActive(False);
+  end;
+  Result := FCreator;
+end;
+procedure TRigmScriptCreatorFrame.RefreshScript(Sender: TObject);
+begin
+  var State := FWorkspace.ScriptStatus;
+  try
+    FSync := True;
+    try
+      if FTitle.Text<>JS(State,'title') then FTitle.Text := JS(State,'title');
+      if not JB(State,'hasProject') then Exit;
+      var Wizard := JO(State,'wizard'); var IsCharacters := JS(Wizard,'stage')='characters'; var IsLayout := JS(Wizard,'stage')='layout';
+      var IsPlacement := JS(Wizard,'stage')='placement'; var IsText := JS(Wizard,'stage')='text'; var StageIndex := ScriptStageIndex(JS(Wizard,'stage'));
+      if IsLayout and (FLayout=nil) then begin
+        FLayout := TRigmScriptLayoutFrame.CreateForWorkspace(Self,FWorkspace); FLayout.Parent := Self;
+      end;
+      if IsPlacement and (FPlacement=nil) then begin FPlacement := TRigmScriptPlacementFrame.CreateForWorkspace(Self,FWorkspace); FPlacement.Parent := Self; end;
+      if IsText and (FText=nil) then begin FText := TRigmScriptTextFrame.CreateForWorkspace(Self,FWorkspace); FText.Parent := Self; end;
+      FTitleBody.Visible := not IsCharacters and not IsLayout and not IsPlacement and not IsText; FCharactersBody.Visible := IsCharacters;
+      if FLayout<>nil then begin FLayout.Visible := IsLayout; FLayout.SetActive(FActive and IsLayout); if IsLayout then FLayout.RefreshState; end;
+      if FPlacement<>nil then begin FPlacement.Visible := IsPlacement; if IsPlacement then FPlacement.RefreshState else FPlacement.SetActive(False); end;
+      if FText<>nil then begin FText.Visible := IsText; FText.SetActive(FActive and IsText); if IsText then FText.RefreshState; end;
+      FTitleStage.Down := StageIndex=0; FCharactersStage.Down := IsCharacters; FLayoutStage.Down := IsLayout; FPlacementStage.Down := IsPlacement;
+      FCharactersStage.Enabled := StageIndex>=1; FLayoutStage.Enabled := StageIndex>=2; FPlacementStage.Enabled := StageIndex>=3;
+      FTextStage.Down := IsText; FTextStage.Enabled := StageIndex>=4;
+      FNext.Visible := not IsText; FNext.Enabled := JB(State,'canAdvance');
+      if IsCharacters then FNext.Hint := 'Next：キャラ選択と移動先を保存してレイアウトへ'
+      else if IsLayout then FNext.Hint := 'Next：レイアウトと移動先を保存してキャラ配置へ'
+      else if IsPlacement then FNext.Hint := 'Next：配置と移動先を保存して台本入力へ'
+      else FNext.Hint := 'Next：題名と移動先を保存してキャラ選択へ';
+      var Reload := (FCatalog=nil) or (FCatalogProject<>JS(State,'projectId'));
+      if IsCharacters and not Reload then for var V in JA(Wizard,'selectedCharacters') do begin
+        var Found := False;
+        for var Item in FCharacters.Items do if SameText(JS(TJSONObject(Item.Data),'path'),JS(TJSONObject(V),'path')) then begin Found := True; Break; end;
+        if not Found then begin Reload := True; Break; end;
+      end;
+      if IsCharacters and Reload then ReloadCharacters(Self);
+      for var Item in FCharacters.Items do begin
+        var Entry := TJSONObject(Item.Data); var Selected := False;
+        for var V in JA(Wizard,'selectedCharacters') do
+          if SameText(JS(TJSONObject(V),'path'),JS(Entry,'path')) then begin Selected := True; Break; end;
+        Item.Checked := Selected;
+      end;
+      FSave.Enabled := JB(State,'modified'); FSave.Hint := '下書きを保存する（Nextでも保存されます）';
+      if IsCharacters then begin
+        var Progress := '選択中'; if JS(Wizard,'charactersStatus')='complete' then Progress := '確認済み';
+        FCharactersGuide.Caption := 'キャラ選択：'+Progress+'（第2段階）  '+JA(Wizard,'selectedCharacters').Count.ToString+'人'+#13#10+
+          '完成済みキャラを1人以上チェックし、Nextで保存してレイアウト選択へ進んでください。未完成・読込不可は選べません。'+#13#10+
+          '声の割り当てはこの工程では行いません。';
+      end;
+    finally FSync := False; end;
+    if not JB(State,'hasProject') then FProgress.Caption := '台本管理から新規作成してください。'
+    else if JS(JO(State,'wizard'),'titleStatus')='complete' then FProgress.Caption := '題名：確認済み（第1段階）'
+    else FProgress.Caption := '題名：入力中（第1段階）';
+    if JB(State,'modified') then FStatus.Caption := '入力中です。戻る・終了時に途中状態を保存します。'
+    else FStatus.Caption := '保存済み。再開先は最後にNextで到達した画面です（'+ScriptStageName(JS(State,'resumeStage'))+'）。';
+    FStatus.Hint := JS(State,'path'); FStatus.ShowHint := True;
+  finally State.Free; end;
+end;
+procedure TRigmScriptCreatorFrame.Changed(Sender: TObject);
+begin
+  if FSync then Exit;
+  try FWorkspace.SetScriptTitle(FTitle.Text);
+  except on E: Exception do FStatus.Caption := E.Message; end;
+end;
+procedure TRigmScriptCreatorFrame.SaveWork(Sender: TObject);
+begin
+  try FWorkspace.SaveScriptDraft(False); FStatus.Caption := '下書きを保存しました。Nextで次の工程へ進めます。';
+  except on E: Exception do FStatus.Caption := E.Message; end;
+end;
+procedure TRigmScriptCreatorFrame.SelectStage(Sender: TObject);
+begin
+  try
+    if Sender=FNext then FWorkspace.NextScriptDraft
+    else begin
+      var Stage := 'characters'; if Sender=FTitleStage then Stage := 'title'
+      else if Sender=FLayoutStage then Stage := 'layout' else if Sender=FPlacementStage then Stage := 'placement' else if Sender=FTextStage then Stage := 'text';
+      FWorkspace.SetScriptStage(Stage);
+    end;
+  except on E: Exception do begin RefreshScript(Self); FStatus.Caption := E.Message; end; end;
+end;
+procedure TRigmScriptCreatorFrame.ReloadCharacters(Sender: TObject);
+begin
+  if FWorkspace.ScriptDraft=nil then Exit;
+  var WasSync := FSync; FSync := True; FCharacters.Items.BeginUpdate;
+  try
+    var Catalog := FWorkspace.ScriptCharacterLibrary;
+    FLoader.Reset; FCharacters.Items.Clear; FCatalog.Free; FCatalog := Catalog; FCatalogProject := FWorkspace.ScriptDraft.Id;
+    var State := FWorkspace.ScriptStatus;
+    try
+      // 登録素材が一時的に見つからなくても、保存済み選択を黙って消さない。
+      for var V in JA(JO(State,'wizard'),'selectedCharacters') do begin
+        var Found := False;
+        for var E in JA(FCatalog,'characters') do if SameText(JS(TJSONObject(E),'path'),JS(TJSONObject(V),'path')) then begin Found := True; Break; end;
+        if not Found then begin
+          var Missing := TJSONObject(V.Clone); Missing.AddPair('readyForScript',TJSONBool.Create(False));
+          Missing.AddPair('productionReason','登録素材が見つかりません。'); JA(FCatalog,'characters').AddElement(Missing);
+        end;
+      end;
+      for var V in JA(FCatalog,'characters') do begin
+        var Entry := TJSONObject(V); var Item := FCharacters.Items.Add; Item.Data := Entry;
+        var LabelText := CharacterFormatLabel(JS(Entry,'path'));
+        if JB(Entry,'loading') then LabelText := LabelText+' / 準備中' else if not JB(Entry,'readyForScript') then LabelText := LabelText+' / 未完成';
+        Item.Caption := '['+LabelText+'] '+JS(Entry,'name'); Item.ImageIndex := -1;
+        for var Saved in JA(JO(State,'wizard'),'selectedCharacters') do
+          if SameText(JS(TJSONObject(Saved),'path'),JS(Entry,'path')) then Item.Checked := True;
+      end;
+    finally State.Free; end;
+  except on E: Exception do FStatus.Caption := E.Message;
+  end;
+  FCharacters.Items.EndUpdate; FSync := WasSync;
+  FLoader.Refresh;
+end;
+function TRigmScriptCreatorFrame.ThumbnailPath(Item: TListItem): string;
+begin Result := JS(TJSONObject(Item.Data),'path'); end;
+procedure TRigmScriptCreatorFrame.ThumbnailApplied(Sender: TObject; Item: TListItem; Metadata: TJSONObject);
+begin
+  var Entry := TJSONObject(Item.Data);
+  for var Pair in Metadata do PsdJson.Put(Entry,Pair.JsonString.Value,Pair.JsonValue.Clone as TJSONValue);
+  if Metadata.GetValue('loading')=nil then PsdJson.Put(Entry,'loading',TJSONBool.Create(False));
+  var LabelText := CharacterFormatLabel(JS(Entry,'path'));
+  if JS(Entry,'productionState')<>'' then LabelText := LabelText+' / '+JS(Entry,'productionState');
+  Item.Caption := '['+LabelText+'] '+JS(Entry,'name');
+end;
+procedure TRigmScriptCreatorFrame.CharacterChecked(Sender: TObject; Item: TListItem);
+begin
+  if FSync then Exit;
+  var Paths := TJSONArray.Create;
+  try
+    try
+      for var Entry in FCharacters.Items do if Entry.Checked then Paths.Add(JS(TJSONObject(Entry.Data),'path'));
+      FWorkspace.SetScriptCharacters(Paths);
+    except on E: Exception do begin FLoader.Refresh; RefreshScript(Self); FStatus.Caption := E.Message; end; end;
+  finally Paths.Free; end;
+end;
+procedure TRigmScriptCreatorFrame.ReturnToLibrary(Sender: TObject);
+begin
+  if RequestFinish and Assigned(FWorkspace.OnNavigate) then FWorkspace.OnNavigate(Self,apScripts,'');
 end;
 procedure TRigmScriptCreatorFrame.SetActive(Value: Boolean);
 begin
-  if Value then begin
-    var Session := FWorkspace.ActiveSession;
-    if FBound<>Session then begin FBound := Session; FCreator.Bind(Session,nil); end;
-  end;
-  FCreator.SetActive(Value);
-end;
-procedure TRigmScriptCreatorFrame.Movie(Sender: TObject);
-begin FWorkspace.RequestMovie(Self); end;
-procedure TRigmScriptCreatorFrame.NewWork(Sender: TObject);
-begin FWorkspace.NewWork; SetActive(True); end;
-procedure TRigmScriptCreatorFrame.SaveWork(Sender: TObject);
-begin
-  var Dialog := TSaveDialog.Create(Self);
-  try
-    Dialog.Filter := '台本・動画作品|*.rigmovie'; Dialog.DefaultExt := 'rigmovie'; Dialog.FileName := FWorkspace.ActiveSession.Project.FileName;
-    if Dialog.FileName='' then begin Dialog.InitialDir := FRoot; Dialog.FileName := '作品.rigmovie'; end;
-    if not Dialog.Execute then Exit;
-    var Session := FWorkspace.ActiveSession; var A := TJSONObject.Create;
-    try A.AddPair('path',Dialog.FileName); A.AddPair('projectId',Session.Project.Id); AddN(A,'revision',Session.Project.Revision); var R := Session.Execute('save',A); R.Free;
-    finally A.Free; end;
-  finally Dialog.Free; end;
+  FActive := Value;
+  if FLayout<>nil then FLayout.SetActive(Value and (FWorkspace.ScriptDraft<>nil) and (FWorkspace.CurrentScriptStage='layout'));
+  if FPlacement<>nil then FPlacement.SetActive(Value and (FWorkspace.CurrentScriptStage='placement'));
+  if FText<>nil then FText.SetActive(Value and (FWorkspace.CurrentScriptStage='text'));
+  if Value then begin if FWorkspace.ScriptDraft=nil then FWorkspace.NewScriptDraft; RefreshScript(Self); if FCatalog<>nil then FLoader.Refresh; end;
+  if FCreator<>nil then FCreator.SetActive(False);
 end;
 function TRigmScriptCreatorFrame.RequestFinish: Boolean;
-begin Result := not FCreator.HasInputDraft or (MessageDlg('台本作成の未適用入力を破棄して終了しますか？',mtConfirmation,[mbYes,mbNo],0)=mrYes); end;
+begin
+  Result := False;
+  if (FWorkspace.ScriptDraft<>nil) and (FTitle.Text<>JS(FWorkspace.ScriptDraft.ScriptWizard,'titleInput')) then begin
+    FStatus.Caption := '題名を確認してください。入力を保持してこの画面に留まります。'; Exit;
+  end;
+  try FWorkspace.SaveScriptDraft(False); Result := True;
+  except on E: Exception do FStatus.Caption := '保存できません。入力を保持しています。'+E.Message; end;
+end;
 end.

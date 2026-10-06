@@ -2,7 +2,7 @@
 
 // 共通一覧から形式を判別し、PSDの所有モデル/描画器へ委譲する。原画像は変更しない。
 interface
-uses System.SysUtils, System.JSON, PsdWorkspace, PsdCharacter, PsdAnimation;
+uses System.SysUtils, System.JSON, Vcl.Graphics, PsdWorkspace, PsdCharacter, PsdAnimation;
 type
   TPsdCharacterAsset = class
   public
@@ -18,8 +18,34 @@ function ReadCharacterThumbnail(const Path: string; out Name: string; out Width,
 function ReadCharacterThumbnailStatus(const Path: string; out Name,ProductionState: string; out Width,Height: Integer): TBytes;
 function ReadPsdActorAssets(const Path: string): TJSONObject;
 function CharacterReadyForNewScript(const Path: string; out Reason: string): Boolean;
+procedure PaintCharacterThumbnail(const Path: string; Bitmap: TBitmap; const Width,Height: Integer;
+  out Name,ProductionState: string);
+procedure PaintCharacterPixels(const Pixels: TBytes; const W,H: Integer; Bitmap: TBitmap; const Width,Height: Integer);
 implementation
-uses System.IOUtils, PsdPackage, PsdJson, PsdProduction, RigmStorage, RigmAppSettings;
+uses System.IOUtils, System.Math, System.Types, PsdPackage, PsdJson, PsdProduction, RigmStorage, RigmAppSettings;
+procedure PaintCharacterThumbnail(const Path: string; Bitmap: TBitmap; const Width,Height: Integer;
+  out Name,ProductionState: string);
+begin
+  var W,H: Integer; var Pixels := ReadCharacterThumbnailStatus(Path,Name,ProductionState,W,H);
+  PaintCharacterPixels(Pixels,W,H,Bitmap,Width,Height);
+end;
+procedure PaintCharacterPixels(const Pixels: TBytes; const W,H: Integer; Bitmap: TBitmap; const Width,Height: Integer);
+begin
+  if (W<1) or (H<1) or (Int64(W)*H*4<>Length(Pixels)) then raise Exception.Create('Invalid thumbnail pixels');
+  Bitmap.PixelFormat := pf32bit; Bitmap.SetSize(Width,Height);
+  Bitmap.Canvas.Brush.Color := $002A2A2A; Bitmap.Canvas.FillRect(Rect(0,0,Width,Height));
+  var K := Min((Width-12)/Max(1,W),(Height-12)/Max(1,H));
+  var TW := Max(1,Round(W*K)); var TH := Max(1,Round(H*K));
+  var OX := (Width-TW) div 2; var OY := (Height-TH) div 2;
+  for var Y := 0 to TH-1 do begin
+    var Row := PByte(Bitmap.ScanLine[Y+OY]);
+    for var X := 0 to TW-1 do begin
+      var P := (Min(H-1,Y*H div TH)*W+Min(W-1,X*W div TW))*4; var A := Pixels[P+3];
+      for var C := 0 to 2 do Row[(X+OX)*4+2-C] := (Pixels[P+C]*A+42*(255-A)+127) div 255;
+      Row[(X+OX)*4+3] := 255;
+    end;
+  end;
+end;
 function CharacterFormat(const Path: string): string;
 begin if SameText(ExtractFileExt(Path), '.psdchar') then Result := 'psd' else Result := 'rigm'; end;
 function CharacterFormatLabel(const Path: string): string;
