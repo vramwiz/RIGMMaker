@@ -10,6 +10,7 @@ procedure VerifyThumbnailCache(Main: TRigmWizardMainForm; const ResultPath: stri
 procedure VerifyScriptLayout(Main: TRigmWizardMainForm; const ResultPath: string; Reopen: Boolean);
 procedure VerifyScriptPlacement(Main: TRigmWizardMainForm; const ResultPath: string; Reopen: Boolean);
 procedure VerifyScriptText(Main: TRigmWizardMainForm; const ResultPath: string; Reopen: Boolean);
+procedure VerifyScriptReview(Main: TRigmWizardMainForm; const ResultPath: string; Reopen: Boolean);
 implementation
 uses System.SysUtils, System.Classes, System.JSON, System.IOUtils, System.Hash, System.Math, System.Types, System.DateUtils,
   Vcl.Forms, Vcl.Controls, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls, System.UITypes,
@@ -20,7 +21,7 @@ uses System.SysUtils, System.Classes, System.JSON, System.IOUtils, System.Hash, 
   PsdPackage, RigmLegacyEditorFrame, Winapi.ShellAPI, Winapi.ShlObj, System.StrUtils, ArtLayerList, RigmModel, ArtDocument,
   RigmWizardWorkspace, RigmMovieModel, RigmScriptManagerFrame, RigmThumbnailCache, RigmScriptLayoutFrame, RigmMovieLayout,
   RigmScriptPlacementFrame, RigmScriptPlacementModel, RigmScriptTextFrame, RigmScriptTextModel,
-  RigmMovieComposition, RigmMovieCompositionCommands, RigmMovieCompositor;
+  RigmMovieComposition, RigmMovieCompositionCommands, RigmMovieCompositor, RigmScriptReviewFrame, RigmScriptReviewModel;
 type
   TReturnDialogAnswer = class
   public
@@ -1347,4 +1348,5 @@ begin
   finally Report.Free; end;
 end;
 {$I RigmScriptTextValidation.inc}
+{$I RigmScriptReviewValidation.inc}
 end.

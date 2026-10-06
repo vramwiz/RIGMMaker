@@ -53,6 +53,11 @@ type
     procedure SetScriptText(const Section,Text: string);
     procedure SelectScriptSection(const Section: string);
     function ReadScriptText(Args: TJSONObject): TJSONObject;
+    procedure RequestReview;
+    procedure SubmitReview(Args: TJSONObject);
+    procedure DecideReview(const Id,Decision,Text: string);
+    procedure EditReviewDraft(const Id,Text: string);
+    function ReadReview(Args: TJSONObject): TJSONObject;
     property ScriptTextEditing: Boolean read FScriptTextEditing;
     function ScriptCharacterLibrary(ValidatePreview: Boolean = True): TJSONObject;
     function Thumbnails: TRigmThumbnailCache; // 両一覧の共有サービス。UIを所有しない。
@@ -70,7 +75,7 @@ type
 implementation
 uses System.IOUtils, System.Math, System.DateUtils, System.StrUtils, Winapi.Windows, RigmJson, RigmAppSettings, PsdSession,
   PsdCharacter, PsdJson, PsdPackage, PsdProduction, RigmEditor, PsdImport, RigmStorage,
-  System.Hash, ArtDocument, PsdWorkspace, RigmCharacterCatalog, RigmMovieLayout, RigmScriptPlacementModel, RigmScriptTextModel;
+  System.Hash, ArtDocument, PsdWorkspace, RigmCharacterCatalog, RigmMovieLayout, RigmScriptPlacementModel, RigmScriptTextModel, RigmScriptReviewModel;
 constructor TRigmWizardWorkspace.Create(AOwner: TComponent);
 begin
   inherited; FSessions := TObjectList<TRigmMovieSession>.Create(True);
@@ -101,13 +106,16 @@ begin
   if Name='script-list' then Exit(ScriptLibrary(JI(Args,'offset',0),JI(Args,'limit',50)));
   if Name='script-character-library' then Exit(ScriptCharacterLibrary);
   if Name='script-text' then Exit(ReadScriptText(Args));
+  if Name='script-review' then Exit(ReadReview(Args));
   if Name='script-new' then begin NewScriptDraft; if Assigned(FOnNavigate) then FOnNavigate(Self,apScriptCreate,''); Exit(ScriptStatus); end;
   if Name='script-open' then begin OpenScriptDraft(JS(Args,'path')); if Assigned(FOnNavigate) then FOnNavigate(Self,apScriptCreate,''); Exit(ScriptStatus); end;
-  if MatchText(Name,['script-set-title','script-save','script-set-stage','script-set-characters','script-set-layout','script-next','script-set-placement','script-select-placement','script-set-text','script-select-section']) then begin
+  if MatchText(Name,['script-set-title','script-save','script-set-stage','script-set-characters','script-set-layout','script-next','script-set-placement','script-select-placement','script-set-text','script-select-section','script-request-review','script-submit-review']) then begin
     if FPlacementEditing or FScriptTextEditing then raise Exception.Create('GUIで入力中です。入力完了アイコンを押してから再取得してください。');
     if (FScriptDraft=nil) or (JS(Args,'projectId')<>FScriptDraft.Id) or (JI(Args,'revision',-1)<>FScriptDraft.Revision) then
       raise Exception.Create('script-statusの現在のprojectId/revisionを指定してください。');
-    if Name='script-set-title' then SetScriptTitle(JS(Args,'title'))
+    if Name='script-request-review' then RequestReview
+    else if Name='script-submit-review' then SubmitReview(Args)
+    else if Name='script-set-title' then SetScriptTitle(JS(Args,'title'))
     else if Name='script-set-stage' then SetScriptStage(JS(Args,'stage'))
     else if Name='script-set-layout' then SetScriptLayout(JS(Args,'choice'),JS(Args,'backgroundTone'))
     else if Name='script-next' then NextScriptDraft
@@ -139,7 +147,10 @@ begin
     Result := PsdJson.ObjectText('{"workspaceCommandPrefix":"app-","movieCommandPrefix":"movie-","psdCommandPrefix":"psd-","workspace":{"status":{},"library":{},"switch-page":{"page":"home|preview|create|characters|scripts|character-edit","propertyPage":"optional"},"open-work":{"path":".rigmovie"},"edit-character":{"path":".psdchar|.psd|.rigm"},"register-character":{"path":"file within dataRoot","name":"optional"}}}');
     var ScriptSchema := PsdJson.ObjectText('{"script-status":{},"script-list":{"offset":0,"limit":50},"script-new":{},"script-open":{"path":"Projects/<UID>/project.rigmovie"},"script-set-title":{"projectId":"from script-status","revision":"from script-status","title":"<=128 characters"},"script-save":{"projectId":"from script-status","revision":"from script-status"}}');
     ScriptSchema.AddPair('script-character-library',TJSONObject.Create);
-    ScriptSchema.AddPair('script-set-stage',PsdJson.ObjectText('{"projectId":"from script-status","revision":"from script-status","stage":"title|characters|layout|placement|text (backward only)"}'));
+    ScriptSchema.AddPair('script-set-stage',PsdJson.ObjectText('{"projectId":"from script-status","revision":"from script-status","stage":"title|characters|layout|placement|text|review (backward only)"}'));
+    ScriptSchema.AddPair('script-review',PsdJson.ObjectText('{"projectId":"required","revision":"required","offset":0,"limit":1}'));
+    ScriptSchema.AddPair('script-request-review',PsdJson.ObjectText('{"projectId":"required","revision":"required"}'));
+    ScriptSchema.AddPair('script-submit-review',PsdJson.ObjectText('{"projectId":"required","revision":"required","requestId":"from review","fingerprint":"from review","items":[{"id":"unique <=64","section":"body","offset":0,"original":"<=4096 UTF16","proposed":"<=4096 UTF16","reason":"<=2048"}],"complete":true}'));
     ScriptSchema.AddPair('script-text',PsdJson.ObjectText('{"section":"opening|body|closing","offset":0,"limit":4096,"projectId":"optional consistent read","revision":"optional consistent read"}'));
     ScriptSchema.AddPair('script-set-text',PsdJson.ObjectText('{"projectId":"from script-status","revision":"from script-status","section":"opening|body|closing","text":"<=4096 chars","offset":"optional zero-based UTF16 patch position","removeCount":"optional patch length"}'));
     ScriptSchema.AddPair('script-select-section',PsdJson.ObjectText('{"projectId":"from script-status","revision":"from script-status","section":"opening|body|closing"}'));
@@ -303,7 +314,9 @@ begin
   for var C in Project.Characters do if (C.PlacementRef='') or (Project.Placement(C.PlacementRef)=nil) then
     raise Exception.Create('台本工程のキャラは共通配置への参照が必要です。');
   if Project.ScriptWizard.GetValue('scriptText')<>nil then ValidateScriptText(JO(Project.ScriptWizard,'scriptText'))
-  else if JS(Project.ScriptWizard,'stage')='text' then raise Exception.Create('台本入力データがありません。');
+  else if ScriptStageIndex(JS(Project.ScriptWizard,'stage'))>=4 then raise Exception.Create('台本入力データがありません。');
+  if Project.ScriptWizard.GetValue('review')<>nil then ValidateScriptReview(Project)
+  else if JS(Project.ScriptWizard,'stage')='review' then raise Exception.Create('校正依頼データがありません。');
   if (Project.ScriptWizard.GetValue('selectedCharacters')<>nil) and
     not (Project.ScriptWizard.GetValue('selectedCharacters') is TJSONArray) then raise Exception.Create('キャラ選択の状態が不正です。');
   if (Project.ScriptWizard.GetValue('charactersStatus')<>nil) and
@@ -579,8 +592,8 @@ begin
   if (FScriptDraft=nil) or FPlacementEditing or FScriptTextEditing then raise Exception.Create('入力操作を完了してからNextで進んでください。');
   var Stage := CurrentScriptStage; var Next := '';
   if Stage='title' then Next := 'characters' else if Stage='characters' then Next := 'layout'
-  else if Stage='layout' then Next := 'placement' else if Stage='placement' then Next := 'text'
-  else raise Exception.Create('校正以降は準備中です。台本文は戻る・終了時に保存します。');
+  else if Stage='layout' then Next := 'placement' else if Stage='placement' then Next := 'text' else if Stage='text' then Next := 'review'
+  else raise Exception.Create('配役以降は準備中です。校正の採否と下書きは戻る・終了時に保存します。');
   if Trim(JS(FScriptDraft.ScriptWizard,'titleInput'))='' then raise Exception.Create('題名を入力してからNextで進んでください。');
   var Snapshot := FScriptDraft.Clone;
   try
@@ -605,12 +618,20 @@ begin
     end;
     if Next='placement' then PreparePlacements(Snapshot,Thumbnails);
     if Next='text' then PrepareScriptText(Snapshot);
+    if Next='review' then begin
+      var HasText := False;
+      for var V in JA(JO(Snapshot.ScriptWizard,'scriptText'),'sections') do HasText := HasText or (Trim(JS(TJSONObject(V),'text'))<>'');
+      if not HasText then raise Exception.Create('台本文を入力してから校正へ進んでください。');
+      if not (Snapshot.ScriptWizard.GetValue('review') is TJSONObject) or
+        (JS(JO(Snapshot.ScriptWizard,'review'),'state')='stale') or
+        (JS(JO(Snapshot.ScriptWizard,'review'),'fingerprint')<>ScriptFingerprint(Snapshot)) then RequestScriptReview(Snapshot);
+    end;
     PsdJson.Put(Snapshot.ScriptWizard,Stage+'Status','complete'); PsdJson.Put(Snapshot.ScriptWizard,'stage',Next); Snapshot.Changed;
     StoreScript(Snapshot,Next);
   finally Snapshot.Free; end;
 end;
 procedure TRigmWizardWorkspace.BeginScriptTextEdit;
-begin if CurrentScriptStage='text' then FScriptTextEditing := True; end;
+begin if MatchText(CurrentScriptStage,['text','review']) then FScriptTextEditing := True; end;
 procedure TRigmWizardWorkspace.EndScriptTextEdit;
 begin FScriptTextEditing := False; end;
 procedure TRigmWizardWorkspace.SelectScriptSection(const Section: string);
@@ -627,7 +648,46 @@ begin
   if Length(Value)>ScriptSectionLimit then raise Exception.Create('1区分は100000文字以内にしてください。');
   for var C in Value do if (Ord(C)<32) and not CharInSet(C,[#9,#10,#13]) then raise Exception.Create('台本に無効な制御文字が含まれています。');
   if JS(O,'text')=Value then Exit;
-  PsdJson.Put(O,'text',Value); PsdJson.Put(FScriptDraft.ScriptWizard,'textStatus','in-progress'); FScriptDraft.Changed; ScriptChanged;
+  PsdJson.Put(O,'text',Value); InvalidateScriptReview(FScriptDraft); PsdJson.Put(FScriptDraft.ScriptWizard,'textStatus','in-progress'); FScriptDraft.Changed; ScriptChanged;
+end;
+procedure TRigmWizardWorkspace.RequestReview;
+begin
+  if CurrentScriptStage<>'review' then raise Exception.Create('校正工程で依頼してください。');
+  RequestScriptReview(FScriptDraft); FScriptDraft.Changed; ScriptChanged;
+end;
+procedure TRigmWizardWorkspace.SubmitReview(Args: TJSONObject);
+begin
+  if CurrentScriptStage<>'review' then raise Exception.Create('校正工程で提案を送ってください。');
+  SubmitScriptReview(FScriptDraft,Args); FScriptDraft.Changed; ScriptChanged;
+end;
+procedure TRigmWizardWorkspace.DecideReview(const Id,Decision,Text: string);
+begin
+  if CurrentScriptStage<>'review' then raise Exception.Create('校正工程で採否を選んでください。');
+  DecideScriptReview(FScriptDraft,Id,Decision,Text); FScriptDraft.Changed; ScriptChanged;
+end;
+procedure TRigmWizardWorkspace.EditReviewDraft(const Id,Text: string);
+begin
+  if CurrentScriptStage<>'review' then raise Exception.Create('校正工程で案を編集してください。');
+  var O := ReviewItem(FScriptDraft,Id);
+  if (O=nil) or not MatchText(JS(O,'decision'),['pending','hold']) or
+    (JS(JO(FScriptDraft.ScriptWizard,'review'),'state')<>'ready') then raise Exception.Create('未確定の提案を選んでください。');
+  var Value := NormalizeScriptText(Text);
+  if Length(Value)>4096 then raise Exception.Create('修正案は4096文字以内で入力してください。');
+  for var C in Value do if (Ord(C)<32) and not CharInSet(C,[#9,#10,#13]) then raise Exception.Create('修正案に無効な制御文字があります。');
+  if JS(O,'editedDraft',JS(O,'proposed'))=Value then Exit;
+  PsdJson.Put(O,'editedDraft',Value); FScriptDraft.Changed; ScriptChanged;
+end;
+function TRigmWizardWorkspace.ReadReview(Args: TJSONObject): TJSONObject;
+begin
+  if (FScriptDraft=nil) or (JS(Args,'projectId')<>FScriptDraft.Id) or (JI(Args,'revision',-1)<>FScriptDraft.Revision) then
+    raise Exception.Create('最新のprojectId/revisionで校正を取得してください。');
+  Result := ScriptReviewSummary(FScriptDraft);
+  Result.AddPair('projectId',FScriptDraft.Id); AddN(Result,'revision',FScriptDraft.Revision);
+  var A := TJSONArray.Create; Result.AddPair('items',A);
+  var R := FScriptDraft.ScriptWizard.GetValue('review') as TJSONObject; if R=nil then Exit;
+  var Offset := EnsureRange(JI(Args,'offset'),0,JA(R,'items').Count); var Count := 1;
+  for var I := Offset to Min(Offset+Count,JA(R,'items').Count)-1 do A.AddElement(JA(R,'items').Items[I].Clone as TJSONObject);
+  AddN(Result,'nextOffset',Offset+A.Count); Result.AddPair('hasMore',TJSONBool.Create(Offset+A.Count<JA(R,'items').Count));
 end;
 function TRigmWizardWorkspace.ReadScriptText(Args: TJSONObject): TJSONObject;
 begin
@@ -648,11 +708,11 @@ end;
 function TRigmWizardWorkspace.ScriptStatus: TJSONObject;
 begin
   Result := TJSONObject.Create; Result.AddPair('hasProject',TJSONBool.Create(FScriptDraft<>nil));
-  Result.AddPair('implementedStage','text'); Result.AddPair('placementEditing',TJSONBool.Create(FPlacementEditing));
+  Result.AddPair('implementedStage','review'); Result.AddPair('placementEditing',TJSONBool.Create(FPlacementEditing));
   Result.AddPair('textEditing',TJSONBool.Create(FScriptTextEditing));
   var Advance := False;
   if FScriptDraft<>nil then Advance := not FPlacementEditing and not FScriptTextEditing and (Trim(JS(FScriptDraft.ScriptWizard,'titleInput'))<>'') and
-    ((CurrentScriptStage='title') or (((CurrentScriptStage='characters') or (CurrentScriptStage='layout') or (CurrentScriptStage='placement')) and
+    ((CurrentScriptStage='title') or (((CurrentScriptStage='characters') or (CurrentScriptStage='layout') or (CurrentScriptStage='placement') or (CurrentScriptStage='text')) and
     (FScriptDraft.ScriptWizard.GetValue('selectedCharacters')<>nil) and (JA(FScriptDraft.ScriptWizard,'selectedCharacters').Count>0)));
   Result.AddPair('canAdvance',TJSONBool.Create(Advance));
   if FScriptDraft=nil then Exit;
@@ -661,9 +721,10 @@ begin
   Result.AddPair('path',FScriptDraft.FileName); Result.AddPair('modified',TJSONBool.Create(FScriptDraft.Modified));
   Result.AddPair('resumeStage',JS(FScriptDraft.ScriptWizard,'stage'));
   var Wizard := TJSONObject.Create;
-  for var Pair in FScriptDraft.ScriptWizard do if Pair.JsonString.Value<>'scriptText' then
+  for var Pair in FScriptDraft.ScriptWizard do if not MatchText(Pair.JsonString.Value,['scriptText','review']) then
     Wizard.AddPair(Pair.JsonString.Value,Pair.JsonValue.Clone as TJSONValue);
   if FScriptDraft.ScriptWizard.GetValue('scriptText')<>nil then Wizard.AddPair('scriptText',ScriptTextSummary(FScriptDraft));
+  if FScriptDraft.ScriptWizard.GetValue('review')<>nil then Wizard.AddPair('review',ScriptReviewSummary(FScriptDraft));
   if Wizard.GetValue('selectedCharacters')=nil then Wizard.AddPair('selectedCharacters',TJSONArray.Create);
   if Wizard.GetValue('charactersStatus')=nil then Wizard.AddPair('charactersStatus','in-progress');
   PsdJson.Put(Wizard,'stage',CurrentScriptStage);

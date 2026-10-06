@@ -68,7 +68,7 @@ procedure TRigmScriptTextFrame.UpdateGuide;
 begin
   if FWorkspace.ScriptTextEditing then FGuide.Caption := '入力中：AIの変更を停止しています。入力完了のチェックアイコンで解除できます。'
   else FGuide.Caption := '入力完了：AIはパイプで取得・変更できます。再び入力を始めると変更を停止します。';
-  FGuide.Caption := FGuide.Caption+#13#10+'戻る・終了・任意の保存で文章を保存します。校正・配役・音声合成・画像制作はまだ実行しません。';
+  FGuide.Caption := FGuide.Caption+#13#10+'戻る・終了・任意の保存で文章を保存します。Nextで保存して校正へ進み、Codexへ入力完了を伝えてください。';
 end;
 procedure TRigmScriptTextFrame.BeginInput(Sender: TObject);
 begin if FSync then Exit; FWorkspace.BeginScriptTextEdit; UpdateGuide; end;
@@ -103,5 +103,5 @@ begin
   finally FSync := False; end;
 end;
 procedure TRigmScriptTextFrame.SetActive(Value: Boolean);
-begin if Value then RefreshState else FWorkspace.EndScriptTextEdit; end;
+begin if Value then RefreshState else if FWorkspace.CurrentScriptStage='text' then FWorkspace.EndScriptTextEdit; end;
 end.
