@@ -25,6 +25,7 @@ type
     constructor Create;
     destructor Destroy; override;
     function Json: TJSONObject;
+    class function FromJson(O: TJSONObject): TRigmMovieCue; static; // 既存保存値の再利用・複製。呼出側所有。
   end;
   TRigmMovieProject = class
   public
@@ -103,6 +104,19 @@ begin
   if Emotion<>'neutral' then Result.AddPair('emotion',Emotion);
   if VoiceStyleId>=0 then AddN(Result,'voiceStyleId',VoiceStyleId);
 end;
+class function TRigmMovieCue.FromJson(O: TJSONObject): TRigmMovieCue;
+begin
+  Result := TRigmMovieCue.Create; var C := Result;
+  try
+      var Q := O; C.Id := JS(Q,'id',C.Id); C.Scene := JS(Q,'scene',C.Scene);
+      C.SpeakerId := JS(Q,'speaker','narrator'); C.Text := JS(Q,'text'); C.Subtitle := JS(Q,'subtitle',C.Text);
+      C.Emotion := JS(Q,'emotion','neutral'); C.VoiceStyleId := JI(Q,'voiceStyleId',-1); C.Expression := JS(Q,'expression','neutral'); C.Motion := JS(Q,'motion','idle'); C.Background := JS(Q,'background');
+      C.Pause := JN(Q,'pause',0.3); C.AudioSeconds := JN(Q,'audioSeconds');
+      C.WaveFile := JS(Q,'waveFile'); C.LabFile := JS(Q,'labFile'); C.AudioKey := JS(Q,'audioKey');
+      if Q.GetValue('parameters') <> nil then begin C.Parameters.Free; C.Parameters := JO(Q,'parameters').Clone as TJSONObject; end;
+      if Q.GetValue('acting')<>nil then begin C.Acting.Free; C.Acting := TRigmMovieActing.FromJson(JO(Q,'acting')); end;
+  except Result.Free; raise; end;
+end;
 constructor TRigmMovieProject.Create;
 begin
   inherited; Id := NewRigmId; Title := '新しい解説動画'; EngineUrl := 'http://127.0.0.1:50021';
@@ -150,7 +164,7 @@ function TRigmMovieProject.Clone: TRigmMovieProject;
 var O: TJSONObject;
 begin O := Json; try Result := FromJson(O); Result.FileName := FileName; Result.Modified := Modified; finally O.Free; end; end;
 class function TRigmMovieProject.FromJson(O: TJSONObject): TRigmMovieProject;
-var S: TRigmMovieSpeaker; C: TRigmMovieCue;
+var S: TRigmMovieSpeaker;
 begin
   Result := TRigmMovieProject.Create;
   try
@@ -186,14 +200,7 @@ begin
     end;
     if O.GetValue('cues') <> nil then for var V in JA(O,'cues') do begin
       if not (V is TJSONObject) then raise ERigm.Create('セリフオブジェクトが必要です。');
-      C := TRigmMovieCue.Create; Result.Cues.Add(C);
-      var Q := TJSONObject(V); C.Id := JS(Q,'id',C.Id); C.Scene := JS(Q,'scene',C.Scene);
-      C.SpeakerId := JS(Q,'speaker','narrator'); C.Text := JS(Q,'text'); C.Subtitle := JS(Q,'subtitle',C.Text);
-      C.Emotion := JS(Q,'emotion','neutral'); C.VoiceStyleId := JI(Q,'voiceStyleId',-1); C.Expression := JS(Q,'expression','neutral'); C.Motion := JS(Q,'motion','idle'); C.Background := JS(Q,'background');
-      C.Pause := JN(Q,'pause',0.3); C.AudioSeconds := JN(Q,'audioSeconds');
-      C.WaveFile := JS(Q,'waveFile'); C.LabFile := JS(Q,'labFile'); C.AudioKey := JS(Q,'audioKey');
-      if Q.GetValue('parameters') <> nil then begin C.Parameters.Free; C.Parameters := JO(Q,'parameters').Clone as TJSONObject; end;
-      if Q.GetValue('acting')<>nil then begin C.Acting.Free; C.Acting := TRigmMovieActing.FromJson(JO(Q,'acting')); end;
+      Result.Cues.Add(TRigmMovieCue.FromJson(TJSONObject(V)));
     end;
     Result.BindCharacterPlacements; Result.Validate;
   except Result.Free; raise; end;
@@ -368,8 +375,12 @@ begin
         not StartsText(IncludeTrailingPathDelimiter(Root),TPath.GetFullPath(TPath.Combine(Root,Path))) then
         raise ERigm.Create('Wizard character reference must remain within its data root');
       for var C in Characters do if SameText(C.PlacementRef,Path) then Found := True;
+      var SpeakerId := 'narrator';
+      if ScriptWizard.GetValue('casting') is TJSONObject then for var R in JA(JO(ScriptWizard,'casting'),'roles') do
+        if JB(TJSONObject(R),'active') and SameText(JS(TJSONObject(R),'path'),Path) then SpeakerId := JS(TJSONObject(R),'speakerId');
+      for var C in Characters do if SameText(C.PlacementRef,Path) then C.SpeakerId := SpeakerId;
       if Found then Continue;
-      var C := TRigmMovieCharacter.Create; C.Name := JS(S,'name'); C.RenderFormat := JS(S,'renderFormat'); C.PlacementRef := Path;
+      var C := TRigmMovieCharacter.Create; C.SpeakerId := SpeakerId; C.Name := JS(S,'name'); C.RenderFormat := JS(S,'renderFormat'); C.PlacementRef := Path;
       C.FileName := ExtractRelativePath(ExtractFilePath(FileName),TPath.Combine(Root,Path)); Characters.Add(C);
     end;
     BindCharacterPlacements;

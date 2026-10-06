@@ -1,0 +1,118 @@
+﻿// 所有確認作品の配役・境界調整・保存再開。AI内容評価とは区別した輸送fixture。
+procedure VerifyScriptCasting(Main: TRigmWizardMainForm; const ResultPath: string; Reopen: Boolean);
+  procedure Check(Value: Boolean; const Text: string; Results: TJSONArray);
+  begin if not Value then raise Exception.Create('Casting check: '+Text); Results.Add(Text); end;
+  function CastingFrame(Creator: TFrame): TRigmScriptCastingFrame;
+  begin Result := nil; for var I := 0 to Creator.ComponentCount-1 do if Creator.Components[I] is TRigmScriptCastingFrame then Exit(TRigmScriptCastingFrame(Creator.Components[I])); end;
+  procedure Press(List: TListView; Key: Word);
+  begin List.SetFocus; List.Perform(WM_KEYDOWN,Key,0); Application.ProcessMessages; end;
+begin
+  var Marker := ParseObject(TFile.ReadAllText(TPath.Combine(Main.DataRoot,'gui-validation-owner.json'),TEncoding.UTF8));
+  try if JS(Marker,'owner')<>'RIGMMaker.ScriptCasting.Validation.v1' then raise Exception.Create('Owned casting root required'); finally Marker.Free; end;
+  Main.Position := poDesigned; Main.SetBounds(40,40,1280,840); Main.Show; ShowWindow(Main.Handle,SW_SHOWNOACTIVATE); Application.ProcessMessages;
+  var Report := TJSONObject.Create; var Results := TJSONArray.Create; Report.AddPair('checks',Results);
+  try
+    var W := Main.Workspace; Main.NavigateTo(apScripts);
+    if Reopen then begin
+      var Resume := ParseObject(TFile.ReadAllText(ResultPath+'.resume.json',TEncoding.UTF8));
+      try W.OpenScriptDraft(JS(Resume,'path')); Main.NavigateTo(apScriptCreate);
+        Check(W.CurrentScriptStage='casting','restart resumes casting',Results);
+        Check(W.ScriptDraft.Id=JS(Resume,'projectId'),'same UID after restart',Results);
+        Check(JO(W.ScriptDraft.ScriptWizard,'casting').ToJSON=JS(Resume,'casting'),'numbers decisions cursor and request survive restart',Results);
+        var ReopenedProject := W.ScriptDraft.Json;
+        try Check(ReopenedProject.ToJSON=JS(Resume,'project'),'existing cues scenes speakers and separate subtitle survive restart',Results);
+        finally ReopenedProject.Free; end;
+      finally Resume.Free; end;
+    end else begin W.NewScriptDraft; Main.NavigateTo(apScriptCreate); end;
+    var Creator := Main.PageInstance(apScriptCreate); var Toolbar := TToolBar(Creator.FindComponent('ScriptTitleToolbar')); var Next := TToolButton(Toolbar.FindComponent('ScriptNext'));
+    if not Reopen then begin
+      TEdit(Creator.FindComponent('ScriptTitle')).Text := '配役工程の分離した確認作品'; Next.Click; WaitThumbnailLibrary(W);
+      var Deadline := GetTickCount64+5000; var Ready: Integer;
+      repeat
+        Application.ProcessMessages; Ready := 0;
+        for var Item in TListView(Creator.FindComponent('ScriptCharacters')).Items do if JB(TJSONObject(Item.Data),'readyForScript') then Inc(Ready);
+        if Ready=2 then Break; Sleep(5);
+      until GetTickCount64>Deadline;
+      for var Item in TListView(Creator.FindComponent('ScriptCharacters')).Items do if JB(TJSONObject(Item.Data),'readyForScript') then Item.Checked := True;
+      Check(JA(W.ScriptDraft.ScriptWizard,'selectedCharacters').Count=2,'two explicit copies of one asset selected only in owned root',Results);
+      for var I := 0 to 1 do PsdJson.Put(TJSONObject(JA(W.ScriptDraft.ScriptWizard,'selectedCharacters')[I]),'name',IfThen(I=0,'案内役（確認用複製）','質問役（確認用複製）'));
+      Next.Click; Next.Click; Next.Click;
+      W.SetScriptText('opening','観測所へようこそ。');
+      var BodyText := '質問: 空'+Char($D83D)+Char($DE00)+'の色はどう決めますか。'+#13#10+'同じ段落の補足です。'+#13#10+#13#10+'説明の二段落目です。';
+      W.SetScriptText('body',BodyText); W.SetScriptText('closing','今日はここまでです。'); W.EndScriptTextEdit; Next.Click;
+      var Rejected := False; try W.NextScriptDraft; except on E: Exception do Rejected := True; end;
+      Check(Rejected and (W.CurrentScriptStage='review'),'review request cannot silently become confirmed',Results);
+      CaptureUiWindow(Main,ResultPath,'.review');
+      var Path := W.ScriptDraft.FileName; var Hash := THashSHA2.GetHashStringFromFile(Path); var Guard := TFileStream.Create(Path,fmOpenRead or fmShareDenyWrite);
+      try Next.Click; Check((W.CurrentScriptStage='review') and (W.ScriptDraft.Cues.Count=0) and (THashSHA2.GetHashStringFromFile(Path)=Hash),'failed casting Next retains previous disk and original draft',Results); finally Guard.Free; end;
+      Next.Click; Check((W.CurrentScriptStage='casting') and not W.ScriptDraft.Modified,'Next atomically saves cues and casting destination',Results);
+      Check((W.ScriptDraft.Cues.Count=4) and (W.ScriptDraft.Scenes.Count=4),'paragraph scene units preserve three section order',Results);
+      Check((JS(TJSONObject(JA(JO(W.ScriptDraft.ScriptWizard,'casting'),'rows')[0]),'section')='opening') and
+        (JS(TJSONObject(JA(JO(W.ScriptDraft.ScriptWizard,'casting'),'rows')[3]),'section')='closing'),'opening body closing order retained',Results);
+      Check(W.ScriptDraft.Cues[1].Text=BodyText.Substring(0,BodyText.IndexOf(#13#10+#13#10)),'soft newline stays within one speech unit and colon remains raw text',Results);
+      var Frame := CastingFrame(Creator); Check((Frame<>nil) and Frame.Showing and not Next.Visible,'lazy casting frame stops safely before subtitle stage',Results);
+      var List := TListView(Frame.FindComponent('ScriptCastingRows')); var Id := W.ScriptDraft.Cues[0].Id;
+      Press(List,VK_RETURN); Check((JS(JO(W.ScriptDraft.ScriptWizard,'casting'),'selectedCue')=Id) and not JB(CastingRow(W.ScriptDraft,Id),'confirmed'),'Enter cannot confirm unknown speaker or advance',Results);
+      Press(List,Ord('1')); Check(JB(CastingRow(W.ScriptDraft,Id),'confirmed') and (JS(CastingRow(W.ScriptDraft,Id),'origin')='human'),'number key confirms human assignment',Results);
+      Check(JS(JO(W.ScriptDraft.ScriptWizard,'casting'),'selectedCue')=W.ScriptDraft.Cues[1].Id,'number key advances to next dialogue',Results);
+      CaptureUiWindow(Main,ResultPath,'.pending');
+      Check((JI(CastingRow(W.ScriptDraft,W.ScriptDraft.Cues[1].Id),'role')=2) and not JB(CastingRow(W.ScriptDraft,W.ScriptDraft.Cues[1].Id),'confirmed'),'real pipe AI proposal stays unconfirmed',Results);
+      Press(List,VK_NUMPAD1); Check(JS(CastingRow(W.ScriptDraft,W.ScriptDraft.Cues[1].Id),'origin')='human','numpad changes AI proposal to human choice',Results);
+      Press(List,VK_RETURN); Check(JB(CastingRow(W.ScriptDraft,W.ScriptDraft.Cues[2].Id),'confirmed') and (JI(CastingRow(W.ScriptDraft,W.ScriptDraft.Cues[2].Id),'role')=2),'Enter accepts current AI role and advances',Results);
+      Press(List,VK_UP); Check(JS(JO(W.ScriptDraft.ScriptWizard,'casting'),'selectedCue')=W.ScriptDraft.Cues[2].Id,'up moves dialogue cursor',Results);
+      Press(List,VK_DOWN); Check(JS(JO(W.ScriptDraft.ScriptWizard,'casting'),'selectedCue')=W.ScriptDraft.Cues[3].Id,'down moves dialogue cursor',Results);
+      Press(List,Ord('2')); Check(JS(W.ScriptDraft.ScriptWizard,'castingStatus')='complete','all human confirmations complete casting without claiming voice ready',Results);
+      for var V in JA(JO(W.ScriptDraft.ScriptWizard,'casting'),'roles') do Check(W.ScriptDraft.Speaker(JS(TJSONObject(V),'speakerId')).StyleId=-1,'VOICEVOX binding remains explicitly unassigned',Results);
+      W.SelectCasting(W.ScriptDraft.Cues[1].Id); var Before := ScriptFingerprint(W.ScriptDraft); var Count := W.ScriptDraft.Cues.Count;
+      Rejected := False; try W.SplitCasting(W.ScriptDraft.Cues[1].Id,6); except on E: Exception do Rejected := True; end;
+      Check(Rejected and (W.ScriptDraft.Cues.Count=Count),'surrogate middle split rejected without mutation',Results);
+      Rejected := False; try W.SplitCasting(W.ScriptDraft.Cues[1].Id,BodyText.IndexOf(#13#10)+1); except on E: Exception do Rejected := True; end;
+      Check(Rejected and (W.ScriptDraft.Cues.Count=Count),'CRLF middle split rejected without mutation',Results);
+      var Text := TMemo(Frame.FindComponent('ScriptCastingText')); Text.SelStart := 5;
+      TToolButton(TToolBar(Frame.FindComponent('ScriptCastingToolbar')).FindComponent('ScriptCastingSplit')).Click;
+      Check((W.ScriptDraft.Cues.Count=Count+1) and (W.ScriptDraft.Cues[1].Scene=W.ScriptDraft.Cues[2].Scene) and (ScriptFingerprint(W.ScriptDraft)=Before),'GUI split keeps raw script and one scene with multiple speeches',Results);
+      CaptureUiWindow(Main,ResultPath,'.split');
+      TToolButton(TToolBar(Frame.FindComponent('ScriptCastingToolbar')).FindComponent('ScriptCastingMerge')).Click;
+      Check((W.ScriptDraft.Cues.Count=Count) and (W.ScriptDraft.Cues[1].Text=BodyText.Substring(0,BodyText.IndexOf(#13#10+#13#10))),'GUI merge restores full utterance and source',Results);
+      W.ScriptDraft.Cues[1].Subtitle := '字幕表示だけを変更'; W.ScriptDraft.Changed;
+      Check(W.ScriptDraft.Cues[1].Text<>W.ScriptDraft.Cues[1].Subtitle,'voice text and display subtitle remain independent',Results);
+      var StableId := W.ScriptDraft.Cues[2].Id; var StableSpeaker := W.ScriptDraft.Cues[2].SpeakerId;
+      TToolButton(Toolbar.FindComponent('ScriptTextStage')).Click; W.SetScriptText('opening','観測所へようこそ。今回は架空の案内です。'); W.EndScriptTextEdit;
+      var StaleCopy := W.ScriptDraft.Clone;
+      try Rejected := False; try RequestScriptCasting(StaleCopy); except on E: Exception do Rejected := True; end;
+        Check(Rejected and (JS(JO(StaleCopy.ScriptWizard,'casting'),'state')='stale'),'request cannot reactivate obsolete casting after raw source edit',Results);
+      finally StaleCopy.Free; end; Next.Click;
+      CaptureUiWindow(Main,ResultPath,'.review2'); Next.Click;
+      Check((W.ScriptDraft.Cues[2].Id=StableId) and (W.ScriptDraft.Cues[2].SpeakerId=StableSpeaker) and JB(CastingRow(W.ScriptDraft,StableId),'confirmed'),'unchanged sections retain human confirmed IDs and roles after earlier text edit',Results);
+      Check((W.ScriptDraft.Cues[1].Subtitle='字幕表示だけを変更') and (JA(W.ScriptDraft.ScriptWizard,'castingArchives').Count=1),'edited subtitle preserved and old changed section archived',Results);
+      var Copy := W.ScriptDraft.Clone;
+      try
+        var Selected := JA(Copy.ScriptWizard,'selectedCharacters'); Selected.Remove(1).Free; PrepareScriptCasting(Copy);
+        Check((JI(CastingRow(Copy,Copy.Cues[0].Id),'role')=1) and (JS(CastingRow(Copy,Copy.Cues[0].Id),'origin')='single-default') and not JB(CastingRow(Copy,Copy.Cues[0].Id),'confirmed'),'one-character fallback is labelled and remains unconfirmed',Results);
+        Check(JI(CastingRole(Copy,1),'number')=1,'character number remains fixed after selection change',Results);
+      finally Copy.Free; end;
+      Copy := W.ScriptDraft.Clone;
+      try Copy.EnableComposition; Copy.Validate; Check(Copy.Characters[0].SpeakerId=JS(CastingRole(Copy,1),'speakerId'),'final actor composition uses same speaker mapping',Results); finally Copy.Free; end;
+      W.SaveScriptDraft(False); CaptureUiWindow(Main,ResultPath,'.saved');
+      var Resume := TJSONObject.Create; var SavedProject := W.ScriptDraft.Json;
+      try Resume.AddPair('path',Path); Resume.AddPair('projectId',W.ScriptDraft.Id); Resume.AddPair('casting',JO(W.ScriptDraft.ScriptWizard,'casting').ToJSON); Resume.AddPair('project',SavedProject.ToJSON); TFile.WriteAllText(ResultPath+'.resume.json',Resume.ToJSON,TEncoding.UTF8); finally Resume.Free; SavedProject.Free; end;
+      // 親が実際の意味を読んで提案できる、Codex著の架空会話。ユーザー作品ではない。
+      Copy := W.ScriptDraft.Clone;
+      try
+        Copy.Id := PsdJson.NewId; Copy.Title := 'Codex実往復用：架空の星空観測所'; Copy.FileName := '';
+        Copy.Cues.Clear; Copy.Scenes.Clear; Copy.Characters.Clear; Copy.ScriptWizard.RemovePair('casting').Free; Copy.ScriptWizard.RemovePair('castingArchives').Free;
+        PsdJson.Put(Copy.ScriptWizard,'stage','review'); PsdJson.Put(Copy.ScriptWizard,'titleInput',Copy.Title);
+        PsdJson.Put(ScriptSection(Copy,'opening'),'text','架空の星空観測所へようこそ。今日は夜空を描く準備をします。');
+        PsdJson.Put(ScriptSection(Copy,'body'),'text','星を見る前に、明りを消してもいいですか。'+#13#10+#13#10+'はい。足元を確認してから、小さなランプを消しましょう。'+#13#10+#13#10+'空の色は何色に塗ればいいですか。'+#13#10+#13#10+'この架空の絵では、濃い青から紫へゆっくり変わる空を描きましょう。');
+        PsdJson.Put(ScriptSection(Copy,'closing'),'text','描けた星空を、最後に一緒に眺めましょう。'); RequestScriptReview(Copy);
+        var FixturePath := Main.Workspace.Pipe.Workspace.Resolve('Projects\'+Copy.Id+'\project.rigmovie',False); SaveMovie(Copy,FixturePath,False);
+        var Info := TJSONObject.Create;
+        try Info.AddPair('path',FixturePath); Info.AddPair('projectId',Copy.Id); Info.AddPair('dataRoot',Main.DataRoot); Info.AddPair('stage','review'); Info.AddPair('authorship','Codex-written fictional dialogue, not user work; same registered image copied as two distinct test roles');
+          Info.AddPair('reviewRequestId',JS(JO(Copy.ScriptWizard,'review'),'requestId')); Info.AddPair('fingerprint',ScriptFingerprint(Copy)); TFile.WriteAllText(ResultPath+'.semantic-fixture.json',Info.ToJSON,TEncoding.UTF8);
+        finally Info.Free; end;
+      finally Copy.Free; end;
+    end else CaptureUiWindow(Main,ResultPath,'.reopened');
+    Check(W.RequestFinish,'owned application closes normally',Results);
+    var Target := ResultPath; if Reopen then Target := ResultPath+'.reopened.json'; TFile.WriteAllText(Target,Report.ToJSON,TEncoding.UTF8);
+  finally Report.Free; end;
+end;

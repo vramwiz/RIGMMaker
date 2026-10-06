@@ -19,7 +19,7 @@ begin
   Application.Title := 'RIGM Maker';
   Application.CreateForm(TRigmWizardMainForm, RigmWizardMain);
   var ResultPath := ''; var SmokePath := ''; var UiCheck := False; var CreateCheck := False; var ScriptCheck := False; var ScriptReopen := False; var CharactersCheck := False;
-  var ReviewCheck := False; var ThumbnailCheck := False; var LayoutCheck := False; var PlacementCheck := False; var TextCheck := False;
+  var CastingCheck := False; var ReviewCheck := False; var ThumbnailCheck := False; var LayoutCheck := False; var PlacementCheck := False; var TextCheck := False;
   for var Index := 1 to ParamCount-1 do begin
     if ParamStr(Index)='--verify-wizard' then ResultPath := ParamStr(Index+1);
     if ParamStr(Index)='--smoke' then SmokePath := ParamStr(Index+1);
@@ -35,6 +35,8 @@ begin
     if ParamStr(Index)='--verify-script-layout-reopen' then begin ResultPath := ParamStr(Index+1); LayoutCheck := True; ScriptReopen := True; end;
     if ParamStr(Index)='--verify-script-placement' then begin ResultPath := ParamStr(Index+1); PlacementCheck := True; end;
     if ParamStr(Index)='--verify-script-placement-reopen' then begin ResultPath := ParamStr(Index+1); PlacementCheck := True; ScriptReopen := True; end;
+    if ParamStr(Index)='--verify-script-casting' then begin ResultPath := ParamStr(Index+1); CastingCheck := True; end;
+    if ParamStr(Index)='--verify-script-casting-reopen' then begin ResultPath := ParamStr(Index+1); CastingCheck := True; ScriptReopen := True; end;
     if ParamStr(Index)='--verify-script-review' then begin ResultPath := ParamStr(Index+1); ReviewCheck := True; end;
     if ParamStr(Index)='--verify-script-review-reopen' then begin ResultPath := ParamStr(Index+1); ReviewCheck := True; ScriptReopen := True; end;
     if ParamStr(Index)='--verify-script-text' then begin ResultPath := ParamStr(Index+1); TextCheck := True; end;
@@ -42,7 +44,8 @@ begin
   end;
   if ResultPath<>'' then begin
     try
-      try if ReviewCheck then VerifyScriptReview(RigmWizardMain,ResultPath,ScriptReopen)
+      try if CastingCheck then VerifyScriptCasting(RigmWizardMain,ResultPath,ScriptReopen)
+      else if ReviewCheck then VerifyScriptReview(RigmWizardMain,ResultPath,ScriptReopen)
       else if TextCheck then VerifyScriptText(RigmWizardMain,ResultPath,ScriptReopen)
       else if PlacementCheck then VerifyScriptPlacement(RigmWizardMain,ResultPath,ScriptReopen)
       else if LayoutCheck then VerifyScriptLayout(RigmWizardMain,ResultPath,ScriptReopen)
