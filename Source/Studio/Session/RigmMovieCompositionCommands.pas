@@ -13,7 +13,7 @@ function CompositionRequests(Project: TRigmMovieProject): TJSONObject;
 
 implementation
 uses System.SysUtils, System.IOUtils, System.Math, System.StrUtils,
-  RigmScriptClosingModel, RigmJson, RigmModel, RigmMovieComposition, RigmMovieCompositor, RigmStorage, RigmSample, RigmMovieMotionLibrary, RigmMoviePsdRendering, RigmCharacterCatalog;
+  RigmScriptClosingModel, RigmJson, RigmModel, RigmMovieComposition, RigmMovieCompositor, RigmStorage, RigmSample, RigmMovieMotionLibrary, RigmMoviePsdRendering, RigmCharacterCatalog, RigmMovieTransitions, RigmMovieWorkspace, RigmMovieImageTransfer;
 function IsCompositionCommand(const Name: string): Boolean;
 begin
   Result := MatchText(Name,['composition-enable','add-character','update-character','delete-character','add-scene','update-scene',
@@ -132,16 +132,32 @@ begin
     Project.Cues.Add(C); Exit;
   end;
   if Name='update-scene' then begin
+    var LockedScene := RequiredScene;
+    if LockedScene.ImageApproved and ((Args.GetValue('image')<>nil) or (Args.GetValue('imagePrompt')<>nil) or
+      (Args.GetValue('description')<>nil) or (Args.GetValue('displayMode')<>nil) or (Args.GetValue('imageFeedback')<>nil)) then
+      raise ERigm.Create('Scene image is approved. Uncheck approval in the image stage before changing its image or caption.');
     if Args.GetValue('chart')<>nil then begin
       if not(Args.GetValue('chart') is TJSONObject) then raise ERigm.Create('Scene chart must be an object');
       var Scene := RequiredScene; var Chart := JO(Args,'chart').Clone as TJSONObject;
       Scene.Chart.Free; Scene.Chart := Chart;
     end;
     if Args.GetValue('animation')<>nil then begin
+      if LockedScene.ImageApproved then begin
+        var OldCard := LockedScene.Animation.GetValue('closingCard'); var NewCard := JO(Args,'animation').GetValue('closingCard');
+        if ((OldCard=nil)<>(NewCard=nil)) or ((OldCard<>nil) and (NewCard<>nil) and (OldCard.ToJSON<>NewCard.ToJSON)) then
+          raise ERigm.Create('Approved closing image metadata cannot be replaced through animation settings');
+      end;
       var Animation := JO(Args,'animation').Clone as TJSONObject;
+      try ValidateMovieImageTransitions(Animation); except Animation.Free; raise; end;
       var Scene := RequiredScene; Scene.Animation.Free; Scene.Animation := Animation;
     end;
-    var S := RequiredScene; StringValue(S.Title,'title'); StringValue(S.Image,'image'); StringValue(S.Description,'description'); StringValue(S.ImagePrompt,'imagePrompt');
+    var S := RequiredScene; StringValue(S.Title,'title'); StringValue(S.Description,'description'); StringValue(S.ImagePrompt,'imagePrompt');
+    StringValue(S.DisplayMode,'displayMode');
+    if Args.GetValue('image')<>nil then begin
+      if not (Args.GetValue('image') is TJSONString) then raise ERigm.Create('Scene image must be a local path string');
+      var Path := JS(Args,'image');
+      if Path='' then S.Image := '' else S.Image := CopyCheckedMovieImage(ResolveMoviePath(Project.FileName,Path),TPath.Combine(MovieWorkDirectory(Project),'Images'));
+    end;
     if Args.GetValue('duration')<>nil then begin
       var Natural := Project.SceneDuration(S)-S.Padding;
       if JN(Args,'duration')<Natural then raise ERigm.Create('Scene duration cannot truncate stored speech');
@@ -201,7 +217,7 @@ function CompositionRequests(Project: TRigmMovieProject): TJSONObject;
 begin
   Result := TJSONObject.Create;
   var Images := TJSONArray.Create; Result.AddPair('sceneImages',Images);
-  for var S in Project.Scenes do if S.Image='' then begin
+  for var S in Project.Scenes do if not S.ImageApproved then begin
     var O := S.Json; AddN(O,'width',1280); AddN(O,'height',720);
     O.AddPair('registerCommand','movie-update-scene'); Images.AddElement(O);
   end;

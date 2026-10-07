@@ -224,7 +224,7 @@ begin
       if FVoice<>nil then begin FVoice.Visible := IsVoice; FVoice.SetActive(FActive and IsVoice); if IsVoice then FVoice.RefreshState; end;
       if FSceneAssignment<>nil then begin FSceneAssignment.Visible := IsSceneAssignment; if IsSceneAssignment then FSceneAssignment.RefreshState; end;
       if FScenes<>nil then begin FScenes.Visible := IsScenes; FScenes.SetActive(FActive and IsScenes); if IsScenes then FScenes.RefreshState; end;
-      if FEffects<>nil then begin FEffects.Visible := IsEffects; if IsEffects then FEffects.RefreshState; end;
+      if FEffects<>nil then begin FEffects.Visible := IsEffects; FEffects.SetActive(FActive and IsEffects); if IsEffects then FEffects.RefreshState; end;
       LayoutStagePages;
       FTitleStage.Down := StageIndex=0; FCharactersStage.Down := IsCharacters; FLayoutStage.Down := IsLayout; FPlacementStage.Down := IsPlacement;
       FCharactersStage.Enabled := StageIndex>=1; FLayoutStage.Enabled := StageIndex>=2; FPlacementStage.Enabled := StageIndex>=3;
@@ -237,7 +237,8 @@ begin
       FEffectsStage.Down := IsEffects; FEffectsStage.Enabled := Reached>=ScriptStageIndex('voice-effects');
       FSceneAssignmentStage.Down := IsSceneAssignment; FSceneAssignmentStage.Enabled := Reached>=ScriptStageIndex('scene-assignment');
       FScenesStage.Down := IsScenes; FScenesStage.Enabled := (Reached>=ScriptStageIndex('scenes')) and (JS(FWorkspace.ScriptDraft.ScriptWizard,'scene-assignmentStatus')='complete'); FSummaryStage.Down := IsSummary or IsSummaryEdit; FSummaryStage.Enabled := Reached>=ScriptStageIndex('summary'); FClosingStage.Down := IsClosing; FClosingStage.Enabled := Reached>=ScriptStageIndex('closing'); FNext.Visible := True; FNext.Enabled := JB(State,'canAdvance') or (IsVoice and JB(State,'canConfirmVoice')) or (IsSubtitles and JB(State,'canConfirmSubtitles'));
-      if not JB(State,'castingReady') then begin
+      if (Wizard.GetValue('scenes')<>nil) and not JB(JO(Wizard,'scenes'),'allApproved') then begin FSummaryStage.Enabled := False; FClosingStage.Enabled := False; end;
+    if not JB(State,'castingReady') then begin
         FSubtitleStage.Enabled := False; FVoiceStage.Enabled := False; FEffectsStage.Enabled := False; FScenesStage.Enabled := False; FSummaryStage.Enabled := False; FClosingStage.Enabled := False;
       end;
       if IsSubtitles and not JB(State,'canAdvance') then begin
@@ -246,7 +247,7 @@ begin
       if IsClosing then FNext.Hint := 'Next：締め設定を確認し、保存して動画編集へ'
       else if IsSummaryEdit then FNext.Hint := 'Next：総評・評価を確認し、保存して総評の音声へ'
       else if IsSummary then FNext.Hint := 'Next：総評の選択と移動先を保存する'
-      else if IsScenes then FNext.Hint := 'Next：シーン確認後、内容と移動先を保存して総評の有無へ'
+      else if IsScenes then FNext.Hint := 'Next：全シーンの確定チェックを確認し、保存して動画編集へ'
       else if IsSceneAssignment then FNext.Hint := 'Next：セリフのシーン割当を保存して、画像・説明文の設定へ'
       else if IsEffects and (JS(Wizard,'voiceReturnStage')='closing') then FNext.Hint := 'Next：保存して締めへ'
       else if IsEffects then FNext.Hint := 'Next：保存してセリフのシーン割当へ'
@@ -260,7 +261,7 @@ begin
       else if IsPlacement then FNext.Hint := 'Next：配置と移動先を保存して台本入力へ'
       else FNext.Hint := 'Next：題名と移動先を保存してキャラ選択へ';
       FNext.Caption := FNext.Hint; // ネイティブのボタン名も現在の移動先へ揃える。
-      if not FNext.Enabled and (IsSubtitles or IsCasting or IsVoice or IsSceneAssignment) and (JS(State,'advanceBlockedReason')<>'') then FNext.Hint := FNext.Hint+#13#10+JS(State,'advanceBlockedReason');
+      if not FNext.Enabled and (IsSubtitles or IsCasting or IsVoice or IsSceneAssignment or IsScenes) and (JS(State,'advanceBlockedReason')<>'') then FNext.Hint := FNext.Hint+#13#10+JS(State,'advanceBlockedReason');
       var Reload := (FCatalog=nil) or (FCatalogProject<>JS(State,'projectId'));
       if IsCharacters and not Reload then for var V in JA(Wizard,'selectedCharacters') do begin
         var Found := False;
@@ -305,6 +306,7 @@ begin
   if (FWorkspace.CurrentScriptStage='scenes') and (FScenes<>nil) and not FScenes.RequestFinish then Exit;
   if (FWorkspace.CurrentScriptStage='casting') and (FCasting<>nil) and not FCasting.RequestFinish then Exit;
   if (FWorkspace.CurrentScriptStage='voice') and (FVoice<>nil) and not FVoice.RequestFinish then Exit;
+  if (FWorkspace.CurrentScriptStage='voice-effects') and (FEffects<>nil) and not FEffects.RequestFinish then Exit;
   try
     FWorkspace.SaveScriptDraft(False);
     if FNext.Enabled then FStatus.Caption := '下書きを保存しました。Nextで入力を確認し、次の工程へ進めます。'
@@ -325,6 +327,7 @@ begin
     if (FSummaryEdit<>nil) and (Before='summary-edit') and not FSummaryEdit.RequestFinish then raise Exception.Create('総評の入力を確定できません。編集欄の理由を確認してください。');
     if (FCasting<>nil) and (Before='casting') and not FCasting.RequestFinish then raise Exception.Create('配役工程のVOICEVOX接続先を適用してください。');
     if (FVoice<>nil) and (Before='voice') and not FVoice.RequestFinish then raise Exception.Create('音声の入力を確定できません。編集欄の理由を確認してください。');
+    if (FEffects<>nil) and (Before='voice-effects') and not FEffects.RequestFinish then raise Exception.Create('音声エフェクトの入力を確定できません。編集欄の理由を確認してください。');
     if (FScenes<>nil) and (Before='scenes') and not FScenes.RequestFinish then raise Exception.Create('シーンの入力を確定できません。編集欄の理由を確認してください。');
     if Advance then begin
       if Before='subtitles' then FWorkspace.CompleteSubtitles;
@@ -412,6 +415,7 @@ begin
   if FSubtitles<>nil then FSubtitles.SetActive(Value and (FWorkspace.CurrentScriptStage='subtitles'));
   if Value then begin if FWorkspace.ScriptDraft=nil then FWorkspace.NewScriptDraft; RefreshScript(Self); if FCatalog<>nil then FLoader.Refresh; end;
   if FVoice<>nil then FVoice.SetActive(Value and (FWorkspace.CurrentScriptStage='voice'));
+  if FEffects<>nil then FEffects.SetActive(Value and (FWorkspace.CurrentScriptStage='voice-effects'));
   if FScenes<>nil then FScenes.SetActive(Value and (FWorkspace.CurrentScriptStage='scenes'));
   if FCreator<>nil then FCreator.SetActive(False);
 end;
@@ -423,6 +427,7 @@ begin
   if (FSummaryEdit<>nil) and (FWorkspace.CurrentScriptStage='summary-edit') and not FSummaryEdit.RequestFinish then Exit;
   if (FCasting<>nil) and (FWorkspace.CurrentScriptStage='casting') and not FCasting.RequestFinish then Exit;
   if (FVoice<>nil) and (FWorkspace.CurrentScriptStage='voice') and not FVoice.RequestFinish then Exit;
+  if (FEffects<>nil) and (FWorkspace.CurrentScriptStage='voice-effects') and not FEffects.RequestFinish then Exit;
   if (FScenes<>nil) and (FWorkspace.CurrentScriptStage='scenes') and not FScenes.RequestFinish then Exit;
   if (FWorkspace.ScriptDraft<>nil) and (FTitle.Text<>JS(FWorkspace.ScriptDraft.ScriptWizard,'titleInput')) then begin
     FStatus.Caption := '題名を確認してください。入力を保持してこの画面に留まります。'; Exit;

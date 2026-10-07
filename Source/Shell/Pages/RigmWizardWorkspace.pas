@@ -104,6 +104,10 @@ type
     procedure CompleteVoice;
     function VoiceBusy: Boolean;
     function VoiceStatus: TJSONObject;
+    procedure SelectVoiceEffects(const CueId: string);
+    procedure EditVoiceEffects(const CueId: string; Settings: TJSONObject);
+    procedure NotifyVoiceEffectsPreview;
+    function ReadVoiceEffects(Args: TJSONObject): TJSONObject;
     function ReadVoice(Args: TJSONObject): TJSONObject;
     function ReadVoiceCatalog(Args: TJSONObject): TJSONObject;
     function VoiceCatalogReady: Boolean;
@@ -116,7 +120,13 @@ type
     procedure AdoptScriptSceneImage(const Id,Path: string);
     procedure RequestScriptSceneImage(const Id: string);
     procedure CancelScriptSceneImage(const Id: string);
-    procedure CompleteScriptScenes;
+    procedure UpdateScriptSceneInputs(Inputs: TJSONArray);
+    procedure SetScriptSceneApproved(const Id: string; Value: Boolean); // GUI checkbox only; pipes cannot unlock.
+      procedure EditScriptSceneFeedback(const Id,Feedback: string);
+      procedure DeliverScriptSceneImage(Args: TJSONObject);
+      procedure RequestUnapprovedScriptImages;
+      function ScriptScenesAdvanceReason: string;
+      procedure CompleteScriptScenes;
     procedure SetScriptSceneStart(const CueId: string; Value: Boolean);
     procedure PreviewScriptScene(Force: Boolean=False);
     function ScenePreview: Vcl.Graphics.TBitmap; // 現在の正本に一致する描画だけを借用。
@@ -161,7 +171,7 @@ type
     property OnNavigate: TRigmNavigateEvent read FOnNavigate write FOnNavigate;
   end;
 implementation
-uses System.IOUtils, System.Math, System.DateUtils, System.StrUtils, Winapi.Windows, RigmJson, RigmAppSettings, PsdSession,
+uses RigmVoiceEffects, RigmVoiceEffectSettings, System.IOUtils, System.Math, System.DateUtils, System.StrUtils, Winapi.Windows, RigmJson, RigmAppSettings, PsdSession,
   PsdCharacter, PsdJson, PsdPackage, PsdProduction, RigmEditor, PsdImport, RigmStorage,
   System.Hash, ArtDocument, PsdWorkspace, RigmCharacterCatalog, RigmMovieLayout, RigmScriptPlacementModel, RigmScriptTextModel, RigmScriptReviewModel, RigmScriptCastingModel, RigmScriptSubtitleModel, RigmScriptVoiceModel, RigmScriptVoiceSelection, System.SyncObjs, Winapi.MMSystem, RigmScriptScenesModel, RigmScriptSceneAssignmentModel, RigmScriptSummaryModel, RigmScriptClosingModel, RigmMovieCompositor, RigmMovieWorkspace, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg;
 constructor TRigmWizardWorkspace.Create(AOwner: TComponent);
@@ -200,6 +210,7 @@ begin
   if Name='script-review' then Exit(ReadReview(Args));
   if Name='script-casting' then Exit(ReadCasting(Args));
   if Name='script-subtitles' then Exit(ReadSubtitles(Args));
+  if Name='script-voice-effects' then Exit(ReadVoiceEffects(Args));
   if Name='script-voice' then Exit(ReadVoice(Args));
   if Name='script-voice-catalog' then Exit(ReadVoiceCatalog(Args));
   if Name='script-scenes' then Exit(ReadScriptScenes(Args));
@@ -207,7 +218,7 @@ begin
   if Name.StartsWith('script-image-transfer-') then Exit(ExecuteScriptImageTransfer(Name.Substring(7),Args));
   if Name='script-new' then begin NewScriptDraft; if Assigned(FOnNavigate) then FOnNavigate(Self,apScriptCreate,''); Exit(ScriptStatus); end;
   if Name='script-open' then begin OpenWork(FPipe.Workspace.Resolve(JS(Args,'path'))); Exit(ScriptStatus); end;
-  if MatchText(Name,['script-set-title','script-save','script-set-stage','script-set-characters','script-set-layout','script-next','script-set-placement','script-select-placement','script-set-text','script-select-section','script-request-review','script-submit-review','script-request-casting','script-submit-casting','script-select-casting','script-split-casting','script-merge-casting','script-select-subtitle','script-edit-subtitle','script-set-subtitle-break','script-select-voice','script-edit-voice','script-set-voice-engine','script-refresh-voice','script-bind-voice','script-bind-voice-person','script-set-voice-state','script-save-character-voice','script-generate-voice','script-cancel-voice','script-set-scene-start','script-select-scene','script-edit-scene','script-adopt-scene-image','script-request-scene-image','script-cancel-scene-image','script-complete-scenes','script-preview-scene','script-set-summary-choice','script-set-summary','script-complete-summary','script-set-closing','script-adopt-closing-image','script-complete-closing']) then begin
+  if MatchText(Name,['script-set-title','script-save','script-set-stage','script-set-characters','script-set-layout','script-next','script-set-placement','script-select-placement','script-set-text','script-select-section','script-request-review','script-submit-review','script-request-casting','script-submit-casting','script-select-casting','script-split-casting','script-merge-casting','script-select-subtitle','script-edit-subtitle','script-set-subtitle-break','script-select-voice','script-edit-voice','script-select-voice-effects','script-edit-voice-effects','script-set-voice-engine','script-refresh-voice','script-bind-voice','script-bind-voice-person','script-set-voice-state','script-save-character-voice','script-generate-voice','script-cancel-voice','script-set-scene-start','script-select-scene','script-edit-scene','script-adopt-scene-image','script-request-unapproved-images','script-request-scene-image','script-cancel-scene-image','script-complete-scenes','script-preview-scene','script-set-summary-choice','script-set-summary','script-complete-summary','script-set-closing','script-adopt-closing-image','script-complete-closing']) then begin
     if VoiceContinuous and (Name<>'script-cancel-voice') then raise Exception.Create('連続再生を停止してから変更してください。');
     if FPlacementEditing or FScriptTextEditing then raise Exception.Create('GUIで入力中です。入力完了アイコンを押してから再取得してください。');
     if (FScriptDraft=nil) or (JS(Args,'projectId')<>FScriptDraft.Id) or (JI(Args,'revision',-1)<>FScriptDraft.Revision) then
@@ -217,8 +228,9 @@ begin
       SetScriptSceneStart(JS(Args,'cueId'),JB(Args,'startsScene'));
     end
     else if Name='script-select-scene' then SelectScriptScene(JS(Args,'sceneId'))
-    else if Name='script-edit-scene' then begin var S := FScriptDraft.Scene(JS(Args,'sceneId')); if S=nil then raise Exception.Create('シーンがありません。'); EditScriptScene(S.Id,JS(Args,'description',S.Description),JS(Args,'prompt',S.ImagePrompt),JS(Args,'displayMode',S.DisplayMode)); end
-    else if Name='script-adopt-scene-image' then AdoptScriptSceneImage(JS(Args,'sceneId'),FPipe.Workspace.Resolve(JS(Args,'path')))
+    else if Name='script-edit-scene' then begin var S := FScriptDraft.Scene(JS(Args,'sceneId')); if S=nil then raise Exception.Create('シーンがありません。'); EditScriptScene(S.Id,JS(Args,'description',S.Description),JS(Args,'prompt',S.ImagePrompt),JS(Args,'displayMode',S.DisplayMode)); if Args.GetValue('feedback')<>nil then EditScriptSceneFeedback(S.Id,JS(Args,'feedback')); end
+    else if Name='script-adopt-scene-image' then DeliverScriptSceneImage(Args)
+    else if Name='script-request-unapproved-images' then RequestUnapprovedScriptImages
     else if Name='script-request-scene-image' then RequestScriptSceneImage(JS(Args,'sceneId'))
     else if Name='script-cancel-scene-image' then CancelScriptSceneImage(JS(Args,'sceneId'))
     else if Name='script-complete-scenes' then CompleteScriptScenes
@@ -233,6 +245,11 @@ begin
     else if Name='script-edit-voice' then begin
       if not (Args.GetValue('reading') is TJSONString) or not (Args.GetValue('settings') is TJSONObject) then raise Exception.Create('reading文字列とsettingsを指定してください。');
       EditVoice(JS(Args,'cueId'),JS(Args,'reading'),JO(Args,'settings'));
+    end
+    else if Name='script-select-voice-effects' then SelectVoiceEffects(JS(Args,'cueId'))
+    else if Name='script-edit-voice-effects' then begin
+      if not (Args.GetValue('settings') is TJSONObject) then raise Exception.Create('settingsオブジェクトを指定してください。');
+      EditVoiceEffects(JS(Args,'cueId'),JO(Args,'settings'));
     end
     else if Name='script-set-voice-engine' then SetVoiceEngine(JS(Args,'engineUrl'))
     else if Name='script-refresh-voice' then RefreshVoiceCatalog
@@ -293,13 +310,13 @@ begin
     ScriptSchema.AddPair('script-edit-subtitle',PsdJson.ObjectText('{"projectId":"required","revision":"required","cueId":"required","subtitle":"<=3000 UTF16","note":"optional <=2048"}'));
     ScriptSchema.AddPair('script-set-subtitle-break',PsdJson.ObjectText('{"projectId":"required","revision":"required","cueId":"required","offset":"UTF16 offset after removing first CRLF; remaining CRLF preserved"}'));
     ScriptSchema.AddPair('script-voice',PsdJson.ObjectText('{"projectId":"required","revision":"required","offset":0,"limit":1}'));
-    ScriptSchema.AddPair('script-scenes',PsdJson.ObjectText('{"projectId":"required","revision":"required","offset":0,"limit":1,"sourceCuesLimit":10}'));
+    ScriptSchema.AddPair('script-scenes',PsdJson.ObjectText('{"projectId":"required","revision":"required","offset":0,"limit":1,"sourceCuesLimit":10,"unapprovedOnly":"optional true"}'));
     ScriptSchema.AddPair('script-scene-assignment',PsdJson.ObjectText('{"projectId":"required","revision":"required","offset":0,"limit":50}'));
     ScriptSchema.AddPair('script-set-scene-start',PsdJson.ObjectText('{"projectId":"required","revision":"required","cueId":"from scene-assignment; first row fixed","startsScene":"required boolean"}'));
     for var CommandName in ['script-select-scene','script-request-scene-image','script-cancel-scene-image'] do ScriptSchema.AddPair(CommandName,PsdJson.ObjectText('{"projectId":"required","revision":"required","sceneId":"from scenes"}'));
-    ScriptSchema.AddPair('script-edit-scene',PsdJson.ObjectText('{"projectId":"required","revision":"required","sceneId":"from scenes","description":"optional <=3000 UTF16","prompt":"optional <=8000 UTF16","displayMode":"both/image/text/none"}'));
-    ScriptSchema.AddPair('script-adopt-scene-image',PsdJson.ObjectText('{"projectId":"required","revision":"required","sceneId":"from scenes","path":"existing local image inside data root"}'));
-    for var CommandName in ['script-complete-scenes','script-preview-scene'] do ScriptSchema.AddPair(CommandName,PsdJson.ObjectText('{"projectId":"required","revision":"required"}'));
+    ScriptSchema.AddPair('script-edit-scene',PsdJson.ObjectText('{"projectId":"required","revision":"required","sceneId":"from scenes","description":"optional <=3000 UTF16","prompt":"optional <=8000 UTF16","displayMode":"both/image/text/none","feedback":"optional Codex revision instructions <=8000; independent of on-screen description"}'));
+    ScriptSchema.AddPair('script-adopt-scene-image',PsdJson.ObjectText('{"projectId":"required","revision":"required","sceneId":"from scenes","path":"local PNG/JPEG/BMP inside data root (no bytes)","requestId":"current pending request required","sha256":"required 64 hex","provenance":"external-generated/existing-material/test-fixture"}'));
+    for var CommandName in ['script-complete-scenes','script-preview-scene','script-request-unapproved-images'] do ScriptSchema.AddPair(CommandName,PsdJson.ObjectText('{"projectId":"required","revision":"required"}'));
     ScriptSchema.AddPair('script-set-summary-choice',PsdJson.ObjectText('{"projectId":"required","revision":"required","choice":"none/yes; no chart values invented"}'));
     ScriptSchema.AddPair('script-summary',PsdJson.ObjectText('{"projectId":"required","revision":"required"}'));
     ScriptSchema.AddPair('script-set-summary',PsdJson.ObjectText('{"projectId":"required","revision":"required","draft":{"text":"human <=2000","subtitle":"independent, blank hides","reading":"independent, blank uses text","role":"active 1..9; draft may be 0","kind":"radar/bar","title":"<=120","minimum":"numeric text","maximum":"numeric text","items":"3..8 objects label/value as text, incomplete strings retained"}}'));
@@ -320,6 +337,9 @@ begin
     ScriptSchema.AddPair('script-bind-voice-person',PsdJson.ObjectText('{"projectId":"required","revision":"required","role":1,"uuid":"from live catalog"}'));
     ScriptSchema.AddPair('script-set-voice-state',PsdJson.ObjectText('{"projectId":"required","revision":"required","cueId":"required","styleId":"from selected person"}'));
     ScriptSchema.AddPair('script-save-character-voice',PsdJson.ObjectText('{"projectId":"required","revision":"required","role":1}'));
+    ScriptSchema.AddPair('script-voice-effects',PsdJson.ObjectText('{"projectId":"required","revision":"required","offset":0}'));
+    ScriptSchema.AddPair('script-select-voice-effects',PsdJson.ObjectText('{"projectId":"required","revision":"required","cueId":"stable cue ID"}'));
+    ScriptSchema.AddPair('script-edit-voice-effects',PsdJson.ObjectText('{"projectId":"required","revision":"required","cueId":"stable cue ID","settings":"object: sparse numeric Aul2 controller keys; {} clears all effects"}'));
     ScriptSchema.AddPair('script-select-voice',PsdJson.ObjectText('{"projectId":"required","revision":"required","cueId":"from voice"}'));
     ScriptSchema.AddPair('script-edit-voice',PsdJson.ObjectText('{"projectId":"required","revision":"required","cueId":"from voice","reading":"<=2000 UTF16; empty restores original","settings":{"speedScale":1,"pitchScale":0,"intonationScale":1,"volumeScale":1,"prePhonemeLength":0.1,"postPhonemeLength":0.1}}'));
     ScriptSchema.AddPair('script-generate-voice',PsdJson.ObjectText('{"projectId":"required","revision":"required","cueId":"selected only","play":false}'));
@@ -655,6 +675,9 @@ begin
   if (ScriptStageIndex(Value)<0) or (ScriptStageIndex(Value)>Reached) then
     raise Exception.Create('次工程へはNextで保存して進んでください。');
   if CurrentScriptStage=Value then Exit;
+  if (ScriptStageIndex(Value)>ScriptStageIndex('scenes')) and (FScriptDraft.ScriptWizard.GetValue('scenes')<>nil) then begin
+    var Reason := ScriptScenesAdvanceReason; if Reason<>'' then raise Exception.Create(Reason);
+  end;
   if (CurrentScriptStage='scene-assignment') and (ScriptStageIndex(Value)>ScriptStageIndex('scene-assignment')) then
     raise Exception.Create('シーン割当をNextで保存してから進んでください。');
   if ScriptStageIndex(Value)>ScriptStageIndex('casting') then begin
@@ -795,6 +818,7 @@ begin
 end;
 procedure TRigmWizardWorkspace.StoreScript(Snapshot: TRigmMovieProject; const ViewStage: string);
 begin
+  if Snapshot.ScriptWizard.GetValue('scenes')<>nil then SyncScriptScenesStatus(Snapshot);
   CheckScript(Snapshot);
   var Path := ScriptPath(FScriptDraft); var SavedHash: string;
   if FileExists(Path) and (not FScriptSavedHashes.TryGetValue(FScriptDraft.Id,SavedHash) or
@@ -854,7 +878,7 @@ procedure TRigmWizardWorkspace.NextScriptDraft;
 begin
   if VoiceBusy or VoicePlaying or VoiceContinuous then raise Exception.Create('音声生成・再生を停止してからNextで進んでください。');
   if (FScriptDraft=nil) or FPlacementEditing or FScriptTextEditing then raise Exception.Create('入力操作を完了してからNextで進んでください。');
-  var Stage := CurrentScriptStage; var Next := ''; if Stage='closing' then begin FinishScriptToEditor; Exit; end;
+  var Stage := CurrentScriptStage; var Next := ''; if MatchStr(Stage,['closing','scenes']) then begin FinishScriptToEditor; Exit; end;
   if Stage='title' then Next := 'characters' else if Stage='characters' then Next := 'layout'
   else if Stage='layout' then Next := 'placement' else if Stage='placement' then Next := 'text' else if Stage='text' then Next := 'review' else if Stage='review' then Next := 'casting' else if Stage='casting' then Next := 'subtitles' else if Stage='subtitles' then Next := 'voice' else if Stage='voice' then Next := 'voice-effects' else if Stage='voice-effects' then Next := 'scene-assignment' else if Stage='scene-assignment' then Next := 'scenes' else if Stage='scenes' then Next := 'summary'
   else if Stage='summary' then begin var Choice := JS(FScriptDraft.ScriptWizard,'summaryChoice'); if Choice='none' then Next := 'closing' else if Choice='yes' then Next := 'summary-edit' else raise Exception.Create('総評の有無を選んでください。'); end
@@ -928,7 +952,7 @@ begin
     if Next='scene-assignment' then PrepareScriptScenes(Snapshot,Stage<>'voice-effects');
     if Next='scenes' then begin ValidateScriptSceneAssignment(Snapshot); PsdJson.Put(Snapshot.ScriptWizard,'scene-assignmentStatus','complete'); end;
     if Next='summary' then begin
-      if (JS(Snapshot.ScriptWizard,'scenesStatus')<>'complete') or not ScriptScenesReady(Snapshot) then raise Exception.Create('シーンの確認完了を押してから進んでください。');
+      if not ScriptScenesReady(Snapshot,True) then raise Exception.Create('シーンの確認完了を押してから進んでください。');
       for var C in Snapshot.Cues do if not Snapshot.AudioReady(C) then raise Exception.Create('音声の変更を確認してから進んでください。');
       if Snapshot.ScriptWizard.GetValue('summaryChoice')=nil then PsdJson.Put(Snapshot.ScriptWizard,'summaryChoice','');
     end;
@@ -945,12 +969,12 @@ end;
 procedure TRigmWizardWorkspace.BeginScriptTextEdit;
 begin
   if not FScriptTextEditing and MatchText(CurrentScriptStage,['text','review','casting','subtitles','voice','scenes','summary-edit','closing']) then begin
-    FScriptTextEditing := True; if MatchText(CurrentScriptStage,['casting','subtitles']) then ScriptChanged;
+    FScriptTextEditing := True; if MatchText(CurrentScriptStage,['casting','subtitles','scenes']) then ScriptChanged;
   end;
 end;
 procedure TRigmWizardWorkspace.EndScriptTextEdit;
 begin
-  if FScriptTextEditing then begin FScriptTextEditing := False; if CurrentScriptStage='subtitles' then ScriptChanged; end;
+  if FScriptTextEditing then begin FScriptTextEditing := False; if MatchText(CurrentScriptStage,['subtitles','scenes']) then ScriptChanged; end;
 end;
 procedure TRigmWizardWorkspace.SelectScriptSection(const Section: string);
 begin
@@ -1159,7 +1183,7 @@ begin
     if VoiceBusy or VoicePlaying or VoiceContinuous then Reason := '音声生成・再生を停止してからNextで進んでください。';
     Advance := not FScriptTextEditing and (Reason=''); Result.AddPair('advanceBlockedReason',Reason);
   end;
-  if (FScriptDraft<>nil) and (CurrentScriptStage='scenes') then begin Advance := not FScriptTextEditing and (JS(FScriptDraft.ScriptWizard,'scenesStatus')='complete') and ScriptScenesReady(FScriptDraft); for var C in FScriptDraft.Cues do Advance := Advance and FScriptDraft.AudioReady(C); end;
+    if (FScriptDraft<>nil) and (CurrentScriptStage='scenes') then begin var Reason := ScriptScenesAdvanceReason; Advance := Reason=''; PsdJson.Put(Result,'advanceBlockedReason',Reason); end;
   if (FScriptDraft<>nil) and (CurrentScriptStage='summary') then Advance := not FScriptTextEditing and MatchStr(JS(FScriptDraft.ScriptWizard,'summaryChoice'),['none','yes']);
   if (FScriptDraft<>nil) and (CurrentScriptStage='summary-edit') then Advance := not FScriptTextEditing and (JS(JO(FScriptDraft.ScriptWizard,'summaryData'),'status')='complete');
   if (FScriptDraft<>nil) and (CurrentScriptStage='closing') then Advance := not FScriptTextEditing and not VoiceBusy and (JS(JO(FScriptDraft.ScriptWizard,'closingData'),'status')='complete');
@@ -1299,6 +1323,7 @@ begin
   end;
 end;
 {$I RigmScriptVoiceWorkspace.inc}
+{$I RigmScriptVoiceEffectsWorkspace.inc}
 {$I RigmScriptScenesWorkspace.inc}
 {$I RigmScriptClosingWorkspace.inc}
 end.

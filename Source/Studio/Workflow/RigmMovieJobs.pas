@@ -454,7 +454,7 @@ begin
     except on E: Exception do begin CheckCancel; AddB(O,'engineConnected',False); O.AddPair('engineError',E.Message); end; end;
     CheckCancel; Report(1,2);
     try
-      if FProject.Characters.Count>0 then ValidateCompositionMaterials(FProject);
+      if (FProject.Characters.Count>0) or (FProject.BgmFile<>'') then ValidateCompositionMaterials(FProject);
       Document := LoadActor(FProject);
       if Document<>nil then Document.ValidateStructure;
       var Assets := SourceActorAssets(FProject,Document); O.AddPair('assets',Assets);

@@ -86,6 +86,9 @@ type
     Scene             : TEdit;                  // 選択区間の場面ID。場面名と区別する読取専用欄。
     SceneDescription  : TMemo;
     SceneTitle        : TEdit;
+    ImageEnter,ImageExit: TComboBox;
+    ImageEnterSeconds,ImageExitSeconds: TEdit;
+    BgmPath,BgmVolume,BgmFadeOut: TEdit;
     Script            : TMemo;
     ScriptPanel       : TPanel;
     Seek              : TRigmFineTrackBar;
@@ -263,6 +266,14 @@ begin
   ChartColor.Style := [cbStandardColors,cbExtendedColors,cbCustomColor,cbPrettyNames];
   ChartColor.Selected := RGB(90,184,232); ChartColor.OnChange := FCallbacks.DraftEdited; FPages.AddProperty(L,ChartColor,672,12,330,28);
   Button(Right,'MovieApplySceneChart','チャートを適用',44,12,726,330);
+  ImageEnter := Combo('MovieImageEnter','画像の登場',12,780,158); ImageEnter.Items.AddStrings(['なし','フェード']);
+  ImageExit := Combo('MovieImageExit','画像の退場',184,780,158); ImageExit.Items.AddStrings(['なし','フェード']);
+  ImageEnterSeconds := Edit(Right,'MovieImageEnterSeconds','登場の時間（秒、0～60）',12,834,158);
+  ImageExitSeconds := Edit(Right,'MovieImageExitSeconds','退場の時間（秒、0～60）',184,834,158);
+  ImageEnter.OnChange := FCallbacks.DraftEdited; ImageExit.OnChange := FCallbacks.DraftEdited;
+  L := TLabel.Create(FOwner); L.Parent := Right; L.Caption := '短い場面では登場・退場の時間を比例して縮めます。画像のみをフェードし、字幕と説明は保持します。';
+  FPages.AddProperty(L,nil,888,12,330,0);
+  Button(Right,'MovieApplyImageAnimation','画像アニメーションを適用',45,12,916,330);
   FPages.BuildPage := 0;
   Speaker := Combo('MovieCueSpeaker','台本上の話者',12,53,158); Speaker.OnChange := FCallbacks.SelectSpeaker;
   Pause := Edit(Right,'MovieCuePause','セリフ後の間（秒）',184,53,158);
@@ -294,6 +305,14 @@ begin
   Speed := Edit(Right,'MovieVoiceSpeed','話速（0.5～2）',12,500,158); Pitch := Edit(Right,'MovieVoicePitch','音高（-0.15～0.15）',184,500,158);
   Button(Right,'MovieApplyVoice','音声設定を適用',20,12,554,330);
   Button(Right,'MovieGenerateVoice','必要な音声を再生成',8,12,600,330);
+  BgmPath := Edit(Right,'MovieBgmPath','動画全体のBGM（PCM16 WAV）',12,654,330); BgmPath.ReadOnly := True;
+  BgmPath.ShowHint := True;
+  Button(Right,'MovieSelectBgm','BGMを選ぶ...',47,12,708,158); Button(Right,'MovieClearBgm','BGMを解除',48,184,708,158);
+  BgmVolume := Edit(Right,'MovieBgmVolume','BGM音量（0～2、声とは別）',12,752,330);
+  BgmFadeOut := Edit(Right,'MovieBgmFadeOut','動画末尾のBGMフェード（秒）',12,806,330);
+  L := TLabel.Create(FOwner); L.Parent := Right; L.Caption := '短いBGMは繰り返します。フェードは動画末尾に合わせ、動画の長さを超えないように調整します。';
+  FPages.AddProperty(L,nil,860,12,330,0);
+  Button(Right,'MovieApplyBgm','BGM音量・フェードを適用',46,12,888,330);
   FPages.BuildPage := 2;
   L := TLabel.Create(FOwner); L.Parent := Right; L.Caption := 'セリフ別の演技（音声は再生成しません）'; L.SetBounds(12,594,330,20);
   FPages.AddProperty(L,nil,594,12,330,0);

@@ -40,7 +40,7 @@ type
     FOnOpenWork     : TRigmOpenMovieFile;
     FOnlyTextDraft, FTextPending: Boolean;
     FPropertyDrafts: TRigmPropertyDrafts; // 属性ページ別の未適用変更。適用時に別ページの下書きを残す。
-    FPoseDraft, FActingDraft, FSceneDraft, FChartDraft: Boolean;
+    FPoseDraft, FActingDraft, FSceneDraft, FChartDraft, FAnimationDraft, FVoiceDraft, FBgmDraft: Boolean;
     FOtherDraft     : Boolean;
     FStaticUiUpdates: Integer;
     FSavePath       : string;
@@ -260,7 +260,7 @@ begin
   if FRefreshing then Exit;
   if FDraftRevision=0 then begin
     FillChar(FPropertyDrafts,SizeOf(FPropertyDrafts),0); FOtherDraft := False;
-    FPoseDraft := False; FActingDraft := False; FSceneDraft := False; FChartDraft := False;
+    FPoseDraft := False; FActingDraft := False; FSceneDraft := False; FChartDraft := False; FAnimationDraft := False; FVoiceDraft := False; FBgmDraft := False;
     // Stamp the data actually displayed, even before the next timer refresh.
     FDraftRevision := FLastRevision;
     if FDraftRevision=0 then FDraftRevision := FSession.Project.Revision;
@@ -274,6 +274,9 @@ begin
     for var Field in FUi.Pages.Fields do
       if (Field.Control=Sender) and (Field.Page=2) then begin FActingDraft := True; Break; end;
   end;
+  if (Sender=FUi.BgmVolume) or (Sender=FUi.BgmFadeOut) then FBgmDraft := True
+  else begin for var Field in FUi.Pages.Fields do if (Field.Control=Sender) and (Field.Page=3) then FVoiceDraft := True; end;
+  if (Sender=FUi.ImageEnter) or (Sender=FUi.ImageExit) or (Sender=FUi.ImageEnterSeconds) or (Sender=FUi.ImageExitSeconds) then FAnimationDraft := True;
   if (Sender=FUi.ChartKind) or (Sender=FUi.ChartTitle) or (Sender=FUi.ChartMaximum) or
     (Sender=FUi.ChartItems) or (Sender=FUi.ChartColor) then FChartDraft := True
   else if (Sender=FUi.SceneTitle) or (Sender=FUi.SceneDescription) or (Sender=FUi.LayoutChoice) then FSceneDraft := True;
@@ -303,6 +306,7 @@ begin
   try
   C := FSession.Project.Cue(FSelectedId);
   if C=nil then begin
+    FUi.ImageEnter.ItemIndex := 0; FUi.ImageExit.ItemIndex := 0; FUi.ImageEnterSeconds.Text := '0.5'; FUi.ImageExitSeconds.Text := '0.5';
     FUi.SceneTitle.Clear; FUi.SceneDescription.Clear; FUi.Emotion.Items.Clear;
     FUi.Scene.Clear; FUi.Pause.Clear; FUi.Dialogue.Clear; FUi.Subtitle.Clear; FUi.Speed.Clear; FUi.Pitch.Clear;
     FUi.Style.ItemIndex := -1; FUi.Speaker.ItemIndex := -1; FUi.Expression.ItemIndex := -1; FUi.Motion.ItemIndex := -1;
@@ -313,6 +317,14 @@ begin
   var Scene := FSession.Project.Scene(C.Scene);
   if Scene<>nil then begin FUi.SceneTitle.Text := Scene.Title; FUi.SceneDescription.Text := Scene.Description; end
   else begin FUi.SceneTitle.Clear; FUi.SceneDescription.Clear; end;
+  FUi.ImageEnter.ItemIndex := 0; FUi.ImageExit.ItemIndex := 0; FUi.ImageEnterSeconds.Text := '0.5'; FUi.ImageExitSeconds.Text := '0.5';
+  FUi.SceneDescription.ReadOnly := (Scene<>nil) and Scene.ImageApproved;
+  if Scene<>nil then begin
+    FUi.ImageEnter.ItemIndex := IndexText(JS(Scene.Animation,'enter','none'),['none','fade']);
+    FUi.ImageExit.ItemIndex := IndexText(JS(Scene.Animation,'exit','none'),['none','fade']);
+    FUi.ImageEnterSeconds.Text := FloatToStr(JN(Scene.Animation,'enterSeconds',0.5),TFormatSettings.Invariant);
+    FUi.ImageExitSeconds.Text := FloatToStr(JN(Scene.Animation,'exitSeconds',0.5),TFormatSettings.Invariant);
+  end;
   FUi.ChartKind.ItemIndex := 0; FUi.ChartTitle.Text := '総評'; FUi.ChartMaximum.Text := '5'; FUi.ChartItems.Clear;
   FUi.ChartColor.Selected := RGB(90,184,232);
   if (Scene<>nil) and MovieChartEnabled(Scene.Chart) then begin
@@ -377,6 +389,9 @@ begin
     for var I := 0 to 3 do if OutputPresetIds[I]=MoviePresetId(FSession.Project.Width,FSession.Project.Height,FSession.Project.Fps) then FUi.OutputPreset.ItemIndex := I;
     for var I := 0 to 2 do if EncodeProfileIds[I]=FSession.Project.EncodeProfile then FUi.EncodeProfile.ItemIndex := I;
     FUi.OutputPath.Text := FSession.Project.OutputTarget;
+    FUi.BgmPath.Text := FSession.Project.BgmFile; FUi.BgmPath.Hint := FUi.BgmPath.Text;
+    FUi.BgmVolume.Text := FloatToStr(FSession.Project.BgmVolume,TFormatSettings.Invariant);
+    FUi.BgmFadeOut.Text := FloatToStr(FSession.Project.BgmFadeOut,TFormatSettings.Invariant);
     FUi.Speaker.Items.Clear; for var S in FSession.Project.Speakers do FUi.Speaker.Items.Add(S.Id);
     FUi.List.Items.BeginUpdate;
     try
@@ -820,11 +835,45 @@ var O: TJSONObject; OpenDialog: TOpenDialog; SaveDialog: TSaveDialog;
 begin
   var DraftPages := FPropertyDrafts; var OtherDraft := FOtherDraft;
   var PoseDraft := FPoseDraft; var ActingDraft := FActingDraft;
-  var SceneDraft := FSceneDraft; var ChartDraft := FChartDraft;
+  var SceneDraft := FSceneDraft; var ChartDraft := FChartDraft; var AnimationDraft := FAnimationDraft;
+  var VoiceDraft := FVoiceDraft; var BgmDraft := FBgmDraft;
   var TextPending := FTextPending; var TextOnly := FOnlyTextDraft;
   try
     FLastError := '';
     case TComponent(Sender).Tag of
+      45: begin
+        StopPlayback; var Cue := FSession.Project.Cue(FSelectedId); if Cue=nil then raise ERigm.Create('場面を選択してください。');
+        var Scene := FSession.Project.Scene(Cue.Scene); if Scene=nil then raise ERigm.Create('画像アニメーションには場面が必要です。');
+        var Animation := Scene.Animation.Clone as TJSONObject;
+        try
+          Animation.RemovePair('enter').Free; Animation.AddPair('enter',IfThen(FUi.ImageEnter.ItemIndex=1,'fade','none'));
+          Animation.RemovePair('exit').Free; Animation.AddPair('exit',IfThen(FUi.ImageExit.ItemIndex=1,'fade','none'));
+          Animation.RemovePair('enterSeconds').Free; AddN(Animation,'enterSeconds',StrToFloat(FUi.ImageEnterSeconds.Text,TFormatSettings.Invariant));
+          Animation.RemovePair('exitSeconds').Free; AddN(Animation,'exitSeconds',StrToFloat(FUi.ImageExitSeconds.Text,TFormatSettings.Invariant));
+          O := TJSONObject.Create; O.AddPair('id',Scene.Id); O.AddPair('animation',Animation.Clone as TJSONObject); Run('update-scene',O); FPendingPreview := True;
+        finally Animation.Free; end;
+      end;
+      46,47,48: begin
+        StopPlayback; var Path := FSession.Project.BgmFile;
+        if TComponent(Sender).Tag=47 then begin
+          OpenDialog := TOpenDialog.Create(Self);
+          try
+            OpenDialog.Options := [ofFileMustExist,ofPathMustExist,ofEnableSizing,ofNoChangeDir];
+            OpenDialog.Filter := 'PCM16 WAV (*.wav)|*.wav'; OpenDialog.Title := '動画全体のBGMを選択';
+            if not OpenDialog.Execute then Exit; Path := OpenDialog.FileName;
+          finally OpenDialog.Free; end;
+        end else if TComponent(Sender).Tag=48 then Path := '';
+        var Bgm := TJSONObject.Create;
+        try
+          if TComponent(Sender).Tag<>46 then Bgm.AddPair('file',Path);
+          AddN(Bgm,'volume',StrToFloat(FUi.BgmVolume.Text,TFormatSettings.Invariant));
+          AddN(Bgm,'fadeOut',StrToFloat(FUi.BgmFadeOut.Text,TFormatSettings.Invariant));
+          O := TJSONObject.Create; O.AddPair('bgm',Bgm.Clone as TJSONObject); Run('update-project',O);
+          var WasRefreshing := FRefreshing; FRefreshing := True;
+          try FUi.BgmPath.Text := FSession.Project.BgmFile; FUi.BgmPath.Hint := FUi.BgmPath.Text; finally FRefreshing := WasRefreshing; end;
+          Run('waveform-refresh'); FPendingPreview := True;
+        finally Bgm.Free; end;
+      end;
       44: begin
         var Cue := FSession.Project.Cue(FSelectedId);
         if (Cue=nil) or (FSession.Project.Scene(Cue.Scene)=nil) then raise ERigm.Create('チャートを置く場面を選んでください。');
@@ -951,7 +1000,7 @@ begin
         var Cue := FSession.Project.Cue(FSelectedId); if Cue=nil then raise ERigm.Create('場面を選択してください');
         if FSession.Project.Scene(Cue.Scene)=nil then raise ERigm.Create('構成作品の場面を選択してください');
         O := TJSONObject.Create; O.AddPair('id',Cue.Scene); O.AddPair('title',FUi.SceneTitle.Text);
-        O.AddPair('description',FUi.SceneDescription.Text); Run('update-scene',O);
+        if not FSession.Project.Scene(Cue.Scene).ImageApproved then O.AddPair('description',FUi.SceneDescription.Text); Run('update-scene',O);
         O := TJSONObject.Create; O.AddPair('layout',IfThen(FUi.LayoutChoice.ItemIndex=0,'theme','l'));
         O.AddPair('lDirection',IfThen(FUi.LayoutChoice.ItemIndex=1,'left','right')); Run('update-project',O);
       end;
@@ -1027,7 +1076,7 @@ begin
     var AppliedPage := -1;
     case TComponent(Sender).Tag of
       16: if FUi.Pages.Page=2 then AppliedPage := 2 else AppliedPage := 0;
-      20: AppliedPage := 3; 25,26: AppliedPage := 2; 41,44: AppliedPage := 1;
+      20,46,47,48: AppliedPage := 3; 25,26: AppliedPage := 2; 41,44,45: AppliedPage := 1;
     end;
     if AppliedPage>=0 then begin
       DraftPages[AppliedPage] := False;
@@ -1036,9 +1085,14 @@ begin
         DraftPages[2] := PoseDraft or ActingDraft;
       end;
       if AppliedPage=1 then begin
-        if TComponent(Sender).Tag=44 then ChartDraft := False else SceneDraft := False;
-        DraftPages[1] := SceneDraft or ChartDraft;
+        if TComponent(Sender).Tag=44 then ChartDraft := False else if TComponent(Sender).Tag=45 then AnimationDraft := False else SceneDraft := False;
+        DraftPages[1] := SceneDraft or ChartDraft or AnimationDraft;
       end;
+      if AppliedPage=3 then begin
+        if TComponent(Sender).Tag=20 then VoiceDraft := False else BgmDraft := False;
+        DraftPages[3] := VoiceDraft or BgmDraft;
+      end;
+      FVoiceDraft := VoiceDraft; FBgmDraft := BgmDraft; FAnimationDraft := AnimationDraft;
       FPoseDraft := PoseDraft; FActingDraft := ActingDraft;
       FSceneDraft := SceneDraft; FChartDraft := ChartDraft;
       FPropertyDrafts := DraftPages; FOtherDraft := OtherDraft;

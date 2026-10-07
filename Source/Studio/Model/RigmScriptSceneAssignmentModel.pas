@@ -87,7 +87,15 @@ begin
       for var I := 0 to Project.Cues.Count-1 do if Project.Cues[I].Scene=Old.Id then Last := I;
       if Last>=0 then for var Scene in Scenes do if Scene.Id=Assignments[Last] then begin Scene.Padding := Scene.Padding+Old.Padding; Break; end;
     end;
-    for var Scene in Scenes do Scene.Validate;
+    for var Scene in Scenes do begin
+      var OldIds := ''; var NewIds := '';
+      for var I := 0 to Project.Cues.Count-1 do begin
+        if Project.Cues[I].Scene=Scene.Id then OldIds := OldIds+'|'+Project.Cues[I].Id;
+        if Assignments[I]=Scene.Id then NewIds := NewIds+'|'+Project.Cues[I].Id;
+      end;
+      if OldIds<>NewIds then begin Scene.ImageApproved := False; Scene.ImageApprovalKey := ''; if Scene.ImageEditEpoch=MaxInt then raise Exception.Create('画像編集世代の上限です。'); Inc(Scene.ImageEditEpoch); end;
+      Scene.Validate;
+    end;
     // 構築・検査に成功した後で、既存セリフのscene参照とscene一覧だけを置き換える。
     for var I := 0 to Project.Cues.Count-1 do Project.Cues[I].Scene := Assignments[I];
     var OldScenes := Project.Scenes; Project.Scenes := Scenes; Scenes := nil; OldScenes.Free;

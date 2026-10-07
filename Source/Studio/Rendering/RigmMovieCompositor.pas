@@ -14,7 +14,7 @@ procedure ValidateCompositionMaterials(Project: TRigmMovieProject);
 implementation
 uses System.Classes, System.Types, System.Math, System.IOUtils, System.StrUtils,
   System.Generics.Collections, Winapi.Windows, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg,
-  ArtDocument, RigmJson, RigmStorage, RigmSample, RigmRenderer, RigmMovieRendering, RigmMovieActing, RigmMovieChart, RigmMoviePsdRendering, RigmMovieLayout, RigmMovieEndCards;
+  ArtDocument, RigmJson, RigmStorage, RigmSample, RigmRenderer, RigmMovieRendering, RigmMovieActing, RigmMovieChart, RigmMoviePsdRendering, RigmMovieLayout, RigmMovieEndCards, RigmMovieTransitions;
 type
   TActorEntry = class
     Stamp: string;
@@ -238,6 +238,12 @@ procedure ValidateCompositionMaterials(Project: TRigmMovieProject);
 begin
   TMonitor.Enter(CacheLock);
   try
+    if Project.BgmFile<>'' then begin
+      var Path := ResolveMoviePath(Project.FileName,Project.BgmFile);
+      if not FileExists(Path) then raise ERigm.Create('BGM WAV is missing: '+Path);
+      if (TFile.GetSize(Path)<44) or (TFile.GetSize(Path)>128*1024*1024) then raise ERigm.Create('BGM WAV must be 44 bytes..128 MiB');
+      var Bgm := TRigmPcm.Load(Path); try if Bgm.Duration>3600 then raise ERigm.Create('BGM must be at most one hour'); finally Bgm.Free; end;
+    end;
     for var C in Project.Characters do if C.Visible then begin
       if C.RenderFormat='psd' then begin ValidatePsdMovieCharacter(Project,C); Continue; end;
       var D := Actor(Project,C.FileName); var P := TRigmPose.Create;
@@ -265,9 +271,9 @@ begin
 end;
 function RenderComposition(Project: TRigmMovieProject; Seconds: Double; Audio: TRigmPcm): Vcl.Graphics.TBitmap;
 var Info: TBitmapInfo; DC: HDC; Dib,Previous: HGDIOBJ; Bits: Pointer; Canvas: TCanvas;
-  procedure Image(const Path: string; R: TRect; Cover: Boolean; Flip: Boolean = False);
+  procedure Image(const Path: string; R: TRect; Cover: Boolean; Flip: Boolean = False; Opacity: Double = 1);
   begin
-    if Path='' then Exit;
+    if (Path='') or (Opacity<=0) then Exit;
     var Picture := TPicture.Create;
     try
       Picture.LoadFromFile(ResolveMoviePath(Project.FileName,Path));
@@ -276,6 +282,12 @@ var Info: TBitmapInfo; DC: HDC; Dib,Previous: HGDIOBJ; Bits: Pointer; Canvas: TC
       if Cover then K := Max(R.Width/Picture.Width,R.Height/Picture.Height);
       var W := Round(Picture.Width*K); var H := Round(Picture.Height*K);
       var Target := Rect(R.Left+(R.Width-W) div 2,R.Top+(R.Height-H) div 2,R.Left+(R.Width+W) div 2,R.Top+(R.Height+H) div 2);
+      var Clip := Rect(Max(0,Target.Left),Max(0,Target.Top),Min(Project.Width,Target.Right),Min(Project.Height,Target.Bottom));
+      var Before: TBytes;
+      if (Opacity<1) and (Clip.Width>0) and (Clip.Height>0) then begin
+        GdiFlush; SetLength(Before,Clip.Width*Clip.Height*4);
+        for var Y := 0 to Clip.Height-1 do Move(PByte(Bits)[((Y+Clip.Top)*Project.Width+Clip.Left)*4],Before[Y*Clip.Width*4],Clip.Width*4);
+      end;
       if not Flip then Canvas.StretchDraw(Target,Picture.Graphic)
       else begin
         var B := Vcl.Graphics.TBitmap.Create;
@@ -287,6 +299,13 @@ var Info: TBitmapInfo; DC: HDC; Dib,Previous: HGDIOBJ; Bits: Pointer; Canvas: TC
           end;
           Canvas.StretchDraw(Target,B);
         finally B.Free; end;
+      end;
+      if Length(Before)>0 then begin
+        GdiFlush; var Alpha := Round(EnsureRange(Opacity,0.0,1.0)*255);
+        for var Y := 0 to Clip.Height-1 do for var X := 0 to Clip.Width-1 do begin
+          var Q := ((Y+Clip.Top)*Project.Width+X+Clip.Left)*4; var P := (Y*Clip.Width+X)*4;
+          for var Channel := 0 to 2 do PByte(Bits)[Q+Channel] := (PByte(Bits)[Q+Channel]*Alpha+Before[P+Channel]*(255-Alpha)+127) div 255;
+        end;
       end;
     finally Picture.Free; end;
   end;
@@ -326,11 +345,11 @@ begin
         if (SceneImage='') and (C<>nil) then SceneImage := C.Background;
         var Closing: TJSONObject := nil; if S.Animation.GetValue('closingCard') is TJSONObject then Closing := JO(S.Animation,'closingCard');
         if Closing<>nil then begin
-          if JS(Closing,'representativeChoice')='use' then Image(JS(Closing,'image'),ImageRect,False);
+          if JS(Closing,'representativeChoice')='use' then Image(JS(Closing,'image'),ImageRect,False,False,MovieImageOpacity(S.Animation,SceneLocal,Project.SceneDuration(S)));
           Text(JS(Closing,'title'),BaseRect(400,60,1520,190),48,DT_CENTER or DT_WORDBREAK);
         end else if (S.DisplayMode='both') or (S.DisplayMode='image') then begin
           if MovieChartEnabled(S.Chart) then DrawMovieChart(Canvas,S.Chart,ImageRect)
-          else Image(SceneImage,ImageRect,False);
+          else Image(SceneImage,ImageRect,False,False,MovieImageOpacity(S.Animation,SceneLocal,Project.SceneDuration(S)));
         end;
         if ((S.DisplayMode='both') or (S.DisplayMode='text')) and (S.Description<>'') then begin
           Canvas.Brush.Style := bsSolid; Canvas.Brush.Color := $302820; Canvas.FillRect(DescriptionRect); InflateRect(DescriptionRect,-12,-8);

@@ -1,0 +1,52 @@
+# シーン画像工程と受渡し（2026-10-07）
+
+今回の仕様は以前のSCRIPT-STAGE10文書の画像採用・完了手順を更新する。番号は表示用、sceneIdは固定IDである。対象を番号・タイトル・配列位置で推測しない。
+
+## 人間の操作
+
+1. 各行に画像要望と動画上の補足テキストを入力。Codex向け修正指示は要望列の別欄へ入力する。
+2. Ctrl+Enter / Esc / 入力反映アイコンで保存し、Codexへ画像作業を指示する。要求アイコンは要望のある未確定行だけを要求する。
+3. 画像を確認し、必要なら修正指示と再要求を繰り返す。満足した行の右端チェックを入れる。
+4. 承認した行を直す時は人間がチェックを外す。新しい要求を作り、以前の応答を再送しない。
+5. 全件が有効な画像と確定チェックを持つと上段Nextで保存して動画編集へ進む。入力反映・画像確定・Nextはそれぞれ独立する。
+
+## Codexのパイプ手順
+
+既存のアプリ共通パイプを使う。現在の接続先/状態/schemaは既存の探索手順から取得する。今回の実装作業中はライブ作品へ操作していない。
+
+1. `app-script-status` と `app-script-scenes` で現在のprojectId/revision、固定sceneId、承認状態、要望・補足・feedback・要求を読む。取得にも最新版revisionが必要。`unapprovedOnly:true` とページoffsetで未確定だけ読める。
+2. 必要な未確定IDに `app-script-request-scene-image` を使うか、`app-script-request-unapproved-images` を使う。更新のたびに返された最新版revisionを次操作へ用いる。
+3. 要求のrequestIdを保存してローカルで画像を用意し、既存data-root内のExchangeへ置く。生成/素材利用の権限は個別のユーザー指示に従う。この工程の実装依頼自体は画像生成や外部送信の許可ではない。
+4. 改めて状態を読み、まだ同じ要求がpendingかつ未確定であることを確認し、次のmetadataだけを送る。
+
+```json
+{
+  "command": "app-script-adopt-scene-image",
+  "args": {
+    "projectId": "現在の作品ID",
+    "revision": 123,
+    "sceneId": "固定sceneID",
+    "requestId": "現在の要求ID",
+    "path": "Exchange/scene-image.png",
+    "sha256": "ファイル全体のSHA256を64桁の16進数で指定",
+    "provenance": "external-generated"
+  }
+}
+```
+
+`command/args`は内容を説明する例で、実際の外側エンベロープは既存パイププロトコルに従う。provenanceは `external-generated` / `existing-material` / `test-fixture`。アプリが検証・管理コピーを行うため、scene.imageを直接書き換えない。画像バイト列は送らない。
+
+5. 成功したら状態を再読込し、GUIのプレビュー更新と人間の確定を待つ。revision/要求/scene/承認の不一致は拒否を尊重して再取得する。要求を作り直さず古いrequestIdだけ更新してリトライしない。
+
+承認/解除のpipeコマンドは提供しない。`app-script-complete-scenes`は既存の確定済み全件を検証する操作で、チェックを自動で入れない。画像完了は要求完了/コピー成功とは別である。汎用動画編集のJSON取込/produceを含め同じ固定IDの承認済み画像を書き換えたり解除したりできない。
+
+## 保存・安全性・制限
+
+- 管理ImagesのSHA256名へ非上書きコピー後に参照更新。原本/過去版保持。
+- sceneId+requestId+画像/文脈fingerprint+承認epochを適用直前にも検査する。分割/統合でcue所属変更は承認を再確認に戻す。表示番号変更だけで別sceneに応答を当てない。
+- 画像はPNG/JPEG/BMP、32MiB/各辺8192/16MP。PNGは非インターレース静止画像と限定した非圧縮メタデータ、BMPはDIB40/52/56の限定形式。欠損/破損/不正パス/再解析ポイントを拒否する。
+- 動画上の補足文は任意。表示modeがtext/noneでも工程完了には画像と人間承認が必要。画像工程でchartは画像の代用にしない。
+- アニメーション/BGM/音声エフェクトは画像承認とは別の後工程設定として保持する。画像内容を差し替えるclosingCard設定は承認保護対象。
+- 古い作品の承認はfalseから始める。総評・締めの既存データは保持し画像Nextから動画編集へ渡す。独立した旧動画編集プロジェクトは既存経路を維持する。
+
+実行検証はビルド/起動禁止のため未実施。詳細と次のユーザービルド後の確認対象はnote.mdを参照。

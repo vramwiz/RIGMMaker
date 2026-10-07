@@ -19,6 +19,13 @@ begin
     var Path := ResolveMoviePath(Project.FileName,Character.FileName);
     if FileExists(Path) then Result := Result+'|'+TFile.GetSize(Path).ToString+'|'+DateTimeToStr(TFile.GetLastWriteTimeUtc(Path));
   end;
+  var BgmPath := ResolveMoviePath(Project.FileName,Project.BgmFile); Result := Result+'|bgm|'+BgmPath;
+  if BgmPath<>'' then begin
+    try
+      if FileExists(BgmPath) then Result := Result+'|'+TFile.GetSize(BgmPath).ToString+'|'+FormatDateTime('yyyymmddhhnnsszzz',TFile.GetLastWriteTimeUtc(BgmPath))
+      else Result := Result+'|missing';
+    except Result := Result+'|unreadable'; end;
+  end;
   Result := Result+'|'+Project.ThemeBackground;
   for var Scene in Project.Scenes do Result := Result+'|'+Scene.Image;
   for var C in Project.Cues do Result := Result+'|'+C.Id+'|'+C.Acting.MouthMode+'|'+C.Acting.BlinkMode+'|'+C.Acting.Variants.ToJSON;
@@ -57,7 +64,7 @@ begin
 end;
 function MoviePreparation(Project: TRigmMovieProject; Diagnostics,DiagnosticJob: TJSONObject;
   const OutputPath: string; PreviewCurrent: Boolean): TJSONObject;
-var Issues,Steps: TJSONArray; TotalIssues,Pending,Unselected: Integer; AudioOK,CharacterOK,OutputOK,EngineOK: Boolean;
+var Issues,Steps: TJSONArray; TotalIssues,Pending,Unselected: Integer; AudioOK,CharacterOK,OutputOK,EngineOK,BgmOK: Boolean;
   Target,Directory: string; Duration,EstimatedSeconds: Double; Staging,FreeBytes,TotalBytes,Unused: UInt64;
   procedure Issue(const Code,Message,Action,Scope: string; Blocking: Boolean; const Id: string='');
   begin
@@ -109,6 +116,23 @@ begin
     Issue(Code,Message,'movie-diagnostics-refresh','audio',not AudioOK);
   end;
   if Pending>0 then Issue('audio_pending',Pending.ToString+'件の音声が未生成または設定変更で無効です。','movie-audio-generate','export',True);
+  BgmOK := True;
+  if Project.BgmFile<>'' then begin
+    var BgmPath := ResolveMoviePath(Project.FileName,Project.BgmFile);
+    try
+      if not FileExists(BgmPath) then begin
+        BgmOK := False; Issue('bgm_missing','BGMが見つかりません。選び直すか解除してください。','movie-update-project','export',True);
+      end else if not SameText(ExtractFileExt(BgmPath),'.wav') or (TFile.GetSize(BgmPath)<44) or (TFile.GetSize(BgmPath)>128*1024*1024) then begin
+        BgmOK := False; Issue('bgm_invalid','BGMには44bytes～128MiBのPCM16 WAVを選択してください。','movie-update-project','export',True);
+      end else if not Current then begin
+        BgmOK := False; Issue('bgm_unchecked','BGM素材の読込診断を待つか、診断を更新してください。','movie-diagnostics-refresh','export',True);
+      end else if JS(Diagnostics,'materialError')<>'' then begin
+        BgmOK := False; Issue('bgm_material_invalid','BGMを含む素材診断に失敗しました。 '+JS(Diagnostics,'materialError'),'movie-diagnostics-refresh','export',True);
+      end;
+    except
+      on E: Exception do begin BgmOK := False; Issue('bgm_unreadable','BGMを読めません。 '+E.Message,'movie-update-project','export',True); end;
+    end;
+  end;
   CharacterOK := True;
   for var Character in Project.Characters do if Character.Visible and (Character.FileName<>'@sample') and
     not FileExists(ResolveMoviePath(Project.FileName,Character.FileName)) then begin
@@ -161,7 +185,7 @@ begin
   Step('setup','2 話者・キャラクター・素材を選ぶ','movie-diagnostics-refresh',EngineOK and (Unselected=0) and CharacterOK);
   Step('audio','3 音声を生成する','movie-audio-generate',AudioOK);
   Step('preview','4 プレビューで確認する','movie-preview',PreviewCurrent);
-  Step('export','5 新しいファイルへ出力する','movie-export',AudioOK and CharacterOK and OutputOK);
+  Step('export','5 新しいファイルへ出力する','movie-export',AudioOK and CharacterOK and BgmOK and OutputOK);
   var Next := 'movie-import-script'; var Message := '自分の台本を貼り付けて取り込んでください。';
   if Project.Cues.Count>0 then begin
     Next := 'movie-diagnostics-refresh'; Message := '接続・話者・素材を診断してください。';
@@ -192,9 +216,10 @@ begin
   AddB(Result,'nextArgsRequireUserValues',MatchText(Next,['movie-import-script','movie-update-speaker','movie-update-project','safe-acting']));
   Result.AddPair('mutationPrecondition','read latest movie-status projectId/revision before applying suggested edits');
   AddN(Result,'audioPending',Pending); AddB(Result,'canGenerateAudio',EngineOK and (Unselected=0) and (Project.Cues.Count>0));
-  AddB(Result,'canExport',AudioOK and CharacterOK and OutputOK); AddB(Result,'canPreview',CharacterOK and (Project.Cues.Count>0));
+  AddB(Result,'canExport',AudioOK and CharacterOK and BgmOK and OutputOK); AddB(Result,'canPreview',CharacterOK and BgmOK and (Project.Cues.Count>0));
   Result.AddPair('outputPath',Target); AddB(Result,'ffmpegConfigured',FfmpegOK);
-  AddB(Result,'previewCurrent',PreviewCurrent);
+  AddB(Result,'previewCurrent',PreviewCurrent); AddB(Result,'bgmReady',BgmOK);
+  AddN(Result,'bgmFadeOutEffective',Min(Project.BgmFadeOut,Project.Duration));
 end;
 function MovieExamples: TJSONArray;
 begin

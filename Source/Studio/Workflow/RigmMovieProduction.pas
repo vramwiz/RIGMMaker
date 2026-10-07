@@ -9,7 +9,7 @@ function MovieProductionNeeds(Preparation: TJSONObject; const Deliver: string;
   Project: TRigmMovieProject=nil): TJSONArray;
 implementation
 uses System.SysUtils, System.IOUtils, System.Hash, System.Math, System.Generics.Collections, RigmJson, RigmModel,
-  RigmMovieActing, RigmMovieOutput;
+  RigmMovieActing, RigmMovieOutput, RigmMovieAudio, RigmMovieWorkspace;
 
 procedure Put(O: TJSONObject; const Key: string; V: TJSONValue);
 begin O.RemovePair(Key).Free; O.AddPair(Key,V); end;
@@ -30,6 +30,21 @@ begin
     Result := '['; for var Item in TJSONArray(V) do begin if Length(Result)>1 then Result := Result+','; Result := Result+Canonical(Item); end; Result := Result+']';
   end else Result := V.ToJSON;
 end;
+procedure MergeProductionBgm(Project: TRigmMovieProject; O,Values: TJSONObject; const Base: string);
+begin
+  var Bgm := JO(O,'bgm').Clone as TJSONObject;
+  try
+    Merge(Bgm,Values,['file','volume','fadeOut']);
+    if Values.GetValue('file')<>nil then begin
+      if not (Values.GetValue('file') is TJSONString) then raise ERigm.Create('BGM file must be a local path string');
+      var Path := JS(Values,'file');
+      if Path<>'' then Path := CopyCheckedMovieBgm(ResolveMoviePath(Base,Path),TPath.Combine(MovieWorkDirectory(Project),'Audio'));
+      Put(Bgm,'file',TJSONString.Create(Path));
+    end;
+    Put(O,'bgm',Bgm); Bgm := nil;
+  finally Bgm.Free; end;
+end;
+
 function MovieProductionSignature(Args: TJSONObject): string;
 begin
   var O := Args.Clone as TJSONObject;
@@ -61,6 +76,22 @@ begin
         // Resolve only paths supplied by this JSON script against its location.
         // Inherited project references remain relative to the current project file.
         var Base := Current.FileName; if Path<>'' then Base := ExpandFileName(Path);
+        Put(JO(Existing,'bgm'),'file',TJSONString.Create(ResolveMoviePath(Current.FileName,Current.BgmFile)));
+        var RequestedBgm: TJSONObject := nil;
+        if O.GetValue('bgm')<>nil then RequestedBgm := JO(O,'bgm').Clone as TJSONObject;
+        try
+          Put(O,'bgm',JO(Existing,'bgm').Clone as TJSONObject);
+          if RequestedBgm<>nil then MergeProductionBgm(Current,O,RequestedBgm,Base);
+        finally RequestedBgm.Free; end;
+        if O.GetValue('themeBackground')<>nil then Put(O,'themeBackground',TJSONString.Create(ResolveMoviePath(Base,JS(O,'themeBackground'))));
+        if O.GetValue('scenes')<>nil then for var V in JA(O,'scenes') do begin
+          var Scene := TJSONObject(V);
+          if Scene.GetValue('image')<>nil then Put(Scene,'image',TJSONString.Create(ResolveMoviePath(Base,JS(Scene,'image'))));
+          if (Scene.GetValue('animation') is TJSONObject) and (JO(Scene,'animation').GetValue('closingCard') is TJSONObject) then begin
+            var Card := JO(JO(Scene,'animation'),'closingCard');
+            if Card.GetValue('image')<>nil then Put(Card,'image',TJSONString.Create(ResolveMoviePath(Base,JS(Card,'image'))));
+          end;
+        end;
         for var Key in ['character','ffmpeg'] do if (O.GetValue(Key)<>nil) and (JS(O,Key)<>'@sample') then
           Put(O,Key,TJSONString.Create(ResolveMoviePath(Base,JS(O,Key))));
         if O.GetValue('cues')<>nil then for var V in JA(O,'cues') do
@@ -81,6 +112,7 @@ begin
       P.Width := Current.Width; P.Height := Current.Height; P.Fps := Current.Fps;
       P.BackgroundColor := Current.BackgroundColor; P.FfmpegExe := Current.FfmpegExe;
       P.EncodeProfile := Current.EncodeProfile; P.OutputTarget := Current.OutputTarget;
+      P.BgmFile := Current.BgmFile; P.BgmVolume := Current.BgmVolume; P.BgmFadeOut := Current.BgmFadeOut;
       for var S in P.Speakers do begin
         var Old := Current.Speaker(S.Id);
         if Old<>nil then begin S.Name := Old.Name; S.StyleId := Old.StyleId; S.Speed := Old.Speed; S.Pitch := Old.Pitch; S.Intonation := Old.Intonation; S.Volume := Old.Volume; end;
@@ -93,6 +125,8 @@ begin
         var ExistingActing := Old.Acting.Json;
         try C.Acting.Free; C.Acting := TRigmMovieActing.FromJson(ExistingActing); finally ExistingActing.Free; end;
         if (C.Text=Old.Text) and (C.SpeakerId=Old.SpeakerId) then begin
+          C.AudioEffects.Free; C.AudioEffects := Old.AudioEffects.Clone as TJSONObject; C.AudioEffect := Old.AudioEffect;
+          C.EffectWaveFile := Old.EffectWaveFile; C.EffectAudioKey := Old.EffectAudioKey;
           C.Id := Old.Id; C.WaveFile := Old.WaveFile; C.LabFile := Old.LabFile; C.AudioKey := Old.AudioKey; C.AudioSeconds := Old.AudioSeconds;
           C.Subtitle := Old.Subtitle; C.Pause := Old.Pause; C.Expression := Old.Expression; C.Motion := Old.Motion; C.Background := Old.Background;
           C.Parameters.Free; C.Parameters := Old.Parameters.Clone as TJSONObject;
@@ -107,6 +141,7 @@ begin
         var W,H,F: Integer; MoviePresetDimensions(JS(Settings,'outputPreset'),W,H,F);
         if W>0 then begin Put(O,'width',TJSONNumber.Create(W)); Put(O,'height',TJSONNumber.Create(H)); Put(O,'fps',TJSONNumber.Create(F)); end;
       end;
+      if Settings.GetValue('bgm')<>nil then MergeProductionBgm(Current,O,JO(Settings,'bgm'),Current.FileName);
       Merge(O,Settings,['title','character','engineUrl','width','height','fps','backgroundColor','ffmpeg','encodeProfile','outputTarget']);
     end;
     if Args.GetValue('voices')<>nil then begin

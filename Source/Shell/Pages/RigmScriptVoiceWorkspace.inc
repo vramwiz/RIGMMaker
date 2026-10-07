@@ -226,6 +226,7 @@ end;
 function TRigmWizardWorkspace.ScriptResumeView(Project: TRigmMovieProject): string;
 begin
   Result := JS(Project.ScriptWizard,'stage');
+  if (ScriptStageIndex(Result)>ScriptStageIndex('scenes')) and (Result<>'editor') and (Project.ScriptWizard.GetValue('scenes')<>nil) and not ScriptScenesReady(Project) then Result := 'scenes';
   // 旧版のシーン画像画面で保存した台本も、未確認なら先にセリフの割当を表示する。
   if (Result='scenes') and (JS(Project.ScriptWizard,'scene-assignmentStatus')<>'complete') then Result := 'scene-assignment';
   if (ScriptStageIndex(Result)>ScriptStageIndex('casting')) and (Project.ScriptWizard.GetValue('casting') is TJSONObject) and (MissingCastingVoices(Project)>0) then Result := 'casting';

@@ -39,7 +39,7 @@ begin
   var O := Project.Json;
   try
     for var Key in ['projectId','revision','workflow','engineUrl','ffmpeg','outputTarget'] do O.RemovePair(Key).Free;
-    FileValue(O,'character');
+    FileValue(O,'character'); if O.GetValue('bgm')<>nil then FileValue(JO(O,'bgm'),'file');
     if O.GetValue('themeBackground')<>nil then FileValue(O,'themeBackground');
     if O.GetValue('characters')<>nil then for var V in JA(O,'characters') do begin
       var Character := TJSONObject(V); FileValue(Character,'file');

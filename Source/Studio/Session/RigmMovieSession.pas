@@ -75,7 +75,7 @@ type
 
 implementation
 uses System.Math, System.IOUtils, System.StrUtils, RigmJson, RigmModel, RigmMovieAudio,
-  RigmMovieOutput, RigmMoviePreparation, RigmMovieProduction, RigmMovieWorkflow, RigmAppSettings, RigmMovieCompositionCommands, RigmMovieComposition, RigmMovieWorkspace, Winapi.Windows;
+  RigmMovieOutput, RigmMoviePreparation, RigmMovieProduction, RigmMovieWorkflow, RigmAppSettings, RigmMovieCompositionCommands, RigmMovieComposition, RigmMovieWorkspace, RigmVoiceEffects, Winapi.Windows;
 
 constructor TRigmMovieSession.Create;
 begin
@@ -103,9 +103,33 @@ begin
   if not CanEdit then raise ERigm.Create('ジョブ処理中です。取消または完了後に編集できます。');
   if (JS(Args,'projectId')<>FProject.Id) or (JI(Args,'revision',-1)<>FProject.Revision) then raise ERigm.Create('statusの最新projectIdとrevisionを指定してください。');
 end;
+procedure GuardApprovedSceneUpdates(Current,Next: TRigmMovieProject);
+begin
+  // Every pipe/model commit shares this guard. Only the trusted image checkbox uses SetProject to unlock.
+  for var Existing in Current.Scenes do if Existing.ImageApproved then begin
+    var Imported := Next.Scene(Existing.Id); if Imported=nil then Continue;
+    if not Imported.ImageApproved or (Imported.ImageApprovalKey<>Existing.ImageApprovalKey) or
+      (Imported.ImageEditEpoch<>Existing.ImageEditEpoch) or
+      not SameText(ResolveMoviePath(Next.FileName,Imported.Image),ResolveMoviePath(Current.FileName,Existing.Image)) or
+      (Imported.Description<>Existing.Description) or (Imported.ImagePrompt<>Existing.ImagePrompt) or
+      (Imported.ImageFeedback<>Existing.ImageFeedback) or (Imported.DisplayMode<>Existing.DisplayMode) then
+      raise ERigm.Create('Approved scene image/caption cannot be changed by a model commit. Uncheck image approval in the image stage first.');
+    var OldCard := Existing.Animation.GetValue('closingCard'); var NewCard := Imported.Animation.GetValue('closingCard');
+    if ((OldCard=nil)<>(NewCard=nil)) then raise ERigm.Create('Approved closing image cannot be replaced');
+    if (OldCard<>nil) and (NewCard<>nil) then begin
+      if not (OldCard is TJSONObject) or not (NewCard is TJSONObject) then raise ERigm.Create('Closing image metadata must be an object');
+      if (JS(TJSONObject(OldCard),'representativeChoice')<>JS(TJSONObject(NewCard),'representativeChoice')) or
+        not SameText(ResolveMoviePath(Current.FileName,JS(TJSONObject(OldCard),'image')),
+          ResolveMoviePath(Next.FileName,JS(TJSONObject(NewCard),'image'))) then raise ERigm.Create('Approved closing image cannot be replaced');
+    end;
+  end;
+end;
+
 procedure TRigmMovieSession.Commit(Project: TRigmMovieProject);
 begin
-  Project.Validate; Project.Revision := FProject.Revision; Project.Changed;
+  Project.Validate; GuardApprovedSceneUpdates(FProject,Project);
+  if MovieAudioStamp(Project)<>MovieAudioStamp(FProject) then FPlaying := False;
+  Project.Revision := FProject.Revision; Project.Changed;
   FUndo.Add(FProject); FProject := Project; FRedo.Clear; while FUndo.Count>30 do FUndo.Delete(0);
   if Assigned(FOnChanged) then FOnChanged(Self);
 end;
@@ -362,7 +386,8 @@ begin
   if GuiLocked or not CanEdit then raise ERigm.Create('Movie editing is busy');
   var S := FProject.Scene(SceneId); var C := FProject.Cue(SceneId);
   if not Theme and (S=nil) and (C=nil) then raise ERigm.Create('Select a scene first');
-  var Image := CopyMovieImage(FProject,Path); var Args := TJSONObject.Create;
+  if not Theme and (S<>nil) and S.ImageApproved then raise ERigm.Create('Scene image is approved; uncheck approval in the image stage to change it');
+  var Image := CopyCheckedMovieImage(Path,TPath.Combine(MovieWorkDirectory(FProject),'Images')); var Args := TJSONObject.Create;
   try
     Args.AddPair('projectId',FProject.Id); AddN(Args,'revision',FProject.Revision);
     var Name := 'update-project';
@@ -581,7 +606,7 @@ begin
       Next := FProject.Clone;
       try
         var Scene := Next.Scene(SceneId);
-        if Scene=nil then raise ERigm.Create('Image transfer scene no longer exists');
+        if (Scene=nil) or Scene.ImageApproved then raise ERigm.Create('Image transfer scene was removed or approved before adoption');
         Scene.Image := Path; Commit(Next); Next := nil;
         FImageTransfers.Adopted(Args);
       finally Next.Free; end;
@@ -608,8 +633,8 @@ begin
     Result.AddPair('commands',ParseObject('{"status":{},'+
       '"project":{"offset":0,"limit":20},'+
       '"import-script":{"text":"text or JSON","path":"optional local file","format":"text|json"},'+
-      '"update-project":{"title":"string","character":"local .rigm or @sample","engineUrl":"loopback URL","width":1920,"height":1080,"fps":30,"outputPreset":"draft|hd|fullhd|custom","encodeProfile":"fast|balanced|quality","backgroundColor":3156000,"ffmpeg":"optional existing local ffmpeg.exe","outputTarget":"new .mp4 or .avi"},'+
-      '"update-cue":{"id":"cue id","text":"string","subtitle":"string","pause":0.3,"expression":"neutral|smile|serious|sad","motion":"idle|still|nod|emphasis","background":"local image","parameters":{},"acting":{}},'+
+      '"update-project":{"title":"string","character":"local .rigm or @sample","engineUrl":"loopback URL","width":1920,"height":1080,"fps":30,"outputPreset":"draft|hd|fullhd|custom","encodeProfile":"fast|balanced|quality","backgroundColor":3156000,"ffmpeg":"optional existing local ffmpeg.exe","outputTarget":"new .mp4 or .avi","bgm":{"file":"local PCM16 .wav, copied before adoption; empty to clear","volume":0.25,"fadeOut":2}},'+
+      '"update-cue":{"id":"cue id","text":"string","subtitle":"string","pause":0.3,"expression":"neutral|smile|serious|sad","motion":"idle|still|nod|emphasis","background":"local image","parameters":{},"acting":{},"audioEffects":{"Out: Use":1,"Out: Gain(dB)":-3}},'+
       '"add-cue":{"cue":{},'+
       '"index":0},'+
       '"delete-cue":{"id":"cue id"},'+
@@ -643,7 +668,7 @@ begin
     var Extra := ParseObject('{"composition-enable":{},"add-character":{"character":{"file":".rigm","speaker":"speaker id","x":1370,"y":130,"width":520,"height":900}},'+
       '"update-character":{"id":"character id","x":0,"y":0,"width":520,"height":900,"flipX":false,"visible":true,"rigSafe":true},"delete-character":{"id":"character id"},'+
       '"add-scene":{"scene":{"title":"string"},"text":"initial spoken line","subtitle":"display text","index":0},'+
-      '"update-scene":{"id":"scene id","image":"local image","description":"persistent scene text","imagePrompt":"generation prompt","chart":{"kind":"none|radar|bar","title":"summary title","maximum":5,"color":"#5AB8E8","items":[{"label":"criterion","value":4}]},"animation":{"explainImage":"optional boolean; enables image-direction head support, not pupil gaze"}},'+
+      '"update-scene":{"id":"scene id","image":"local image","description":"persistent scene text","imagePrompt":"generation prompt","chart":{"kind":"none|radar|bar","title":"summary title","maximum":5,"color":"#5AB8E8","items":[{"label":"criterion","value":4}]},"animation":{"enter":"none|fade","exit":"none|fade","enterSeconds":0.5,"exitSeconds":0.5,"explainImage":"optional boolean; enables image-direction head support, not pupil gaze"}},'+
       '"delete-scene":{"id":"scene id"},"move-scene":{"id":"scene id","index":0},"resize-scene":{"id":"scene id","duration":"seconds, cannot trim existing speech"},'+
       '"register-expression":{"id":"character id","emotion":"neutral|happy|sad|serious|angry|gentle|surprised|doubt|joy|confused","preset":{"variants":[],"blinkAnimate":true,"mouthAnimate":true,"rigSafe":true}},'+
       '"register-motion":{"id":"character id","name":"motion name","motion":{"loop":true,"frames":[{"image":"local frame image","duration":0.1}]}},'+
@@ -765,7 +790,8 @@ begin
         try
           var Character := JS(Current,'character');
           if Character<>'@sample' then ReplacePair(Current,'character',TJSONString.Create(ResolveMoviePath(FProject.FileName,Character)));
-          for var Key in ['character','engineUrl','width','height','fps','backgroundColor','ffmpeg','encodeProfile','outputTarget'] do
+          ReplacePair(JO(Current,'bgm'),'file',TJSONString.Create(ResolveMoviePath(FProject.FileName,FProject.BgmFile)));
+          for var Key in ['character','engineUrl','width','height','fps','backgroundColor','ffmpeg','encodeProfile','outputTarget','bgm'] do
             if O.GetValue(Key)=nil then O.AddPair(Key,Current.GetValue(Key).Clone as TJSONValue);
           Next := TRigmMovieProject.FromJson(O);
         finally Current.Free; end;
@@ -778,6 +804,7 @@ begin
         Next.BackgroundColor := FProject.BackgroundColor; Next.FfmpegExe := FProject.FfmpegExe;
         Next.EncodeProfile := FProject.EncodeProfile;
         Next.OutputTarget := FProject.OutputTarget;
+        Next.BgmFile := FProject.BgmFile; Next.BgmVolume := FProject.BgmVolume; Next.BgmFadeOut := FProject.BgmFadeOut;
         Next.Layout := FProject.Layout; Next.ThemeBackground := FProject.ThemeBackground; Next.LDirection := FProject.LDirection;
         for var Character in FProject.Characters do begin
           if Next.Speaker(Character.SpeakerId)=nil then begin
@@ -793,6 +820,11 @@ begin
           Next.EnableComposition;
           for var Scene in Next.Scenes do for var Existing in FProject.Scenes do if Scene.Title=Existing.Title then begin
             Scene.Image := Existing.Image; Scene.Description := Existing.Description; Scene.ImagePrompt := Existing.ImagePrompt; Scene.Padding := Existing.Padding;
+            Scene.ImageFeedback := Existing.ImageFeedback;
+            // Text import creates new stable IDs. A title match cannot preserve image approval.
+            Scene.ImageApproved := False; Scene.ImageApprovalKey := ''; Scene.ImageEditEpoch := Existing.ImageEditEpoch+1;
+            Scene.Animation.Free; Scene.Animation := Existing.Animation.Clone as TJSONObject;
+            Scene.Chart.Free; Scene.Chart := Existing.Chart.Clone as TJSONObject;
             Break;
           end;
         end;
@@ -800,9 +832,21 @@ begin
         var Base := FProject.FileName; if Path<>'' then Base := ExpandFileName(Path);
         if Next.CharacterFile<>'@sample' then Next.CharacterFile := ResolveMoviePath(Base,Next.CharacterFile);
         Next.FfmpegExe := ResolveMoviePath(Base,Next.FfmpegExe);
+        Next.BgmFile := ResolveMoviePath(Base,Next.BgmFile);
         for var C in Next.Cues do begin
           C.WaveFile := ResolveMoviePath(Base,C.WaveFile); C.LabFile := ResolveMoviePath(Base,C.LabFile); C.Background := ResolveMoviePath(Base,C.Background);
         end;
+      end;
+      if IsJson then begin
+        var ImportBase := FProject.FileName; if Path<>'' then ImportBase := ExpandFileName(Path);
+        for var Scene in Next.Scenes do begin
+          Scene.Image := ResolveMoviePath(ImportBase,Scene.Image);
+          if Scene.Animation.GetValue('closingCard') is TJSONObject then begin
+            var Card := JO(Scene.Animation,'closingCard');
+            if Card.GetValue('image')<>nil then ReplacePair(Card,'image',TJSONString.Create(ResolveMoviePath(ImportBase,JS(Card,'image'))));
+          end;
+        end;
+        Next.ThemeBackground := ResolveMoviePath(ImportBase,Next.ThemeBackground);
       end;
       Next.FileName := FProject.FileName; Next.Id := FProject.Id;
       if not IsJson then for var S in Next.Speakers do begin
@@ -819,6 +863,18 @@ begin
       if Args.GetValue('outputPreset')<>nil then begin
         var W,H,F: Integer; MoviePresetDimensions(JS(Args,'outputPreset'),W,H,F);
         if W>0 then begin ReplacePair(O,'width',TJSONNumber.Create(W)); ReplacePair(O,'height',TJSONNumber.Create(H)); ReplacePair(O,'fps',TJSONNumber.Create(F)); end;
+      end;
+      if Args.GetValue('bgm')<>nil then begin
+        var Bgm := JO(Args,'bgm');
+        if not (Bgm.GetValue('file') is TJSONString) and (Bgm.GetValue('file')<>nil) then raise ERigm.Create('BGM file must be a local path string');
+        for var Key in ['volume','fadeOut'] do if (Bgm.GetValue(Key)<>nil) and not (Bgm.GetValue(Key) is TJSONNumber) then raise ERigm.Create('BGM settings must be numeric');
+        Merge(JO(O,'bgm'),Bgm,['file','volume','fadeOut']);
+        var Settings := JO(O,'bgm'); var Volume := JN(Settings,'volume'); var Fade := JN(Settings,'fadeOut');
+        if not Finite(Volume) or (Volume<0) or (Volume>2) or not Finite(Fade) or (Fade<0) or (Fade>3600) then raise ERigm.Create('BGM gain must be 0..2, fade 0..3600 seconds');
+        if (Bgm.GetValue('file')<>nil) and (JS(Bgm,'file')<>'') then begin
+          var Path := CopyCheckedMovieBgm(ResolveMoviePath(FProject.FileName,JS(Bgm,'file')),TPath.Combine(MovieWorkDirectory(FProject),'Audio'));
+          ReplacePair(Settings,'file',TJSONString.Create(Path));
+        end;
       end;
       Merge(O,Args,['title','character','engineUrl','width','height','fps','backgroundColor','ffmpeg','encodeProfile','outputTarget','layout','themeBackground','lDirection']);
       if (Args.GetValue('layout')<>nil) and SameText(JS(O,'layout'),'l') and (O.GetValue('characters')<>nil) then begin
@@ -871,7 +927,11 @@ begin
       finally Item.Free; end;
     end else raise ERigm.Create('不明な動画命令です: '+Command);
     Next := TRigmMovieProject.FromJson(O);
-    try Next.FileName := FProject.FileName; Commit(Next); Next := nil; finally Next.Free; end;
+    try
+      Next.FileName := FProject.FileName;
+      if (Command='update-cue') and (Args.GetValue('audioEffects')<>nil) then EditCueVoiceEffects(Next,JS(Args,'id'),JO(Args,'audioEffects'));
+      Commit(Next); Next := nil;
+    finally Next.Free; end;
   finally O.Free; end;
   Result := Status;
 end;

@@ -38,13 +38,18 @@ begin
 end;
 procedure TRigmWizardWorkspace.FinishScriptToEditor;
 begin
-  if (CurrentScriptStage<>'closing') or FScriptTextEditing or FPlacementEditing or VoiceBusy then raise Exception.Create('締め設定を完了してください。');
-  if JS(JO(FScriptDraft.ScriptWizard,'closingData'),'status')<>'complete' then raise Exception.Create('締め設定の確認完了を押してください。');
+  if not MatchStr(CurrentScriptStage,['scenes','closing']) or FScriptTextEditing or FPlacementEditing or VoiceBusy or VoicePlaying or VoiceContinuous then raise Exception.Create('入力・音声処理を完了してください。');
+  var FromScenes := CurrentScriptStage='scenes';
+  var Reason := ScriptScenesAdvanceReason; if Reason<>'' then raise Exception.Create(Reason);
+  if not ScriptScenesReady(FScriptDraft,True) then raise Exception.Create('画像の欠損・読込失敗があります。確定を外して画像を再設定してください。');
+  if not FromScenes and (JS(JO(FScriptDraft.ScriptWizard,'closingData'),'status')<>'complete') then raise Exception.Create('締め設定の確認完了を押してください。');
   for var Existing in FSessions do if SameText(Existing.Project.Id,FScriptDraft.Id) then
     raise Exception.Create('この作品は動画編集で既に開いています。既存の編集内容を確認してください。');
   var P := FScriptDraft.Clone;
   try
-    MaterializeScriptClosing(P); P.EnableComposition; ValidateCompositionMaterials(P);
+    // Keep existing optional summary/closing data and cards; do not invent or overwrite human choices.
+    if not FromScenes then MaterializeScriptClosing(P);
+    P.EnableComposition; ValidateCompositionMaterials(P); SyncScriptScenesStatus(P);
     for var C in P.Cues do if not P.AudioReady(C) then raise Exception.Create('音声変更を確認してください。');
     P.WorkflowStage := 'preview'; PsdJson.Put(P.ScriptWizard,'stage','editor'); PsdJson.Put(P.ScriptWizard,'furthestStage','editor'); P.Changed;
     StoreScript(P,'editor'); // 内容と再開先を同時に保存してから画面を切り替える。

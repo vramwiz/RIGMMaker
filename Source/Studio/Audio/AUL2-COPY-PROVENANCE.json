@@ -1,0 +1,127 @@
+{
+  "referenceReadOnly": true,
+  "referenceProject": "D:\\DelphiProg\\Aul2AudioFilter",
+  "adaptation": "DSP kernels and standalone controller widgets copied; AviUtl telemetry removed; global DSP serialized and reset for each cue. Original reference remains unchanged.",
+  "files": [
+    {
+      "source": "D:\\DelphiProg\\Aul2AudioFilter\\Source\\Aul2AudioFilterPluginDelay.pas",
+      "sourceSha256": "d2c9a45998dc2ef7e8e720a394a19e173ddb2beb666613672059786e8d826857",
+      "destination": "RigmAul2Delay.pas"
+    },
+    {
+      "source": "D:\\DelphiProg\\Aul2AudioFilter\\Source\\Aul2AudioFilterPluginEq.pas",
+      "sourceSha256": "d6794bdf1963d236f1e447fcab7222070fd9539c6537635666e4725e7aaa8936",
+      "destination": "RigmAul2Eq.pas"
+    },
+    {
+      "source": "D:\\DelphiProg\\Aul2AudioFilter\\Source\\Aul2AudioFilterPluginCompressor.pas",
+      "sourceSha256": "0c6c4bba6fc11344fc83f79781a24b169fe733cf07ba9d58639e5889bd207a53",
+      "destination": "RigmAul2Compressor.pas"
+    },
+    {
+      "source": "D:\\DelphiProg\\Aul2AudioFilter\\Source\\Aul2AudioFilterPluginVoiceDrive.pas",
+      "sourceSha256": "d1b6e34986e895249de3484df3d5f9a06fcedc12a1f6c8c80068cb1409405664",
+      "destination": "RigmAul2VoiceDrive.pas"
+    },
+    {
+      "source": "D:\\DelphiProg\\Aul2AudioFilter\\Source\\Aul2AudioFilterPluginDistortion.pas",
+      "sourceSha256": "7c304fcf0210581f70b70a8aeba9ad55aa6e6c20d886ce961a57e5744d99886f",
+      "destination": "RigmAul2Distortion.pas"
+    },
+    {
+      "source": "D:\\DelphiProg\\Aul2AudioFilter\\Source\\Aul2AudioFilterPluginNoise.pas",
+      "sourceSha256": "31b3301dfe7446bde3cbfaed7229157b0bd2622dd060ca9355806e88fb2afa0b",
+      "destination": "RigmAul2Noise.pas"
+    },
+    {
+      "source": "D:\\DelphiProg\\Aul2AudioFilter\\Source\\Aul2AudioFilterPluginBitCrusher.pas",
+      "sourceSha256": "7248515282dad4ef57b6209c83d02873f71e1901cf839a226bce119f909b7792",
+      "destination": "RigmAul2BitCrusher.pas"
+    },
+    {
+      "source": "D:\\DelphiProg\\Aul2AudioFilter\\Source\\Aul2AudioFilterPluginTremble.pas",
+      "sourceSha256": "54ea2d43f6cc06d646524e8a34e51c77588e00b2dbcbecea84df3d7238e3cacb",
+      "destination": "RigmAul2Tremble.pas"
+    },
+    {
+      "source": "D:\\DelphiProg\\Aul2AudioFilter\\Source\\Aul2AudioFilterPluginWobble.pas",
+      "sourceSha256": "3c89f6af4b62bd98c72ca4d0d106262bcedc5d3c48af0b47d440b2656bb155fa",
+      "destination": "RigmAul2Wobble.pas"
+    },
+    {
+      "source": "D:\\DelphiProg\\Aul2AudioFilter\\Source\\Aul2AudioFilterPluginPitch.pas",
+      "sourceSha256": "3e228c21309c973dd728402b2feb55a0deeda9c1dfcf10191bfd92cb2938a585",
+      "destination": "RigmAul2Pitch.pas"
+    },
+    {
+      "source": "D:\\DelphiProg\\Aul2AudioFilter\\Source\\Aul2AudioFilterPluginRingMod.pas",
+      "sourceSha256": "7114d6d5df78bab20cdabc3d583b42e8f0ff16eaa995ebd42ef771707e8fc95b",
+      "destination": "RigmAul2RingMod.pas"
+    },
+    {
+      "source": "D:\\DelphiProg\\Aul2AudioFilter\\Source\\Aul2AudioFilterPluginMuffle.pas",
+      "sourceSha256": "b1c092f42ac49a592c9d4d61404c9bce47d6414e1715821b27c35cf398b9fcca",
+      "destination": "RigmAul2Muffle.pas"
+    },
+    {
+      "source": "D:\\DelphiProg\\Aul2AudioFilter\\Source\\Aul2AudioFilterPluginWhisper.pas",
+      "sourceSha256": "95b1eaa17bd17527f0dfc85df966cb04db29831674452f1fac5d04b558743d65",
+      "destination": "RigmAul2Whisper.pas"
+    },
+    {
+      "source": "D:\\DelphiProg\\Aul2AudioFilter\\Source\\Aul2AudioFilterPluginAutoGain.pas",
+      "sourceSha256": "e3f744d75e8d18a404869934240ed7edbdb057f23d37cc74e0c011470f2fadb5",
+      "destination": "RigmAul2AutoGain.pas"
+    },
+    {
+      "source": "D:\\DelphiProg\\Aul2AudioFilter\\Source\\Aul2AudioFilterPluginNoiseGate.pas",
+      "sourceSha256": "6c6241f9219398659e1319b33d467f90df9e2aa07751dffa96a1aeecfc6d91a4",
+      "destination": "RigmAul2NoiseGate.pas"
+    },
+    {
+      "source": "D:\\DelphiProg\\Aul2AudioFilter\\Source\\Aul2AudioFilterPluginGhost.pas",
+      "sourceSha256": "9aa4c129107ad32c04f3d1c709bf739405777797303a275d6dad54574f62322c",
+      "destination": "RigmAul2Ghost.pas"
+    },
+    {
+      "source": "D:\\DelphiProg\\Aul2AudioFilter\\Source\\Aul2AudioFilterPluginChorus.pas",
+      "sourceSha256": "cc1fafb252a25df48eb28f3a06591c3834f1ce556d2314ba0b2580cf9fd8c996",
+      "destination": "RigmAul2Chorus.pas"
+    },
+    {
+      "source": "D:\\DelphiProg\\Aul2AudioFilter\\Source\\Aul2AudioFilterPluginReverb.pas",
+      "sourceSha256": "dde6c32b9c51c01976ffebadf0537c1a4586da98310367e435e07bd5accb51c5",
+      "destination": "RigmAul2Reverb.pas"
+    },
+    {
+      "source": "D:\\DelphiProg\\Aul2AudioFilter\\Source\\Aul2AudioFilterPluginOutput.pas",
+      "sourceSha256": "8447099784d893cf5664dcbf6162eadd3659438a2999618d46ded5733494e1b4",
+      "destination": "RigmAul2Output.pas"
+    },
+    {
+      "source": "D:\\DelphiProg\\Aul2AudioFilter\\Source\\Aul2AudioFilterPluginLimiter.pas",
+      "sourceSha256": "803b7d0ba8424ced12ba49af7110734866ce1cc13474b2c28f2d3b65cdc2179b",
+      "destination": "RigmAul2Limiter.pas"
+    },
+    {
+      "source": "D:\\DelphiProg\\Aul2AudioFilter\\Source\\Aul2AudioControllerEffectDefinition.pas",
+      "sourceSha256": "9d20b35e3d4445a220ef9ef2fafa8da7681156f2de79a156191fc2368f081ba4",
+      "destination": "RigmAul2EffectDefinition.pas"
+    },
+    {
+      "source": "D:\\DelphiProg\\Aul2AudioFilter\\Source\\Aul2AudioControllerVolumeControl.pas",
+      "sourceSha256": "43549a77d64ff9b042d46ff178d3bd578a575440a1a67bba36189eca72f12200",
+      "destination": "RigmAul2VolumeControl.pas"
+    },
+    {
+      "source": "D:\\DelphiProg\\Aul2AudioFilter\\Source\\Aul2AudioControllerLampSwitch.pas",
+      "sourceSha256": "5e92c2a1ede704f9af25807e66fe851715b036e90ccf46c73d913213ba2be10d",
+      "destination": "RigmAul2LampSwitch.pas"
+    },
+    {
+      "source": "D:\\DelphiProg\\Aul2AudioFilter\\Source\\Aul2AudioFilterContextManager.pas",
+      "sourceSha256": "1fa028841d92f494765f0038bf49683fd13b17039b03201a08c81d3b40863ad6",
+      "destination": "RigmAul2Context.pas"
+    }
+  ]
+}
