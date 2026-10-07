@@ -46,10 +46,10 @@ begin
       var Path := W.ScriptDraft.FileName; var Hash := THashSHA2.GetHashStringFromFile(Path); var Guard := TFileStream.Create(Path,fmOpenRead or fmShareDenyWrite);
       try Next.Click; Check((W.CurrentScriptStage='review') and (W.ScriptDraft.Cues.Count=0) and (THashSHA2.GetHashStringFromFile(Path)=Hash),'failed casting Next retains previous disk and original draft',Results); finally Guard.Free; end;
       Next.Click; Check((W.CurrentScriptStage='casting') and not W.ScriptDraft.Modified,'Next atomically saves cues and casting destination',Results);
-      Check((W.ScriptDraft.Cues.Count=4) and (W.ScriptDraft.Scenes.Count=4),'paragraph scene units preserve three section order',Results);
+      Check((W.ScriptDraft.Cues.Count=5) and (W.ScriptDraft.Scenes.Count=4),'line cues and paragraph scenes preserve three section order',Results);
       Check((JS(TJSONObject(JA(JO(W.ScriptDraft.ScriptWizard,'casting'),'rows')[0]),'section')='opening') and
-        (JS(TJSONObject(JA(JO(W.ScriptDraft.ScriptWizard,'casting'),'rows')[3]),'section')='closing'),'opening body closing order retained',Results);
-      Check(W.ScriptDraft.Cues[1].Text=BodyText.Substring(0,BodyText.IndexOf(#13#10+#13#10)),'soft newline stays within one speech unit and colon remains raw text',Results);
+        (JS(TJSONObject(JA(JO(W.ScriptDraft.ScriptWizard,'casting'),'rows')[4]),'section')='closing'),'opening body closing order retained',Results);
+      Check((W.ScriptDraft.Cues[1].Text=BodyText.Substring(0,BodyText.IndexOf(#13#10))) and (W.ScriptDraft.Cues[1].Scene=W.ScriptDraft.Cues[2].Scene),'newline separates speech units within the same paragraph scene',Results);
       var Frame := CastingFrame(Creator); Check((Frame<>nil) and Frame.Showing and not Next.Visible,'lazy casting frame stops safely before subtitle stage',Results);
       var List := TListView(Frame.FindComponent('ScriptCastingRows')); var Id := W.ScriptDraft.Cues[0].Id;
       Press(List,VK_RETURN); Check((JS(JO(W.ScriptDraft.ScriptWizard,'casting'),'selectedCue')=Id) and not JB(CastingRow(W.ScriptDraft,Id),'confirmed'),'Enter cannot confirm unknown speaker or advance',Results);
@@ -61,19 +61,19 @@ begin
       Press(List,VK_RETURN); Check(JB(CastingRow(W.ScriptDraft,W.ScriptDraft.Cues[2].Id),'confirmed') and (JI(CastingRow(W.ScriptDraft,W.ScriptDraft.Cues[2].Id),'role')=2),'Enter accepts current AI role and advances',Results);
       Press(List,VK_UP); Check(JS(JO(W.ScriptDraft.ScriptWizard,'casting'),'selectedCue')=W.ScriptDraft.Cues[2].Id,'up moves dialogue cursor',Results);
       Press(List,VK_DOWN); Check(JS(JO(W.ScriptDraft.ScriptWizard,'casting'),'selectedCue')=W.ScriptDraft.Cues[3].Id,'down moves dialogue cursor',Results);
-      Press(List,Ord('2')); Check(JS(W.ScriptDraft.ScriptWizard,'castingStatus')='complete','all human confirmations complete casting without claiming voice ready',Results);
+      Press(List,Ord('2')); Press(List,Ord('2')); Check(JS(W.ScriptDraft.ScriptWizard,'castingStatus')='complete','all human confirmations complete casting without claiming voice ready',Results);
       for var V in JA(JO(W.ScriptDraft.ScriptWizard,'casting'),'roles') do Check(W.ScriptDraft.Speaker(JS(TJSONObject(V),'speakerId')).StyleId=-1,'VOICEVOX binding remains explicitly unassigned',Results);
       W.SelectCasting(W.ScriptDraft.Cues[1].Id); var Before := ScriptFingerprint(W.ScriptDraft); var Count := W.ScriptDraft.Cues.Count;
       Rejected := False; try W.SplitCasting(W.ScriptDraft.Cues[1].Id,6); except on E: Exception do Rejected := True; end;
       Check(Rejected and (W.ScriptDraft.Cues.Count=Count),'surrogate middle split rejected without mutation',Results);
       Rejected := False; try W.SplitCasting(W.ScriptDraft.Cues[1].Id,BodyText.IndexOf(#13#10)+1); except on E: Exception do Rejected := True; end;
-      Check(Rejected and (W.ScriptDraft.Cues.Count=Count),'CRLF middle split rejected without mutation',Results);
+      Check(Rejected and (W.ScriptDraft.Cues.Count=Count),'split outside the selected line rejected without mutation',Results);
       var Text := TMemo(Frame.FindComponent('ScriptCastingText')); Text.SelStart := 5;
       TToolButton(TToolBar(Frame.FindComponent('ScriptCastingToolbar')).FindComponent('ScriptCastingSplit')).Click;
       Check((W.ScriptDraft.Cues.Count=Count+1) and (W.ScriptDraft.Cues[1].Scene=W.ScriptDraft.Cues[2].Scene) and (ScriptFingerprint(W.ScriptDraft)=Before),'GUI split keeps raw script and one scene with multiple speeches',Results);
       CaptureUiWindow(Main,ResultPath,'.split');
       TToolButton(TToolBar(Frame.FindComponent('ScriptCastingToolbar')).FindComponent('ScriptCastingMerge')).Click;
-      Check((W.ScriptDraft.Cues.Count=Count) and (W.ScriptDraft.Cues[1].Text=BodyText.Substring(0,BodyText.IndexOf(#13#10+#13#10))),'GUI merge restores full utterance and source',Results);
+      Check((W.ScriptDraft.Cues.Count=Count) and (W.ScriptDraft.Cues[1].Text=BodyText.Substring(0,BodyText.IndexOf(#13#10))),'GUI merge restores the original line and source',Results);
       W.ScriptDraft.Cues[1].Subtitle := '字幕表示だけを変更'; W.ScriptDraft.Changed;
       Check(W.ScriptDraft.Cues[1].Text<>W.ScriptDraft.Cues[1].Subtitle,'voice text and display subtitle remain independent',Results);
       var StableId := W.ScriptDraft.Cues[2].Id; var StableSpeaker := W.ScriptDraft.Cues[2].SpeakerId;

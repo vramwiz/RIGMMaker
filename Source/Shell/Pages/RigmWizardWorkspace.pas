@@ -543,10 +543,14 @@ begin
     for var Existing in FScriptDrafts do if SameText(Existing.FileName,FullPath) then begin
       var OldHash: string;
       if FScriptSavedHashes.TryGetValue(Existing.Id,OldHash) and SameText(OldHash,Hash) then begin
-        FScriptDraft := Existing; FScriptViewStage := JS(Existing.ScriptWizard,'stage'); if FScriptViewStage='closing' then PrepareScriptClosing(Existing); ScriptChanged; Exit;
+        FScriptDraft := Existing; FScriptViewStage := JS(Existing.ScriptWizard,'stage'); if FScriptViewStage='closing' then PrepareScriptClosing(Existing);
+        if (FScriptViewStage='casting') and UpgradeScriptCastingLines(Existing) then Existing.Changed;
+        ScriptChanged; Exit;
       end;
     end;
-    if JS(P.ScriptWizard,'stage')='closing' then PrepareScriptClosing(P); P.Modified := False; FScriptDrafts.Add(P); FScriptDraft := P; FScriptViewStage := JS(P.ScriptWizard,'stage'); P := nil;
+    if JS(P.ScriptWizard,'stage')='closing' then PrepareScriptClosing(P); P.Modified := False;
+    if (JS(P.ScriptWizard,'stage')='casting') and UpgradeScriptCastingLines(P) then P.Changed;
+    FScriptDrafts.Add(P); FScriptDraft := P; FScriptViewStage := JS(P.ScriptWizard,'stage'); P := nil;
     FScriptSavedHashes.AddOrSetValue(FScriptDraft.Id,Hash); ScriptChanged;
   finally P.Free; end;
 end;

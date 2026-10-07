@@ -4,6 +4,7 @@
 interface
 uses System.JSON, RigmMovieModel;
 procedure PrepareScriptCasting(Project: TRigmMovieProject); // 未変更区分の配役・字幕・音声を保持して準備する。
+function UpgradeScriptCastingLines(Project: TRigmMovieProject): Boolean; // 未割当・未編集の旧配役だけを改行単位へ更新する。
 function CastingFingerprint(Project: TRigmMovieProject): string; // 原稿・セリフ境界・キャラ番号の指紋。
 function CastingRow(Project: TRigmMovieProject; const CueId: string): TJSONObject; // 借用。未登録ならnil。
 function CastingRole(Project: TRigmMovieProject; Number: Integer): TJSONObject; // 借用。無効番号ならnil。
@@ -92,6 +93,69 @@ begin
   if not Confirm then PsdJson.Put(Row,'origin','human');
   SelectCastingRow(Project,CueId); MoveCastingRow(Project,1); RefreshCastingStatus(Project);
 end;
+procedure AddLineCues(const Text,Section,SceneId: string; Start,Finish: Integer;
+  Cues: TObjectList<TRigmMovieCue>; Rows: TJSONArray; TemplateCue: TRigmMovieCue=nil; TemplateRow: TJSONObject=nil);
+begin
+  var Reused := False;
+  while Start<Finish do begin
+    var LineEnd := Text.IndexOf(#13#10,Start); if (LineEnd<0) or (LineEnd>Finish) then LineEnd := Finish;
+    if Trim(Text.Substring(Start,LineEnd-Start))<>'' then
+      while Start<LineEnd do begin
+        var Count := Min(2000,LineEnd-Start); if not ScriptTextBoundary(Text,Start+Count) then Dec(Count);
+        var C: TRigmMovieCue;
+        if TemplateCue=nil then C := TRigmMovieCue.Create
+        else begin
+          var Q := TemplateCue.Json; try C := TRigmMovieCue.FromJson(Q); finally Q.Free; end;
+          if Reused then C.Id := PsdJson.NewId;
+        end;
+        Reused := True; C.Scene := SceneId; C.Text := Text.Substring(Start,Count); C.Subtitle := C.Text; Cues.Add(C);
+        var Row: TJSONObject;
+        if TemplateRow<>nil then Row := TemplateRow.Clone as TJSONObject
+        else begin Row := TJSONObject.Create; AddN(Row,'role',0); Row.AddPair('origin','unassigned'); AddB(Row,'confirmed',False); end;
+        Rows.AddElement(Row); PsdJson.Put(Row,'cueId',C.Id); PsdJson.Put(Row,'section',Section);
+        PsdJson.Put(Row,'offset',TJSONNumber.Create(Start)); PsdJson.Put(Row,'length',TJSONNumber.Create(Count));
+        Inc(Start,Count);
+      end;
+    Start := LineEnd+2;
+  end;
+end;
+function UpgradeScriptCastingLines(Project: TRigmMovieProject): Boolean;
+begin
+  Result := False;
+  if (Project.ScriptWizard=nil) or not (Project.ScriptWizard.GetValue('casting') is TJSONObject) then Exit;
+  if not MatchText(JS(Project.ScriptWizard,'stage'),['review','casting']) then Exit;
+  var Cast := JO(Project.ScriptWizard,'casting');
+  if (JS(Cast,'state')='stale') or (JS(Cast,'sourceFingerprint')<>ScriptFingerprint(Project)) then Exit;
+  for var Key in ['subtitles','voice','scenes','summaryData','closingData'] do if Project.ScriptWizard.GetValue(Key)<>nil then Exit;
+  var HasLines := False;
+  for var V in JA(Cast,'rows') do begin
+    var Row := TJSONObject(V); var C := Project.Cue(JS(Row,'cueId')); if C=nil then Exit;
+    // 人の配役、AI候補、独立字幕、読み、音声資産を自動更新で失わない。
+    if JB(Row,'confirmed') or (JI(Row,'role')<>0) or (JS(Row,'origin')<>'unassigned') or
+      (C.SpeakerId<>'narrator') or (C.Subtitle<>C.Text) or (C.SubtitleNote<>'') or
+      (C.VoiceReading<>'') or (C.VoiceSettings.Count>0) or (C.VoiceStyleId>=0) or
+      (C.WaveFile<>'') or (C.LabFile<>'') or (C.AudioKey<>'') or (C.AudioSeconds<>0) then Exit;
+    var Text := JS(ScriptSection(Project,JS(Row,'section')),'text');
+    if C.Text<>Text.Substring(JI(Row,'offset'),JI(Row,'length')) then Exit;
+    HasLines := HasLines or C.Text.Contains(#13#10);
+  end;
+  if not HasLines then Exit;
+  ValidateScriptCasting(Project);
+  var Snapshot := Project.Clone;
+  try
+    Snapshot.Cues.Clear; var Rows := TJSONArray.Create; PsdJson.Put(JO(Snapshot.ScriptWizard,'casting'),'rows',Rows);
+    for var V in JA(Cast,'rows') do begin
+      var Row := TJSONObject(V); var C := Project.Cue(JS(Row,'cueId'));
+      AddLineCues(JS(ScriptSection(Project,JS(Row,'section')),'text'),JS(Row,'section'),C.Scene,
+        JI(Row,'offset'),JI(Row,'offset')+JI(Row,'length'),Snapshot.Cues,Rows,C,Row);
+    end;
+    if (Rows.Count=0) or (Rows.Count>2000) then raise Exception.Create('セリフは1～2000件の範囲にしてください。');
+    RequestScriptCasting(Snapshot); ValidateScriptCasting(Snapshot);
+    Project.Cues.Free; Project.Cues := Snapshot.Cues; Snapshot.Cues := TObjectList<TRigmMovieCue>.Create(True);
+    PsdJson.Put(Project.ScriptWizard,'casting',JO(Snapshot.ScriptWizard,'casting').Clone as TJSONObject);
+    PsdJson.Put(Project.ScriptWizard,'castingStatus',JS(Snapshot.ScriptWizard,'castingStatus')); Result := True;
+  finally Snapshot.Free; end;
+end;
 procedure PrepareScriptCasting(Project: TRigmMovieProject);
 begin
   var Selected := JA(Project.ScriptWizard,'selectedCharacters');
@@ -154,14 +218,7 @@ begin
         var Finish := Text.IndexOf(#13#10+#13#10,Start); if Finish<0 then Finish := Length(Text);
         if Trim(Text.Substring(Start,Finish-Start))<>'' then begin
           Inc(Paragraph); var Scene := TRigmMovieScene.Create; Scene.Title := Id+' '+Paragraph.ToString; NewScenes.Add(Scene);
-          while Start<Finish do begin
-            var Count := Min(2000,Finish-Start); if not ScriptTextBoundary(Text,Start+Count) then Dec(Count);
-            if (Start+Count<Finish) and (Text[Start+Count]=#13) and (Text[Start+Count+1]=#10) then Dec(Count);
-            var C := TRigmMovieCue.Create; C.Scene := Scene.Id; C.Text := Text.Substring(Start,Count); C.Subtitle := C.Text; NewCues.Add(C);
-            var Row := TJSONObject.Create; Rows.AddElement(Row); Row.AddPair('cueId',C.Id); Row.AddPair('section',Id);
-            AddN(Row,'offset',Start); AddN(Row,'length',Count); AddN(Row,'role',0); Row.AddPair('origin','unassigned'); AddB(Row,'confirmed',False);
-            Inc(Start,Count);
-          end;
+          AddLineCues(Text,Id,Scene.Id,Start,Finish,NewCues,Rows);
         end;
         Start := Finish+4;
       end;
@@ -182,7 +239,7 @@ begin
         else begin PsdJson.Put(Row,'role',TJSONNumber.Create(0)); PsdJson.Put(Row,'origin','unassigned'); C.SpeakerId := 'narrator'; end;
       end;
     end;
-    RequestScriptCasting(Project); ValidateScriptCasting(Project);
+    RequestScriptCasting(Project); ValidateScriptCasting(Project); UpgradeScriptCastingLines(Project);
   finally Cast.Free; NewCues.Free; NewScenes.Free; end;
 end;
 procedure SubmitScriptCasting(Project: TRigmMovieProject; Args: TJSONObject);
