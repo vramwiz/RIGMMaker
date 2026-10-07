@@ -93,7 +93,7 @@ function ResolveMoviePath(const BaseFile, Path: string): string;
 
 implementation
 
-uses System.IOUtils, System.Math, System.StrUtils, System.Hash, Winapi.Windows, RigmJson, RigmMovieOutput, RigmMovieEndCards, RigmMovieTransitions, RigmVoiceEffectSettings;
+uses System.IOUtils, System.Math, System.StrUtils, System.Hash, Winapi.Windows, RigmJson, RigmMovieOutput, RigmMovieEndCards, RigmMovieTransitions, RigmVoiceEffectSettings, RigmAudioFilePaths;
 
 constructor TRigmMovieSpeaker.Create;
 begin inherited; Id := 'narrator'; Name := 'ナレーター'; StyleId := -1; Speed := 1; Intonation := 1; Volume := 1; end;
@@ -427,7 +427,7 @@ end;
 function TRigmMovieProject.AudioReady(C: TRigmMovieCue): Boolean;
 begin
   if C.SpokenText='' then Exit(not ((Scenes.Count>0) and (C.WaveFile<>'') and (C.AudioSeconds>0)));
-  Result := (C.AudioSeconds>0) and (C.AudioKey=AudioFingerprint(C)) and FileExists(ResolveMoviePath(FileName,C.WaveFile));
+  Result := (C.AudioSeconds>0) and (C.AudioKey=AudioFingerprint(C)) and AudioFileExists(ResolveMoviePath(FileName,C.WaveFile));
 end;
 function TRigmMovieProject.AudioHeard(C: TRigmMovieCue): Boolean;
 begin Result := AudioReady(C) and ((C.SpokenText='') or (C.VoiceHeardKey=AudioFingerprint(C))); end;
@@ -442,7 +442,7 @@ begin Result := nil; for var C in Characters do if C.Id=Id then Exit(C); end;
 function TRigmMovieProject.Scene(const Id: string): TRigmMovieScene;
 begin Result := nil; for var S in Scenes do if S.Id=Id then Exit(S); end;
 function TRigmMovieProject.HasStoredAudio(C: TRigmMovieCue): Boolean;
-begin Result := (C.Text='') or ((C.AudioSeconds>0) and (C.WaveFile<>'') and FileExists(ResolveMoviePath(FileName,C.WaveFile))); end;
+begin Result := (C.Text='') or ((C.AudioSeconds>0) and (C.WaveFile<>'') and AudioFileExists(ResolveMoviePath(FileName,C.WaveFile))); end;
 function TRigmMovieProject.EffectiveStyle(C: TRigmMovieCue): Integer;
 begin Result := C.VoiceStyleId; if Result<0 then Result := Speaker(C.SpeakerId).StyleId; end;
 function TRigmMovieProject.SceneDuration(S: TRigmMovieScene): Double;
@@ -545,12 +545,14 @@ end;
 procedure SaveMovie(Project: TRigmMovieProject; const FileName: string; Organized: Boolean);
 var Temp,TargetFile,AssetDirectory: string; O: TJSONObject; Saved: TRigmMovieProject;
   function Asset(const Path: string): string;
-  var Source,Name,Target: string;
+  var Source,Name,Target,FsSource,FsTarget: string; IsAudio: Boolean;
   begin
     if (Path='') or (Path='@sample') then Exit(Path);
     Source := ResolveMoviePath(Project.FileName,Path);
-    if not FileExists(Source) then Exit(Source);
-    Name := THashSHA2.GetHashStringFromFile(Source)+LowerCase(ExtractFileExt(Source));
+    IsAudio := SameText(ExtractFileExt(Source),'.wav') or SameText(ExtractFileExt(Source),'.lab');
+    FsSource := Source; if IsAudio then FsSource := AudioFilePath(Source);
+    if not FileExists(FsSource) then Exit(Source);
+    Name := THashSHA2.GetHashStringFromFile(FsSource)+LowerCase(ExtractFileExt(Source));
     var Directory := AssetDirectory;
     if Organized then begin
       var Ext := LowerCase(ExtractFileExt(Source)); var Kind := 'Images';
@@ -558,9 +560,10 @@ var Temp,TargetFile,AssetDirectory: string; O: TJSONObject; Saved: TRigmMoviePro
       else if (Ext='.rigm') or (Ext='.psdchar') then Kind := 'Characters';
       Directory := TPath.Combine(AssetDirectory,Kind);
     end;
-    ForceDirectories(Directory); Target := TPath.Combine(Directory,Name);
-    if not FileExists(Target) then TFile.Copy(Source,Target,False);
-    if THashSHA2.GetHashStringFromFile(Target)<>THashSHA2.GetHashStringFromFile(Source) then raise ERigm.Create('保存資産の検証に失敗しました。');
+    if IsAudio then ForceDirectories(AudioFilePath(Directory)) else ForceDirectories(Directory);
+    Target := TPath.Combine(Directory,Name); FsTarget := Target; if IsAudio then FsTarget := AudioFilePath(Target);
+    if not FileExists(FsTarget) then TFile.Copy(FsSource,FsTarget,False);
+    if THashSHA2.GetHashStringFromFile(FsTarget)<>THashSHA2.GetHashStringFromFile(FsSource) then raise ERigm.Create('保存資産の検証に失敗しました。');
     Result := ExtractRelativePath(ExtractFilePath(TargetFile),Target);
   end;
 begin

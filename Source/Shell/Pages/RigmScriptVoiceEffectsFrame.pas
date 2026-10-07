@@ -4,16 +4,21 @@ interface
 uses System.Classes, System.Generics.Collections, Winapi.Messages, RigmScriptPageFrame,
   Vcl.Controls, Vcl.Forms, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls, Vcl.Buttons, RigmBufferedControls,
   RigmWizardWorkspace, RigmAul2EffectDefinition, RigmAul2VolumeControl, RigmAul2LampSwitch,
-  RigmVoiceEffectsPreview;
+  RigmVoiceEffectsPreview, VoicevoxToolbarButtons, RigmEffectsPlayback, RigmEffectsAnalysis,
+  RigmEffectsWaveform, RigmAul2OutputGraph;
 type
   TRigmScriptVoiceEffectsFrame = class(TRigmScriptPageFrame)
   private
     FWorkspace: TRigmWizardWorkspace; FList: TListView; FSync,FActive,FLoop,FWantPlay: Boolean;
     FEffect,FMode: TComboBox; FLamp: TAul2LampSwitch; FKnobs: TScrollBox;
     FVolumes: TArray<TAul2VolumeControl>; FDefinition: TControllerEffectDefinition;
-    FNotice: TLabel; FPlay,FLoopPlay,FStop: TSpeedButton; FTimer: TTimer;
+    FNotice,FHelp,FModeLabel,FGraphLabel,FMeasure,FTransportLabel: TLabel;
+    FBody: TScrollBox; FContent: TPanel; FSettingsGraph: TCustomControl;
+    FWave: TRigmEffectsWaveform; FMonitor: TAul2ControllerOutputGraph;
+    FReadyAnalysis,FPlayingAnalysis: TRigmEffectsAnalysis; FPlayback: TRigmEffectsPlayback;
+    FPlay,FLoopPlay,FStop: TVoicevoxToolbarButton; FTimer: TTimer;
     FJob: TRigmVoiceEffectsPreviewJob; FRetired: TObjectList<TRigmVoiceEffectsPreviewJob>;
-    FProjectId,FSelectedCue,FShownSettings,FPlaybackAlias,FPlaybackKey,FVoiceSourceKey,FReadyKey,FReadyPath: string; FRenderDue: UInt64;
+    FProjectId,FSelectedCue,FShownSettings,FPlaybackKey,FVoiceSourceKey,FReadyKey,FReadyPath: string; FRenderDue: UInt64;
     function SelectedId: string;
     procedure Selected(Sender: TObject; Item: TListItem; Value: Boolean);
     procedure Resized(Sender: TObject);
@@ -22,6 +27,8 @@ type
     procedure VolumeChanged(Sender: TObject; const ValueText: string; var Accept: Boolean);
     procedure CommitParameters(ChangedControl: TAul2VolumeControl=nil; const NewText: string='');
     procedure ShowParameters;
+    procedure UpdateGraphs;
+    procedure UpdateMeasurements;
     procedure Play(Sender: TObject);
     procedure Stop(Sender: TObject);
     procedure Tick(Sender: TObject);
@@ -40,50 +47,70 @@ type
   end;
 implementation
 uses System.SysUtils, System.Math, System.JSON, System.IOUtils, Winapi.Windows,
-  Winapi.MMSystem, RigmJson, PsdJson, RigmMovieModel, RigmVoiceEffects, RigmVoiceEffectSettings;
+  RigmAul2DelayGraph, RigmAul2EqGraph, RigmAul2CompressorGraph, RigmAul2DistortionGraph,
+  RigmAul2BitCrusherGraph, RigmAul2NoiseGateGraph, RigmAul2LimiterGraph, RigmJson, PsdJson, RigmMovieModel, RigmVoiceEffects, RigmVoiceEffectSettings, RigmAudioFilePaths;
 {$R *.dfm}
-procedure EffectMci(const Command: string);
-begin
-  var E := mciSendString(PChar(Command),nil,0,0);
-  if E<>0 then begin var B: array[0..255] of Char; mciGetErrorString(E,B,Length(B)); raise Exception.Create(string(B)); end;
-end;
 constructor TRigmScriptVoiceEffectsFrame.CreateForWorkspace(AOwner: TComponent; Workspace: TRigmWizardWorkspace);
+  function LabelAt(const Name,Text: string): TLabel;
+  begin
+    Result := TRigmScriptLabel.Create(Self); Result.Parent := FContent;
+    Result.Name := Name; Result.AutoSize := False; Result.WordWrap := True; Result.Caption := Text;
+  end;
 begin
   inherited Create(AOwner); Align := alClient; FWorkspace := Workspace;
   if AOwner is TWinControl then Parent := TWinControl(AOwner);
   FRetired := TObjectList<TRigmVoiceEffectsPreviewJob>.Create(True);
+  FPlayback := TRigmEffectsPlayback.Create;
   var Guide := TRigmScriptLabel.Create(Self); Guide.Parent := Self; Guide.Align := alTop;
-  Guide.AutoSize := False; Guide.Height := ScaleValue(58); Guide.WordWrap := True; Guide.Name := 'ScriptVoiceEffectsGuide';
-  Guide.Caption := 'セリフ1行ごとの音声エフェクト'+#13#10+'ON/OFFランプ・ノブで調整します。原音声を保持し、再生中の変更は次のループから反映します。';
-  var Rows := TRigmBufferedPanel.Create(Self); Rows.Parent := Self; Rows.Align := alLeft; Rows.Width := ScaleValue(310); Rows.BevelOuter := bvNone; Rows.Caption := '';
+  Guide.AutoSize := False; Guide.Height := ScaleValue(44); Guide.WordWrap := True; Guide.Name := 'ScriptVoiceEffectsGuide';
+  Guide.Caption := 'セリフごとの音声エフェクト。ノブ・数値で調整し、再生で波形と処理前後を確認します。'+#13#10+
+    '原音声を保持します。ループ中の変更は次の周回、通常再生の変更は次の再生に反映します。';
+  var Rows := TRigmBufferedPanel.Create(Self); Rows.Parent := Self; Rows.Align := alLeft;
+  Rows.Width := ScaleValue(260); Rows.BevelOuter := bvNone; Rows.Caption := '';
   FList := TRigmBufferedListView.Create(Self); FList.Parent := Rows; FList.Align := alClient;
-  FList.Name := 'ScriptVoiceEffectsRows'; FList.ViewStyle := vsReport; FList.RowSelect := True; FList.ReadOnly := True;
-  FList.HideSelection := False; FList.OnSelectItem := Selected;
-  FList.Columns.Add.Caption := 'セリフ'; FList.Columns[0].Width := ScaleValue(214);
-  FList.Columns.Add.Caption := 'エフェクト'; FList.Columns[1].Width := ScaleValue(84);
+  FList.Name := 'ScriptVoiceEffectsRows'; FList.ViewStyle := vsReport; FList.RowSelect := True;
+  FList.ReadOnly := True; FList.HideSelection := False; FList.OnSelectItem := Selected;
+  FList.Columns.Add.Caption := 'セリフ'; FList.Columns[0].Width := ScaleValue(236);
   var Splitter := TSplitter.Create(Self); Splitter.Parent := Self; Splitter.Align := alLeft;
-  var Body := TRigmBufferedPanel.Create(Self); Body.Parent := Self; Body.Align := alClient; Body.BevelOuter := bvNone; Body.Caption := '';
-  var Controls := TRigmBufferedPanel.Create(Self); Controls.Parent := Body; Controls.Align := alTop; Controls.Height := ScaleValue(40); Controls.Caption := ''; Controls.BevelOuter := bvNone;
-  FPlay := TSpeedButton.Create(Self); FPlay.Parent := Controls; FPlay.Align := alLeft; FPlay.Width := ScaleValue(104); FPlay.Caption := '▶ 再生'; FPlay.Name := 'ScriptEffectsPlay'; FPlay.OnClick := Play;
-  FLoopPlay := TSpeedButton.Create(Self); FLoopPlay.Parent := Controls; FLoopPlay.Align := alLeft; FLoopPlay.Width := ScaleValue(138); FLoopPlay.Caption := '⟳ ループ再生'; FLoopPlay.Name := 'ScriptEffectsLoop'; FLoopPlay.OnClick := Play;
-  FStop := TSpeedButton.Create(Self); FStop.Parent := Controls; FStop.Align := alLeft; FStop.Width := ScaleValue(104); FStop.Caption := '■ 停止'; FStop.Name := 'ScriptEffectsStop'; FStop.OnClick := Stop;
-  FPlay.Left := 0; FLoopPlay.Left := FPlay.Width; FStop.Left := FPlay.Width+FLoopPlay.Width;
-  var Choice := TRigmBufferedPanel.Create(Self); Choice.Parent := Body; Choice.Align := alTop; Choice.Height := ScaleValue(40); Choice.Caption := ''; Choice.BevelOuter := bvNone;
-  FEffect := TComboBox.Create(Self); FEffect.Parent := Choice; FEffect.Align := alLeft; FEffect.Width := ScaleValue(210); FEffect.Style := csDropDownList; FEffect.Name := 'ScriptEffectKind'; FEffect.OnChange := EffectChanged;
-  for var I := 0 to CONTROLLER_EFFECT_COUNT-1 do begin var D: TControllerEffectDefinition; GetControllerEffectDefinition(I,D); FEffect.Items.Add(D.DisplayName); end;
+  FBody := TScrollBox.Create(Self); FBody.Parent := Self; FBody.Align := alClient;
+  FBody.BorderStyle := bsNone; FBody.VertScrollBar.Tracking := True; FBody.HorzScrollBar.Tracking := True;
+  FContent := TRigmBufferedPanel.Create(Self); FContent.Parent := FBody; FContent.BevelOuter := bvNone;
+  FContent.Caption := ''; FContent.Name := 'ScriptEffectsContent';
+  FPlay := TVoicevoxToolbarButton.CreatePreview(Self); FPlay.Parent := FContent;
+  FPlay.Name := 'ScriptEffectsPlay'; FPlay.Hint := '選択したセリフを1回再生'; FPlay.OnExecute := Play;
+  FLoopPlay := TVoicevoxToolbarButton.NewContinuous(Self); FLoopPlay.Parent := FContent;
+  FLoopPlay.Name := 'ScriptEffectsLoop'; FLoopPlay.Hint := '選択したセリフをループ再生'; FLoopPlay.OnExecute := Play;
+  FStop := TVoicevoxToolbarButton.NewStop(Self); FStop.Parent := FContent;
+  FStop.Name := 'ScriptEffectsStop'; FStop.Hint := '試聴・処理を停止'; FStop.OnExecute := Stop;
+  FTransportLabel := LabelAt('ScriptEffectsTransportLabel','再生　／　ループ　／　停止');
+  FTransportLabel.SetBounds(ScaleValue(122),ScaleValue(9),ScaleValue(260),ScaleValue(24));
+  FEffect := TComboBox.Create(Self); FEffect.Parent := FContent; FEffect.Style := csDropDownList;
+  FEffect.Name := 'ScriptEffectKind'; FEffect.OnChange := EffectChanged;
+  for var I := 0 to CONTROLLER_EFFECT_COUNT-1 do begin
+    var D: TControllerEffectDefinition; GetControllerEffectDefinition(I,D); FEffect.Items.Add(D.DisplayName);
+  end;
   FEffect.ItemIndex := 0;
-  FLamp := TAul2LampSwitch.Create(Self); FLamp.Parent := Choice; FLamp.Align := alLeft; FLamp.Width := ScaleValue(154); FLamp.Name := 'ScriptEffectOn'; FLamp.OnClick := ParameterChanged;
-  FMode := TComboBox.Create(Self); FMode.Parent := Choice; FMode.Align := alClient; FMode.Style := csDropDownList; FMode.Name := 'ScriptEffectMode'; FMode.OnChange := ParameterChanged;
-  FEffect.Left := 0; FLamp.Left := FEffect.Width; FMode.Left := FEffect.Width+FLamp.Width;
-  FNotice := TRigmScriptLabel.Create(Self); FNotice.Parent := Body; FNotice.Align := alBottom; FNotice.Height := ScaleValue(68); FNotice.AutoSize := False; FNotice.WordWrap := True; FNotice.Name := 'ScriptEffectsStatus';
-  FKnobs := TScrollBox.Create(Self); FKnobs.Parent := Body; FKnobs.Align := alClient; FKnobs.BorderStyle := bsNone;
-  FKnobs.HorzScrollBar.Visible := False; FKnobs.VertScrollBar.Tracking := True;
-  Controls.Top := 0; Choice.Top := Controls.Height;
+  FLamp := TAul2LampSwitch.Create(Self); FLamp.Parent := FContent; FLamp.Name := 'ScriptEffectOn'; FLamp.OnClick := ParameterChanged;
+  FHelp := LabelAt('ScriptEffectDescription','');
+  FModeLabel := LabelAt('ScriptEffectModeLabel','');
+  FMode := TComboBox.Create(Self); FMode.Parent := FContent; FMode.Style := csDropDownList;
+  FMode.Name := 'ScriptEffectMode'; FMode.OnChange := ParameterChanged;
+  FKnobs := TScrollBox.Create(Self); FKnobs.Parent := FContent; FKnobs.BorderStyle := bsNone;
+  FKnobs.HorzScrollBar.Visible := False; FKnobs.VertScrollBar.Visible := False;
+  FGraphLabel := LabelAt('ScriptEffectGraphLabel','');
+  FMonitor := TAul2ControllerOutputGraph.Create(Self); FMonitor.Parent := FContent; FMonitor.Name := 'ScriptEffectsMeasuredLevels';
+  FWave := TRigmEffectsWaveform.Create(Self); FWave.Parent := FContent; FWave.Name := 'ScriptEffectsWaveform';
+  FMeasure := LabelAt('ScriptEffectsMeasurements','');
+  FNotice := LabelAt('ScriptEffectsStatus','再生ボタンで選択行を試聴できます。');
   FTimer := TTimer.Create(Self); FTimer.Interval := 80; FTimer.OnTimer := Tick; FTimer.Enabled := False;
-  OnResize := Resized;
+  OnResize := Resized; FBody.OnResize := Resized; Resized(Self);
 end;
 destructor TRigmScriptVoiceEffectsFrame.Destroy;
-begin if FTimer<>nil then FTimer.Enabled := False; StopPreview; if FTimer<>nil then FTimer.Enabled := False; FreeAndNil(FRetired); inherited; end;
+begin
+  if FTimer<>nil then FTimer.Enabled := False; StopPreview;
+  if FTimer<>nil then FTimer.Enabled := False;
+  FreeAndNil(FPlayback); FreeAndNil(FRetired); inherited;
+end;
 function TRigmScriptVoiceEffectsFrame.SelectedId: string;
 begin Result := ''; if FWorkspace.ScriptDraft<>nil then Result := JS(JO(FWorkspace.ScriptDraft.ScriptWizard,'voiceEffects'),'selectedCue'); end;
 procedure TRigmScriptVoiceEffectsFrame.CMShowingChanged(var Message: TMessage);
@@ -100,22 +127,66 @@ procedure TRigmScriptVoiceEffectsFrame.RetireJob;
 begin if FJob<>nil then begin FJob.Terminate; FRetired.Add(FJob); FJob := nil; FTimer.Enabled := True; end; end;
 procedure TRigmScriptVoiceEffectsFrame.ClosePlayback;
 begin
-  if FPlaybackAlias<>'' then begin mciSendString(PChar('stop '+FPlaybackAlias),nil,0,0); mciSendString(PChar('close '+FPlaybackAlias),nil,0,0); end;
-  FPlaybackAlias := ''; FPlaybackKey := '';
+  if FWave<>nil then FWave.SetData(nil,0);
+  try if FPlayback<>nil then FPlayback.Close;
+  except on E: Exception do if FNotice<>nil then FNotice.Caption := '停止処理：'+E.Message; end;
+  FPlaybackKey := ''; FreeAndNil(FPlayingAnalysis);
+  if FPlay<>nil then FPlay.Selected := False;
+  if FLoopPlay<>nil then FLoopPlay.Selected := False;
 end;
 procedure TRigmScriptVoiceEffectsFrame.StopPreview;
-begin FWantPlay := False; FLoop := False; FRenderDue := 0; FReadyKey := ''; FReadyPath := ''; FVoiceSourceKey := ''; ClosePlayback; RetireJob; end;
+begin
+  FWantPlay := False; FLoop := False; FRenderDue := 0; FReadyKey := ''; FReadyPath := ''; FVoiceSourceKey := '';
+  if FWave<>nil then FWave.SetData(nil,0); if FMonitor<>nil then FMonitor.ClearData;
+  ClosePlayback; FreeAndNil(FReadyAnalysis); RetireJob;
+  if FMeasure<>nil then FMeasure.Caption := '';
+  if FStop<>nil then FStop.Enabled := False;
+end;
 procedure TRigmScriptVoiceEffectsFrame.Stop(Sender: TObject);
-begin StopPreview; FNotice.Caption := '試聴を停止しました。'; end;
+begin
+  FWantPlay := False; FLoop := False; FRenderDue := 0; FVoiceSourceKey := '';
+  ClosePlayback; RetireJob; FStop.Enabled := False; UpdateMeasurements;
+  FNotice.Caption := '試聴を停止しました。';
+end;
 procedure TRigmScriptVoiceEffectsFrame.Selected(Sender: TObject; Item: TListItem; Value: Boolean);
-begin if FSync or not Value then Exit; StopPreview; FWorkspace.SelectVoiceEffects(Item.SubItems[1]); RefreshState; end;
+begin if FSync or not Value then Exit; StopPreview; FWorkspace.SelectVoiceEffects(Item.SubItems[0]); RefreshState; end;
 procedure TRigmScriptVoiceEffectsFrame.Resized(Sender: TObject);
 begin
-  if FList<>nil then FList.Columns[0].Width := Max(ScaleValue(120),FList.ClientWidth-FList.Columns[1].Width-ScaleValue(24));
-  if FKnobs<>nil then for var I := 0 to High(FVolumes) do begin
-    var W := Max(ScaleValue(128),FKnobs.ClientWidth div 3); var H := ScaleValue(190);
-    FVolumes[I].SetBounds((I mod 3)*W,(I div 3)*H,W-ScaleValue(8),H-ScaleValue(8));
-  end;
+  if FList<>nil then FList.Columns[0].Width := Max(ScaleValue(120),FList.ClientWidth-ScaleValue(24));
+  if (FContent=nil) or (FNotice=nil) then Exit;
+  var W := Max(ScaleValue(340),FBody.ClientWidth-ScaleValue(18)); var Gap := ScaleValue(6);
+  FContent.Width := W;
+  FPlay.SetBounds(Gap,0,ScaleValue(34),ScaleValue(34));
+  FLoopPlay.SetBounds(ScaleValue(42),0,ScaleValue(34),ScaleValue(34));
+  FStop.SetBounds(ScaleValue(78),0,ScaleValue(34),ScaleValue(34));
+  FTransportLabel.SetBounds(ScaleValue(122),ScaleValue(9),W-ScaleValue(128),ScaleValue(24));
+  FEffect.SetBounds(Gap,ScaleValue(40),W-Gap*2,ScaleValue(28));
+  FLamp.SetBounds(Gap,ScaleValue(74),ScaleValue(78),ScaleValue(30));
+  FHelp.SetBounds(ScaleValue(90),ScaleValue(74),W-ScaleValue(96),ScaleValue(40));
+  var Y := ScaleValue(116);
+  FModeLabel.SetBounds(Gap,Y,ScaleValue(96),ScaleValue(28));
+  FMode.SetBounds(ScaleValue(104),Y,W-ScaleValue(110),ScaleValue(28));
+  if FMode.Visible then Inc(Y,ScaleValue(34));
+  var Cols := Max(1,(W-Gap) div ScaleValue(90));
+  var Rows := Max(1,(Length(FVolumes)+Cols-1) div Cols);
+  FKnobs.SetBounds(Gap,Y,W-Gap*2,Rows*ScaleValue(126));
+  for var I := 0 to High(FVolumes) do
+    FVolumes[I].SetBounds((I mod Cols)*ScaleValue(90),(I div Cols)*ScaleValue(126),ScaleValue(84),ScaleValue(122));
+  Inc(Y,FKnobs.Height+Gap);
+  FGraphLabel.SetBounds(Gap,Y,W-Gap*2,ScaleValue(44)); Inc(Y,ScaleValue(46));
+  var GraphWidth := (W-Gap*3) div 2;
+  if FSettingsGraph<>nil then begin
+    if W>=ScaleValue(640) then begin
+      FSettingsGraph.SetBounds(Gap,Y,GraphWidth,ScaleValue(150));
+      FMonitor.SetBounds(GraphWidth+Gap*2,Y,GraphWidth,ScaleValue(150)); Inc(Y,ScaleValue(156));
+    end else begin
+      FSettingsGraph.SetBounds(Gap,Y,W-Gap*2,ScaleValue(150)); Inc(Y,ScaleValue(156));
+      FMonitor.SetBounds(Gap,Y,W-Gap*2,ScaleValue(150)); Inc(Y,ScaleValue(156));
+    end;
+  end else begin FMonitor.SetBounds(Gap,Y,W-Gap*2,ScaleValue(150)); Inc(Y,ScaleValue(156)); end;
+  FWave.SetBounds(Gap,Y,W-Gap*2,ScaleValue(150)); Inc(Y,ScaleValue(156));
+  FMeasure.SetBounds(Gap,Y,W-Gap*2,ScaleValue(80)); Inc(Y,ScaleValue(84));
+  FNotice.SetBounds(Gap,Y,W-Gap*2,ScaleValue(58)); FContent.Height := Y+ScaleValue(64);
 end;
 procedure TRigmScriptVoiceEffectsFrame.ShowParameters;
 begin
@@ -124,7 +195,13 @@ begin
   try
     GetControllerEffectDefinition(FEffect.ItemIndex,FDefinition);
     FLamp.Checked := VoiceEffectValue(C.AudioEffects,FDefinition.UseItemName)<>0;
-    FLamp.PanelColor := FDefinition.BackgroundColor; FLamp.TextColor := FDefinition.TextColor;
+    FLamp.PanelColor := FDefinition.VolumeColor; FLamp.TextColor := FDefinition.TextColor;
+    FContent.Color := FDefinition.BackgroundColor; FKnobs.Color := FDefinition.BackgroundColor;
+    FHelp.Caption := FDefinition.LampCaption; FHelp.Font.Color := FDefinition.TextColor;
+    FHelp.Transparent := False; FHelp.Color := FDefinition.VolumeColor;
+    FModeLabel.Transparent := False; FModeLabel.Color := FDefinition.VolumeColor; FModeLabel.Font.Color := FDefinition.TextColor;
+    FGraphLabel.Font.Color := $00F2F0EE; FMeasure.Font.Color := $00F2F0EE; FNotice.Font.Color := $00F2F0EE;
+    FModeLabel.Caption := FDefinition.SelectControl.DisplayName; FModeLabel.Visible := FDefinition.SelectControl.Visible;
     FMode.Visible := FDefinition.SelectControl.Visible; FMode.Items.Clear;
     for var S in FDefinition.SelectControl.Items do FMode.Items.Add(S);
     if FMode.Visible then FMode.ItemIndex := Round(VoiceEffectValue(C.AudioEffects,FDefinition.SelectControl.ItemName));
@@ -132,11 +209,12 @@ begin
     for var I := 0 to High(FVolumes) do begin
       var D := FDefinition.Volumes[I]; var V := TAul2VolumeControl.Create(Self); FVolumes[I] := V;
       V.Parent := FKnobs; V.Name := 'ScriptEffectValue'+I.ToString;
+      V.ParentFont := False; V.Font.Assign(Font); V.Font.Size := 9; // Aul2 compact controller font; avoids inherited Yu Gothic clipping.
       V.Configure(D.DisplayName,D.Minimum,D.Maximum,D.Step,D.Decimals,D.UnitText);
-      V.PanelColor := FDefinition.VolumeColor; V.AccentColor := FDefinition.ThemeColor;
+      V.PanelColor := FDefinition.VolumeColor; V.Color := FDefinition.ThemeColor; V.AccentColor := FDefinition.IndicatorColor;
       V.TextColor := FDefinition.TextColor; V.ValueText := FloatToStr(VoiceEffectValue(C.AudioEffects,D.ItemName),TFormatSettings.Invariant); V.OnValueChange := VolumeChanged;
     end;
-    FShownSettings := CueVoiceEffectsStamp(C); Resized(Self);
+    FShownSettings := CueVoiceEffectsStamp(C); UpdateGraphs; Resized(Self); UpdateMeasurements;
   finally FSync := False; end;
 end;
 procedure TRigmScriptVoiceEffectsFrame.EffectChanged(Sender: TObject);
@@ -164,6 +242,7 @@ begin
     end;
     FShownSettings := VoiceEffectSettingsStamp(Settings); // Prevent reentrant refresh replacing active knob.
     FWorkspace.EditVoiceEffects(SelectedId,Settings);
+    UpdateGraphs; UpdateMeasurements;
     if FWantPlay and (FLoop or (FJob<>nil)) then begin
       FRenderDue := GetTickCount64+280;
       if FLoop then FNotice.Caption := '調整を保存しました。処理後、次のループから反映します。'
@@ -182,11 +261,14 @@ begin
 end;
 procedure TRigmScriptVoiceEffectsFrame.OpenPlayback(const Path,Key: string);
 begin
-  ClosePlayback; FPlaybackAlias := 'rigm_effect_'+IntToHex(NativeUInt(Self),SizeOf(Pointer)*2);
+  ClosePlayback;
   try
-    EffectMci('open "'+Path+'" type waveaudio alias '+FPlaybackAlias);
-    EffectMci('play '+FPlaybackAlias+' from 0'); FPlaybackKey := Key;
-    FNotice.Caption := '選択行を再生中'; if FLoop then FNotice.Caption := '選択行をループ再生中（変更は次のループで反映）';
+    FPlayback.Open(Path); FPlayback.Play; FPlaybackKey := Key;
+    if FReadyAnalysis<>nil then FPlayingAnalysis := FReadyAnalysis.Clone;
+    FPlay.Selected := not FLoop; FLoopPlay.Selected := FLoop;
+    FNotice.Caption := '選択行を再生中';
+    if FLoop then FNotice.Caption := '選択行をループ再生中（変更は次の周回に反映）';
+    UpdateMeasurements;
   except ClosePlayback; raise; end;
 end;
 procedure TRigmScriptVoiceEffectsFrame.EnsurePreview;
@@ -197,8 +279,8 @@ begin
   var Key := CueEffectPreviewKey(P,C); if (FJob<>nil) and (FJob.Key=Key) then Exit; RetireJob;
   // A cancelled worker may still be loading PCM. Wait asynchronously before allocating the latest job.
   if FRetired.Count>0 then begin FRenderDue := GetTickCount64+80; Exit; end;
-  if (FReadyKey=Key) and FileExists(FReadyPath) then begin
-    if FPlaybackAlias='' then OpenPlayback(FReadyPath,Key); Exit;
+  if (FReadyKey=Key) and AudioFileExists(FReadyPath) then begin
+    if FPlaybackKey='' then OpenPlayback(FReadyPath,Key); Exit;
   end;
   FJob := TRigmVoiceEffectsPreviewJob.Create(P,C.Id); FJob.Start; FTimer.Enabled := True;
   FNotice.Caption := '選択行の派生音声を準備しています…';
@@ -215,23 +297,26 @@ begin
     if (FJob<>nil) and FJob.Done then begin
       var Job := FJob; FJob := nil;
       try
-        if (Job.Key=CueEffectPreviewKey(P,C)) and (Job.FileName<>'') and FileExists(Job.FileName) then begin
+        if (Job.Key=CueEffectPreviewKey(P,C)) and (Job.FileName<>'') and AudioFileExists(Job.FileName) then begin
           C.EffectWaveFile := ExtractRelativePath(IncludeTrailingPathDelimiter(ExtractFileDir(P.FileName)),Job.FileName);
-          C.EffectAudioKey := Job.Key; P.Changed;
+          C.EffectAudioKey := Job.Key; Job.KeepOutput; P.Changed;
           FReadyKey := Job.Key; FReadyPath := Job.FileName;
+          FWave.SetData(nil,0); FreeAndNil(FReadyAnalysis); FReadyAnalysis := Job.DetachAnalysis; UpdateMeasurements;
           FWorkspace.NotifyVoiceEffectsPreview;
-          if FWantPlay and (FPlaybackAlias='') then OpenPlayback(Job.FileName,Job.Key);
+          if FWantPlay and (FPlaybackKey='') then OpenPlayback(Job.FileName,Job.Key);
         end else if (Job.Key=CueEffectPreviewKey(P,C)) and (Job.Error<>'') then begin StopPreview; FNotice.Caption := Job.Error; end;
       finally Job.Free; end;
     end;
-    if FPlaybackAlias<>'' then begin
-      var B: array[0..63] of Char; var E := mciSendString(PChar('status '+FPlaybackAlias+' mode'),B,Length(B),0);
-      if E<>0 then raise Exception.Create('試聴の再生状態を取得できません。');
-      if not SameText(string(B),'playing') then begin
-        ClosePlayback;
-        if FLoop and FWantPlay then EnsurePreview else begin FWantPlay := False; FNotice.Caption := '選択行の試聴が終了しました。'; end;
+    if FPlaybackKey<>'' then begin
+      if not FPlayback.Playing then begin
+        if FLoop and FWantPlay then begin ClosePlayback; EnsurePreview; end
+        else begin
+          FWantPlay := False; FPlay.Selected := False; FLoopPlay.Selected := False;
+          FNotice.Caption := '選択行の試聴が終了しました。';
+        end;
       end;
     end;
+    UpdateMeasurements;
     FStop.Enabled := FWantPlay or (FJob<>nil); FTimer.Enabled := FActive or (FRetired.Count>0);
   except on E: Exception do begin StopPreview; FNotice.Caption := E.Message; end; end;
 end;
@@ -242,15 +327,14 @@ begin
   if (FProjectId<>P.Id) or (FSelectedCue<>Id) then begin StopPreview; FProjectId := P.Id; FSelectedCue := Id; FShownSettings := ''; end;
   var Rebuild := FList.Items.Count<>P.Cues.Count;
   if not Rebuild then for var I := 0 to P.Cues.Count-1 do
-    if (FList.Items[I].SubItems.Count<>2) or (FList.Items[I].SubItems[1]<>P.Cues[I].Id) then begin Rebuild := True; Break; end;
+    if (FList.Items[I].SubItems.Count<>1) or (FList.Items[I].SubItems[0]<>P.Cues[I].Id) then begin Rebuild := True; Break; end;
   FSync := True; FList.Items.BeginUpdate;
   try
     if Rebuild then FList.Items.Clear;
     for var I := 0 to P.Cues.Count-1 do begin
       var C := P.Cues[I]; var Item: TListItem;
-      if Rebuild then begin Item := FList.Items.Add; Item.SubItems.Add(''); Item.SubItems.Add(C.Id); end else Item := FList.Items[I];
-      Item.Caption := C.SpokenText; var Effect := 'なし'; if VoiceEffectsEnabled(C.AudioEffects) then Effect := '設定あり';
-      Item.SubItems[0] := Effect; Item.Selected := C.Id=Id;
+      if Rebuild then begin Item := FList.Items.Add; Item.SubItems.Add(C.Id); end else Item := FList.Items[I];
+      Item.Caption := C.SpokenText; Item.Selected := C.Id=Id;
     end;
   finally FList.Items.EndUpdate; FSync := False; end;
   var C := P.Cue(Id);
@@ -260,4 +344,53 @@ begin
     if (C.AudioSeconds<=0) or (C.WaveFile='') then FNotice.Caption := '音声を持たない字幕行です。試聴はありません。';
   end;
 end;
+
+procedure TRigmScriptVoiceEffectsFrame.UpdateGraphs;
+  function V(I: Integer): Double;
+  begin Result := 0; if I<Length(FDefinition.Volumes) then Result := VoiceEffectValue(FWorkspace.ScriptDraft.Cue(SelectedId).AudioEffects,FDefinition.Volumes[I].ItemName); end;
+begin
+  FreeAndNil(FSettingsGraph);
+  var P := FWorkspace.ScriptDraft; if (P=nil) or (P.Cue(SelectedId)=nil) then Exit;
+  case FEffect.ItemIndex of
+    0: begin var G := TAul2ControllerDelayGraph.Create(Self); G.SetDelay(V(0),V(1),V(2),V(3),FMode.ItemIndex=1,FLamp.Checked); G.AccentColor := FDefinition.IndicatorColor; FSettingsGraph := G; end;
+    1: begin var G := TAul2ControllerEqGraph.Create(Self); G.SetEq(FMode.ItemIndex,V(0),V(1),V(2),FLamp.Checked); G.AccentColor := FDefinition.IndicatorColor; FSettingsGraph := G; end;
+    2: begin var G := TAul2ControllerCompressorGraph.Create(Self); G.SetCompressor(V(0),V(1),V(2),V(3),V(4),V(5),FLamp.Checked); G.AccentColor := FDefinition.IndicatorColor; FSettingsGraph := G; end;
+    4: begin var G := TAul2ControllerDistortionGraph.Create(Self); G.SetDistortion(FMode.ItemIndex,V(0),V(1),V(2),V(3),FLamp.Checked); G.AccentColor := FDefinition.IndicatorColor; FSettingsGraph := G; end;
+    6: begin var G := TAul2ControllerBitCrusherGraph.Create(Self); G.SetBitCrusher(V(0),V(1),V(2),FLamp.Checked); G.AccentColor := FDefinition.IndicatorColor; FSettingsGraph := G; end;
+    14: begin var G := TAul2ControllerNoiseGateGraph.Create(Self); G.SetNoiseGate(V(0),V(1),V(2),V(3),FLamp.Checked); G.AccentColor := FDefinition.IndicatorColor; FSettingsGraph := G; end;
+    19: begin var G := TAul2ControllerLimiterGraph.Create(Self); G.SetLimiter(V(0),V(1),V(2),FLamp.Checked); G.AccentColor := FDefinition.IndicatorColor; FSettingsGraph := G; end;
+  end;
+  if FSettingsGraph<>nil then begin
+    FSettingsGraph.Parent := FContent; FSettingsGraph.Name := 'ScriptEffectSettingsGraph';
+    FGraphLabel.Caption := '特性：設定値から描画 ／ 処理前後レベル・波形：実測（モノラル）';
+  end else FGraphLabel.Caption := '選択エフェクトの処理前後（実測・モノラル）';
+  Resized(Self);
+end;
+procedure TRigmScriptVoiceEffectsFrame.UpdateMeasurements;
+  function Db(Value: Double): string;
+  begin if Value<=0 then Result := '−∞' else Result := FormatFloat('0.0',20*Log10(Value)); end;
+begin
+  var A := FPlayingAnalysis; var Position := 0.0;
+  if (FPlaybackKey<>'') and (FPlayback<>nil) then Position := FPlayback.PositionSeconds;
+  if A=nil then A := FReadyAnalysis;
+  FWave.SetData(A,Position);
+  if (A=nil) or not A.Ready or (A.BlockCount=0) then begin FMonitor.ClearData; FMeasure.Caption := '実測値：再生後に表示'; Exit; end;
+  var M := A.EffectAt(FEffect.ItemIndex,Position); var Chain := A.ChainAt(Position);
+  var BeforeRms,AfterRms: TControllerOutputHistory;
+  FillChar(BeforeRms,SizeOf(BeforeRms),0); FillChar(AfterRms,SizeOf(AfterRms),0);
+  var Last := A.BlockIndexAt(Position); var First := Max(0,Last-CONTROLLER_OUTPUT_HISTORY_COUNT+1);
+  for var I := First to Last do begin
+    var H := A.Block(I).Effects[FEffect.ItemIndex]; BeforeRms[I-First] := H.InputRms; AfterRms[I-First] := H.OutputRms;
+  end;
+  FMonitor.SetActive(M.Applied);
+  FMonitor.SetMonitorData(M.InputPeak,M.InputPeak,M.OutputPeak,M.OutputPeak,BeforeRms,BeforeRms,AfterRms,AfterRms,Last-First+1);
+  var State := '実測'; if not M.Applied then State := 'バイパス実測';
+  var Current := ''; var P := FWorkspace.ScriptDraft;
+  if (P<>nil) and (P.Cue(SelectedId)<>nil) then Current := CueEffectPreviewKey(P,P.Cue(SelectedId));
+  var MeasuredKey := FReadyKey; if FPlayingAnalysis<>nil then MeasuredKey := FPlaybackKey;
+  if MeasuredKey<>Current then State := State+'（前回の試聴設定。次の再生で更新）';
+  FMeasure.Caption := State+'：'+FEffect.Text+' RMS '+Db(M.InputRms)+' → '+Db(M.OutputRms)+' dBFS / 差分RMS '+Db(M.ResidualRms)+' dBFS'+#13#10+
+    '最終出力 Peak '+Db(Chain.OutputPeak)+' dBFS。差分は出力−入力の実測値です。';
+end;
+
 end.

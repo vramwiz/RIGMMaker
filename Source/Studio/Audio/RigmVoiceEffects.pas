@@ -6,14 +6,14 @@ function CueEffectSourceStamp(Project: TRigmMovieProject; Cue: TRigmMovieCue): s
 function CueEffectPreviewKey(Project: TRigmMovieProject; Cue: TRigmMovieCue): string;
 procedure EditCueVoiceEffects(Project: TRigmMovieProject; const CueId: string; Settings: TJSONObject);
 implementation
-uses System.SysUtils, System.IOUtils, System.Hash, RigmVoiceEffectSettings, RigmModel;
+uses System.SysUtils, System.IOUtils, System.Hash, RigmVoiceEffectSettings, RigmModel, RigmAudioFilePaths;
 function CueVoiceEffectsStamp(Cue: TRigmMovieCue): string;
 begin Result := VoiceEffectSettingsStamp(Cue.AudioEffects); end;
 function CueEffectSourceStamp(Project: TRigmMovieProject; Cue: TRigmMovieCue): string;
 begin
   var FileName := ResolveMoviePath(Project.FileName,Cue.WaveFile);
   var Key := Project.Id+'|'+Cue.Id+'|'+Cue.AudioKey+'|'+Project.AudioFingerprint(Cue)+'|'+FileName;
-  if FileExists(FileName) then Key := Key+'|'+TFile.GetSize(FileName).ToString+'|'+FloatToStr(TFile.GetLastWriteTimeUtc(FileName),TFormatSettings.Invariant);
+  if AudioFileExists(FileName) then Key := Key+'|'+TFile.GetSize(AudioFilePath(FileName)).ToString+'|'+FloatToStr(TFile.GetLastWriteTimeUtc(AudioFilePath(FileName)),TFormatSettings.Invariant);
   Result := THashSHA2.GetHashString(Key);
 end;
 function CueEffectPreviewKey(Project: TRigmMovieProject; Cue: TRigmMovieCue): string;

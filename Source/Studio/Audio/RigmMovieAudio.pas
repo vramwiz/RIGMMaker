@@ -23,7 +23,7 @@ function CachedMovieAudio(Project: TRigmMovieProject; AllowStale: Boolean=False)
 function MovieWaveform(Project: TRigmMovieProject; Bins: Integer = 2048): TJSONObject;
 
 implementation
-uses System.Math, System.IOUtils, System.Hash, System.StrUtils, System.Generics.Collections, Winapi.Windows, RigmModel, RigmJson, RigmVoiceEffects, RigmVoiceEffectsDsp;
+uses System.Math, System.IOUtils, System.Hash, System.StrUtils, System.Generics.Collections, Winapi.Windows, RigmModel, RigmJson, RigmVoiceEffects, RigmVoiceEffectsDsp, RigmAudioFilePaths;
 
 var CacheLock: TObject; CacheKey: string; CacheSamples,CacheSpeechSamples: TArray<SmallInt>;
 
@@ -36,11 +36,11 @@ begin
     var FileName := ResolveMoviePath(Project.FileName,C.WaveFile);
     Key := Key+'|'+C.Id+'|'+C.Scene+'|'+FloatToStr(Project.CueStart(C),TFormatSettings.Invariant)+'|'+C.AudioKey+'|'+Project.AudioFingerprint(C)+'|'+CueVoiceEffectsStamp(C)+'|'+
       FloatToStr(C.AudioSeconds,TFormatSettings.Invariant)+'|'+FloatToStr(C.Pause,TFormatSettings.Invariant)+'|'+FileName;
-    if FileExists(FileName) then Key := Key+'|'+TFile.GetSize(FileName).ToString+'|'+FloatToStr(TFile.GetLastWriteTimeUtc(FileName),TFormatSettings.Invariant);
+    if AudioFileExists(FileName) then Key := Key+'|'+TFile.GetSize(AudioFilePath(FileName)).ToString+'|'+FloatToStr(TFile.GetLastWriteTimeUtc(AudioFilePath(FileName)),TFormatSettings.Invariant);
   end;
   var BgmPath := ResolveMoviePath(Project.FileName,Project.BgmFile);
   Key := Key+'|bgm|'+BgmPath+'|'+FloatToStr(Project.BgmVolume,TFormatSettings.Invariant)+'|'+FloatToStr(Project.BgmFadeOut,TFormatSettings.Invariant);
-  if FileExists(BgmPath) then Key := Key+'|'+TFile.GetSize(BgmPath).ToString+'|'+FloatToStr(TFile.GetLastWriteTimeUtc(BgmPath),TFormatSettings.Invariant);
+  if AudioFileExists(BgmPath) then Key := Key+'|'+TFile.GetSize(AudioFilePath(BgmPath)).ToString+'|'+FloatToStr(TFile.GetLastWriteTimeUtc(AudioFilePath(BgmPath)),TFormatSettings.Invariant);
   Result := THashSHA2.GetHashString(Key);
 end;
 
@@ -95,7 +95,7 @@ begin
   Result := TRigmPcm.Create; Stream := nil;
   try
    try
-    Stream := TFileStream.Create(FileName,fmOpenRead or fmShareDenyWrite);
+    Stream := TFileStream.Create(AudioFilePath(FileName),fmOpenRead or fmShareDenyWrite);
     Stream.ReadBuffer(Code,4); if Code<>'RIFF' then raise ERigm.Create('PCM WAVのRIFFヘッダがありません。');
     Stream.ReadBuffer(RiffSize,4); Stream.ReadBuffer(Code,4); if Code<>'WAVE' then raise ERigm.Create('WAVE形式ではありません。');
     Limit := Int64(RiffSize)+8; if (Limit>Stream.Size) or (Limit<12) or (Limit>512*1024*1024) then raise ERigm.Create('WAV長が不正です。');
@@ -131,7 +131,7 @@ var S: TFileStream; N: Cardinal; W: Word; Code: AnsiString;
   procedure U32(Value: Cardinal); begin N := Value; S.WriteBuffer(N,4); end;
   procedure U16(Value: Word); begin W := Value; S.WriteBuffer(W,2); end;
 begin
-  S := TFileStream.Create(FileName,fmCreate);
+  S := TFileStream.Create(AudioFilePath(FileName),fmCreate);
   try
     Four('RIFF'); U32(36+Length(Samples)*2); Four('WAVE'); Four('fmt '); U32(16);
     U16(1); U16(1); U32(Rate); U32(Rate*2); U16(2); U16(16); Four('data'); U32(Length(Samples)*2);

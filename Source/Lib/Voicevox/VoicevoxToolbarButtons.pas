@@ -57,6 +57,8 @@ type
     // ページを切り替えず、確認再生または停止だけを要求するボタンを生成する。
     constructor CreatePreview(AOwner: TComponent); reintroduce;
     class function NewContinuous(AOwner: TComponent): TVoicevoxToolbarButton; static;
+    // Reuse the existing preview stop glyph as a dedicated stop operation.
+    class function NewStop(AOwner: TComponent): TVoicevoxToolbarButton; static;
     // ページを切り替えず、現在のセリフの送信だけを要求するボタンを生成する。
     class function NewSend(AOwner: TComponent): TVoicevoxToolbarButton; static;
     // 入力パネルを閉じるための×印を持つ操作ボタンを生成する。
@@ -193,6 +195,12 @@ begin
   ParentShowHint := False;
   ShowHint := True;
   TabStop := True;
+end;
+
+class function TVoicevoxToolbarButton.NewStop(AOwner: TComponent): TVoicevoxToolbarButton;
+begin
+  Result := TVoicevoxToolbarButton.CreatePreview(AOwner);
+  Result.FPreviewActive := True;
 end;
 
 class function TVoicevoxToolbarButton.NewSend(

@@ -42,6 +42,7 @@ type
     FValue: Double;
     FValueEdit: TEdit;
     FValueText: string;
+    function ScalePx(LogicalPixels: Integer): Integer;
     procedure CommitValueEdit;
     procedure EditEnter(Sender: TObject);
     procedure EditExit(Sender: TObject);
@@ -62,6 +63,7 @@ type
     procedure SetValueText(const Value: string);
     function TryApplyValue(Value: Double; NotifyChange: Boolean): Boolean;
   protected
+    procedure ChangeScale(M, D: Integer; isDpiChange: Boolean); override;
     procedure CreateParams(var Params: TCreateParams); override;
     procedure KeyDown(var Key: Word; Shift: TShiftState); override;
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
@@ -141,7 +143,7 @@ begin
 end;
 
 procedure DrawKnobLimitMark(Canvas: TCanvas; const Center: TPoint; Radius,
-  Degree: Integer);
+  Degree, InnerOffset, OuterOffset, LineWidth: Integer);
 var
   Angle    : Double;
   InnerPoint: TPoint;
@@ -149,13 +151,13 @@ var
 begin
   Angle := DegToRad(Degree);
   InnerPoint := Point(
-    Center.X + Round(Cos(Angle) * (Radius + 2)),
-    Center.Y + Round(Sin(Angle) * (Radius + 2)));
+    Center.X + Round(Cos(Angle) * (Radius + InnerOffset)),
+    Center.Y + Round(Sin(Angle) * (Radius + InnerOffset)));
   OuterPoint := Point(
-    Center.X + Round(Cos(Angle) * (Radius + 7)),
-    Center.Y + Round(Sin(Angle) * (Radius + 7)));
+    Center.X + Round(Cos(Angle) * (Radius + OuterOffset)),
+    Center.Y + Round(Sin(Angle) * (Radius + OuterOffset)));
   Canvas.Pen.Style := psSolid;
-  Canvas.Pen.Width := 2;
+  Canvas.Pen.Width := LineWidth;
   Canvas.Pen.Color := RGB(118, 122, 127);
   Canvas.MoveTo(InnerPoint.X, InnerPoint.Y);
   Canvas.LineTo(OuterPoint.X, OuterPoint.Y);
@@ -208,6 +210,22 @@ begin
   Params.Style := Params.Style or WS_CLIPCHILDREN;
 end;
 
+function TAul2VolumeControl.ScalePx(LogicalPixels: Integer): Integer;
+var PPI: Integer;
+begin
+  PPI := CurrentPPI;
+  if PPI <= 0 then PPI := 96;
+  Result := MulDiv(LogicalPixels, PPI, 96);
+end;
+
+procedure TAul2VolumeControl.ChangeScale(M, D: Integer; isDpiChange: Boolean);
+begin
+  inherited;
+  // The inherited DPI change scales fonts/children first. Reapply our logical editor geometry last.
+  LayoutValueEdit;
+  Invalidate;
+end;
+
 procedure TAul2VolumeControl.SetEditText(const Value: string);
 begin
   if not Assigned(FValueEdit) or (FValueEdit.Text = Value) then
@@ -240,7 +258,9 @@ begin
     Exit;
   end;
 
-  KnobRect := Rect(0, 26, Width, 88);
+  // Independent DPI rounding of center/radius/shadow can exceed the scaled base bottom by one pixel.
+  KnobRect := Rect(0, ScalePx(26), Width,
+    Max(ScalePx(88), ScalePx(57) + ScalePx(27) + ScalePx(4)));
   InvalidateRect(Handle, @KnobRect, False);
 end;
 
@@ -249,27 +269,22 @@ var
   EditHeight: Integer;
   EditRight: Integer;
   EditTop  : Integer;
-  FontPPI  : Integer;
   UnitWidth: Integer;
 begin
   if not Assigned(FValueEdit) then
     Exit;
 
   // Handle生成前のResize/Configureからも呼ばれるため、Canvasには触れない。
-  FontPPI := Font.PixelsPerInch;
-  if FontPPI <= 0 then
-    FontPPI := 96;
   if FUnitText <> '' then
-    UnitWidth := Max(MulDiv(18, FontPPI, 96),
-      MulDiv(Length(FUnitText) * 7 + 5, FontPPI, 96))
+    UnitWidth := Max(ScalePx(18), ScalePx(Length(FUnitText) * 7 + 5))
   else
     UnitWidth := 0;
   // ClientWidth/ClientHeightはHandleを要求するため、Parent接続前は保存済み寸法を使う。
   // TEditの既定AutoSizeへ任せると、親カードの固定高さと異なる倍率で拡大されて下端が欠ける。
-  EditHeight := MulDiv(23, FontPPI, 96);
-  EditRight := Width - 6 - UnitWidth;
-  EditTop := Min(Height - EditHeight - 14, 89);
-  FValueEdit.SetBounds(6, EditTop, Max(24, EditRight - 6), EditHeight);
+  EditHeight := ScalePx(23);
+  EditRight := Width - ScalePx(6) - UnitWidth;
+  EditTop := Min(Height - EditHeight - ScalePx(14), ScalePx(89));
+  FValueEdit.SetBounds(ScalePx(6), EditTop, Max(ScalePx(24), EditRight - ScalePx(6)), EditHeight);
 end;
 
 function TAul2VolumeControl.FormatValue(Value: Double): string;
@@ -505,7 +520,7 @@ begin
   DeltaY := Y - FDragStartPoint.Y;
   if FDragAxis = vdaNone then
   begin
-    if Max(Abs(DeltaX), Abs(DeltaY)) < VOLUME_DRAG_AXIS_THRESHOLD then
+    if Max(Abs(DeltaX), Abs(DeltaY)) < ScalePx(VOLUME_DRAG_AXIS_THRESHOLD) then
       Exit;
     if Abs(DeltaX) > Abs(DeltaY) then
       FDragAxis := vdaHorizontal
@@ -517,12 +532,12 @@ begin
   if FDragAxis = vdaHorizontal then
   begin
     DeltaPixels := DeltaX;
-    DeltaValue := DeltaPixels * ValueRange * VOLUME_HORIZONTAL_RANGE_PER_PIXEL;
+    DeltaValue := DeltaPixels * ValueRange * VOLUME_HORIZONTAL_RANGE_PER_PIXEL * 96 / ScalePx(96);
   end
   else
   begin
     DeltaPixels := -DeltaY;
-    DeltaValue := DeltaPixels * ValueRange * VOLUME_VERTICAL_RANGE_PER_PIXEL;
+    DeltaValue := DeltaPixels * ValueRange * VOLUME_VERTICAL_RANGE_PER_PIXEL * 96 / ScalePx(96);
   end;
   TryApplyValue(FDragStartValue + DeltaValue, True);
 end;
@@ -584,53 +599,58 @@ var
   UnitLeft    : Integer;
 begin
   inherited;
+  // Text painting leaves bsClear behind; restore a solid brush on every repaint.
+  Canvas.Brush.Style := bsSolid;
   Canvas.Brush.Color := Color;
   Canvas.FillRect(ClientRect);
 
-  CardRect := Rect(1, 1, ClientWidth - 1, ClientHeight - 1);
+  CardRect := Rect(ScalePx(1), ScalePx(1), ClientWidth - ScalePx(1), ClientHeight - ScalePx(1));
+  Canvas.Pen.Style := psSolid;
+  Canvas.Pen.Width := ScalePx(1);
   Canvas.Pen.Color := RGB(58, 62, 68);
   Canvas.Brush.Color := FPanelColor;
-  Canvas.RoundRect(CardRect.Left, CardRect.Top, CardRect.Right, CardRect.Bottom, 9, 9);
+  Canvas.RoundRect(CardRect.Left, CardRect.Top, CardRect.Right, CardRect.Bottom, ScalePx(9), ScalePx(9));
 
   Canvas.Font.Assign(Font);
   Canvas.Font.Color := FTextColor;
   Canvas.Font.Style := [fsBold];
   Canvas.Brush.Style := bsClear;
-  TextRect := Rect(3, 7, ClientWidth - 3, 25);
+  TextRect := Rect(ScalePx(3), ScalePx(7), ClientWidth - ScalePx(3), ScalePx(25));
   DrawText(Canvas.Handle, PChar(FDisplayName), -1, TextRect,
     DT_CENTER or DT_SINGLELINE or DT_END_ELLIPSIS or DT_VCENTER);
 
-  KnobRadius := Min(ClientWidth div 2 - 7, 27);
-  KnobRadius := Max(KnobRadius, 18);
-  Center := Point(ClientWidth div 2, 57);
+  KnobRadius := Min(ClientWidth div 2 - ScalePx(7), ScalePx(27));
+  KnobRadius := Max(KnobRadius, ScalePx(18));
+  Center := Point(ClientWidth div 2, ScalePx(57));
 
-  DrawKnobLimitMark(Canvas, Center, KnobRadius, 135);
-  DrawKnobLimitMark(Canvas, Center, KnobRadius, 405);
+  DrawKnobLimitMark(Canvas, Center, KnobRadius, 135, ScalePx(2), ScalePx(7), ScalePx(2));
+  DrawKnobLimitMark(Canvas, Center, KnobRadius, 405, ScalePx(2), ScalePx(7), ScalePx(2));
 
   Canvas.Pen.Style := psClear;
+  Canvas.Brush.Style := bsSolid;
   Canvas.Brush.Color := RGB(10, 11, 12);
-  Canvas.Ellipse(Center.X - KnobRadius + 2, Center.Y - KnobRadius + 4,
-    Center.X + KnobRadius + 2, Center.Y + KnobRadius + 4);
+  Canvas.Ellipse(Center.X - KnobRadius + ScalePx(2), Center.Y - KnobRadius + ScalePx(4),
+    Center.X + KnobRadius + ScalePx(2), Center.Y + KnobRadius + ScalePx(4));
   Canvas.Brush.Color := RGB(82, 86, 91);
   Canvas.Ellipse(Center.X - KnobRadius, Center.Y - KnobRadius,
     Center.X + KnobRadius, Center.Y + KnobRadius);
   Canvas.Brush.Color := RGB(13, 14, 16);
-  Canvas.Ellipse(Center.X - KnobRadius + 2, Center.Y - KnobRadius + 2,
-    Center.X + KnobRadius - 2, Center.Y + KnobRadius - 2);
+  Canvas.Ellipse(Center.X - KnobRadius + ScalePx(2), Center.Y - KnobRadius + ScalePx(2),
+    Center.X + KnobRadius - ScalePx(2), Center.Y + KnobRadius - ScalePx(2));
   Canvas.Brush.Color := RGB(27, 29, 33);
-  Canvas.Ellipse(Center.X - KnobRadius + 4, Center.Y - KnobRadius + 4,
-    Center.X + KnobRadius - 4, Center.Y + KnobRadius - 4);
+  Canvas.Ellipse(Center.X - KnobRadius + ScalePx(4), Center.Y - KnobRadius + ScalePx(4),
+    Center.X + KnobRadius - ScalePx(4), Center.Y + KnobRadius - ScalePx(4));
   Canvas.Brush.Color := RGB(36, 39, 43);
-  Canvas.Ellipse(Center.X - KnobRadius + 7, Center.Y - KnobRadius + 6,
-    Center.X + KnobRadius - 7, Center.Y + KnobRadius - 8);
+  Canvas.Ellipse(Center.X - KnobRadius + ScalePx(7), Center.Y - KnobRadius + ScalePx(6),
+    Center.X + KnobRadius - ScalePx(7), Center.Y + KnobRadius - ScalePx(8));
   Canvas.Brush.Color := RGB(43, 46, 50);
-  Canvas.Ellipse(Center.X - KnobRadius + 11, Center.Y - KnobRadius + 10,
-    Center.X + KnobRadius - 10, Center.Y + KnobRadius - 12);
+  Canvas.Ellipse(Center.X - KnobRadius + ScalePx(11), Center.Y - KnobRadius + ScalePx(10),
+    Center.X + KnobRadius - ScalePx(10), Center.Y + KnobRadius - ScalePx(12));
 
-  DrawKnobArc(Canvas, Center, KnobRadius - 3, 190, 300, RGB(112, 116, 121), 2);
-  DrawKnobArc(Canvas, Center, KnobRadius - 3, 10, 120, RGB(8, 9, 10), 2);
-  DrawKnobArc(Canvas, Point(Center.X - 1, Center.Y - 1), KnobRadius - 7,
-    205, 290, RGB(64, 68, 73), 1);
+  DrawKnobArc(Canvas, Center, KnobRadius - ScalePx(3), 190, 300, RGB(112, 116, 121), ScalePx(2));
+  DrawKnobArc(Canvas, Center, KnobRadius - ScalePx(3), 10, 120, RGB(8, 9, 10), ScalePx(2));
+  DrawKnobArc(Canvas, Point(Center.X - ScalePx(1), Center.Y - ScalePx(1)), KnobRadius - ScalePx(7),
+    205, 290, RGB(64, 68, 73), ScalePx(1));
 
   if FMaximum > FMinimum then
     Ratio := EnsureRange((FValue - FMinimum) / (FMaximum - FMinimum), 0.0, 1.0)
@@ -645,21 +665,21 @@ begin
     Center.X + Round(Cos(Angle) * (KnobRadius * 0.72)),
     Center.Y + Round(Sin(Angle) * (KnobRadius * 0.72)));
   Canvas.Pen.Style := psSolid;
-  Canvas.Pen.Width := Max(3, KnobRadius div 6);
+  Canvas.Pen.Width := Max(ScalePx(3), KnobRadius div 6);
   Canvas.Pen.Color := RGB(7, 8, 9);
-  Canvas.MoveTo(LineStart.X + 1, LineStart.Y + 1);
-  Canvas.LineTo(LineEnd.X + 1, LineEnd.Y + 1);
+  Canvas.MoveTo(LineStart.X + ScalePx(1), LineStart.Y + ScalePx(1));
+  Canvas.LineTo(LineEnd.X + ScalePx(1), LineEnd.Y + ScalePx(1));
   Canvas.Pen.Color := ScaleColor(FAccentColor, 5, 4);
   Canvas.MoveTo(LineStart.X, LineStart.Y);
   Canvas.LineTo(LineEnd.X, LineEnd.Y);
   Canvas.Pen.Style := psClear;
   Canvas.Brush.Color := ScaleColor(FAccentColor, 5, 4);
-  Canvas.Ellipse(LineEnd.X - 2, LineEnd.Y - 2, LineEnd.X + 3, LineEnd.Y + 3);
+  Canvas.Ellipse(LineEnd.X - ScalePx(2), LineEnd.Y - ScalePx(2), LineEnd.X + ScalePx(3), LineEnd.Y + ScalePx(3));
 
   if (FUnitText <> '') and Assigned(FValueEdit) then
   begin
-    UnitLeft := FValueEdit.Left + FValueEdit.Width + 3;
-    TextRect := Rect(UnitLeft, FValueEdit.Top, ClientWidth - 4,
+    UnitLeft := FValueEdit.Left + FValueEdit.Width + ScalePx(3);
+    TextRect := Rect(UnitLeft, FValueEdit.Top, ClientWidth - ScalePx(4),
       FValueEdit.Top + FValueEdit.Height);
     Canvas.Font.Style := [];
     Canvas.Font.Color := FTextColor;

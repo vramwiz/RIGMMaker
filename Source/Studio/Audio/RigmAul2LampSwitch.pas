@@ -18,6 +18,7 @@ type
     FPanelColor: TColor;
     FPressed: Boolean;
     FTextColor: TColor;
+    function ScalePx(LogicalPixels: Integer): Integer;
     procedure CMMouseEnter(var Message: TMessage); message CM_MOUSEENTER;
     procedure CMMouseLeave(var Message: TMessage); message CM_MOUSELEAVE;
     procedure SetChecked(Value: Boolean);
@@ -25,6 +26,7 @@ type
     procedure SetTextColor(const Value: TColor);
     procedure Toggle;
   protected
+    procedure ChangeScale(M, D: Integer; isDpiChange: Boolean); override;
     procedure KeyDown(var Key: Word; Shift: TShiftState); override;
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
     procedure MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
@@ -65,6 +67,20 @@ begin
   TabStop := True;
   FPanelColor := RGB(34, 37, 41);
   FTextColor := RGB(236, 236, 236);
+end;
+
+function TAul2LampSwitch.ScalePx(LogicalPixels: Integer): Integer;
+var PPI: Integer;
+begin
+  PPI := CurrentPPI;
+  if PPI <= 0 then PPI := 96;
+  Result := MulDiv(LogicalPixels, PPI, 96);
+end;
+
+procedure TAul2LampSwitch.ChangeScale(M, D: Integer; isDpiChange: Boolean);
+begin
+  inherited;
+  Invalidate;
 end;
 
 procedure TAul2LampSwitch.SetChecked(Value: Boolean);
@@ -164,40 +180,40 @@ begin
   Canvas.Brush.Color := Color;
   Canvas.FillRect(ClientRect);
 
-  BodyRect := Rect(1, 1, ClientWidth - 1, ClientHeight - 1);
+  BodyRect := Rect(ScalePx(1), ScalePx(1), ClientWidth - ScalePx(1), ClientHeight - ScalePx(1));
   Canvas.Pen.Style := psSolid;
-  Canvas.Pen.Width := 1;
+  Canvas.Pen.Width := ScalePx(1);
   if FHover then
     Canvas.Pen.Color := RGB(88, 92, 98)
   else
     Canvas.Pen.Color := RGB(55, 59, 64);
   // 押下中もエフェクター固有の面色を維持し、黒い点滅に見せない。
   Canvas.Brush.Color := FPanelColor;
-  Canvas.RoundRect(BodyRect.Left, BodyRect.Top, BodyRect.Right, BodyRect.Bottom, 7, 7);
+  Canvas.RoundRect(BodyRect.Left, BodyRect.Top, BodyRect.Right, BodyRect.Bottom, ScalePx(7), ScalePx(7));
 
-  LedCenter := Point(17, ClientHeight div 2);
+  LedCenter := Point(ScalePx(17), ClientHeight div 2);
   Canvas.Pen.Style := psClear;
   if FChecked and Enabled then
   begin
     Canvas.Brush.Color := RGB(67, 13, 16);
-    Canvas.Ellipse(LedCenter.X - 12, LedCenter.Y - 12, LedCenter.X + 12, LedCenter.Y + 12);
+    Canvas.Ellipse(LedCenter.X - ScalePx(12), LedCenter.Y - ScalePx(12), LedCenter.X + ScalePx(12), LedCenter.Y + ScalePx(12));
     Canvas.Brush.Color := RGB(126, 17, 23);
-    Canvas.Ellipse(LedCenter.X - 10, LedCenter.Y - 10, LedCenter.X + 10, LedCenter.Y + 10);
+    Canvas.Ellipse(LedCenter.X - ScalePx(10), LedCenter.Y - ScalePx(10), LedCenter.X + ScalePx(10), LedCenter.Y + ScalePx(10));
     Canvas.Brush.Color := RGB(92, 94, 97);
-    Canvas.Ellipse(LedCenter.X - 8, LedCenter.Y - 8, LedCenter.X + 8, LedCenter.Y + 8);
+    Canvas.Ellipse(LedCenter.X - ScalePx(8), LedCenter.Y - ScalePx(8), LedCenter.X + ScalePx(8), LedCenter.Y + ScalePx(8));
     Canvas.Brush.Color := RGB(255, 25, 31);
-    Canvas.Ellipse(LedCenter.X - 7, LedCenter.Y - 7, LedCenter.X + 7, LedCenter.Y + 7);
+    Canvas.Ellipse(LedCenter.X - ScalePx(7), LedCenter.Y - ScalePx(7), LedCenter.X + ScalePx(7), LedCenter.Y + ScalePx(7));
     Canvas.Brush.Color := RGB(255, 154, 158);
-    Canvas.Ellipse(LedCenter.X - 3, LedCenter.Y - 5, LedCenter.X + 1, LedCenter.Y - 1);
+    Canvas.Ellipse(LedCenter.X - ScalePx(3), LedCenter.Y - ScalePx(5), LedCenter.X + ScalePx(1), LedCenter.Y - ScalePx(1));
   end
   else
   begin
     Canvas.Brush.Color := RGB(79, 82, 86);
-    Canvas.Ellipse(LedCenter.X - 9, LedCenter.Y - 9, LedCenter.X + 9, LedCenter.Y + 9);
+    Canvas.Ellipse(LedCenter.X - ScalePx(9), LedCenter.Y - ScalePx(9), LedCenter.X + ScalePx(9), LedCenter.Y + ScalePx(9));
     Canvas.Brush.Color := RGB(42, 12, 14);
-    Canvas.Ellipse(LedCenter.X - 7, LedCenter.Y - 7, LedCenter.X + 7, LedCenter.Y + 7);
+    Canvas.Ellipse(LedCenter.X - ScalePx(7), LedCenter.Y - ScalePx(7), LedCenter.X + ScalePx(7), LedCenter.Y + ScalePx(7));
     Canvas.Brush.Color := RGB(91, 38, 40);
-    Canvas.Ellipse(LedCenter.X - 4, LedCenter.Y - 5, LedCenter.X, LedCenter.Y - 1);
+    Canvas.Ellipse(LedCenter.X - ScalePx(4), LedCenter.Y - ScalePx(5), LedCenter.X, LedCenter.Y - ScalePx(1));
   end;
 
   Canvas.Font.Assign(Font);
@@ -211,7 +227,7 @@ begin
     StateText := 'ON'
   else
     StateText := 'OFF';
-  TextRect := Rect(36, 1, ClientWidth - 8, ClientHeight - 1);
+  TextRect := Rect(ScalePx(36), ScalePx(1), ClientWidth - ScalePx(8), ClientHeight - ScalePx(1));
   DrawText(Canvas.Handle, PChar(StateText), -1, TextRect,
     DT_LEFT or DT_SINGLELINE or DT_END_ELLIPSIS or DT_VCENTER);
 end;

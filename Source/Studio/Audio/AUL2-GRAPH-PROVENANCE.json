@@ -1,0 +1,64 @@
+{
+  "referenceCommit": "ae87b3ce392d3022e6dcdf77b63fccde58658b37",
+  "referenceAccess": "read-only",
+  "date": "2026-10-07",
+  "files": [
+    {
+      "source": "D:\\DelphiProg\\Aul2AudioFilter\\Source\\Aul2AudioControllerDelayGraph.pas",
+      "sourceSha256": "46e29f000946e0cc8661b4114a030f485b22989c550d74c759f749776d2e6bf4",
+      "destination": "RigmAul2DelayGraph.pas",
+      "adaptedSha256": "e936d83f1c10ea5614f53c286e547f7a7b1b17c35cd3f4195c6f5d4310920d7a",
+      "adaptation": "Unit name and host uses; configuration-derived curves preserved."
+    },
+    {
+      "source": "D:\\DelphiProg\\Aul2AudioFilter\\Source\\Aul2AudioControllerEqGraph.pas",
+      "sourceSha256": "b1a910a838672755e958d7b0feea6ba74db96c1a212c1f04412984340338fa4f",
+      "destination": "RigmAul2EqGraph.pas",
+      "adaptedSha256": "469759ee4dd05152181bd93a97c126f627029424887ad7eeed07af6777a64014",
+      "adaptation": "Unit name and host uses; configuration-derived curves preserved."
+    },
+    {
+      "source": "D:\\DelphiProg\\Aul2AudioFilter\\Source\\Aul2AudioControllerCompressorGraph.pas",
+      "sourceSha256": "d39b2d8f14807870a864abd7a1f3a8977e007133e7b595967c206156261b0d32",
+      "destination": "RigmAul2CompressorGraph.pas",
+      "adaptedSha256": "bace72807105aaf74028db084a6d4f0b3a34e4df9bd19209e4026418b78665c6",
+      "adaptation": "Unit name and host uses; configuration-derived curves preserved."
+    },
+    {
+      "source": "D:\\DelphiProg\\Aul2AudioFilter\\Source\\Aul2AudioControllerDistortionGraph.pas",
+      "sourceSha256": "240e9ab13d9f374c951fb77cce8fb35a5e548d304d714f850f4cceaed60ac0b6",
+      "destination": "RigmAul2DistortionGraph.pas",
+      "adaptedSha256": "f9918c8ea15a1d47db5f0a63f1d26885f046e0bbb1c610c805eef8fb05d11c28",
+      "adaptation": "Unit name and host uses; configuration-derived curves preserved."
+    },
+    {
+      "source": "D:\\DelphiProg\\Aul2AudioFilter\\Source\\Aul2AudioControllerBitCrusherGraph.pas",
+      "sourceSha256": "d5bebaf5340df050b45c076120b00cfd4b9ad45395d3d2bed58f0509859d5ca4",
+      "destination": "RigmAul2BitCrusherGraph.pas",
+      "adaptedSha256": "7e85522a87756e251966210f90684ef819af27ee9db9c3204c8e7d11c85fec61",
+      "adaptation": "Unit name and host uses; configuration-derived curves preserved."
+    },
+    {
+      "source": "D:\\DelphiProg\\Aul2AudioFilter\\Source\\Aul2AudioControllerNoiseGateGraph.pas",
+      "sourceSha256": "0b942302b5cd9141abce98c6dc375084e1aa88a8041c57f58a9c2a44e19f9328",
+      "destination": "RigmAul2NoiseGateGraph.pas",
+      "adaptedSha256": "de7711de534cfd8a77c812a862c5fad8dad9f2060b4a4a215a4cd3a4c5c49559",
+      "adaptation": "Unit name and host uses; configuration-derived curves preserved."
+    },
+    {
+      "source": "D:\\DelphiProg\\Aul2AudioFilter\\Source\\Aul2AudioControllerLimiterGraph.pas",
+      "sourceSha256": "aa85636bc4abe5bc89c09e106b6edbe3194476c445207a2d7cd02f6460a9d650",
+      "destination": "RigmAul2LimiterGraph.pas",
+      "adaptedSha256": "a12fc8bf76f017347474f7f526bace1d6d5f5571e8920626fc7c037e934d60fd",
+      "adaptation": "Unit name and host uses; configuration-derived curves preserved."
+    },
+    {
+      "source": "D:\\DelphiProg\\Aul2AudioFilter\\Source\\Aul2AudioControllerOutputGraph.pas",
+      "sourceSha256": "e9095e8b921cd0222a434f0b5351c329a16c926fd36a0400a2803608580efbd2",
+      "destination": "RigmAul2OutputGraph.pas",
+      "adaptedSha256": "2292cb19cb40281df14e6a896188141ab7d0ceaa262a0fffbefc9bb933b72d3a",
+      "adaptation": "Unit name and host uses; mono input/output meters and RMS histories."
+    }
+  ],
+  "notes": "Settings curves do not represent measured audio. Output graph receives actual DSP measurements. Adapted hashes record this revision, not a promise that later adaptations remain byte-identical."
+}
