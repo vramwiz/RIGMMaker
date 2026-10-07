@@ -13,7 +13,7 @@ type
     vtpShortcuts, vtpAudioSettings);
   // 排他的なページ選択と、ページを切り替えない再生操作を描き分ける。
   TVoicevoxToolbarButtonKind = (vbkPage, vbkPreview, vbkSend, vbkClose,
-    vbkMoveEnd, vbkContinuous);
+    vbkMoveEnd, vbkContinuous, vbkLoop);
 
   TVoicevoxToolbarButton = class;
   TVoicevoxToolbarSelectEvent = procedure(Sender: TObject;
@@ -34,6 +34,7 @@ type
     FPressed: Boolean;
     FPressedColor: TColor;
     FPreviewActive: Boolean;
+    FUseParentBackground: Boolean;
     FSelected: Boolean;
     procedure SetBackgroundColor(const Value: TColor);
     procedure SetCheckedColor(const Value: TColor);
@@ -57,6 +58,8 @@ type
     // ページを切り替えず、確認再生または停止だけを要求するボタンを生成する。
     constructor CreatePreview(AOwner: TComponent); reintroduce;
     class function NewContinuous(AOwner: TComponent): TVoicevoxToolbarButton; static;
+    class function NewLoop(AOwner: TComponent): TVoicevoxToolbarButton; static;
+    procedure UseParentBackground;
     // Reuse the existing preview stop glyph as a dedicated stop operation.
     class function NewStop(AOwner: TComponent): TVoicevoxToolbarButton; static;
     // ページを切り替えず、現在のセリフの送信だけを要求するボタンを生成する。
@@ -151,7 +154,9 @@ type
 implementation
 
 uses
-  Winapi.Windows, System.Math;
+  Winapi.Windows, System.Math, Vcl.Themes;
+
+type TParentControlAccess = class(TWinControl);
 
 const
   BUTTON_SIZE = 30;
@@ -195,6 +200,20 @@ begin
   ParentShowHint := False;
   ShowHint := True;
   TabStop := True;
+end;
+
+class function TVoicevoxToolbarButton.NewLoop(AOwner: TComponent): TVoicevoxToolbarButton;
+begin
+  Result := TVoicevoxToolbarButton.CreatePreview(AOwner);
+  Result.FKind := vbkLoop;
+end;
+
+procedure TVoicevoxToolbarButton.UseParentBackground;
+begin
+  FUseParentBackground := True;
+  FHotColor := $00282828; FPressedColor := $00404040;
+  FCheckedColor := $00D07000; FFontColor := $00F2F0EE;
+  Invalidate;
 end;
 
 class function TVoicevoxToolbarButton.NewStop(AOwner: TComponent): TVoicevoxToolbarButton;
@@ -301,6 +320,8 @@ var
   CenterX: Integer;
   CenterY: Integer;
   GearPoints: array[0..15] of TPoint;
+  LoopPoints: array[0..12] of TPoint;
+  J, Side: Integer;
   GlyphColor: TColor;
   I: Integer;
   R: Integer;
@@ -320,14 +341,17 @@ var
   end;
 
 begin
-  if FPressed then
-    BackColor := FPressedColor
-  else if FSelected then
-    BackColor := FCheckedColor
-  else if FHot then
-    BackColor := FHotColor
-  else
-    BackColor := FBackgroundColor;
+  BackColor := FBackgroundColor;
+  if FUseParentBackground and (Parent<>nil) then begin
+    if (seClient in Parent.StyleElements) and not StyleServices(Parent).IsSystemStyle then
+      BackColor := StyleServices(Parent).GetStyleColor(scPanel)
+    else BackColor := StyleServices(Parent).GetSystemColor(TParentControlAccess(Parent).Color);
+  end;
+  if Enabled or not FUseParentBackground then begin
+    if FPressed then BackColor := FPressedColor
+    else if FSelected then BackColor := FCheckedColor
+    else if FHot then BackColor := FHotColor;
+  end;
   Canvas.Brush.Style := bsSolid;
   Canvas.Brush.Color := BackColor;
   Canvas.Pen.Color := BackColor;
@@ -338,11 +362,12 @@ begin
   R := Max(2, Min(ClientWidth, ClientHeight) div 14);
   case FKind of
     vbkClose: GlyphColor := CLOSE_GLYPH_COLOR;
-    vbkPreview, vbkContinuous: GlyphColor := PREVIEW_GLYPH_COLOR;
+    vbkPreview, vbkContinuous, vbkLoop: GlyphColor := PREVIEW_GLYPH_COLOR;
     vbkSend, vbkMoveEnd: GlyphColor := SEND_GLYPH_COLOR;
   else
     GlyphColor := FFontColor;
   end;
+  if FUseParentBackground and not Enabled then GlyphColor := StyleServices(Self).GetSystemColor(clGrayText);
   Canvas.Pen.Color := GlyphColor;
   Canvas.Pen.Width := Max(1, Min(ClientWidth, ClientHeight) div 16);
   Canvas.Brush.Color := GlyphColor;
@@ -380,6 +405,24 @@ begin
         Canvas.LineTo(CenterX - GlyphScale(3), CenterY + I*GlyphScale(6));
       end;
     end;
+  end
+  else if FKind = vbkLoop then
+  begin
+    // Two clockwise arrows surround a play triangle, using the shared glyph scale/pen.
+    for J := 0 to 1 do begin
+      for I := 0 to High(LoopPoints) do begin
+        Angle := (-150 + I*150/High(LoopPoints) + J*180)*Pi/180;
+        LoopPoints[I] := Point(CenterX+Round(Cos(Angle)*GlyphScale(11)),
+          CenterY+Round(Sin(Angle)*GlyphScale(11)));
+      end;
+      Canvas.Polyline(LoopPoints);
+      if J=0 then Side := 1 else Side := -1;
+      Canvas.Polygon([Point(CenterX+Side*GlyphScale(11),CenterY+Side*GlyphScale(4)),
+        Point(CenterX+Side*GlyphScale(8),CenterY-Side*GlyphScale(2)),
+        Point(CenterX+Side*GlyphScale(14),CenterY-Side*GlyphScale(2))]);
+    end;
+    Canvas.Polygon([Point(CenterX-GlyphScale(3),CenterY-GlyphScale(5)),
+      Point(CenterX-GlyphScale(3),CenterY+GlyphScale(5)),Point(CenterX+GlyphScale(5),CenterY)]);
   end
   else if FKind = vbkSend then
   begin

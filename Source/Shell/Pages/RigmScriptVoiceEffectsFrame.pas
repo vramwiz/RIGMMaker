@@ -78,10 +78,11 @@ begin
   FContent.Caption := ''; FContent.Name := 'ScriptEffectsContent';
   FPlay := TVoicevoxToolbarButton.CreatePreview(Self); FPlay.Parent := FContent;
   FPlay.Name := 'ScriptEffectsPlay'; FPlay.Hint := '選択したセリフを1回再生'; FPlay.OnExecute := Play;
-  FLoopPlay := TVoicevoxToolbarButton.NewContinuous(Self); FLoopPlay.Parent := FContent;
+  FLoopPlay := TVoicevoxToolbarButton.NewLoop(Self); FLoopPlay.Parent := FContent;
   FLoopPlay.Name := 'ScriptEffectsLoop'; FLoopPlay.Hint := '選択したセリフをループ再生'; FLoopPlay.OnExecute := Play;
   FStop := TVoicevoxToolbarButton.NewStop(Self); FStop.Parent := FContent;
   FStop.Name := 'ScriptEffectsStop'; FStop.Hint := '試聴・処理を停止'; FStop.OnExecute := Stop;
+  FPlay.UseParentBackground; FLoopPlay.UseParentBackground; FStop.UseParentBackground;
   FTransportLabel := LabelAt('ScriptEffectsTransportLabel','再生　／　ループ　／　停止');
   FTransportLabel.SetBounds(ScaleValue(122),ScaleValue(9),ScaleValue(260),ScaleValue(24));
   FEffect := TComboBox.Create(Self); FEffect.Parent := FContent; FEffect.Style := csDropDownList;
