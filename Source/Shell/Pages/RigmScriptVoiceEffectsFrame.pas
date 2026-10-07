@@ -46,10 +46,63 @@ type
     procedure StopPreview;
   end;
 implementation
-uses System.SysUtils, System.Math, System.JSON, System.IOUtils, Winapi.Windows,
+uses System.SysUtils, System.Math, System.JSON, System.IOUtils, System.Types,
+  Winapi.Windows, Winapi.CommCtrl, Vcl.Graphics, Vcl.Themes,
   RigmAul2DelayGraph, RigmAul2EqGraph, RigmAul2CompressorGraph, RigmAul2DistortionGraph,
   RigmAul2BitCrusherGraph, RigmAul2NoiseGateGraph, RigmAul2LimiterGraph, RigmJson, PsdJson, RigmMovieModel, RigmVoiceEffects, RigmVoiceEffectSettings, RigmAudioFilePaths;
 {$R *.dfm}
+type
+  TRigmEffectsListView = class(TRigmBufferedListView)
+  protected
+    function IsCustomDrawn(Target: TCustomDrawTarget; Stage: TCustomDrawStage): Boolean; override;
+    function CustomDrawItem(Item: TListItem; State: TCustomDrawState; Stage: TCustomDrawStage): Boolean; override;
+  end;
+function TRigmEffectsListView.IsCustomDrawn(Target: TCustomDrawTarget; Stage: TCustomDrawStage): Boolean;
+begin
+  Result := ((Target in [dtControl,dtItem]) and (Stage=cdPrePaint)) or inherited IsCustomDrawn(Target,Stage);
+end;
+function TRigmEffectsListView.CustomDrawItem(Item: TListItem; State: TCustomDrawState; Stage: TCustomDrawStage): Boolean;
+begin
+  if Stage<>cdPrePaint then Exit(inherited CustomDrawItem(Item,State,Stage));
+  Result := False;
+  var Row := Item.DisplayRect(drBounds); Row.Left := 0; Row.Right := ClientWidth;
+  var Saved := SaveDC(Canvas.Handle);
+  try
+    // ネイティブの内部バッファへ背景と文字を一緒に描き、黒い選択文字や空白の行を防ぐ。
+    IntersectClipRect(Canvas.Handle,Row.Left,Row.Top,Row.Right,Row.Bottom);
+    Canvas.Brush.Style := bsSolid;
+    Canvas.Brush.Color := StyleServices(Self).GetStyleColor(scListView);
+    Canvas.Font.Color := StyleServices(Self).GetSystemColor(clWindowText);
+    if Item.Selected then begin Canvas.Brush.Color := $00D07000; Canvas.Font.Color := clWhite; end;
+    Canvas.FillRect(Row);
+    SetBkMode(Canvas.Handle,TRANSPARENT);
+    var Header := ListView_GetHeader(Handle);
+    var Padding := MulDiv(6,CurrentPPI,96);
+    for var Index := 0 to Columns.Count-1 do begin
+      var Cell: TRect; if not Header_GetItemRect(Header,Index,@Cell) then Continue;
+      MapWindowPoints(Header,Handle,Cell,2); Cell.Top := Row.Top; Cell.Bottom := Row.Bottom;
+      var CellSaved := SaveDC(Canvas.Handle);
+      try
+        IntersectClipRect(Canvas.Handle,Cell.Left,Cell.Top,Cell.Right,Cell.Bottom);
+        Inc(Cell.Left,Padding); Dec(Cell.Right,Padding);
+        var Text := Item.Caption;
+        if Index>0 then begin
+          Text := ''; if Index<=Item.SubItems.Count then Text := Item.SubItems[Index-1];
+        end;
+        var Flags: Cardinal := DT_SINGLELINE or DT_VCENTER or DT_END_ELLIPSIS or DT_NOPREFIX;
+        case Columns[Index].Alignment of
+          taCenter: Flags := Flags or DT_CENTER;
+          taRightJustify: Flags := Flags or DT_RIGHT;
+        end;
+        if Cell.Right>Cell.Left then DrawText(Canvas.Handle,PChar(Text),Length(Text),Cell,Flags);
+      finally RestoreDC(Canvas.Handle,CellSaved); end;
+    end;
+    if Item.Selected then begin
+      Canvas.Brush.Color := $00FFC762;
+      var Accent := Row; Accent.Right := MulDiv(3,CurrentPPI,96); Canvas.FillRect(Accent);
+    end;
+  finally RestoreDC(Canvas.Handle,Saved); end;
+end;
 constructor TRigmScriptVoiceEffectsFrame.CreateForWorkspace(AOwner: TComponent; Workspace: TRigmWizardWorkspace);
   function LabelAt(const Name,Text: string): TLabel;
   begin
@@ -67,7 +120,7 @@ begin
     '原音声を保持します。ループ中の変更は次の周回、通常再生の変更は次の再生に反映します。';
   var Rows := TRigmBufferedPanel.Create(Self); Rows.Parent := Self; Rows.Align := alLeft;
   Rows.Width := ScaleValue(260); Rows.BevelOuter := bvNone; Rows.Caption := '';
-  FList := TRigmBufferedListView.Create(Self); FList.Parent := Rows; FList.Align := alClient;
+  FList := TRigmEffectsListView.Create(Self); FList.Parent := Rows; FList.Align := alClient;
   FList.Name := 'ScriptVoiceEffectsRows'; FList.ViewStyle := vsReport; FList.RowSelect := True;
   FList.ReadOnly := True; FList.HideSelection := False; FList.OnSelectItem := Selected;
   FList.Columns.Add.Caption := 'セリフ'; FList.Columns[0].Width := ScaleValue(236);
@@ -150,7 +203,15 @@ begin
   FNotice.Caption := '試聴を停止しました。';
 end;
 procedure TRigmScriptVoiceEffectsFrame.Selected(Sender: TObject; Item: TListItem; Value: Boolean);
-begin if FSync or not Value then Exit; StopPreview; FWorkspace.SelectVoiceEffects(Item.SubItems[0]); RefreshState; end;
+begin
+  // Repaint both the old and new selection, including model-driven changes.
+  if Item<>nil then begin
+    var Row := Item.DisplayRect(drBounds); Row.Left := 0; Row.Right := FList.ClientWidth;
+    InvalidateRect(FList.Handle,@Row,False);
+  end;
+  if FSync or not Value then Exit;
+  StopPreview; FWorkspace.SelectVoiceEffects(Item.SubItems[0]); RefreshState;
+end;
 procedure TRigmScriptVoiceEffectsFrame.Resized(Sender: TObject);
 begin
   if FList<>nil then FList.Columns[0].Width := Max(ScaleValue(120),FList.ClientWidth-ScaleValue(24));
@@ -198,8 +259,10 @@ begin
     FLamp.Checked := VoiceEffectValue(C.AudioEffects,FDefinition.UseItemName)<>0;
     FLamp.PanelColor := FDefinition.VolumeColor; FLamp.TextColor := FDefinition.TextColor;
     FContent.Color := FDefinition.BackgroundColor; FKnobs.Color := FDefinition.BackgroundColor;
-    FHelp.Caption := FDefinition.LampCaption; FHelp.Font.Color := FDefinition.TextColor;
-    FHelp.Transparent := False; FHelp.Color := FDefinition.VolumeColor;
+    FHelp.Caption := FDefinition.LampCaption;
+    // Keep explanation readable regardless of effect palette or active VCL style.
+    FHelp.ParentColor := False; FHelp.ParentFont := False; FHelp.StyleElements := [];
+    FHelp.Transparent := False; FHelp.Color := clBlack; FHelp.Font.Color := clWhite;
     FModeLabel.Transparent := False; FModeLabel.Color := FDefinition.VolumeColor; FModeLabel.Font.Color := FDefinition.TextColor;
     FGraphLabel.Font.Color := $00F2F0EE; FMeasure.Font.Color := $00F2F0EE; FNotice.Font.Color := $00F2F0EE;
     FModeLabel.Caption := FDefinition.SelectControl.DisplayName; FModeLabel.Visible := FDefinition.SelectControl.Visible;

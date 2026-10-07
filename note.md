@@ -1074,3 +1074,17 @@ imageApproved / imageApprovalKey / imageEditEpoch を保存。GUIで承認/解�
 df7f2e9のclean状態を基準に作業コピーで実装。最終Win64 Releaseコンパイル成功。隔離VCL描画で96/144/192 DPIの3ボタン×5状態を確認し、親背景一致・白背景不在・端までの塗りつぶしの109項目が成功。icons-96.png、icons-192.png、実エフェクト画面のeffect-header.pngを実際に見て確認した。記録はicon-fix/probe/evidenceとprobe/run.txt、ビルドはicon-fix/build-Release。プローブは音声を再生せず、通常アプリ／IDEを停止・起動・更新していない。通常EXEは未更新。デスクトップの撮影ではなくVCL自身の描画結果。広範囲のDSP／音声試験は繰り返さなかった。
 
 添付画像の公式Library取得は403で失敗したため、画像を見たとは扱わず、ソースと今回のネイティブ描画を基に修正した。ソース2ファイルと本記録のみを既存mainへコミットしてorigin/mainへpushする。検証EXE・PNG・素材をGitに含めない。
+
+## 2026-10-07 エフェクト説明の配色・ループクリック・セリフ一覧描画の修正
+
+89d1c51の確認後に受けた3点の報告に限定して修正した。今回の後続指示で許可された隔離ビルド・GUI検証を使用し、通常アプリ・IDEの終了/再起動、通常EXEの更新は行っていない。AGENTS.mdと関連.agents/skillsは今回も見つからなかった。既存origin/mainを維持し、DSP・音声再生エンジン・ユーザーの台本/音声/画像は変更しない。
+
+説明欄ScriptEffectDescriptionは黒背景・白文字・非透過に固定し、親の配色/フォントとVCLスタイルによる上書きを止めた。エフェクトごとのノブやモードの配色は維持した。ループ不動は前回追加したvbkLoopがVoicevoxToolbarButton.Executeの操作対象に含まれておらず、マウスクリックからOnExecuteへ到達しなかったことが原因だった。対象へvbkLoopを追加する1か所の修正で既存のPlay→EnsurePreview→OpenPlayback→周回処理へ接続した。前回のアイコン描画だけの検証ではこの欠落を検出できなかった。
+
+エフェクト画面の一覧は汎用TRigmBufferedListViewの標準行描画を使い続けていたため、以前の音声画面の対策を同画面専用TRigmEffectsListViewへ適用した。既存のネイティブ二重バッファへ行全体の背景と文字を一緒に描画し、選択行はフォーカスに関係なく青地・白文字とする。選択解除やモデルからの選択更新でも旧/新の行全体を再描画する。列境界・DPI余白・省略表示・固定cueId・差分更新は維持し、グローバルなバッファ処理には変更を加えていない。
+
+検証: 作業フォルダeffects-three-fix/stagingの複製をWin64 Debug/Releaseでコンパイルし成功。既存EffectsGuiProbeのfixture/ホストを再利用した3点限定の隔離ネイティブGUI検証は、最初の2行で360項目、ユーザー報告に近い日本語を含む13行で1,086項目が成功し、13行版はexit 0。Execute直接呼出しではなくWM_LBUTTONDOWN/UPによる初回ループクリックを使用し、プレビュー作成・開始と実際のwaveOut位置から描画されるカーソルの前進/3回の周回、停止後の非再開、再クリック後の1回の周回、行選択による停止、通常再生の単発終了を確認した。全20エフェクトの説明文字と黒背景の実描画、全13行の選択/非選択文字とcueId、エフェクト/行切替・背景再描画・96/144/192 DPI・大小リサイズ後の実描画を確認した。fixture原PCM2本のSHA256と台本fingerprintは不変。
+
+記録はCodex作業フォルダeffects-three-fix/validation/run-13rowsのprobe.log、checks.json、summary.json、exit-code.txt、three-fixes-final-frame.png、loop-playing-frame.png、description-*.png、list-*.png。これらのネイティブVCL描画画像を実際に見て説明文字・一覧・選択表示・ループ状態を確認した。PrintWindowはこの環境で描画できなかったため、所有する検証用フレーム/コントロールのPaintToによる実描画を取得したもので、通常アプリのデスクトップスクリーンショットではない。検証コードとfixture/PNG/EXE/DCUは作業フォルダに保持しGitへ追加しない。通常EXE・dproj・RESのSHA256は今回の記録開始時から不変。
+
+制約: ユーザーの実プロジェクトで一覧が消える元のタイミングは再現できていない。今回の対策は既存音声画面と同じ行全体描画を適用し、上記の隔離操作で文字が描画されることを確認した結果であり、実プロジェクトの再発が絶対にないとの断定はしない。DSP全体や長パス音声の既存広範囲検証は今回繰り返さず、変更した3点だけを検証した。通常EXEへの反映はユーザーの通常ビルドで行う。

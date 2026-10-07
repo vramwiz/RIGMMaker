@@ -269,7 +269,7 @@ end;
 procedure TVoicevoxToolbarButton.Execute;
 begin
   if not Enabled then Exit;
-  if FKind in [vbkPreview, vbkSend, vbkClose, vbkMoveEnd, vbkContinuous] then
+  if FKind in [vbkPreview, vbkSend, vbkClose, vbkMoveEnd, vbkContinuous, vbkLoop] then
   begin
     if Assigned(FOnExecute) then FOnExecute(Self);
   end
