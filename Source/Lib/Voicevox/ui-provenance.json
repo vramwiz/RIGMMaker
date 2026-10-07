@@ -1,0 +1,88 @@
+{
+  "sourceEntry": "D:\\DelphiProg\\AviUtl2Plugin\\Syncroh2\\Syncroh2_Extension2.dpr",
+  "copiedUnits": [
+    {
+      "source": "D:\\DelphiProg\\AviUtl2Plugin\\AviUtl2PluginLib\\Serif\\Voicevox\\SerifVoicevoxSettingsFrame.pas",
+      "hash": "A6814996DCCBAEC900765CE02B6865B634EFD6FA5A2A47BBD7F90040AF2F018D",
+      "target": "Source/Lib/Voicevox/SerifVoicevoxSettingsFrame.pas"
+    },
+    {
+      "source": "D:\\DelphiProg\\AviUtl2Plugin\\AviUtl2PluginLib\\Serif\\Voicevox\\SerifVoicevoxSettingsFrame.dfm",
+      "hash": "58A6020EAF5690F5084659A48C049F50A7D4358CB1E67D209B1AE68CB8210749",
+      "target": "Source/Lib/Voicevox/SerifVoicevoxSettingsFrame.dfm"
+    },
+    {
+      "source": "D:\\DelphiProg\\AviUtl2Plugin\\AviUtl2PluginLib\\Serif\\Voicevox\\SerifVoicevoxAccentView.pas",
+      "hash": "30B4C81A2F18150B63D8DE26A109E05F5EF64EA4F363B6B2D6C16A8B1780E6D0",
+      "target": "Source/Lib/Voicevox/SerifVoicevoxAccentView.pas"
+    },
+    {
+      "source": "D:\\DelphiProg\\AviUtl2Plugin\\AviUtl2PluginLib\\Serif\\Voicevox\\SerifVoicevoxIntonationFrame.pas",
+      "hash": "EB131D3AC3185C897EA58EBA4B3FAF2919D3843FB2B2ACC58CED627782BC70F2",
+      "target": "Source/Lib/Voicevox/SerifVoicevoxIntonationFrame.pas"
+    },
+    {
+      "source": "D:\\DelphiProg\\AviUtl2Plugin\\AviUtl2PluginLib\\Serif\\Voicevox\\SerifVoicevoxIntonationFrame.dfm",
+      "hash": "73DE2E32AABB23EC3754E63F07E9991DE6A4FFF8381A312138D403D1E61B7AA0",
+      "target": "Source/Lib/Voicevox/SerifVoicevoxIntonationFrame.dfm"
+    },
+    {
+      "source": "D:\\DelphiProg\\AviUtl2Plugin\\AviUtl2PluginLib\\Serif\\Voicevox\\SerifVoicevoxLengthFrame.pas",
+      "hash": "D5B3B1DF20B5930645E501F9423B9306405CE3F22596FAE78AD1BB29B506E865",
+      "target": "Source/Lib/Voicevox/SerifVoicevoxLengthFrame.pas"
+    },
+    {
+      "source": "D:\\DelphiProg\\AviUtl2Plugin\\AviUtl2PluginLib\\Serif\\Voicevox\\SerifVoicevoxLengthFrame.dfm",
+      "hash": "D1A326F45BFA7A3676856911522CF968C4E4CC655ABFA3E9208DE5E4271A42D1",
+      "target": "Source/Lib/Voicevox/SerifVoicevoxLengthFrame.dfm"
+    },
+    {
+      "source": "D:\\DelphiProg\\AviUtl2Plugin\\AviUtl2PluginLib\\Serif\\Voicevox\\SerifVoicevoxAudioSettingsFrame.pas",
+      "hash": "042C6354DC4E3B547A8288E514489767BC3B73209C7E843063E151D9D9B9EFFA",
+      "target": "Source/Lib/Voicevox/SerifVoicevoxAudioSettingsFrame.pas"
+    },
+    {
+      "source": "D:\\DelphiProg\\AviUtl2Plugin\\AviUtl2PluginLib\\Serif\\Voicevox\\SerifVoicevoxAudioSettingsFrame.dfm",
+      "hash": "CCFE44F40115FB57F14CE2D22E83590169D29A9C57D2FAF5CA1A033298133C60",
+      "target": "Source/Lib/Voicevox/SerifVoicevoxAudioSettingsFrame.dfm"
+    },
+    {
+      "source": "D:\\DelphiProg\\AviUtl2Plugin\\AviUtl2PluginLib\\Serif\\Voicevox\\SerifVoicevoxEngineConfig.pas",
+      "hash": "3498F16E9BD71BEE83C4A5B07BAE8EA63F78ED3F64B2E1BDFA2C2E036303F60B",
+      "target": "Source/Lib/Voicevox/SerifVoicevoxEngineConfig.pas"
+    },
+    {
+      "source": "D:\\DelphiProg\\AviUtl2Plugin\\AviUtl2PluginLib\\Lib\\VerticalSlider\\VerticalSliderControl.pas",
+      "hash": "11E622A18AE90980030284E8FDFF9D43AB075731EEE2BD10481B5D2DE1B75F7D",
+      "target": "Source/Lib/Voicevox/VerticalSliderControl.pas"
+    },
+    {
+      "source": "D:\\DelphiProg\\AviUtl2Plugin\\AviUtl2PluginLib\\Lib\\HorizontalScrollBar\\HorizontalScrollBarControl.pas",
+      "hash": "51B3687409EF383140B2D389CE562E34402D43057AD3ADE8A04843673C68C47B",
+      "target": "Source/Lib/Voicevox/HorizontalScrollBarControl.pas"
+    },
+    {
+      "source": "D:\\DelphiProg\\AviUtl2Plugin\\AviUtl2PluginLib\\Lib\\VoicevoxToolbar\\VoicevoxToolbarButtons.pas",
+      "hash": "7CD2EC8C970EBA710D8A85DF27415E0340645B33A7B949CF2EFEF7DFB4020362",
+      "target": "Source/Lib/Voicevox/VoicevoxToolbarButtons.pas"
+    },
+    {
+      "source": "D:\\DelphiProg\\AviUtl2Plugin\\AviUtl2PluginLib\\Lib\\Style\\AviUtl2StyleColors.pas",
+      "hash": "C997C4109CA7F8939707E47D4F81184006A675CC76A38D6EA2FBBA3D14F4821D",
+      "target": "Source/Lib/Voicevox/AviUtl2StyleColors.pas"
+    },
+    {
+      "source": "D:\\DelphiProg\\AviUtl2Plugin\\AviUtl2PluginLib\\Lib\\DarkTheme\\Core\\DarkThemeColors.pas",
+      "hash": "367B73108E87C5702D8A7AECD62F321EB52A0697BB2F2D6298113B2F4E08C32C",
+      "target": "Source/Lib/Voicevox/DarkThemeColors.pas"
+    }
+  ],
+  "adaptations": [
+    "per-cue settings and query; no AviUtl project INI",
+    "per-worker Engine URL and cancellation",
+    "application-folder EXE configuration with conflict detection",
+    "numeric buffer validation and RIGMMaker input completion",
+    "continuous playback through existing async single-cue jobs and owned MCI"
+  ],
+  "validation": "Static only; no build or application execution in this change."
+}

@@ -1,4 +1,5 @@
-﻿// 実エンジンの短文のみ。所有複製のGUI、読み分離、設定、旧音声保持、再開とパイプを確認。
+﻿{$I RigmVoiceSelectionValidation.inc}
+// 実エンジンの短文のみ。所有複製のGUI、読み分離、設定、旧音声保持、再開とパイプを確認。
 procedure VerifyScriptVoice(Main: TRigmWizardMainForm; const ResultPath: string; Reopen: Boolean);
   procedure Check(Value: Boolean; const Text: string; Results: TJSONArray);
   begin if not Value then raise Exception.Create('Voice check: '+Text); Results.Add(Text); end;
@@ -8,6 +9,23 @@ procedure VerifyScriptVoice(Main: TRigmWizardMainForm; const ResultPath: string;
     repeat Application.ProcessMessages; var S := W.VoiceStatus; try if not JB(S,'busy') then Exit; finally S.Free; end; Sleep(5); until GetTickCount64>Deadline;
     raise Exception.Create('Owned voice job timeout');
   end;
+  function VoiceControl(Root: TWinControl; const Name: string): TWinControl;
+  begin
+    if Root.Name=Name then Exit(Root); Result := nil;
+    for var I := 0 to Root.ControlCount-1 do if Root.Controls[I] is TWinControl then begin
+      Result := VoiceControl(TWinControl(Root.Controls[I]),Name); if Result<>nil then Exit;
+    end;
+  end;
+  function VoiceValueEdit(Frame: TWinControl; Index: Integer): TEdit;
+  begin
+    var Pages := TVoicevoxToolbarButtons(VoiceControl(Frame,'VoicevoxPages')); Pages.Activate(vtpAudioSettings);
+    var Slider := VoiceControl(Frame,'VoicevoxValue'+Index.ToString);
+    if Slider=nil then raise Exception.Create('Copied VOICEVOX value slider missing');
+    Slider.Perform(WM_LBUTTONDOWN,MK_LBUTTON,MakeLParam(2,Slider.ClientHeight-1));
+    Slider.Perform(WM_LBUTTONUP,0,MakeLParam(2,Slider.ClientHeight-1));
+    Result := nil; for var I := 0 to Slider.ControlCount-1 do if Slider.Controls[I] is TEdit then Result := TEdit(Slider.Controls[I]);
+    if Result=nil then raise Exception.Create('Copied VOICEVOX numeric editor missing');
+  end;
   procedure Press(Control: TWinControl; Key: Word);
   begin Control.SetFocus; Control.Perform(WM_KEYDOWN,Key,0); Application.ProcessMessages; end;
 begin
@@ -16,6 +34,7 @@ begin
   Main.Position := poDesigned; Main.SetBounds(40,40,1360,900); Main.Show; ShowWindow(Main.Handle,SW_SHOWNOACTIVATE); Application.ProcessMessages;
   var Report := TJSONObject.Create; var Results := TJSONArray.Create; Report.AddPair('checks',Results);
   try
+    VerifyVoicePersonState(Results);
     var W := Main.Workspace; W.OpenScriptDraft(Trim(TFile.ReadAllText(TPath.Combine(Main.DataRoot,'fixture-project.txt'),TEncoding.UTF8))); Main.NavigateTo(apScriptCreate);
     var Creator := Main.PageInstance(apScriptCreate); var Toolbar := TToolBar(Creator.FindComponent('ScriptTitleToolbar')); var Next := TToolButton(Toolbar.FindComponent('ScriptNext'));
     if Reopen then begin
@@ -24,6 +43,16 @@ begin
       finally Json.Free; Resume.Free; end;
     end else begin
       Check(W.CurrentScriptStage='subtitles','copied semantic fixture begins at subtitles',Results);
+      W.SetScriptStage('casting');
+      if MissingCastingVoices(W.ScriptDraft)>0 then begin
+        var Rejected := False; try W.NextScriptDraft; except on E: Exception do Rejected := True; end;
+        Check(Rejected and (W.CurrentScriptStage='casting'),'used character without voice blocks casting Next',Results);
+      end;
+      W.SetVoiceEngine('http://127.0.0.1:50022'); W.RefreshVoiceCatalog; WaitVoice(W);
+      var Used := UsedCastingRoles(W.ScriptDraft);
+      try for var Number in Used do W.BindVoice(StrToInt(Number.Value),108,'1bd6b32b-d650-4072-bbe5-1d0ef4aaa28b'); finally Used.Free; end;
+      Check(W.CastingAdvanceReason='','explicit fixture casting voices satisfy common advance gate',Results);
+      W.SetScriptStage('subtitles');
       for var BadText in ['A'+#1,'A'+Char($D800),'A'+Char($DC00)] do begin
         var Rejected := False; try ValidateVoiceReading(BadText); except on E: Exception do Rejected := True; end;
         Check(Rejected,'reading rejects invalid UTF16/control at even offset',Results);
@@ -42,31 +71,33 @@ begin
     end;
     var Frame: TRigmScriptVoiceFrame := nil; for var I := 0 to Creator.ComponentCount-1 do if Creator.Components[I] is TRigmScriptVoiceFrame then Frame := TRigmScriptVoiceFrame(Creator.Components[I]);
     Check((Frame<>nil) and Frame.Showing and Next.Visible and not Next.Enabled,'lazy voice frame retains audio completion gate before scenes',Results);
-    var List := TListView(Frame.FindComponent('ScriptVoiceRows')); var Reading := TMemo(Frame.FindComponent('ScriptVoiceReading')); var Style := TComboBox(Frame.FindComponent('ScriptVoiceStyle')); var Tools := TToolBar(Frame.FindComponent('ScriptVoiceToolbar'));
+    var List := TListView(Frame.FindComponent('ScriptVoiceRows')); var StateChoice := TComboBox(Frame.FindComponent('ScriptVoiceState'));
+    Check((Frame.FindComponent('ScriptVoiceReading')=nil) and (Frame.FindComponent('ScriptVoiceSubtitle')=nil) and (Frame.FindComponent('ScriptVoiceEngine')=nil) and (Frame.FindComponent('ScriptVoiceStyle')=nil),'VOICEVOX adjustment page excludes duplicate text subtitle endpoint and person editors',Results);
     if not Reopen then begin
-      Check((Style.ItemIndex=-1) and (W.ScriptDraft.Speaker(W.ScriptDraft.Cues[0].SpeakerId).StyleId=-1),'unassigned character has no guessed default voice',Results);
-      TEdit(Frame.FindComponent('ScriptVoiceEngine')).Text := 'http://127.0.0.1:50022'; TButton(Frame.FindComponent('ScriptVoiceEngineApply')).Click;
+      Check((StateChoice.ItemIndex>=0) and (W.ScriptDraft.Speaker(W.ScriptDraft.Cues[0].SpeakerId).StyleId=108),'explicit voice chosen during casting carries into detail screen',Results);
+      WaitVoice(W); W.SetVoiceEngine('http://127.0.0.1:50022');
       Check(W.ScriptDraft.EngineUrl='http://127.0.0.1:50022','explicit GUI endpoint is saved in copied project',Results);
-      TToolButton(Tools.FindComponent('ScriptVoiceRefresh')).Click; WaitVoice(W);
+      W.RefreshVoiceCatalog; WaitVoice(W);
       var Index := -1; for var I := 0 to W.VoiceCatalog.Count-1 do if (JI(TJSONObject(W.VoiceCatalog[I]),'styleId')=108) and (JS(TJSONObject(W.VoiceCatalog[I]),'uuid')='1bd6b32b-d650-4072-bbe5-1d0ef4aaa28b') then Index := I;
       Check(Index>=0,'live catalog supplies Tohoku Kiritan normal 108 actual UUID',Results);
-      Style.ItemIndex := Index; Style.OnChange(Style); Check(W.ScriptDraft.Speaker(W.ScriptDraft.Cues[0].SpeakerId).StyleId=108,'explicit test-only GUI selection binds actual style to guide character',Results);
-      TToolButton(Tools.FindComponent('ScriptVoiceSaveDefault')).Click;
+      var StateIndex := StateChoice.Items.IndexOf('ノーマル'); Check((StateIndex>=0) and (StateChoice.Items.IndexOf('ノーマル（初期値）')<0),'emotion selector contains actual normal without a synthetic duplicate',Results);
+      StateChoice.ItemIndex := StateIndex; StateChoice.OnChange(StateChoice); Check((W.ScriptDraft.Speaker(W.ScriptDraft.Cues[0].SpeakerId).StyleId=108) and (W.ScriptDraft.Cues[0].VoiceStyleId=-1),'GUI normal state inherits explicitly bound casting person',Results);
+      W.SaveCharacterVoice(ScriptCueRole(W.ScriptDraft,W.ScriptDraft.Cues[0].Id));
       Check(FileExists(TPath.Combine(Main.DataRoot,'CharacterVoiceBindings.json')),'registered character initial binding saved separately from rigm',Results);
       var Before := W.ScriptDraft.Revision; var Fingerprint := W.ScriptDraft.AudioFingerprint(W.ScriptDraft.Cues[0]);
-      Press(List,VK_RETURN); TToolButton(Tools.FindComponent('ScriptVoiceDone')).Click;
+      Check(Frame.RequestFinish,'adjustment input finishes without text editor',Results);
       Check((W.ScriptDraft.Revision=Before) and (W.ScriptDraft.AudioFingerprint(W.ScriptDraft.Cues[0])=Fingerprint),'unchanged detail editing preserves existing audio fingerprint and revision',Results);
-      Press(List,VK_DOWN); Check((Style.ItemIndex=-1) and (W.ScriptDraft.Speaker(W.ScriptDraft.Cues[1].SpeakerId).StyleId=-1),'other character remains explicitly unassigned',Results); Press(List,VK_UP);
+      Press(List,VK_DOWN); Check((StateChoice.ItemIndex>=0) and (W.ScriptDraft.Speaker(W.ScriptDraft.Cues[1].SpeakerId).StyleId=108),'next used character retains its explicit casting voice',Results); Press(List,VK_UP);
       var C := W.ScriptDraft.Cues[0]; var Id := C.Id; var Source := C.Text; var Subtitle := C.Subtitle; var Scene := C.Scene; var Raw := ScriptFingerprint(W.ScriptDraft);
-      Press(List,VK_RETURN); Reading.Text := 'かくうのほしぞらかんそくじょです。'; TEdit(Frame.FindComponent('ScriptVoiceValue0')).Text := '0.97'; TEdit(Frame.FindComponent('ScriptVoiceValue1')).Text := '0.02';
-      Check(W.ScriptTextEditing and (C.SpokenText=Reading.Text) and (C.Text=Source) and (C.Subtitle=Subtitle) and (C.Scene=Scene) and (ScriptFingerprint(W.ScriptDraft)=Raw),'human reading and query edits preserve raw subtitle scene and cast source',Results);
+      var PriorReading := C.VoiceReading; VoiceValueEdit(Frame,0).Text := '0.97'; VoiceValueEdit(Frame,1).Text := '0.02';
+      Check(W.ScriptTextEditing and (C.VoiceReading=PriorReading) and (C.Text=Source) and (C.Subtitle=Subtitle) and (C.Scene=Scene) and (ScriptFingerprint(W.ScriptDraft)=Raw),'VOICEVOX query edits retain reading raw subtitle scene and cast source',Results);
       var Settings := C.VoiceSettings.Clone as TJSONObject;
       try var Bad := Settings.Clone as TJSONObject; try PsdJson.Put(Bad,'speedScale',TJSONNumber.Create(9)); var Rejected := False;
-        try W.EditVoice(Id,'上書き',Bad); except on E: Exception do Rejected := True; end; Check(Rejected and (C.SpokenText=Reading.Text),'invalid query atomically rejects reading overwrite',Results);
+        try W.EditVoice(Id,'上書き',Bad); except on E: Exception do Rejected := True; end; Check(Rejected and (C.VoiceReading=PriorReading),'invalid query atomically rejects reading overwrite',Results);
       finally Bad.Free; end; finally Settings.Free; end;
-      TEdit(Frame.FindComponent('ScriptVoiceValue0')).Text := '-'; Check(not Frame.RequestFinish,'incomplete numeric input blocks leaving without discarding typed value',Results);
-      Check(TEdit(Frame.FindComponent('ScriptVoiceValue0')).Text='-','incomplete typed value retained',Results); TEdit(Frame.FindComponent('ScriptVoiceValue0')).Text := '0.97';
-      CaptureUiWindow(Main,ResultPath,'.editing'); TToolButton(Tools.FindComponent('ScriptVoiceDone')).Click; Check(not W.ScriptTextEditing,'input complete releases common pipe edit guard',Results);
+      VoiceValueEdit(Frame,0).Text := '-'; Check(not Frame.RequestFinish,'incomplete numeric input blocks leaving without discarding typed value',Results);
+      Check(VoiceValueEdit(Frame,0).Text='-','incomplete typed value retained',Results); VoiceValueEdit(Frame,0).Text := '0.97';
+      CaptureUiWindow(Main,ResultPath,'.editing'); Check(Frame.RequestFinish,'valid numeric adjustment finishes',Results); Check(not W.ScriptTextEditing,'input complete releases common pipe edit guard',Results);
       Press(List,VK_F5); WaitVoice(W); Check(W.ScriptDraft.AudioReady(C) and FileExists(C.LabFile),'F5 generates and previews one real WAV and phoneme LAB',Results);
       var Pcm := TRigmPcm.Load(C.WaveFile); try Check((Pcm.Duration>0.2) and (Length(Pcm.Samples)>1000),'real PCM is nonempty and measured',Results); finally Pcm.Free; end;
       for var I := 1 to W.ScriptDraft.Cues.Count-1 do Check(W.ScriptDraft.Cues[I].WaveFile='','selected generation leaves other cue audio untouched '+I.ToString,Results);

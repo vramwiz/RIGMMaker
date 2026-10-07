@@ -17,10 +17,13 @@ type
   TRigmMovieCue = class
   public
     Id, Scene, SpeakerId, Text, Subtitle, Expression, Motion, Background, Emotion: string;
+    VoiceQuery, VoiceQueryKey: string; // 選択行の詳細queryと、その入力元の指紋。
     VoiceReading: string; VoiceSettings: TJSONObject; // 空の読みは元の音声文。個別query値は任意。
     SubtitleNote: string; // 表示字幕のメモ。音声キーには含めない。
     VoiceStyleId: Integer;
     WaveFile, LabFile, AudioKey: string;
+    VoiceHeardKey: string; // 最後まで再生した音声の指紋。入力変更後は一致しなくなる。
+    AudioEffect: string; // 将来の音声エフェクト種別。現段階はnone（なし）。
     Pause, AudioSeconds: Double;
     Parameters: TJSONObject;
     Acting: TRigmMovieActing;
@@ -63,8 +66,11 @@ type
     function Clone: TRigmMovieProject;
     class function FromJson(O: TJSONObject): TRigmMovieProject; static;
     class function FromText(const Script: string): TRigmMovieProject; static;
+    function VoiceQuerySourceKey(C: TRigmMovieCue): string;
+    function EffectiveVoiceQuery(C: TRigmMovieCue): string;
     function AudioFingerprint(C: TRigmMovieCue): string;
     function AudioReady(C: TRigmMovieCue): Boolean;
+    function AudioHeard(C: TRigmMovieCue): Boolean;
     function CueDuration(C: TRigmMovieCue): Double;
     function Duration: Double;
     function StoryDuration: Double;
@@ -73,6 +79,7 @@ type
     procedure Validate;
   end;
 
+procedure ValidateVoiceQuery(const QueryJson: string);
 procedure ValidateVoiceValues(Settings: TJSONObject); // 個別queryパラメータの範囲。
 procedure ValidateVoiceReading(const Text: string); // UTF16と音声上限。
 procedure SaveMovie(Project: TRigmMovieProject; const FileName: string; Organized: Boolean=False);
@@ -96,7 +103,7 @@ end;
 constructor TRigmMovieCue.Create;
 begin
   inherited; Id := NewRigmId; Scene := 'scene1'; SpeakerId := 'narrator';
-  VoiceSettings := TJSONObject.Create; VoiceStyleId := -1; Emotion := 'neutral'; Pause := 0.3; Expression := 'neutral'; Motion := 'idle'; Parameters := TJSONObject.Create; Acting := TRigmMovieActing.Create;
+  VoiceSettings := TJSONObject.Create; VoiceStyleId := -1; AudioEffect := 'none'; Emotion := 'neutral'; Pause := 0.3; Expression := 'neutral'; Motion := 'idle'; Parameters := TJSONObject.Create; Acting := TRigmMovieActing.Create;
 end;
 destructor TRigmMovieCue.Destroy;
 begin VoiceSettings.Free; Acting.Free; Parameters.Free; inherited; end;
@@ -109,6 +116,9 @@ begin
   Result.AddPair('expression',Expression); Result.AddPair('motion',Motion); Result.AddPair('background',Background);
   AddN(Result,'pause',Pause); AddN(Result,'audioSeconds',AudioSeconds);
   Result.AddPair('waveFile',WaveFile); Result.AddPair('labFile',LabFile); Result.AddPair('audioKey',AudioKey);
+  if VoiceHeardKey<>'' then Result.AddPair('voiceHeardKey',VoiceHeardKey);
+  Result.AddPair('audioEffect',AudioEffect);
+  if VoiceQuery<>'' then begin Result.AddPair('voiceQuery',VoiceQuery); Result.AddPair('voiceQueryKey',VoiceQueryKey); end;
   if VoiceReading<>'' then Result.AddPair('voiceReading',VoiceReading);
   if VoiceSettings.Count>0 then Result.AddPair('voiceSettings',VoiceSettings.Clone as TJSONObject);
   Result.AddPair('parameters',Parameters.Clone as TJSONObject);
@@ -124,6 +134,9 @@ begin
       C.SpeakerId := JS(Q,'speaker','narrator'); C.Text := JS(Q,'text'); C.Subtitle := JS(Q,'subtitle',C.Text); C.SubtitleNote := JS(Q,'subtitleNote');
       if (Q.GetValue('voiceReading')<>nil) and not (Q.GetValue('voiceReading') is TJSONString) then raise ERigm.Create('読みの保存形式が不正です。');
       C.VoiceReading := JS(Q,'voiceReading');
+      for var K in ['voiceQuery','voiceQueryKey'] do
+        if (Q.GetValue(K)<>nil) and not (Q.GetValue(K) is TJSONString) then raise ERigm.Create('詳細queryの保存形式が不正です。');
+      C.VoiceQuery := JS(Q,'voiceQuery'); C.VoiceQueryKey := JS(Q,'voiceQueryKey');
       if Q.GetValue('voiceSettings')<>nil then begin
         if not (Q.GetValue('voiceSettings') is TJSONObject) then raise ERigm.Create('音声query値の保存形式が不正です。');
         var Values := JO(Q,'voiceSettings').Clone as TJSONObject; C.VoiceSettings.Free; C.VoiceSettings := Values;
@@ -131,6 +144,9 @@ begin
       C.Emotion := JS(Q,'emotion','neutral'); C.VoiceStyleId := JI(Q,'voiceStyleId',-1); C.Expression := JS(Q,'expression','neutral'); C.Motion := JS(Q,'motion','idle'); C.Background := JS(Q,'background');
       C.Pause := JN(Q,'pause',0.3); C.AudioSeconds := JN(Q,'audioSeconds');
       C.WaveFile := JS(Q,'waveFile'); C.LabFile := JS(Q,'labFile'); C.AudioKey := JS(Q,'audioKey');
+      for var K in ['voiceHeardKey','audioEffect'] do
+        if (Q.GetValue(K)<>nil) and not (Q.GetValue(K) is TJSONString) then raise ERigm.Create('音声再生・エフェクトの保存形式が不正です。');
+      C.VoiceHeardKey := JS(Q,'voiceHeardKey'); C.AudioEffect := JS(Q,'audioEffect','none');
       if Q.GetValue('parameters') <> nil then begin C.Parameters.Free; C.Parameters := JO(Q,'parameters').Clone as TJSONObject; end;
       if Q.GetValue('acting')<>nil then begin C.Acting.Free; C.Acting := TRigmMovieActing.FromJson(JO(Q,'acting')); end;
   except Result.Free; raise; end;
@@ -248,6 +264,49 @@ begin
     Result.Validate; Result.Modified := True;
   except Result.Free; raise; end;
 end;
+procedure ValidateVoiceQuery(const QueryJson: string);
+  procedure CheckTree(V: TJSONValue; Depth: Integer);
+  begin
+    if Depth>32 then raise ERigm.Create('詳細queryの階層が深すぎます。');
+    if V is TJSONNumber then begin
+      if not Finite(TJSONNumber(V).AsDouble) then raise ERigm.Create('詳細queryは有限の数値で指定してください。');
+    end else if V is TJSONObject then begin
+      var Seen := TDictionary<string,Boolean>.Create;
+      try for var P in TJSONObject(V) do begin
+        if Seen.ContainsKey(P.JsonString.Value) then raise ERigm.Create('詳細queryの項目が重複しています。');
+        Seen.Add(P.JsonString.Value,True); CheckTree(P.JsonValue,Depth+1);
+      end; finally Seen.Free; end;
+    end else if V is TJSONArray then for var Item in TJSONArray(V) do CheckTree(Item,Depth+1);
+  end;
+  procedure CheckMora(M: TJSONObject);
+  begin
+    if not (M.GetValue('text') is TJSONString) or not (M.GetValue('vowel') is TJSONString) then raise ERigm.Create('モーラの形式が不正です。');
+    for var K in ['pitch','vowel_length','consonant_length'] do begin
+      var V := M.GetValue(K); if (K='consonant_length') and ((V=nil) or (V is TJSONNull)) then Continue;
+      if not (V is TJSONNumber) or (TJSONNumber(V).AsDouble<0) or (TJSONNumber(V).AsDouble>20) then raise ERigm.Create('モーラの音高・長さが範囲外です。');
+    end;
+  end;
+begin
+  if QueryJson='' then Exit;
+  if Length(QueryJson)>512*1024 then raise ERigm.Create('詳細queryが大きすぎます。');
+  var V := TJSONObject.ParseJSONValue(QueryJson);
+  try
+    if not (V is TJSONObject) then raise ERigm.Create('詳細queryはJSONオブジェクトで指定してください。');
+    CheckTree(V,0); var O := TJSONObject(V);
+    if not (O.GetValue('accent_phrases') is TJSONArray) then raise ERigm.Create('詳細queryにアクセント句がありません。');
+    for var Item in TJSONArray(O.GetValue('accent_phrases')) do begin
+      if not (Item is TJSONObject) then raise ERigm.Create('アクセント句の形式が不正です。');
+      var Phrase := TJSONObject(Item);
+      if not (Phrase.GetValue('moras') is TJSONArray) or not (Phrase.GetValue('accent') is TJSONNumber) then raise ERigm.Create('アクセント句の形式が不正です。');
+      var Moras := TJSONArray(Phrase.GetValue('moras')); var Accent := TJSONNumber(Phrase.GetValue('accent')).AsDouble;
+      if (Moras.Count=0) or (Accent<>Trunc(Accent)) or (Accent<1) or (Accent>Moras.Count) then raise ERigm.Create('アクセント位置が範囲外です。');
+      for var Mora in Moras do begin if not (Mora is TJSONObject) then raise ERigm.Create('モーラの形式が不正です。'); CheckMora(TJSONObject(Mora)); end;
+      var Pause := Phrase.GetValue('pause_mora'); if (Pause<>nil) and not (Pause is TJSONNull) then begin
+        if not (Pause is TJSONObject) then raise ERigm.Create('句間の形式が不正です。'); CheckMora(TJSONObject(Pause));
+      end;
+    end;
+  finally V.Free; end;
+end;
 procedure ValidateVoiceValues(Settings: TJSONObject);
 begin
   if Settings=nil then raise ERigm.Create('音声query値がありません。');
@@ -315,12 +374,14 @@ begin
     Seen.Clear;
     for var C in Cues do begin
       C.Acting.Validate;
+      if not (Length(C.VoiceHeardKey) in [0,64]) or (C.AudioEffect='') or (Length(C.AudioEffect)>64) then raise ERigm.Create('音声再生・エフェクトの保存値が不正です。');
       if (Scenes.Count>0) and (Scene(C.Scene)=nil) then raise ERigm.Create('Cue scene does not exist');
     if (C.VoiceStyleId < -1) or not MatchText(C.Emotion,MovieEmotionIds) then raise ERigm.Create('Invalid cue emotion or voice style');
       if (C.Id = '') or Seen.ContainsKey(C.Id) then raise ERigm.Create('セリフIDが空か重複しています。'); Seen.Add(C.Id,True);
       if Speaker(C.SpeakerId) = nil then raise ERigm.Create('セリフの話者がありません: '+C.SpeakerId);
       if (Length(C.Text)>2000) or (Length(C.Subtitle)>3000) or (Length(C.Scene)>300) then raise ERigm.Create('セリフが長すぎます。');
-      ValidateVoiceReading(C.VoiceReading); ValidateVoiceValues(C.VoiceSettings);
+      ValidateVoiceReading(C.VoiceReading); ValidateVoiceValues(C.VoiceSettings); ValidateVoiceQuery(C.VoiceQuery);
+      if (C.VoiceQuery<>'') and (Length(C.VoiceQueryKey)<>64) then raise ERigm.Create('詳細queryの入力元指紋が不正です。');
       if not Finite(C.Pause) or (C.Pause<0) or (C.Pause>60) or not Finite(C.AudioSeconds) or (C.AudioSeconds<0) or (C.AudioSeconds>600) then raise ERigm.Create('セリフ時間が範囲外です。');
       if not MatchText(C.Expression,['neutral','smile','serious','sad']) or not MatchText(C.Motion,['idle','still','nod','emphasis']) then raise ERigm.Create('未対応の表情・動作です。');
       for var Pair in C.Parameters do if not (Pair.JsonValue is TJSONNumber) or not Finite(TJSONNumber(Pair.JsonValue).AsDouble) then raise ERigm.Create('演技パラメータには有限の数値を指定してください。');
@@ -328,12 +389,17 @@ begin
   finally Seen.Free; end;
   if Duration > 3600 then raise ERigm.Create('動画は1時間以内にしてください。');
 end;
+function TRigmMovieProject.VoiceQuerySourceKey(C: TRigmMovieCue): string;
+begin Result := THashSHA2.GetHashString(EngineUrl+#10+C.SpokenText+#10+EffectiveStyle(C).ToString+#10+Speaker(C.SpeakerId).VoiceUuid); end;
+function TRigmMovieProject.EffectiveVoiceQuery(C: TRigmMovieCue): string;
+begin Result := ''; if (C.VoiceQuery<>'') and (C.VoiceQueryKey=VoiceQuerySourceKey(C)) then Result := C.VoiceQuery; end;
 function TRigmMovieProject.AudioFingerprint(C: TRigmMovieCue): string;
 var O: TJSONObject;
 begin
   O := Speaker(C.SpeakerId).Json;
   if C.VoiceStyleId>=0 then begin O.RemovePair('styleId').Free; AddN(O,'styleId',C.VoiceStyleId); end;
   if C.VoiceSettings.Count>0 then O.AddPair('voiceSettings',C.VoiceSettings.Clone as TJSONObject);
+  if EffectiveVoiceQuery(C)<>'' then O.AddPair('voiceQuery',EffectiveVoiceQuery(C));
   try Result := THashSHA2.GetHashString(EngineUrl+#10+C.SpokenText+#10+O.ToJSON); finally O.Free; end;
 end;
 function TRigmMovieProject.AudioReady(C: TRigmMovieCue): Boolean;
@@ -341,6 +407,8 @@ begin
   if C.SpokenText='' then Exit(not ((Scenes.Count>0) and (C.WaveFile<>'') and (C.AudioSeconds>0)));
   Result := (C.AudioSeconds>0) and (C.AudioKey=AudioFingerprint(C)) and FileExists(ResolveMoviePath(FileName,C.WaveFile));
 end;
+function TRigmMovieProject.AudioHeard(C: TRigmMovieCue): Boolean;
+begin Result := AudioReady(C) and ((C.SpokenText='') or (C.VoiceHeardKey=AudioFingerprint(C))); end;
 function TRigmMovieProject.CueDuration(C: TRigmMovieCue): Double;
 begin
   if (Scenes.Count>0) and (C.AudioSeconds>0) and HasStoredAudio(C) then Result := C.AudioSeconds

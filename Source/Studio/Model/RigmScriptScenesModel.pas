@@ -2,7 +2,7 @@
 // シーンの説明・外部画像要求を既存scene正本に結び付ける。画像生成は外部Codexの工程。
 interface
 uses System.JSON, RigmMovieModel, RigmMovieComposition;
-procedure PrepareScriptScenes(Project: TRigmMovieProject);
+procedure PrepareScriptScenes(Project: TRigmMovieProject; RequireVoiceConfirmation: Boolean = True);
 procedure ValidateScriptScenes(Project: TRigmMovieProject);
 procedure RequireScriptScenes(Project: TRigmMovieProject);
 procedure EditScriptScene(Project: TRigmMovieProject; const Id,Description,Prompt,Mode: string);
@@ -35,11 +35,13 @@ begin
   if (Project.ScriptWizard.GetValue('scenes')=nil) or (JS(JO(Project.ScriptWizard,'scenes'),'castingFingerprint')<>CastingFingerprint(Project)) then
     raise Exception.Create('前工程が変わりました。音声工程からNextでシーンを再確認してください。');
 end;
-procedure PrepareScriptScenes(Project: TRigmMovieProject);
+procedure PrepareScriptScenes(Project: TRigmMovieProject; RequireVoiceConfirmation: Boolean);
 begin
-  RequireCurrentVoice(Project);
-  if JS(Project.ScriptWizard,'voiceStatus')<>'complete' then raise Exception.Create('音声確認完了を押してから進んでください。');
-  for var C in Project.Cues do if not Project.AudioReady(C) then raise Exception.Create('変更後または未生成の音声を確認してください。');
+  if RequireVoiceConfirmation then begin
+    RequireCurrentVoice(Project);
+    if JS(Project.ScriptWizard,'voiceStatus')<>'complete' then raise Exception.Create('全セリフの音声を最後まで再生してから進んでください。');
+    for var C in Project.Cues do if not Project.AudioHeard(C) then raise Exception.Create('変更後または未再生の音声を確認してください。');
+  end;
   if Project.Scenes.Count=0 then raise Exception.Create('セリフを含むシーンがありません。');
   if Project.ScriptWizard.GetValue('scenes')=nil then begin
     var O := PsdJson.ObjectText('{"format":"RIGMMaker.ScriptScenes","schemaVersion":1,"requests":[]}');

@@ -2,16 +2,16 @@
 // scene選択・実サムネイル・独立説明文と外部Codex要求。描画と転送はWorkspace所有。
 interface
 uses System.Classes, Vcl.Forms, Vcl.Controls, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.ComCtrls, Vcl.Graphics, Vcl.ImgList,
-  RigmWizardWorkspace, RigmIconToolbar, RigmScriptTextFrame;
+  RigmWizardWorkspace, RigmIconToolbar, RigmScriptTextFrame, RigmBufferedControls;
 type
   TRigmScriptScenePreview = class(TCustomControl)
   private FWorkspace: TRigmWizardWorkspace;
   protected procedure Paint; override;
   public constructor CreateForWorkspace(AOwner: TComponent; Workspace: TRigmWizardWorkspace);
   end;
-  TRigmScriptScenesFrame = class(TFrame)
+  TRigmScriptScenesFrame = class(TRigmBufferedFrame)
   private
-    FWorkspace: TRigmWizardWorkspace; FSync,FEditing,FActive: Boolean; FLoaded,FThumbnailKey: string;
+    FWorkspace: TRigmWizardWorkspace; FSync,FEditing,FActive: Boolean; FLoaded,FThumbnailKey,FPreviewStamp: string;
     FList: TListView; FImages: TImageList; FDescription,FPrompt: TRigmScriptMemo; FMode: TComboBox;
     FInfo,FGuide: TLabel; FPreview: TRigmScriptScenePreview; FToolbar: TRigmIconToolbar;
     procedure Selected(Sender: TObject; Item: TListItem; Value: Boolean);
@@ -51,6 +51,8 @@ end;
 constructor TRigmScriptScenesFrame.CreateForWorkspace(AOwner: TComponent; Workspace: TRigmWizardWorkspace);
 begin
   inherited Create(AOwner); Align := alClient; FWorkspace := Workspace;
+  // サムネイルの設定で一覧HWNDが必要になる前に、画面の表示先へ接続する。
+  if AOwner is TWinControl then Parent := TWinControl(AOwner);
   FToolbar := TRigmIconToolbar.Create(Self); FToolbar.Parent := Self; FToolbar.Align := alTop; FToolbar.Name := 'ScriptScenesToolbar';
   FToolbar.AddIcon('ScriptSceneEdit','Enter：説明文とCodexへの画像指示を編集',riEditPreview,0,Detail);
   FToolbar.AddIcon('ScriptSceneDone','入力完了（Ctrl+Enter / Esc）',riComplete,0,Done);
@@ -61,17 +63,17 @@ begin
   FToolbar.AddIcon('ScriptScenePreview','選択シーンを共通描画で確認',riPreview,0,Preview);
   FGuide := TLabel.Create(Self); FGuide.Parent := Self; FGuide.Align := alBottom; FGuide.AutoSize := False; FGuide.WordWrap := True; FGuide.Height := 64; FGuide.Font.Height := -20; FGuide.Name := 'ScriptSceneGuide';
   FImages := TImageList.Create(Self); FImages.Width := 96; FImages.Height := 54; FImages.ColorDepth := cd32Bit;
-  FList := TListView.Create(Self); FList.Parent := Self; FList.Align := alLeft; FList.Width := 300; FList.ViewStyle := vsReport; FList.ReadOnly := True; FList.RowSelect := True; FList.HideSelection := False;
+  FList := TRigmBufferedListView.Create(Self); FList.Parent := Self; FList.Align := alLeft; FList.Width := 300; FList.ViewStyle := vsReport; FList.ReadOnly := True; FList.RowSelect := True; FList.HideSelection := False;
   FList.SmallImages := FImages; FList.Name := 'ScriptSceneRows'; FList.OnSelectItem := Selected; FList.OnKeyDown := Key;
   FList.Columns.Add.Caption := 'シーン'; FList.Columns[0].Width := 164; FList.Columns.Add.Caption := '状態'; FList.Columns[1].Width := 125;
   var Splitter := TSplitter.Create(Self); Splitter.Parent := Self; Splitter.Align := alLeft;
-  var Body := TPanel.Create(Self); Body.Parent := Self; Body.Align := alClient; Body.BevelOuter := bvNone; Body.Caption := ''; Body.Padding.SetBounds(8,4,8,4);
+  var Body := TRigmBufferedPanel.Create(Self); Body.Parent := Self; Body.Align := alClient; Body.BevelOuter := bvNone; Body.Caption := ''; Body.Padding.SetBounds(8,4,8,4);
   FInfo := TLabel.Create(Self); FInfo.Parent := Body; FInfo.Align := alTop; FInfo.AutoSize := False; FInfo.Height := 36; FInfo.Font.Height := -22; FInfo.Name := 'ScriptSceneInfo';
   FMode := TComboBox.Create(Self); FMode.Parent := Body; FMode.Align := alTop; FMode.Style := csDropDownList; FMode.Items.Add('画像と説明文'); FMode.Items.Add('画像のみ'); FMode.Items.Add('説明文のみ'); FMode.Items.Add('表示なし（素材は保持）'); FMode.OnChange := ModeChanged; FMode.Name := 'ScriptSceneMode';
-  var PromptPanel := TPanel.Create(Self); PromptPanel.Parent := Body; PromptPanel.Align := alBottom; PromptPanel.Height := 84; PromptPanel.Caption := ''; PromptPanel.BevelOuter := bvNone;
+  var PromptPanel := TRigmBufferedPanel.Create(Self); PromptPanel.Parent := Body; PromptPanel.Align := alBottom; PromptPanel.Height := 84; PromptPanel.Caption := ''; PromptPanel.BevelOuter := bvNone;
   var L := TLabel.Create(Self); L.Parent := PromptPanel; L.Align := alTop; L.Caption := 'Codexへの画像指示（外部要求用）'; L.Font.Height := -18;
   FPrompt := TRigmScriptMemo.Create(Self); FPrompt.Parent := PromptPanel; FPrompt.Align := alClient; FPrompt.MaxLength := 8000; FPrompt.Font.Height := -20; FPrompt.ScrollBars := ssVertical; FPrompt.Name := 'ScriptScenePrompt'; FPrompt.OnChange := Changed; FPrompt.OnKeyDown := Key;
-  var DescriptionPanel := TPanel.Create(Self); DescriptionPanel.Parent := Body; DescriptionPanel.Align := alBottom; DescriptionPanel.Top := 0; DescriptionPanel.Height := 124; DescriptionPanel.Caption := ''; DescriptionPanel.BevelOuter := bvNone;
+  var DescriptionPanel := TRigmBufferedPanel.Create(Self); DescriptionPanel.Parent := Body; DescriptionPanel.Align := alBottom; DescriptionPanel.Top := 0; DescriptionPanel.Height := 124; DescriptionPanel.Caption := ''; DescriptionPanel.BevelOuter := bvNone;
   L := TLabel.Create(Self); L.Parent := DescriptionPanel; L.Align := alTop; L.Caption := '説明文（字幕・音声とは独立。シーン全体で表示）'; L.Font.Height := -18;
   FDescription := TRigmScriptMemo.Create(Self); FDescription.Parent := DescriptionPanel; FDescription.Align := alClient; FDescription.MaxLength := 3000; FDescription.Font.Height := -24; FDescription.ScrollBars := ssVertical; FDescription.Name := 'ScriptSceneDescription'; FDescription.OnChange := Changed; FDescription.OnKeyDown := Key;
   FPreview := TRigmScriptScenePreview.CreateForWorkspace(Self,Workspace); FPreview.Parent := Body; FPreview.Align := alClient; FPreview.Name := 'ScriptScenePreviewControl';
@@ -134,17 +136,46 @@ begin
   FSync := True;
   try
     if not FEditing then begin
-      RefreshThumbnails; FList.Items.BeginUpdate;
-      try FList.Items.Clear; for var I := 0 to P.Scenes.Count-1 do begin var Scene := P.Scenes[I]; var Item := FList.Items.Add; Item.Caption := (I+1).ToString; Item.ImageIndex := I; var State := '未確認'; if ScriptSceneReady(P,Scene) then State := '準備済'; var R := ScriptSceneRequest(P,Scene.Id); if (R<>nil) and (JS(R,'state')='pending') then if JS(R,'fingerprint')=ScriptSceneFingerprint(P,Scene.Id) then State := '要求中' else State := '要求変更'; Item.SubItems.Add(State); Item.SubItems.Add(Scene.Id); Item.Selected := Scene.Id=S.Id; end;
-      finally FList.Items.EndUpdate; end;
+      RefreshThumbnails;
+      var Rebuild := FList.Items.Count<>P.Scenes.Count;
+      if not Rebuild then for var I := 0 to P.Scenes.Count-1 do
+        if (FList.Items[I].SubItems.Count<>2) or (FList.Items[I].SubItems[1]<>P.Scenes[I].Id) then begin Rebuild := True; Break; end;
+      var SelectionChanged := (FList.Selected=nil) or (FList.Selected.SubItems[1]<>S.Id);
+      if Rebuild then FList.Items.BeginUpdate;
+      try
+        if Rebuild then FList.Items.Clear;
+        for var I := 0 to P.Scenes.Count-1 do begin
+          var Scene := P.Scenes[I]; var Item: TListItem;
+          if Rebuild then begin Item := FList.Items.Add; Item.Caption := (I+1).ToString; Item.ImageIndex := I; Item.SubItems.Add(''); Item.SubItems.Add(Scene.Id); end
+          else Item := FList.Items[I];
+          var State := '未確認'; if ScriptSceneReady(P,Scene) then State := '準備済';
+          var R := ScriptSceneRequest(P,Scene.Id);
+          if (R<>nil) and (JS(R,'state')='pending') then
+            if JS(R,'fingerprint')=ScriptSceneFingerprint(P,Scene.Id) then State := '要求中' else State := '要求変更';
+          if Item.SubItems[0]<>State then Item.SubItems[0] := State;
+          if Item.Selected<>(Scene.Id=S.Id) then Item.Selected := Scene.Id=S.Id;
+        end;
+        if (Rebuild or SelectionChanged) and (FList.Selected<>nil) then FList.Selected.MakeVisible(False);
+      finally if Rebuild then FList.Items.EndUpdate; end;
     end;
-    if not FEditing or (FLoaded<>S.Id) then begin FDescription.Text := S.Description; FPrompt.Text := S.ImagePrompt; FLoaded := S.Id; for var I := 0 to 3 do if Modes[I]=S.DisplayMode then FMode.ItemIndex := I; end;
+    if not FEditing or (FLoaded<>S.Id) then begin
+      if FDescription.Text<>S.Description then FDescription.Text := S.Description;
+      if FPrompt.Text<>S.ImagePrompt then FPrompt.Text := S.ImagePrompt;
+      FLoaded := S.Id; for var I := 0 to 3 do if (Modes[I]=S.DisplayMode) and (FMode.ItemIndex<>I) then FMode.ItemIndex := I;
+    end;
     FDescription.ReadOnly := not FEditing; FPrompt.ReadOnly := not FEditing;
-    FInfo.Caption := 'シーン '+ScriptSceneNumber(P,S.Id).ToString+' / '+P.Scenes.Count.ToString+'　'+FormatFloat('0.00',ScriptSceneStart(P,S.Id))+'秒〜　'+FormatFloat('0.00',P.SceneDuration(S))+'秒';
-    FGuide.Caption := '↑↓：シーン選択 / Enter：説明・画像指示を編集。画像要求はCodexの外部工程です。';
-    if FActive and not FEditing then try FWorkspace.PreviewScriptScene; except on E: Exception do FGuide.Caption := E.Message; end;
-    var State := FWorkspace.ScriptScenePreviewStatus; try if JS(State,'error')<>'' then FGuide.Caption := FGuide.Caption+#13#10+JS(State,'error'); finally State.Free; end;
-    FPreview.Invalidate;
+    var Info := 'シーン '+ScriptSceneNumber(P,S.Id).ToString+' / '+P.Scenes.Count.ToString+'　'+FormatFloat('0.00',ScriptSceneStart(P,S.Id))+'秒〜　'+FormatFloat('0.00',P.SceneDuration(S))+'秒';
+    if FInfo.Caption<>Info then FInfo.Caption := Info;
+    var Guide := '↑↓：シーン選択 / Enter：説明・画像指示を編集。画像要求はCodexの外部工程です。';
+    if FActive and not FEditing then try FWorkspace.PreviewScriptScene; except on E: Exception do Guide := E.Message; end;
+    var State := FWorkspace.ScriptScenePreviewStatus;
+    try
+      if JS(State,'error')<>'' then Guide := Guide+#13#10+JS(State,'error');
+      // ジョブの経過時間では再描画しない。表示対象・完成画像・エラーが変わった時だけ反映する。
+      var Stamp := P.Id+'|'+S.Id+'|'+JB(State,'current').ToString+'|'+JS(State,'path')+'|'+JS(State,'error');
+      if Stamp<>FPreviewStamp then begin FPreviewStamp := Stamp; FPreview.Invalidate; end;
+    finally State.Free; end;
+    if FGuide.Caption<>Guide then FGuide.Caption := Guide;
   finally FSync := False; end;
 end;
 procedure TRigmScriptScenesFrame.SetActive(Value: Boolean);

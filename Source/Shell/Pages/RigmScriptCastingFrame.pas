@@ -3,12 +3,21 @@
 // 配役セリフの一覧と番号キー操作。セリフ/音声/字幕の正本はWorkspaceの既存モデル。
 interface
 uses System.Classes, Vcl.Forms, Vcl.Controls, Vcl.ComCtrls, Vcl.StdCtrls, Vcl.ExtCtrls,
-  RigmWizardWorkspace, RigmIconToolbar;
+  RigmWizardWorkspace, RigmIconToolbar, RigmVoiceConnection;
 type
   TRigmScriptCastingFrame = class(TFrame)
   private
     FWorkspace: TRigmWizardWorkspace; FSync: Boolean; FSelectedCue: string;
-    FToolbar: TRigmIconToolbar; FList: TListView; FText,FCharacters,FReason: TMemo; FGuide: TLabel;
+    FConnection: TRigmVoiceConnection; FVoiceStyles,FVoiceState: TComboBox;
+    FConnectionRow,FVoicePanel: TPanel; FLocate: TButton; FVoiceActor: TLabel;
+    FVoicePeopleIndices,FVoiceStateIndices: TArray<Integer>; // 借用カタログへの人物・行別状態の索引。
+    FVoiceRole: Integer; FVoiceStatus: TLabel; FVoiceMessage: string;
+    FToolbar: TRigmIconToolbar; FList: TListView; FText,FReason: TMemo; FGuide: TLabel;
+    procedure ConnectionChanged(Sender: TObject);
+    procedure LocateEngine(Sender: TObject);
+    procedure BindVoice(Sender: TObject);
+    procedure StateChanged(Sender: TObject);
+    procedure RefreshVoiceBindings;
     procedure Selected(Sender: TObject; Item: TListItem; Selected: Boolean);
     procedure HandleKey(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure RequestCasting(Sender: TObject);
@@ -20,10 +29,11 @@ type
     constructor CreateForWorkspace(AOwner: TComponent; Workspace: TRigmWizardWorkspace);
     procedure RefreshState;
     procedure SetActive(Value: Boolean);
+    function RequestFinish: Boolean;
   end;
 implementation
 uses System.SysUtils, System.JSON, System.Generics.Collections, Winapi.Windows, Winapi.Messages, Winapi.CommCtrl,
-  System.Types, Vcl.Graphics, Vcl.Themes, RigmJson, RigmMovieModel, RigmScriptCastingModel, RigmScriptPlacementModel, RigmToolbarIcons;
+  System.Types, Vcl.Graphics, Vcl.Themes, RigmJson, RigmMovieModel, RigmScriptCastingModel, RigmScriptVoiceSelection, RigmScriptPlacementModel, RigmToolbarIcons;
 {$R *.dfm}
 type
   TRigmCastingListView = class(TListView)
@@ -105,12 +115,22 @@ begin
   if AOwner is TWinControl then Parent := TWinControl(AOwner);
   FToolbar := TRigmIconToolbar.Create(Self); FToolbar.Parent := Self; FToolbar.Align := alTop; FToolbar.Name := 'ScriptCastingToolbar';
   FToolbar.AddIcon('ScriptCastingRequest','Codexへ配役を依頼／再依頼する',riRefresh,0,RequestCasting);
-  FToolbar.AddIcon('ScriptCastingAccept','Enter：現在の配役を確認して次へ',riComplete,0,Accept);
+  FToolbar.AddIcon('ScriptCastingAccept','Enter：現在のキャラ配役を確認して次のセリフへ（声は別途選択）',riComplete,0,Accept);
   FToolbar.AddSeparator;
   FToolbar.AddIcon('ScriptCastingSplit','選択セリフを本文のカーソル位置で分割する',riEditPreview,0,Split);
   FToolbar.AddIcon('ScriptCastingMerge','同じシーンの次のセリフと結合する',riGroup,0,Merge);
-  FCharacters := TMemo.Create(Self); FCharacters.Parent := Self; FCharacters.Align := alTop;
-  FCharacters.ReadOnly := True; FCharacters.Height := 82; FCharacters.ScrollBars := ssVertical; FCharacters.Name := 'ScriptCastingRoles';
+  FVoicePanel := TPanel.Create(Self); FVoicePanel.Parent := Self; FVoicePanel.Align := alTop; FVoicePanel.Caption := ''; FVoicePanel.BevelOuter := bvNone; FVoicePanel.Height := 98;
+  FConnectionRow := TPanel.Create(Self); FConnectionRow.Parent := FVoicePanel; FConnectionRow.Align := alTop; FConnectionRow.Caption := ''; FConnectionRow.BevelOuter := bvNone; FConnectionRow.Height := 30;
+  FLocate := TButton.Create(Self); FLocate.Parent := FConnectionRow; FLocate.Align := alRight; FLocate.Width := 180; FLocate.Caption := 'VOICEVOXを手動設定'; FLocate.Name := 'ScriptCastingLocateEngine'; FLocate.OnClick := LocateEngine; FLocate.Visible := False;
+  FVoiceStatus := TLabel.Create(Self); FVoiceStatus.Parent := FConnectionRow; FVoiceStatus.Align := alClient; FVoiceStatus.AutoSize := False; FVoiceStatus.WordWrap := True; FVoiceStatus.Name := 'ScriptCastingVoiceStatus';
+  var Choices := TPanel.Create(Self); Choices.Parent := FVoicePanel; Choices.Align := alTop; Choices.Caption := ''; Choices.BevelOuter := bvNone; Choices.Height := 34;
+  FVoiceActor := TLabel.Create(Self); FVoiceActor.Parent := Choices; FVoiceActor.Align := alLeft; FVoiceActor.Width := 220; FVoiceActor.AutoSize := False; FVoiceActor.Caption := '声（人物）';
+  FVoiceStyles := TComboBox.Create(Self); FVoiceStyles.Parent := Choices; FVoiceStyles.Align := alClient; FVoiceStyles.Style := csDropDownList; FVoiceStyles.Name := 'ScriptCastingVoiceStyle'; FVoiceStyles.OnChange := BindVoice;
+  var States := TPanel.Create(Self); States.Parent := FVoicePanel; States.Align := alTop; States.Caption := ''; States.BevelOuter := bvNone; States.Height := 34;
+  var StateLabel := TLabel.Create(Self); StateLabel.Parent := States; StateLabel.Align := alLeft; StateLabel.Width := 220; StateLabel.AutoSize := False; StateLabel.Caption := '選択セリフの感情'; StateLabel.Name := 'ScriptCastingEmotionLabel';
+  FVoiceState := TComboBox.Create(Self); FVoiceState.Parent := States; FVoiceState.Align := alClient; FVoiceState.Style := csDropDownList; FVoiceState.Name := 'ScriptCastingVoiceState'; FVoiceState.OnChange := StateChanged;
+  FToolbar.Top := 0; FVoicePanel.Top := FToolbar.Height; FConnectionRow.Top := 0; Choices.Top := 30; States.Top := 64;
+  FConnection := TRigmVoiceConnection.CreateForWorkspace(Self,FWorkspace); FConnection.OnChanged := ConnectionChanged;
   FGuide := TLabel.Create(Self); FGuide.Parent := Self; FGuide.Align := alBottom; FGuide.AutoSize := False;
   FGuide.WordWrap := True; FGuide.Height := 76; FGuide.Name := 'ScriptCastingGuide';
   var Detail := TPanel.Create(Self); Detail.Parent := Self; Detail.Align := alBottom; Detail.Height := 174; Detail.Caption := ''; Detail.BevelOuter := bvNone;
@@ -125,7 +145,7 @@ begin
   FList.ReadOnly := True; FList.RowSelect := True; FList.HideSelection := False; FList.OnSelectItem := Selected; FList.OnKeyDown := HandleKey;
   FList.Name := 'ScriptCastingRows'; FList.Columns.Add.Caption := '区分'; FList.Columns[0].Width := 90;
   FList.Columns.Add.Caption := '番号 / キャラ'; FList.Columns[1].Width := 270;
-  FList.Columns.Add.Caption := '状態'; FList.Columns[2].Width := 120;
+  FList.Columns.Add.Caption := '感情'; FList.Columns[2].Width := 140;
   FList.Columns.Add.Caption := 'セリフ'; FList.Columns[3].Width := 700;
 end;
 function TRigmScriptCastingFrame.SelectedId: string;
@@ -165,6 +185,60 @@ procedure TRigmScriptCastingFrame.Split(Sender: TObject);
 begin try FWorkspace.SplitCasting(SelectedId,FText.SelStart); except on E: Exception do FGuide.Caption := E.Message; end; end;
 procedure TRigmScriptCastingFrame.Merge(Sender: TObject);
 begin try FWorkspace.MergeCasting(SelectedId); except on E: Exception do FGuide.Caption := E.Message; end; end;
+function TRigmScriptCastingFrame.RequestFinish: Boolean;
+begin
+  FWorkspace.EndScriptTextEdit; Result := True;
+end;
+procedure TRigmScriptCastingFrame.ConnectionChanged(Sender: TObject);
+begin FVoiceMessage := ''; RefreshState; end;
+procedure TRigmScriptCastingFrame.LocateEngine(Sender: TObject);
+begin if RequestFinish then FConnection.Locate; end;
+procedure TRigmScriptCastingFrame.BindVoice(Sender: TObject);
+begin
+  if FSync or (FVoiceStyles.ItemIndex<=0) or (FVoiceRole=0) or not RequestFinish then Exit;
+  var Index := FVoicePeopleIndices[FVoiceStyles.ItemIndex-1];
+  try var O := TJSONObject(FWorkspace.VoiceCatalog[Index]); FVoiceMessage := ''; FWorkspace.BindVoicePerson(FVoiceRole,JS(O,'uuid')); RefreshState;
+  except on E: Exception do begin FVoiceMessage := E.Message; RefreshState; end; end;
+end;
+procedure TRigmScriptCastingFrame.StateChanged(Sender: TObject);
+begin
+  if FSync or (FVoiceState.ItemIndex<0) or (FVoiceState.ItemIndex>=Length(FVoiceStateIndices)) or not RequestFinish then Exit;
+  var Index := FVoiceStateIndices[FVoiceState.ItemIndex];
+  try FVoiceMessage := ''; FWorkspace.SetVoiceState(FSelectedCue,JI(TJSONObject(FWorkspace.VoiceCatalog[Index]),'styleId',-1));
+  except on E: Exception do FVoiceMessage := E.Message; end; RefreshState;
+end;
+procedure TRigmScriptCastingFrame.RefreshVoiceBindings;
+begin
+    var P := FWorkspace.ScriptDraft; var Row := CastingRow(P,FSelectedCue); FVoiceRole := 0;
+    if Row<>nil then FVoiceRole := JI(Row,'role');
+    FVoicePeopleIndices := VoicePersonIndices(FWorkspace.VoiceCatalog);
+    FVoiceStyles.Items.Clear; FVoiceStyles.Items.Add('声の人物を選択してください');
+    for var I in FVoicePeopleIndices do FVoiceStyles.Items.Add(JS(TJSONObject(FWorkspace.VoiceCatalog[I]),'name'));
+    FVoiceStyles.ItemIndex := 0;
+    var Role := CastingRole(P,FVoiceRole);
+    FVoiceActor.Caption := '声（人物）';
+    if Role<>nil then begin var S := P.Speaker(JS(Role,'speakerId'));
+      FVoiceActor.Caption := JS(Role,'name')+'の声（人物）';
+      for var I := 0 to High(FVoicePeopleIndices) do if JS(TJSONObject(FWorkspace.VoiceCatalog[FVoicePeopleIndices[I]]),'uuid')=S.VoiceUuid then FVoiceStyles.ItemIndex := I+1;
+    end;
+    // 実際の感情だけを並べる。ノーマルの追加候補を作らず、未取得時は未選択にする。
+    FVoiceState.Items.Clear; FVoiceState.ItemIndex := -1; FVoiceStateIndices := nil;
+    var Cue := P.Cue(FSelectedCue);
+    if Cue<>nil then begin var S := P.Speaker(Cue.SpeakerId);
+      FVoiceStateIndices := VoiceStateIndices(FWorkspace.VoiceCatalog,S.VoiceUuid);
+      for var I := 0 to High(FVoiceStateIndices) do begin var O := TJSONObject(FWorkspace.VoiceCatalog[FVoiceStateIndices[I]]);
+        FVoiceState.Items.Add(JS(O,'style')); if JI(O,'styleId',-1)=P.EffectiveStyle(Cue) then FVoiceState.ItemIndex := I;
+      end;
+    end;
+    FVoiceStyles.Enabled := FWorkspace.VoiceCatalogReady and not FWorkspace.VoiceBusy and (Role<>nil);
+    FVoiceState.Enabled := FWorkspace.VoiceCatalogReady and not FWorkspace.VoiceBusy and (Role<>nil) and (Length(FVoiceStateIndices)>0);
+    FLocate.Visible := FConnection.NeedsLocate and not FWorkspace.VoiceBusy;
+    FConnectionRow.Visible := not FWorkspace.VoiceCatalogReady or (FVoiceMessage<>'');
+    FVoicePanel.Height := MulDiv(68,CurrentPPI,96); if FConnectionRow.Visible then FVoicePanel.Height := FVoicePanel.Height+FConnectionRow.Height;
+    FVoiceStatus.Caption := 'VOICEVOXを確認しています。';
+    if FConnection.NeedsLocate and not FWorkspace.VoiceBusy then FVoiceStatus.Caption := 'VOICEVOXを確認できません。実行ファイルを指定してください。';
+    if FVoiceMessage<>'' then FVoiceStatus.Caption := FVoiceMessage;
+end;
 procedure TRigmScriptCastingFrame.RefreshState;
   procedure SetSubItem(Item: TListItem; Index: Integer; const Value: string);
   begin if Item.SubItems[Index]<>Value then Item.SubItems[Index] := Value; end;
@@ -183,9 +257,6 @@ begin
     // BeginUpdate/EndUpdateは一覧全体を無効化するため、行構成が変わった時だけ使う。
     if Rebuild then FList.Items.BeginUpdate;
     try
-      var RolesText := '';
-      for var V in JA(Cast,'roles') do begin var R := TJSONObject(V); if JB(R,'active') then RolesText := RolesText+JI(R,'number').ToString+' = '+JS(R,'name')+#13#10; end;
-      if FCharacters.Text<>RolesText then begin FCharacters.Text := RolesText; FCharacters.SelStart := 0; FCharacters.Perform(EM_SCROLLCARET,0,0); end;
       if Rebuild then FList.Items.Clear;
       for var I := 0 to Rows.Count-1 do begin
         var Row := TJSONObject(Rows[I]); var C := Cues[JS(Row,'cueId')]; var Item: TListItem;
@@ -195,10 +266,14 @@ begin
         else if JS(Row,'section')='body' then Section := '本文' else if JS(Row,'section')='closing' then Section := '締め';
         if Item.Caption<>Section then Item.Caption := Section;
         var Role := CastingRole(FWorkspace.ScriptDraft,JI(Row,'role')); var Name := '未割当'; if Role<>nil then Name := JI(Role,'number').ToString+' / '+JS(Role,'name');
-        var State := '未割当'; if JS(Row,'origin')='single-default' then State := '単独候補'
-        else if JS(Row,'origin')='ai' then State := 'AI案' else if JS(Row,'origin')='human' then State := '人の指定';
-        if JB(Row,'confirmed') then State := State+' / 済';
-        SetSubItem(Item,0,Name); SetSubItem(Item,1,State); SetSubItem(Item,2,C.Text.Replace(#13#10,' / ')); SetSubItem(Item,3,C.Id);
+        var Speaker := FWorkspace.ScriptDraft.Speaker(C.SpeakerId);
+        var Emotion := '未設定';
+        var VoiceState := FindVoiceStyle(FWorkspace.VoiceCatalog,Speaker.VoiceUuid,FWorkspace.ScriptDraft.EffectiveStyle(C));
+        if VoiceState<>nil then Emotion := JS(VoiceState,'style')
+        else if (Speaker.VoiceUuid<>'') and (Speaker.StyleId>=0) then begin
+          Emotion := '未取得'; if (C.VoiceStyleId<0) and (Speaker.StyleName<>'') then Emotion := Speaker.StyleName;
+        end;
+        SetSubItem(Item,0,Name); SetSubItem(Item,1,Emotion); SetSubItem(Item,2,C.Text.Replace(#13#10,' / ')); SetSubItem(Item,3,C.Id);
         if C.Id=JS(Cast,'selectedCue') then begin
           if not Item.Selected then Item.Selected := True;
           if not Item.Focused then Item.Focused := True;
@@ -208,11 +283,11 @@ begin
         end;
       end;
       if (Rebuild or SelectionChanged) and (FList.Selected<>nil) then FList.Selected.MakeVisible(False);
-      FSelectedCue := JS(Cast,'selectedCue');
+      FSelectedCue := JS(Cast,'selectedCue'); RefreshVoiceBindings;
       var Summary := ScriptCastingSummary(FWorkspace.ScriptDraft);
       try
         var Guide := '↑↓：セリフ移動 / 1～9：キャラを指定して次へ / Enter：現在の配役を確認して次へ。'+#13#10+
-          '未割当 '+JI(Summary,'unassigned').ToString+' / 未確認 '+JI(Summary,'pending').ToString+'。声の紐付けは後の音声設定で行います。';
+          '未割当 '+JI(Summary,'unassigned').ToString+' / 配役未確認 '+JI(Summary,'pending').ToString+' / 声未設定 '+JI(Summary,'missingVoices').ToString+'。声は人物、感情はセリフごとに選択（初期値：ノーマル）。';
         if FGuide.Caption<>Guide then FGuide.Caption := Guide;
       finally Summary.Free; end;
     finally
@@ -222,5 +297,5 @@ begin
   finally Cues.Free; end;
 end;
 procedure TRigmScriptCastingFrame.SetActive(Value: Boolean);
-begin if Value then RefreshState; end;
+begin FConnection.SetActive(Value); if Value then RefreshState; end;
 end.

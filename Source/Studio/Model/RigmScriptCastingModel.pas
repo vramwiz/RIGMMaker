@@ -19,6 +19,10 @@ procedure MergeCastingRow(Project: TRigmMovieProject; const CueId: string);
 procedure InvalidateScriptCasting(Project: TRigmMovieProject); // 前工程の変更後も元配役を保全する。
 function ScriptCastingSummary(Project: TRigmMovieProject): TJSONObject; // 呼出側所有。長文は含めない。
 procedure ValidateScriptCasting(Project: TRigmMovieProject);
+procedure ApplyScriptVoiceDefaults(Project: TRigmMovieProject);
+procedure RefreshScriptCastingStatus(Project: TRigmMovieProject);
+function UsedCastingRoles(Project: TRigmMovieProject): TJSONArray; // 実セリフが参照する番号。呼出側所有。
+function MissingCastingVoices(Project: TRigmMovieProject): Integer;
 implementation
 uses System.SysUtils, System.Math, System.StrUtils, System.Hash, System.Generics.Collections,
   RigmJson, PsdJson, RigmScriptTextModel, RigmScriptReviewModel, RigmMovieComposition;
@@ -52,11 +56,43 @@ begin
     Result := THashSHA2.GetHashString(O.ToJSON);
   finally O.Free; end;
 end;
-procedure RefreshCastingStatus(Project: TRigmMovieProject);
+function UsedCastingRoles(Project: TRigmMovieProject): TJSONArray;
 begin
-  var Complete := True;
+  Result := TJSONArray.Create;
+  if (Project=nil) or (Project.ScriptWizard=nil) or not (Project.ScriptWizard.GetValue('casting') is TJSONObject) then Exit;
+  for var V in JA(JO(Project.ScriptWizard,'casting'),'roles') do begin
+    var Role := TJSONObject(V); if not JB(Role,'active') then Continue;
+    for var Row in JA(JO(Project.ScriptWizard,'casting'),'rows') do
+      if (JI(TJSONObject(Row),'role')=JI(Role,'number')) and (Project.Cue(JS(TJSONObject(Row),'cueId'))<>nil) then begin Result.Add(JI(Role,'number')); Break; end;
+  end;
+end;
+function MissingCastingVoices(Project: TRigmMovieProject): Integer;
+begin
+  Result := 0; var Used := UsedCastingRoles(Project);
+  try for var N in Used do begin
+    var Role := CastingRole(Project,StrToInt(N.Value)); var S := Project.Speaker(JS(Role,'speakerId'));
+    if (S=nil) or (S.StyleId<0) or (S.VoiceUuid='') then Inc(Result);
+  end; finally Used.Free; end;
+end;
+procedure ApplyScriptVoiceDefaults(Project: TRigmMovieProject);
+begin
+  for var V in JA(Project.ScriptWizard,'selectedCharacters') do begin
+    var C := TJSONObject(V); if not (C.GetValue('voiceBinding') is TJSONObject) then Continue;
+    for var R in JA(JO(Project.ScriptWizard,'casting'),'roles') do begin
+      var Role := TJSONObject(R); if not JB(Role,'active') or not SameText(JS(Role,'path'),JS(C,'path')) then Continue;
+      var S := Project.Speaker(JS(Role,'speakerId')); var Binding := JO(C,'voiceBinding');
+      if (S.StyleId<0) and (JI(Binding,'styleId',-1)>=0) and (JS(Binding,'uuid')<>'') then begin
+        S.StyleId := JI(Binding,'styleId'); S.VoiceUuid := JS(Binding,'uuid'); S.VoiceName := JS(Binding,'name'); S.StyleName := JS(Binding,'style');
+      end;
+    end;
+  end;
+end;
+procedure RefreshScriptCastingStatus(Project: TRigmMovieProject);
+begin
+  var Complete := JS(JO(Project.ScriptWizard,'casting'),'state')<>'stale';
   for var V in JA(JO(Project.ScriptWizard,'casting'),'rows') do
     Complete := Complete and JB(TJSONObject(V),'confirmed') and (CastingRole(Project,JI(TJSONObject(V),'role'))<>nil);
+  Complete := Complete and (MissingCastingVoices(Project)=0);
   if Complete then PsdJson.Put(Project.ScriptWizard,'castingStatus','complete')
   else PsdJson.Put(Project.ScriptWizard,'castingStatus','in-progress');
 end;
@@ -66,7 +102,7 @@ begin
   if (JS(Cast,'state')='stale') or (JS(Cast,'sourceFingerprint')<>ScriptFingerprint(Project)) then
     raise Exception.Create('前工程が変わりました。校正からNextで配役を準備してください。');
   PsdJson.Put(Cast,'requestId',PsdJson.NewId); PsdJson.Put(Cast,'fingerprint',CastingFingerprint(Project));
-  PsdJson.Put(Cast,'state','requested'); RefreshCastingStatus(Project);
+  PsdJson.Put(Cast,'state','requested'); RefreshScriptCastingStatus(Project);
 end;
 procedure InvalidateScriptCasting(Project: TRigmMovieProject);
 begin
@@ -88,10 +124,12 @@ procedure AssignScriptCasting(Project: TRigmMovieProject; const CueId: string; N
 begin
   var Cast := JO(Project.ScriptWizard,'casting'); var Row := CastingRow(Project,CueId); var Role := CastingRole(Project,Number);
   if (Row=nil) or (Role=nil) or (JS(Cast,'state')='stale') then raise Exception.Create('有効なキャラ番号と現在のセリフを選んでください。');
-  var C := Project.Cue(CueId); C.SpeakerId := JS(Role,'speakerId');
+  var C := Project.Cue(CueId);
+  if C.SpeakerId<>JS(Role,'speakerId') then begin C.VoiceStyleId := -1; C.VoiceQuery := ''; C.VoiceQueryKey := ''; end;
+  C.SpeakerId := JS(Role,'speakerId');
   PsdJson.Put(Row,'role',TJSONNumber.Create(Number)); PsdJson.Put(Row,'confirmed',TJSONBool.Create(True));
   if not Confirm then PsdJson.Put(Row,'origin','human');
-  SelectCastingRow(Project,CueId); MoveCastingRow(Project,1); RefreshCastingStatus(Project);
+  SelectCastingRow(Project,CueId); MoveCastingRow(Project,1); RefreshScriptCastingStatus(Project);
 end;
 procedure AddLineCues(const Text,Section,SceneId: string; Start,Finish: Integer;
   Cues: TObjectList<TRigmMovieCue>; Rows: TJSONArray; TemplateCue: TRigmMovieCue=nil; TemplateRow: TJSONObject=nil);
@@ -239,7 +277,7 @@ begin
         else begin PsdJson.Put(Row,'role',TJSONNumber.Create(0)); PsdJson.Put(Row,'origin','unassigned'); C.SpeakerId := 'narrator'; end;
       end;
     end;
-    RequestScriptCasting(Project); ValidateScriptCasting(Project); UpgradeScriptCastingLines(Project);
+    ApplyScriptVoiceDefaults(Project); RequestScriptCasting(Project); ValidateScriptCasting(Project); UpgradeScriptCastingLines(Project);
   finally Cast.Free; NewCues.Free; NewScenes.Free; end;
 end;
 procedure SubmitScriptCasting(Project: TRigmMovieProject; Args: TJSONObject);
@@ -261,9 +299,11 @@ begin
     for var V in JA(Args,'items') do begin
       var O := TJSONObject(V); var Row := CastingRow(Project,JS(O,'cueId')); var Role := CastingRole(Project,JI(O,'role'));
       PsdJson.Put(Row,'role',TJSONNumber.Create(JI(O,'role'))); PsdJson.Put(Row,'origin','ai'); PsdJson.Put(Row,'reason',JS(O,'reason'));
-      Project.Cue(JS(Row,'cueId')).SpeakerId := JS(Role,'speakerId');
+      var C := Project.Cue(JS(Row,'cueId'));
+      if C.SpeakerId<>JS(Role,'speakerId') then begin C.VoiceStyleId := -1; C.VoiceQuery := ''; C.VoiceQueryKey := ''; end;
+      C.SpeakerId := JS(Role,'speakerId');
     end;
-    if JB(Args,'complete') then PsdJson.Put(Cast,'state','ready'); RefreshCastingStatus(Project);
+    if JB(Args,'complete') then PsdJson.Put(Cast,'state','ready'); RefreshScriptCastingStatus(Project);
   finally Seen.Free; end;
 end;
 procedure CheckUneditedCue(Project: TRigmMovieProject; Row: TJSONObject);
@@ -282,6 +322,7 @@ begin
     ((C.Text[Offset]=#13) and (C.Text[Offset+1]=#10)) or
     (Trim(C.Text.Substring(0,Offset))='') or (Trim(C.Text.Substring(Offset))='') then raise Exception.Create('文章内の分割位置を選んでください。');
   var Next := TRigmMovieCue.Create; Next.Scene := C.Scene; Next.SpeakerId := C.SpeakerId;
+  Next.VoiceStyleId := C.VoiceStyleId;
   Next.Text := C.Text.Substring(Offset); Next.Subtitle := Next.Text; C.Text := C.Text.Substring(0,Offset); C.Subtitle := C.Text;
   var Index := Project.Cues.IndexOf(C); Project.Cues.Insert(Index+1,Next);
   var NewRow := Row.Clone as TJSONObject; PsdJson.Put(NewRow,'cueId',Next.Id); PsdJson.Put(NewRow,'offset',TJSONNumber.Create(JI(Row,'offset')+Offset));
@@ -346,5 +387,8 @@ begin
   var Pending := 0; var Unassigned := 0;
   for var V in JA(Cast,'rows') do begin if not JB(TJSONObject(V),'confirmed') then Inc(Pending); if JI(TJSONObject(V),'role')=0 then Inc(Unassigned); end;
   AddN(Result,'count',JA(Cast,'rows').Count); AddN(Result,'pending',Pending); AddN(Result,'unassigned',Unassigned);
+  var Used := UsedCastingRoles(Project); Result.AddPair('usedRoles',Used); AddN(Result,'missingVoices',MissingCastingVoices(Project));
+  AddB(Result,'rolesComplete',(Pending=0) and (Unassigned=0) and (JS(Cast,'state')<>'stale'));
+  AddB(Result,'voicesComplete',MissingCastingVoices(Project)=0);
 end;
 end.

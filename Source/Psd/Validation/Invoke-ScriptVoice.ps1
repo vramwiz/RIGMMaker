@@ -28,7 +28,7 @@ for($phase=0;$phase -lt 2;$phase++){
    $status=Require-Ok (Invoke-Pipe $pipe 'app-script-status' @{});$common=@{projectId=$status.projectId;revision=$status.revision};$voice=Require-Ok (Invoke-Pipe $pipe 'app-script-voice' $common);$row=$voice.rows[0]
    if($status.wizard.stage -ne 'voice' -or $status.canAdvance -or $voice.rows.Count -ne 1 -or -not $voice.hasMore){throw 'Voice boundary or pagination differs'}
    if($request.stage -eq '.editing'){
-    if(-not $status.textEditing -or $row.reading -eq $row.subtitle){throw 'Independent human reading input missing'}
+    if(-not $status.textEditing -or $row.settings.speedScale -ne 0.97 -or $row.settings.pitchScale -ne 0.02){throw 'VOICEVOX adjustment input missing'}
     foreach($command in @('app-script-edit-voice','app-script-bind-voice','app-script-generate-voice','app-script-new')){if((Invoke-Pipe $pipe $command ($common+@{cueId=$row.cueId;reading='上書き';settings=@{};role=1;styleId=108;uuid='1bd6b32b-d650-4072-bbe5-1d0ef4aaa28b'})).ok){throw 'Human voice edit lock bypassed'};$checks.Add('human voice edit lock rejects '+$command)}
    }elseif($request.stage -eq '.generated'){
     if(-not $row.ready -or -not $row.stored -or $row.audioSeconds -le 0 -or $row.speaker.styleId -ne 108){throw 'Actual audio binding or measured metadata missing'}

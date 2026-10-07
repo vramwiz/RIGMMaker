@@ -21,14 +21,14 @@ procedure VerifyScriptClosing(Main: TRigmWizardMainForm; const ResultPath: strin
 implementation
 uses System.SysUtils, System.Classes, System.JSON, System.IOUtils, System.Hash, System.Math, System.Types, System.DateUtils, System.Generics.Collections,
   Vcl.Forms, Vcl.Controls, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls, System.UITypes,
-  RigmPageNavigation, PsdStudioFrame, PsdJson, RigmCharacterEditPage,
+  VoicevoxToolbarButtons, RigmPageNavigation, PsdStudioFrame, PsdJson, RigmCharacterEditPage,
   RigmScriptCreatorFrame, RigmMovieWorkspaceFrame, RigmJson, Winapi.Windows, Winapi.Messages,
   PsdPreviewControl, PsdSettingsPanel, PsdMotionReferenceForm, Vcl.Graphics, Vcl.Imaging.pngimage,
   PsdSession, PsdProduction, RigmCharacterCatalog, RigmCharacterManagerFrame, PsdWorkspace,
   PsdPackage, RigmLegacyEditorFrame, Winapi.ShellAPI, Winapi.ShlObj, Winapi.KnownFolders, Winapi.ActiveX, System.Win.ComObj, System.StrUtils, ArtLayerList, RigmModel, ArtDocument,
   RigmWizardWorkspace, RigmMovieModel, RigmScriptManagerFrame, RigmThumbnailCache, RigmScriptLayoutFrame, RigmMovieLayout,
   RigmScriptPlacementFrame, RigmScriptPlacementModel, RigmScriptTextFrame, RigmScriptTextModel,
-  RigmMovieComposition, RigmMovieCompositionCommands, RigmMovieCompositor, RigmScriptReviewFrame, RigmScriptReviewModel, RigmScriptCastingFrame, RigmScriptCastingModel, RigmScriptSubtitleFrame, RigmScriptSubtitleModel, RigmScriptVoiceModel, RigmScriptVoiceFrame, RigmMovieJobs, RigmMovieAudio, RigmScriptScenesFrame, RigmScriptScenesModel, RigmAppSettings, RigmScriptSummaryFrame, RigmScriptSummaryModel, RigmScriptClosingModel, RigmScriptClosingFrame, RigmMovieEndCards, RigmMovieEndingDialog, Vcl.Grids;
+  RigmMovieComposition, RigmMovieCompositionCommands, RigmMovieCompositor, RigmScriptReviewFrame, RigmScriptReviewModel, RigmScriptCastingFrame, RigmScriptCastingModel, RigmScriptSubtitleFrame, RigmScriptSubtitleModel, RigmScriptVoiceModel, RigmScriptVoiceSelection, RigmScriptVoiceFrame, RigmMovieJobs, RigmMovieAudio, RigmScriptScenesFrame, RigmScriptScenesModel, RigmAppSettings, RigmScriptSummaryFrame, RigmScriptSummaryModel, RigmScriptClosingModel, RigmScriptClosingFrame, RigmMovieEndCards, RigmMovieEndingDialog, Vcl.Grids;
 type
   TReturnDialogAnswer = class
   public

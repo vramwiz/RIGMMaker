@@ -33,6 +33,7 @@ type
     procedure GenerateAudio;
     procedure ExportVideo;
     procedure LoadCatalog;
+    procedure PrepareVoiceEngine;
     procedure Preview;
     procedure PlaybackAudio;
     procedure ActorAssets;
@@ -140,6 +141,7 @@ begin
       if FKind='audio' then GenerateAudio
       else if FKind='export' then ExportVideo
       else if FKind='speakers' then LoadCatalog
+      else if FKind='voice-engine' then PrepareVoiceEngine
       else if FKind='preview' then Preview
       else if FKind='playback-audio' then PlaybackAudio
       else if FKind='assets' then ActorAssets
@@ -194,6 +196,46 @@ begin
     Report(1,1);
   finally Catalog.Free; end;
 end;
+procedure TRigmMovieJob.PrepareVoiceEngine;
+var Startup: TStartupInfo; Process: TProcessInformation; Command: string;
+  function Ready: Boolean;
+  begin
+    CheckCancel; Result := False;
+    var Client := THTTPClient.Create;
+    try
+      ConfigureVoicevoxClient(Client); Client.ConnectionTimeout := 500; Client.ResponseTimeout := 500;
+      try Result := CheckedVoicevoxGet(Client,FProject.EngineUrl+'/version').StatusCode=200;
+      except on E: Exception do begin CheckCancel; Result := False; end; end;
+    finally Client.Free; end;
+  end;
+begin
+  SetPhase('voice-engine',1); Report(0,1);
+  if Ready then begin LoadCatalog; Exit; end;
+  var Exe := JS(FProductionOptions,'engineExe');
+  if (Exe='') or not FileExists(Exe) then raise ERigm.Create('VOICEVOX_EXE_REQUIRED: VOICEVOXが接続先で応答していません。EXEを選択してください。');
+  FProject.Validate; CheckCancel;
+  var Port := Copy(FProject.EngineUrl,LastDelimiter(':',FProject.EngineUrl)+1,MaxInt);
+  var Host := Copy(FProject.EngineUrl,8,LastDelimiter(':',FProject.EngineUrl)-8);
+  Command := '"'+Exe+'" --host '+Host+' --port '+Port; UniqueString(Command);
+  FillChar(Startup,SizeOf(Startup),0); Startup.cb := SizeOf(Startup); Startup.dwFlags := STARTF_USESHOWWINDOW; Startup.wShowWindow := SW_HIDE;
+  FillChar(Process,SizeOf(Process),0);
+  if not CreateProcess(PChar(Exe),PChar(Command),nil,nil,False,CREATE_NO_WINDOW,nil,PChar(ExtractFileDir(Exe)),Startup,Process) then RaiseLastOSError;
+  CloseHandle(Process.hThread);
+  try
+    var Started := GetTickCount64;
+    repeat
+      CheckCancel;
+      if Ready then begin LoadCatalog; Exit; end;
+      if WaitForSingleObject(Process.hProcess,0)=WAIT_OBJECT_0 then raise ERigm.Create('VOICEVOX Engineが起動中に終了しました。EXEと接続ポートを確認してください。');
+      if GetTickCount64-Started>=60000 then raise ERigm.Create('VOICEVOX Engineの起動待ちが60秒を超えました。接続先を確認してください。');
+      TThread.Sleep(100);
+    until False;
+  finally
+    // 起動取消・アプリ終了でもEngineプロセスは停止しない。既存Engineは最初のReadyで再利用する。
+    CloseHandle(Process.hProcess);
+  end;
+end;
+
 procedure TRigmMovieJob.GenerateAudio;
 var Values: TSerifVoicevoxAudioValues; Wave,TextFile,Lab,Error,Directory: string; Pcm: TRigmPcm;
 begin
@@ -216,7 +258,7 @@ begin
       Values.SpeedScale := JN(C.VoiceSettings,'speedScale',Values.SpeedScale); Values.PitchScale := JN(C.VoiceSettings,'pitchScale',Values.PitchScale);
       Values.IntonationScale := JN(C.VoiceSettings,'intonationScale',Values.IntonationScale); Values.VolumeScale := JN(C.VoiceSettings,'volumeScale',Values.VolumeScale);
       Values.PrePhonemeLength := JN(C.VoiceSettings,'prePhonemeLength',Values.PrePhonemeLength); Values.PostPhonemeLength := JN(C.VoiceSettings,'postPhonemeLength',Values.PostPhonemeLength);
-      if not TSerifVoicevoxApi.CreateInputFiles(C.SpokenText,S.Name,IntToStr(FProject.EffectiveStyle(C)),FProject.EffectiveStyle(C),Values,'',Wave,TextFile,Lab,Error) then
+      if not TSerifVoicevoxApi.CreateInputFiles(C.SpokenText,S.Name,IntToStr(FProject.EffectiveStyle(C)),FProject.EffectiveStyle(C),Values,FProject.EffectiveVoiceQuery(C),Wave,TextFile,Lab,Error) then
         raise ERigm.Create('音声生成 '+C.Id+': '+Error);
       try
         CheckCancel; Pcm := TRigmPcm.Load(Wave);

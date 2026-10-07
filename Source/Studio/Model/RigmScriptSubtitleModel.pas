@@ -12,13 +12,16 @@ procedure SetSubtitleBreak(Project: TRigmMovieProject; const CueId: string; Offs
 procedure MoveSubtitleBreak(Project: TRigmMovieProject; const CueId: string; Delta, DefaultOffset: Integer); // 左右で1文字動かす。
 function ScriptSubtitleSummary(Project: TRigmMovieProject): TJSONObject; // 呼出側所有、長文なし。
 procedure ValidateScriptSubtitles(Project: TRigmMovieProject); // 保存・読込の形式と選択を検査する。
+procedure RequireCurrentSubtitles(Project: TRigmMovieProject); // 確定前に字幕形式と現在の配役を検査する。
+function ScriptSubtitleBlockReason(Project: TRigmMovieProject; RequireComplete: Boolean = True): string; // 進行不可の理由。状態は変更しない。
 implementation
-uses System.SysUtils, System.Math, RigmJson, PsdJson, RigmScriptTextModel, RigmScriptCastingModel;
+uses System.SysUtils, System.Math, System.StrUtils, RigmJson, PsdJson, RigmScriptTextModel, RigmScriptReviewModel, RigmScriptCastingModel;
 procedure PrepareScriptSubtitles(Project: TRigmMovieProject);
 begin
   ValidateScriptCasting(Project); var Summary := ScriptCastingSummary(Project);
   try if (JS(Summary,'state')='stale') or (JI(Summary,'pending')<>0) or (JI(Summary,'unassigned')<>0) then
-    raise Exception.Create('未確認の配役を確定してから字幕へ進んでください。'); finally Summary.Free; end;
+    raise Exception.Create('未確認の配役を確定してから字幕へ進んでください。');
+    if JI(Summary,'missingVoices')<>0 then raise Exception.Create('配役工程で、台本に使用するキャラ全員のVOICEVOX話者・スタイルを選択してください。'); finally Summary.Free; end;
   if not (Project.ScriptWizard.GetValue('subtitles') is TJSONObject) then begin
     var O := TJSONObject.Create; O.AddPair('format','RIGMMaker.ScriptSubtitles'); AddN(O,'schemaVersion',1);
     O.AddPair('selectedCue',Project.Cues[0].Id); Project.ScriptWizard.AddPair('subtitles',O);
@@ -50,7 +53,7 @@ end;
 procedure EditSubtitle(Project: TRigmMovieProject; const CueId, Text, Note: string);
 begin
   var Cast := JO(Project.ScriptWizard,'casting');
-  if (JS(Cast,'state')='stale') or (JS(Cast,'fingerprint')<>CastingFingerprint(Project)) then
+  if (JS(Cast,'state')='stale') or (JS(Cast,'sourceFingerprint')<>ScriptFingerprint(Project)) or (JS(Cast,'fingerprint')<>CastingFingerprint(Project)) then
     raise Exception.Create('前工程が変わりました。校正・配役を確認し、Nextで字幕へ進んでください。');
   var Cue := Project.Cue(CueId); if Cue=nil then raise Exception.Create('字幕のセリフがありません。');
   var Value := NormalizeScriptText(Text); var Memo := NormalizeScriptText(Note); ValidateSubtitleText(Value,3000); ValidateSubtitleText(Memo,2048);
@@ -78,10 +81,30 @@ begin
 end;
 procedure ValidateScriptSubtitles(Project: TRigmMovieProject);
 begin
+  if (Project=nil) or (Project.ScriptWizard=nil) or (Project.Cues.Count=0) then raise Exception.Create('字幕のセリフがありません。');
   var O := JO(Project.ScriptWizard,'subtitles');
   if (JS(O,'format')<>'RIGMMaker.ScriptSubtitles') or (JI(O,'schemaVersion')<>1) or
-    (Project.Cue(JS(O,'selectedCue'))=nil) then raise Exception.Create('字幕工程の保存形式が不正です。');
+    (Project.Cue(JS(O,'selectedCue'))=nil) or
+    not MatchStr(JS(Project.ScriptWizard,'subtitlesStatus','in-progress'),['in-progress','complete']) then raise Exception.Create('字幕工程の保存形式が不正です。');
   for var C in Project.Cues do begin ValidateSubtitleText(C.Subtitle,3000); ValidateSubtitleText(C.SubtitleNote,2048); end;
+end;
+procedure RequireCurrentSubtitles(Project: TRigmMovieProject);
+begin
+  ValidateScriptSubtitles(Project); var Cast := JO(Project.ScriptWizard,'casting');
+  if (JS(Cast,'state')='stale') or (JS(Cast,'sourceFingerprint')<>ScriptFingerprint(Project)) or (JS(Cast,'fingerprint')<>CastingFingerprint(Project)) then
+    raise Exception.Create('前工程が変わりました。校正・配役を確認し、Nextで字幕へ進んでください。');
+  ValidateScriptCasting(Project); var Summary := ScriptCastingSummary(Project);
+  try if (JI(Summary,'pending')<>0) or (JI(Summary,'unassigned')<>0) then
+    raise Exception.Create('未確認・未割当の配役を確定してから字幕を完了してください。'); finally Summary.Free; end;
+end;
+function ScriptSubtitleBlockReason(Project: TRigmMovieProject; RequireComplete: Boolean): string;
+begin
+  Result := '';
+  try
+    RequireCurrentSubtitles(Project);
+    if RequireComplete and (JS(Project.ScriptWizard,'subtitlesStatus')<>'complete') then
+      Result := '字幕入力完了のチェックアイコン（Ctrl+Enter / Esc）を押してからNextで音声へ進んでください。';
+  except on E: Exception do Result := E.Message; end;
 end;
 function ScriptSubtitleSummary(Project: TRigmMovieProject): TJSONObject;
 begin
