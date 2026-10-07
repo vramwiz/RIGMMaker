@@ -40,6 +40,7 @@ type
     FOnError: TSerifVoicevoxAccentErrorEvent;
     FOnMoveEnd: TNotifyEvent;
     FOnPreview: TNotifyEvent;
+    FOnContinuous: TNotifyEvent;
     FOnSend: TNotifyEvent;
     FSaveTimer: TTimer;
     FSettings: TSerifVoicevoxAudioSettings;
@@ -53,6 +54,7 @@ type
     procedure LengthChange(Sender: TObject; const QueryJson: string);
     procedure MoveEndRequest(Sender: TObject);
     procedure PreviewRequest(Sender: TObject);
+    procedure ContinuousRequest(Sender: TObject);
     procedure SendRequest(Sender: TObject);
     procedure SaveTimerTimer(Sender: TObject);
     procedure LayoutAdjustments(Sender: TObject);
@@ -91,6 +93,7 @@ type
       const QueryJson: string = '');
     // ツールバー右端の再生マークを再生中／停止中の表示へ切り替える。
     procedure SetPreviewActive(const Value: Boolean);
+    procedure SetContinuousActive(Value, CanExecute: Boolean);
     // 編集対象を切り替えて保存済み値を表示する。表示の復元だけでは保存処理を発生させない。
     procedure ShowStyle(const SpeakerUUID: string; const StyleId: Integer);
     property OnAccentChange: TSerifVoicevoxAccentQueryEvent
@@ -103,6 +106,7 @@ type
     property OnMoveEnd: TNotifyEvent read FOnMoveEnd write FOnMoveEnd;
     // 各編集ページまたはツールバーから、現在編集中の行の共通プレビュー処理を要求する。
     property OnPreview: TNotifyEvent read FOnPreview write FOnPreview;
+    property OnContinuous: TNotifyEvent read FOnContinuous write FOnContinuous;
     // ツールバーから、現在編集中の行をEnterと同じ経路で送信するよう要求する。
     property OnSend: TNotifyEvent read FOnSend write FOnSend;
   end;
@@ -117,7 +121,9 @@ uses
 constructor TFrameSerifVoicevoxSettings.Create(AOwner: TComponent);
 begin
   inherited;
-
+  // 親へ接続される前の96 DPIとフォントを揃え、接続時の拡大を一度だけ行う。
+  ParentFont := False; Font.PixelsPerInch := 96; Font.IsDPIRelated := True;
+  Font.Name := 'Yu Gothic UI'; Font.Size := 10;
   Color := A2SCPanelBackground; Font.Color := A2SCPanelText;
   DoubleBuffered := True;
   for var Panel in [PanelAccent,PanelIntonation,PanelLength,PanelVoice] do begin
@@ -179,6 +185,7 @@ begin
   FToolbar.OnClose := CloseRequest;
   FToolbar.OnMoveEnd := MoveEndRequest;
   FToolbar.OnPreview := PreviewRequest;
+  FToolbar.OnContinuous := ContinuousRequest;
   FToolbar.OnSend := SendRequest;
   FNotice := TLabel.Create(Self); FNotice.Parent := Self; FNotice.Align := alTop;
   FNotice.AutoSize := False; FNotice.WordWrap := True; FNotice.Height := 64; FNotice.Font.Color := A2SCPanelText;
@@ -383,6 +390,11 @@ begin
   if Assigned(FOnPreview) then FOnPreview(Self);
 end;
 
+procedure TFrameSerifVoicevoxSettings.ContinuousRequest(Sender: TObject);
+begin
+  if Assigned(FOnContinuous) then FOnContinuous(Self);
+end;
+
 procedure TFrameSerifVoicevoxSettings.MoveEndRequest(Sender: TObject);
 begin
   if Assigned(FOnMoveEnd) then FOnMoveEnd(Self);
@@ -411,6 +423,11 @@ procedure TFrameSerifVoicevoxSettings.SetPreviewActive(
   const Value: Boolean);
 begin
   FToolbar.SetPreviewActive(Value);
+end;
+
+procedure TFrameSerifVoicevoxSettings.SetContinuousActive(Value, CanExecute: Boolean);
+begin
+  FToolbar.SetContinuousActive(Value,CanExecute);
 end;
 
 destructor TFrameSerifVoicevoxSettings.Destroy;

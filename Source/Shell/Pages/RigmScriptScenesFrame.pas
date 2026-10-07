@@ -1,7 +1,7 @@
 ﻿unit RigmScriptScenesFrame;
 // scene選択・実サムネイル・独立説明文と外部Codex要求。描画と転送はWorkspace所有。
 interface
-uses System.Classes, Vcl.Forms, Vcl.Controls, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.ComCtrls, Vcl.Graphics, Vcl.ImgList,
+uses System.Classes, RigmScriptPageFrame, Vcl.Forms, Vcl.Controls, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.ComCtrls, Vcl.Graphics, Vcl.ImgList,
   RigmWizardWorkspace, RigmIconToolbar, RigmScriptTextFrame, RigmBufferedControls;
 type
   TRigmScriptScenePreview = class(TCustomControl)
@@ -9,7 +9,7 @@ type
   protected procedure Paint; override;
   public constructor CreateForWorkspace(AOwner: TComponent; Workspace: TRigmWizardWorkspace);
   end;
-  TRigmScriptScenesFrame = class(TRigmBufferedFrame)
+  TRigmScriptScenesFrame = class(TRigmScriptPageFrame)
   private
     FWorkspace: TRigmWizardWorkspace; FSync,FEditing,FActive: Boolean; FLoaded,FThumbnailKey,FPreviewStamp: string;
     FList: TListView; FImages: TImageList; FDescription,FPrompt: TRigmScriptMemo; FMode: TComboBox;
@@ -28,6 +28,8 @@ type
     procedure RefreshThumbnails;
     function SelectedId: string;
     function ApplyCurrent: Boolean;
+  protected
+    procedure ChangeScale(M,D: Integer; isDpiChange: Boolean); override;
   public
     constructor CreateForWorkspace(AOwner: TComponent; Workspace: TRigmWizardWorkspace);
     procedure RefreshState;
@@ -61,23 +63,31 @@ begin
   FToolbar.AddIcon('ScriptSceneRequest','選択シーンの画像を外部Codexへ要求（生成そのものは外部工程）',riRefresh,0,RequestImage);
   FToolbar.AddIcon('ScriptSceneCancel','画像要求を取り消す（現在の画像は保持）',riDelete,0,CancelImage);
   FToolbar.AddIcon('ScriptScenePreview','選択シーンを共通描画で確認',riPreview,0,Preview);
-  FGuide := TLabel.Create(Self); FGuide.Parent := Self; FGuide.Align := alBottom; FGuide.AutoSize := False; FGuide.WordWrap := True; FGuide.Height := 64; FGuide.Font.Height := -20; FGuide.Name := 'ScriptSceneGuide';
-  FImages := TImageList.Create(Self); FImages.Width := 96; FImages.Height := 54; FImages.ColorDepth := cd32Bit;
-  FList := TRigmBufferedListView.Create(Self); FList.Parent := Self; FList.Align := alLeft; FList.Width := 300; FList.ViewStyle := vsReport; FList.ReadOnly := True; FList.RowSelect := True; FList.HideSelection := False;
+  FGuide := TRigmScriptLabel.Create(Self); FGuide.Parent := Self; FGuide.Align := alBottom; FGuide.AutoSize := False; FGuide.WordWrap := True; FGuide.Height := ScaleValue(64); FGuide.Font.Height := -ScaleValue(20); FGuide.Name := 'ScriptSceneGuide';
+  FImages := TImageList.Create(Self); FImages.Width := ScaleValue(96); FImages.Height := ScaleValue(54); FImages.ColorDepth := cd32Bit;
+  FList := TRigmBufferedListView.Create(Self); FList.Parent := Self; FList.Align := alLeft; FList.Width := ScaleValue(300); FList.ViewStyle := vsReport; FList.ReadOnly := True; FList.RowSelect := True; FList.HideSelection := False;
   FList.SmallImages := FImages; FList.Name := 'ScriptSceneRows'; FList.OnSelectItem := Selected; FList.OnKeyDown := Key;
-  FList.Columns.Add.Caption := 'シーン'; FList.Columns[0].Width := 164; FList.Columns.Add.Caption := '状態'; FList.Columns[1].Width := 125;
+  FList.Columns.Add.Caption := 'シーン'; FList.Columns[0].Width := ScaleValue(164); FList.Columns.Add.Caption := '状態'; FList.Columns[1].Width := ScaleValue(125);
   var Splitter := TSplitter.Create(Self); Splitter.Parent := Self; Splitter.Align := alLeft;
-  var Body := TRigmBufferedPanel.Create(Self); Body.Parent := Self; Body.Align := alClient; Body.BevelOuter := bvNone; Body.Caption := ''; Body.Padding.SetBounds(8,4,8,4);
-  FInfo := TLabel.Create(Self); FInfo.Parent := Body; FInfo.Align := alTop; FInfo.AutoSize := False; FInfo.Height := 36; FInfo.Font.Height := -22; FInfo.Name := 'ScriptSceneInfo';
+  var Body := TRigmBufferedPanel.Create(Self); Body.Parent := Self; Body.Align := alClient; Body.BevelOuter := bvNone; Body.Caption := ''; Body.Padding.SetBounds(ScaleValue(8),ScaleValue(4),ScaleValue(8),ScaleValue(4));
+  FInfo := TRigmScriptLabel.Create(Self); FInfo.Parent := Body; FInfo.Align := alTop; FInfo.AutoSize := False; FInfo.Height := ScaleValue(36); FInfo.Font.Height := -ScaleValue(22); FInfo.Name := 'ScriptSceneInfo';
   FMode := TComboBox.Create(Self); FMode.Parent := Body; FMode.Align := alTop; FMode.Style := csDropDownList; FMode.Items.Add('画像と説明文'); FMode.Items.Add('画像のみ'); FMode.Items.Add('説明文のみ'); FMode.Items.Add('表示なし（素材は保持）'); FMode.OnChange := ModeChanged; FMode.Name := 'ScriptSceneMode';
-  var PromptPanel := TRigmBufferedPanel.Create(Self); PromptPanel.Parent := Body; PromptPanel.Align := alBottom; PromptPanel.Height := 84; PromptPanel.Caption := ''; PromptPanel.BevelOuter := bvNone;
-  var L := TLabel.Create(Self); L.Parent := PromptPanel; L.Align := alTop; L.Caption := 'Codexへの画像指示（外部要求用）'; L.Font.Height := -18;
-  FPrompt := TRigmScriptMemo.Create(Self); FPrompt.Parent := PromptPanel; FPrompt.Align := alClient; FPrompt.MaxLength := 8000; FPrompt.Font.Height := -20; FPrompt.ScrollBars := ssVertical; FPrompt.Name := 'ScriptScenePrompt'; FPrompt.OnChange := Changed; FPrompt.OnKeyDown := Key;
-  var DescriptionPanel := TRigmBufferedPanel.Create(Self); DescriptionPanel.Parent := Body; DescriptionPanel.Align := alBottom; DescriptionPanel.Top := 0; DescriptionPanel.Height := 124; DescriptionPanel.Caption := ''; DescriptionPanel.BevelOuter := bvNone;
-  L := TLabel.Create(Self); L.Parent := DescriptionPanel; L.Align := alTop; L.Caption := '説明文（字幕・音声とは独立。シーン全体で表示）'; L.Font.Height := -18;
-  FDescription := TRigmScriptMemo.Create(Self); FDescription.Parent := DescriptionPanel; FDescription.Align := alClient; FDescription.MaxLength := 3000; FDescription.Font.Height := -24; FDescription.ScrollBars := ssVertical; FDescription.Name := 'ScriptSceneDescription'; FDescription.OnChange := Changed; FDescription.OnKeyDown := Key;
+  var PromptPanel := TRigmBufferedPanel.Create(Self); PromptPanel.Parent := Body; PromptPanel.Align := alBottom; PromptPanel.Height := ScaleValue(84); PromptPanel.Caption := ''; PromptPanel.BevelOuter := bvNone;
+  var L := TRigmScriptLabel.Create(Self); L.Parent := PromptPanel; L.Align := alTop; L.Caption := 'Codexへの画像指示（外部要求用）'; L.Font.Height := -ScaleValue(18);
+  FPrompt := TRigmScriptMemo.Create(Self); FPrompt.Parent := PromptPanel; FPrompt.Align := alClient; FPrompt.MaxLength := 8000; FPrompt.Font.Height := -ScaleValue(20); FPrompt.ScrollBars := ssVertical; FPrompt.Name := 'ScriptScenePrompt'; FPrompt.OnChange := Changed; FPrompt.OnKeyDown := Key;
+  var DescriptionPanel := TRigmBufferedPanel.Create(Self); DescriptionPanel.Parent := Body; DescriptionPanel.Align := alBottom; DescriptionPanel.Top := 0; DescriptionPanel.Height := ScaleValue(124); DescriptionPanel.Caption := ''; DescriptionPanel.BevelOuter := bvNone;
+  L := TRigmScriptLabel.Create(Self); L.Parent := DescriptionPanel; L.Align := alTop; L.Caption := '説明文（字幕・音声とは独立。シーン全体で表示）'; L.Font.Height := -ScaleValue(18);
+  FDescription := TRigmScriptMemo.Create(Self); FDescription.Parent := DescriptionPanel; FDescription.Align := alClient; FDescription.MaxLength := 3000; FDescription.Font.Height := -ScaleValue(24); FDescription.ScrollBars := ssVertical; FDescription.Name := 'ScriptSceneDescription'; FDescription.OnChange := Changed; FDescription.OnKeyDown := Key;
   FPreview := TRigmScriptScenePreview.CreateForWorkspace(Self,Workspace); FPreview.Parent := Body; FPreview.Align := alClient; FPreview.Name := 'ScriptScenePreviewControl';
-  FInfo.Top := 0; FMode.Top := 36;
+  FInfo.Top := 0; FMode.Top := ScaleValue(36);
+end;
+procedure TRigmScriptScenesFrame.ChangeScale(M,D: Integer; isDpiChange: Boolean);
+begin
+  inherited;
+  if FImages=nil then Exit;
+  FImages.SetSize(MulDiv(96,M,96),MulDiv(54,M,96)); FThumbnailKey := '';
+  for var Item in FList.Items do Item.ImageIndex := -1;
+  if FActive then RefreshThumbnails;
 end;
 function TRigmScriptScenesFrame.SelectedId: string;
 begin Result := JS(JO(FWorkspace.ScriptDraft.ScriptWizard,'scenes'),'selectedScene'); end;

@@ -13,7 +13,7 @@ type
     vtpShortcuts, vtpAudioSettings);
   // 排他的なページ選択と、ページを切り替えない再生操作を描き分ける。
   TVoicevoxToolbarButtonKind = (vbkPage, vbkPreview, vbkSend, vbkClose,
-    vbkMoveEnd);
+    vbkMoveEnd, vbkContinuous);
 
   TVoicevoxToolbarButton = class;
   TVoicevoxToolbarSelectEvent = procedure(Sender: TObject;
@@ -56,6 +56,7 @@ type
       const Page: TVoicevoxToolbarPage); reintroduce;
     // ページを切り替えず、確認再生または停止だけを要求するボタンを生成する。
     constructor CreatePreview(AOwner: TComponent); reintroduce;
+    class function NewContinuous(AOwner: TComponent): TVoicevoxToolbarButton; static;
     // ページを切り替えず、現在のセリフの送信だけを要求するボタンを生成する。
     class function NewSend(AOwner: TComponent): TVoicevoxToolbarButton; static;
     // 入力パネルを閉じるための×印を持つ操作ボタンを生成する。
@@ -84,16 +85,19 @@ type
     FOnClose: TNotifyEvent;
     FOnMoveEnd: TNotifyEvent;
     FOnPreview: TNotifyEvent;
+    FOnContinuous: TNotifyEvent;
     FOnSend: TNotifyEvent;
     FOnPageSelected: TVoicevoxToolbarSelectEvent;
     FPressedColor: TColor;
     FPreviewButton: TVoicevoxToolbarButton;
+    FContinuousButton: TVoicevoxToolbarButton;
     FSendButton: TVoicevoxToolbarButton;
     FMoveEndButton: TVoicevoxToolbarButton;
     FCloseButton: TVoicevoxToolbarButton;
     procedure ButtonClose(Sender: TObject);
     procedure ButtonMoveEnd(Sender: TObject);
     procedure ButtonPreview(Sender: TObject);
+    procedure ButtonContinuous(Sender: TObject);
     procedure ButtonSend(Sender: TObject);
     procedure ButtonSelect(Sender: TObject;
       const Page: TVoicevoxToolbarPage);
@@ -121,6 +125,7 @@ type
       const Notify: Boolean = True);
     // 再生ボタンを停止マークと選択色へ切り替える。
     procedure SetPreviewActive(const Value: Boolean);
+    procedure SetContinuousActive(Value, CanExecute: Boolean);
     property ActivePage: TVoicevoxToolbarPage read FActivePage;
     property BackgroundColor: TColor read FBackgroundColor
       write SetBackgroundColor;
@@ -136,6 +141,7 @@ type
     property OnMoveEnd: TNotifyEvent read FOnMoveEnd write FOnMoveEnd;
     // 右端の再生／停止ボタンが押されたとき、ページを変更せず通知する。
     property OnPreview: TNotifyEvent read FOnPreview write FOnPreview;
+    property OnContinuous: TNotifyEvent read FOnContinuous write FOnContinuous;
     // 再生ボタン右側の送信ボタンが押されたとき、ページを変更せず通知する。
     property OnSend: TNotifyEvent read FOnSend write FOnSend;
   end;
@@ -196,6 +202,13 @@ begin
   Result.FKind := vbkSend;
 end;
 
+class function TVoicevoxToolbarButton.NewContinuous(
+  AOwner: TComponent): TVoicevoxToolbarButton;
+begin
+  Result := TVoicevoxToolbarButton.CreatePreview(AOwner);
+  Result.FKind := vbkContinuous;
+end;
+
 class function TVoicevoxToolbarButton.NewClose(
   AOwner: TComponent): TVoicevoxToolbarButton;
 begin
@@ -229,7 +242,7 @@ end;
 procedure TVoicevoxToolbarButton.Execute;
 begin
   if not Enabled then Exit;
-  if FKind in [vbkPreview, vbkSend, vbkClose, vbkMoveEnd] then
+  if FKind in [vbkPreview, vbkSend, vbkClose, vbkMoveEnd, vbkContinuous] then
   begin
     if Assigned(FOnExecute) then FOnExecute(Self);
   end
@@ -317,7 +330,7 @@ begin
   R := Max(2, Min(ClientWidth, ClientHeight) div 14);
   case FKind of
     vbkClose: GlyphColor := CLOSE_GLYPH_COLOR;
-    vbkPreview: GlyphColor := PREVIEW_GLYPH_COLOR;
+    vbkPreview, vbkContinuous: GlyphColor := PREVIEW_GLYPH_COLOR;
     vbkSend, vbkMoveEnd: GlyphColor := SEND_GLYPH_COLOR;
   else
     GlyphColor := FFontColor;
@@ -342,6 +355,23 @@ begin
       Canvas.Polygon([Point(CenterX - GlyphScale(5),
         CenterY - GlyphScale(8)), Point(CenterX - GlyphScale(5),
         CenterY + GlyphScale(8)), Point(CenterX + GlyphScale(8), CenterY)]);
+  end
+  else if FKind = vbkContinuous then
+  begin
+    if FPreviewActive then
+      Canvas.Rectangle(CenterX - GlyphScale(5), CenterY - GlyphScale(5),
+        CenterX + GlyphScale(6), CenterY + GlyphScale(6))
+    else begin
+      // セリフ一覧を順に再生することを、三本の行と再生三角で示す。
+      Canvas.Polygon([Point(CenterX + GlyphScale(1), CenterY - GlyphScale(8)),
+        Point(CenterX + GlyphScale(1), CenterY + GlyphScale(8)),
+        Point(CenterX + GlyphScale(10), CenterY)]);
+      Canvas.Pen.Width := Max(1, GlyphScale(2));
+      for I := -1 to 1 do begin
+        Canvas.MoveTo(CenterX - GlyphScale(10), CenterY + I*GlyphScale(6));
+        Canvas.LineTo(CenterX - GlyphScale(3), CenterY + I*GlyphScale(6));
+      end;
+    end;
   end
   else if FKind = vbkSend then
   begin
@@ -544,11 +574,18 @@ begin
   end;
   FPreviewButton := TVoicevoxToolbarButton.CreatePreview(Self);
   FPreviewButton.Parent := Self;
+  FPreviewButton.Name := 'VoicevoxPreview';
   FPreviewButton.Left := (Ord(High(TVoicevoxToolbarPage)) + 2) * BUTTON_SIZE;
   FPreviewButton.Top := 0;
   FPreviewButton.Hint := '再生 (F5)';
   FPreviewButton.OnExecute := ButtonPreview;
   FButtons.Add(FPreviewButton);
+  FContinuousButton := TVoicevoxToolbarButton.NewContinuous(Self);
+  FContinuousButton.Parent := Self; FContinuousButton.Name := 'VoicevoxContinuous';
+  FContinuousButton.Visible := False;
+  FContinuousButton.Hint := '連続再生：選択行から最後まで (Shift+F5)';
+  FContinuousButton.OnExecute := ButtonContinuous;
+  FButtons.Add(FContinuousButton);
   FSendButton := TVoicevoxToolbarButton.NewSend(Self);
   FSendButton.Parent := Self;
   FSendButton.Left := (Ord(High(TVoicevoxToolbarPage)) + 3) * BUTTON_SIZE;
@@ -613,7 +650,7 @@ end;
 procedure TVoicevoxToolbarButtons.UseAdjustmentOnly;
 begin
   for var Button in FButtons do begin
-    Button.Visible := (Button.FKind=vbkPreview) or ((Button.FKind=vbkPage) and (Button.FPage in [vtpAccent,vtpAudioSettings]));
+    Button.Visible := (Button.FKind in [vbkPreview,vbkContinuous]) or ((Button.FKind=vbkPage) and (Button.FPage in [vtpAccent,vtpAudioSettings]));
     if (Button.FKind=vbkPage) and (Button.FPage=vtpAccent) then Button.Hint := 'アクセント・音高・音素長';
   end;
   if not (FActivePage in [vtpAccent,vtpAudioSettings]) then Activate(vtpAccent);
@@ -623,6 +660,11 @@ end;
 procedure TVoicevoxToolbarButtons.ButtonPreview(Sender: TObject);
 begin
   if Assigned(FOnPreview) then FOnPreview(Self);
+end;
+
+procedure TVoicevoxToolbarButtons.ButtonContinuous(Sender: TObject);
+begin
+  if Assigned(FOnContinuous) then FOnContinuous(Self);
 end;
 
 procedure TVoicevoxToolbarButtons.ButtonClose(Sender: TObject);
@@ -712,6 +754,16 @@ begin
   if Value then FPreviewButton.Hint := '停止 (F5)'
   else FPreviewButton.Hint := '再生 (F5)';
   FPreviewButton.Invalidate;
+end;
+
+procedure TVoicevoxToolbarButtons.SetContinuousActive(Value, CanExecute: Boolean);
+begin
+  FContinuousButton.FPreviewActive := Value;
+  FContinuousButton.Selected := Value;
+  FContinuousButton.Enabled := CanExecute;
+  if Value then FContinuousButton.Hint := '連続再生を停止 (Shift+F5)'
+  else FContinuousButton.Hint := '連続再生：選択行から最後まで (Shift+F5)';
+  FContinuousButton.Invalidate;
 end;
 
 procedure TVoicevoxToolbarButtons.UpdateButtonColors;

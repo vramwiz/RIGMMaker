@@ -1,9 +1,9 @@
 ﻿unit RigmScriptVoiceEffectsFrame;
 // 音声エフェクトの将来用工程。現段階は行別の「なし」を表示するだけで加工しない。
 interface
-uses System.Classes, Vcl.Controls, Vcl.StdCtrls, Vcl.ComCtrls, RigmBufferedControls, RigmWizardWorkspace;
+uses System.Classes, RigmScriptPageFrame, Vcl.Controls, Vcl.StdCtrls, Vcl.ComCtrls, RigmBufferedControls, RigmWizardWorkspace;
 type
-  TRigmScriptVoiceEffectsFrame = class(TRigmBufferedFrame)
+  TRigmScriptVoiceEffectsFrame = class(TRigmScriptPageFrame)
   private
     FWorkspace: TRigmWizardWorkspace; FList: TListView; FSync: Boolean;
     procedure Selected(Sender: TObject; Item: TListItem; Value: Boolean);
@@ -19,18 +19,18 @@ constructor TRigmScriptVoiceEffectsFrame.CreateForWorkspace(AOwner: TComponent; 
 begin
   inherited Create(AOwner); Align := alClient; FWorkspace := Workspace;
   if AOwner is TWinControl then Parent := TWinControl(AOwner);
-  var Guide := TLabel.Create(Self); Guide.Parent := Self; Guide.Align := alTop;
-  Guide.AutoSize := False; Guide.Height := 60; Guide.WordWrap := True; Guide.Name := 'ScriptVoiceEffectsGuide';
+  var Guide := TRigmScriptLabel.Create(Self); Guide.Parent := Self; Guide.Align := alTop;
+  Guide.AutoSize := False; Guide.Height := ScaleValue(60); Guide.WordWrap := True; Guide.Name := 'ScriptVoiceEffectsGuide';
   Guide.Caption := '音声エフェクト'+#13#10+'現在は全セリフ「なし」です。Nextでシーン画像・説明文へ進めます。';
   FList := TRigmBufferedListView.Create(Self); FList.Parent := Self; FList.Align := alClient;
   FList.Name := 'ScriptVoiceEffectsRows'; FList.ViewStyle := vsReport; FList.RowSelect := True; FList.ReadOnly := True;
   FList.HideSelection := False; FList.OnSelectItem := Selected;
-  FList.Columns.Add.Caption := 'セリフ'; FList.Columns[0].Width := 700;
-  FList.Columns.Add.Caption := 'エフェクト'; FList.Columns[1].Width := 160;
+  FList.Columns.Add.Caption := 'セリフ'; FList.Columns[0].Width := ScaleValue(700);
+  FList.Columns.Add.Caption := 'エフェクト'; FList.Columns[1].Width := ScaleValue(160);
   OnResize := Resized;
 end;
 procedure TRigmScriptVoiceEffectsFrame.Resized(Sender: TObject);
-begin if FList<>nil then FList.Columns[0].Width := Max(120,FList.ClientWidth-FList.Columns[1].Width-24); end;
+begin if FList<>nil then FList.Columns[0].Width := Max(ScaleValue(120),FList.ClientWidth-FList.Columns[1].Width-ScaleValue(24)); end;
 procedure TRigmScriptVoiceEffectsFrame.Selected(Sender: TObject; Item: TListItem; Value: Boolean);
 begin
   if FSync or not Value then Exit;

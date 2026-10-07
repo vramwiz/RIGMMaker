@@ -2,10 +2,10 @@
 
 // 外部Codexの校正を一覧・本文位置・編集案で確認する。Workspaceを借用する。
 interface
-uses System.Classes, Vcl.Forms, Vcl.Controls, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.ComCtrls,
+uses System.Classes, RigmScriptPageFrame, Vcl.Forms, Vcl.Controls, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.ComCtrls,
   RigmWizardWorkspace, RigmIconToolbar, RigmScriptTextFrame;
 type
-  TRigmScriptReviewFrame = class(TFrame)
+  TRigmScriptReviewFrame = class(TRigmScriptPageFrame)
   private
     FWorkspace: TRigmWizardWorkspace; FSync: Boolean; FLoadedId: string;
     FList: TListView; FContext: TMemo; FProposal: TRigmScriptMemo;
@@ -35,20 +35,20 @@ begin
   FToolbar.AddIcon('ScriptReviewHuman','現在の文章を採用',riSave,0,Decide).Tag := 1;
   FToolbar.AddIcon('ScriptReviewEdited','編集した案を採用',riEditPreview,0,Decide).Tag := 2;
   FToolbar.AddIcon('ScriptReviewHold','保留する',riLayer,0,Decide).Tag := 3;
-  FGuide := TLabel.Create(Self); FGuide.Parent := Self; FGuide.Align := alBottom;
-  FGuide.AutoSize := False; FGuide.WordWrap := True; FGuide.Height := 76; FGuide.Name := 'ScriptReviewGuide';
-  FList := TListView.Create(Self); FList.Parent := Self; FList.Align := alLeft; FList.Width := 320;
+  FGuide := TRigmScriptLabel.Create(Self); FGuide.Parent := Self; FGuide.Align := alBottom;
+  FGuide.AutoSize := False; FGuide.WordWrap := True; FGuide.Height := ScaleValue(76); FGuide.Name := 'ScriptReviewGuide';
+  FList := TListView.Create(Self); FList.Parent := Self; FList.Align := alLeft; FList.Width := ScaleValue(320);
   FList.Name := 'ScriptReviewItems'; FList.ViewStyle := vsReport; FList.ReadOnly := True;
   FList.RowSelect := True; FList.HideSelection := False; FList.OnSelectItem := Selected;
-  FList.Columns.Add.Caption := '区分・指摘'; FList.Columns[0].Width := 200;
-  FList.Columns.Add.Caption := '採否'; FList.Columns[1].Width := 95;
+  FList.Columns.Add.Caption := '区分・指摘'; FList.Columns[0].Width := ScaleValue(200);
+  FList.Columns.Add.Caption := '採否'; FList.Columns[1].Width := ScaleValue(95);
   var Splitter := TSplitter.Create(Self); Splitter.Parent := Self; Splitter.Align := alLeft;
   var Body := TPanel.Create(Self); Body.Parent := Self; Body.Align := alClient; Body.BevelOuter := bvNone; Body.Caption := '';
-  Body.Padding.SetBounds(12,8,12,8);
-  var Detail := TPanel.Create(Self); Detail.Parent := Body; Detail.Align := alBottom; Detail.Height := 200; Detail.BevelOuter := bvNone; Detail.Caption := '';
+  Body.Padding.SetBounds(ScaleValue(12),ScaleValue(8),ScaleValue(12),ScaleValue(8));
+  var Detail := TPanel.Create(Self); Detail.Parent := Body; Detail.Align := alBottom; Detail.Height := ScaleValue(200); Detail.BevelOuter := bvNone; Detail.Caption := '';
   FReason := TMemo.Create(Self); FReason.Parent := Detail; FReason.Align := alTop; FReason.ReadOnly := True;
-  FReason.WordWrap := True; FReason.ScrollBars := ssVertical; FReason.Height := 76; FReason.Name := 'ScriptReviewReason';
-  var Vertical := TSplitter.Create(Self); Vertical.Parent := Body; Vertical.Align := alBottom; Vertical.Top := Detail.Top-8; Vertical.Height := 8;
+  FReason.WordWrap := True; FReason.ScrollBars := ssVertical; FReason.Height := ScaleValue(76); FReason.Name := 'ScriptReviewReason';
+  var Vertical := TSplitter.Create(Self); Vertical.Parent := Body; Vertical.Align := alBottom; Vertical.Top := Detail.Top-8; Vertical.Height := ScaleValue(8);
   FProposal := TRigmScriptMemo.Create(Self); FProposal.Parent := Detail; FProposal.Align := alClient;
   FProposal.Name := 'ScriptReviewProposal'; FProposal.Font.Size := 14; FProposal.ScrollBars := ssVertical;
   FProposal.MaxLength := 4096; FProposal.OnEnter := BeginInput; FProposal.OnBeginInput := BeginInput; FProposal.OnExit := EndInput;

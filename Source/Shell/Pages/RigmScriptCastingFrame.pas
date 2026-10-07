@@ -2,10 +2,10 @@
 
 // 配役セリフの一覧と番号キー操作。セリフ/音声/字幕の正本はWorkspaceの既存モデル。
 interface
-uses System.Classes, Vcl.Forms, Vcl.Controls, Vcl.ComCtrls, Vcl.StdCtrls, Vcl.ExtCtrls,
+uses System.Classes, RigmScriptPageFrame, Vcl.Forms, Vcl.Controls, Vcl.ComCtrls, Vcl.StdCtrls, Vcl.ExtCtrls,
   RigmWizardWorkspace, RigmIconToolbar, RigmVoiceConnection;
 type
-  TRigmScriptCastingFrame = class(TFrame)
+  TRigmScriptCastingFrame = class(TRigmScriptPageFrame)
   private
     FWorkspace: TRigmWizardWorkspace; FSync: Boolean; FSelectedCue: string;
     FConnection: TRigmVoiceConnection; FVoiceStyles,FVoiceState: TComboBox;
@@ -119,34 +119,34 @@ begin
   FToolbar.AddSeparator;
   FToolbar.AddIcon('ScriptCastingSplit','選択セリフを本文のカーソル位置で分割する',riEditPreview,0,Split);
   FToolbar.AddIcon('ScriptCastingMerge','同じシーンの次のセリフと結合する',riGroup,0,Merge);
-  FVoicePanel := TPanel.Create(Self); FVoicePanel.Parent := Self; FVoicePanel.Align := alTop; FVoicePanel.Caption := ''; FVoicePanel.BevelOuter := bvNone; FVoicePanel.Height := 98;
-  FConnectionRow := TPanel.Create(Self); FConnectionRow.Parent := FVoicePanel; FConnectionRow.Align := alTop; FConnectionRow.Caption := ''; FConnectionRow.BevelOuter := bvNone; FConnectionRow.Height := 30;
-  FLocate := TButton.Create(Self); FLocate.Parent := FConnectionRow; FLocate.Align := alRight; FLocate.Width := 180; FLocate.Caption := 'VOICEVOXを手動設定'; FLocate.Name := 'ScriptCastingLocateEngine'; FLocate.OnClick := LocateEngine; FLocate.Visible := False;
-  FVoiceStatus := TLabel.Create(Self); FVoiceStatus.Parent := FConnectionRow; FVoiceStatus.Align := alClient; FVoiceStatus.AutoSize := False; FVoiceStatus.WordWrap := True; FVoiceStatus.Name := 'ScriptCastingVoiceStatus';
-  var Choices := TPanel.Create(Self); Choices.Parent := FVoicePanel; Choices.Align := alTop; Choices.Caption := ''; Choices.BevelOuter := bvNone; Choices.Height := 34;
-  FVoiceActor := TLabel.Create(Self); FVoiceActor.Parent := Choices; FVoiceActor.Align := alLeft; FVoiceActor.Width := 220; FVoiceActor.AutoSize := False; FVoiceActor.Caption := '声（人物）';
+  FVoicePanel := TPanel.Create(Self); FVoicePanel.Parent := Self; FVoicePanel.Align := alTop; FVoicePanel.Caption := ''; FVoicePanel.BevelOuter := bvNone; FVoicePanel.Height := ScaleValue(98);
+  FConnectionRow := TPanel.Create(Self); FConnectionRow.Parent := FVoicePanel; FConnectionRow.Align := alTop; FConnectionRow.Caption := ''; FConnectionRow.BevelOuter := bvNone; FConnectionRow.Height := ScaleValue(30);
+  FLocate := TButton.Create(Self); FLocate.Parent := FConnectionRow; FLocate.Align := alRight; FLocate.Width := ScaleValue(180); FLocate.Caption := 'VOICEVOXを手動設定'; FLocate.Name := 'ScriptCastingLocateEngine'; FLocate.OnClick := LocateEngine; FLocate.Visible := False;
+  FVoiceStatus := TRigmScriptLabel.Create(Self); FVoiceStatus.Parent := FConnectionRow; FVoiceStatus.Align := alClient; FVoiceStatus.AutoSize := False; FVoiceStatus.WordWrap := True; FVoiceStatus.Name := 'ScriptCastingVoiceStatus';
+  var Choices := TPanel.Create(Self); Choices.Parent := FVoicePanel; Choices.Align := alTop; Choices.Caption := ''; Choices.BevelOuter := bvNone; Choices.Height := ScaleValue(34);
+  FVoiceActor := TRigmScriptLabel.Create(Self); FVoiceActor.Parent := Choices; FVoiceActor.Align := alLeft; FVoiceActor.Width := ScaleValue(220); FVoiceActor.AutoSize := False; FVoiceActor.Caption := '声（人物）';
   FVoiceStyles := TComboBox.Create(Self); FVoiceStyles.Parent := Choices; FVoiceStyles.Align := alClient; FVoiceStyles.Style := csDropDownList; FVoiceStyles.Name := 'ScriptCastingVoiceStyle'; FVoiceStyles.OnChange := BindVoice;
-  var States := TPanel.Create(Self); States.Parent := FVoicePanel; States.Align := alTop; States.Caption := ''; States.BevelOuter := bvNone; States.Height := 34;
-  var StateLabel := TLabel.Create(Self); StateLabel.Parent := States; StateLabel.Align := alLeft; StateLabel.Width := 220; StateLabel.AutoSize := False; StateLabel.Caption := '選択セリフの感情'; StateLabel.Name := 'ScriptCastingEmotionLabel';
+  var States := TPanel.Create(Self); States.Parent := FVoicePanel; States.Align := alTop; States.Caption := ''; States.BevelOuter := bvNone; States.Height := ScaleValue(34);
+  var StateLabel := TRigmScriptLabel.Create(Self); StateLabel.Parent := States; StateLabel.Align := alLeft; StateLabel.Width := ScaleValue(220); StateLabel.AutoSize := False; StateLabel.Caption := '選択セリフの感情'; StateLabel.Name := 'ScriptCastingEmotionLabel';
   FVoiceState := TComboBox.Create(Self); FVoiceState.Parent := States; FVoiceState.Align := alClient; FVoiceState.Style := csDropDownList; FVoiceState.Name := 'ScriptCastingVoiceState'; FVoiceState.OnChange := StateChanged;
-  FToolbar.Top := 0; FVoicePanel.Top := FToolbar.Height; FConnectionRow.Top := 0; Choices.Top := 30; States.Top := 64;
+  FToolbar.Top := 0; FVoicePanel.Top := FToolbar.Height; FConnectionRow.Top := 0; Choices.Top := ScaleValue(30); States.Top := ScaleValue(64);
   FConnection := TRigmVoiceConnection.CreateForWorkspace(Self,FWorkspace); FConnection.OnChanged := ConnectionChanged;
-  FGuide := TLabel.Create(Self); FGuide.Parent := Self; FGuide.Align := alBottom; FGuide.AutoSize := False;
-  FGuide.WordWrap := True; FGuide.Height := 76; FGuide.Name := 'ScriptCastingGuide';
-  var Detail := TPanel.Create(Self); Detail.Parent := Self; Detail.Align := alBottom; Detail.Height := 174; Detail.Caption := ''; Detail.BevelOuter := bvNone;
+  FGuide := TRigmScriptLabel.Create(Self); FGuide.Parent := Self; FGuide.Align := alBottom; FGuide.AutoSize := False;
+  FGuide.WordWrap := True; FGuide.Height := ScaleValue(76); FGuide.Name := 'ScriptCastingGuide';
+  var Detail := TPanel.Create(Self); Detail.Parent := Self; Detail.Align := alBottom; Detail.Height := ScaleValue(174); Detail.Caption := ''; Detail.BevelOuter := bvNone;
   FReason := TMemo.Create(Self); FReason.Parent := Detail; FReason.Align := alTop; FReason.ReadOnly := True;
-  FReason.Height := 60; FReason.ScrollBars := ssVertical; FReason.Name := 'ScriptCastingReason';
+  FReason.Height := ScaleValue(60); FReason.ScrollBars := ssVertical; FReason.Name := 'ScriptCastingReason';
   FText := TMemo.Create(Self); FText.Parent := Detail; FText.Align := alClient; FText.ReadOnly := True;
   FText.Font.Size := 13; FText.ScrollBars := ssVertical; FText.Name := 'ScriptCastingText'; FText.OnKeyDown := HandleKey;
-  var Splitter := TSplitter.Create(Self); Splitter.Parent := Self; Splitter.Align := alBottom; Splitter.Top := Detail.Top-8; Splitter.Height := 8;
+  var Splitter := TSplitter.Create(Self); Splitter.Parent := Self; Splitter.Align := alBottom; Splitter.Top := Detail.Top-8; Splitter.Height := ScaleValue(8);
   FList := TRigmCastingListView.Create(Self); FList.Parent := Self; FList.Align := alClient; FList.ViewStyle := vsReport;
   // 標準ListView内で一度だけ合成する。VCL側の追加バッファは列クリップを壊すため使わない。
   FList.ParentDoubleBuffered := False; FList.DoubleBuffered := False;
   FList.ReadOnly := True; FList.RowSelect := True; FList.HideSelection := False; FList.OnSelectItem := Selected; FList.OnKeyDown := HandleKey;
-  FList.Name := 'ScriptCastingRows'; FList.Columns.Add.Caption := '区分'; FList.Columns[0].Width := 90;
-  FList.Columns.Add.Caption := '番号 / キャラ'; FList.Columns[1].Width := 270;
-  FList.Columns.Add.Caption := '感情'; FList.Columns[2].Width := 140;
-  FList.Columns.Add.Caption := 'セリフ'; FList.Columns[3].Width := 700;
+  FList.Name := 'ScriptCastingRows'; FList.Columns.Add.Caption := '区分'; FList.Columns[0].Width := ScaleValue(90);
+  FList.Columns.Add.Caption := '番号 / キャラ'; FList.Columns[1].Width := ScaleValue(270);
+  FList.Columns.Add.Caption := '感情'; FList.Columns[2].Width := ScaleValue(140);
+  FList.Columns.Add.Caption := 'セリフ'; FList.Columns[3].Width := ScaleValue(700);
 end;
 function TRigmScriptCastingFrame.SelectedId: string;
 begin Result := ''; if FList.Selected<>nil then Result := FList.Selected.SubItems[3]; end;

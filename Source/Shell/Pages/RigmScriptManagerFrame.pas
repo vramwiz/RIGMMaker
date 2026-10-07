@@ -1,9 +1,9 @@
 ﻿unit RigmScriptManagerFrame;
 interface
-uses System.Classes, Vcl.Forms, Vcl.ComCtrls, Vcl.StdCtrls, RigmWizardWorkspace, RigmPageNavigation;
+uses System.Classes, RigmScriptPageFrame, Vcl.Forms, Vcl.ComCtrls, Vcl.StdCtrls, RigmWizardWorkspace, RigmPageNavigation;
 function ScriptUpdatedAtLocal(const Value: string): string;
 type
-  TRigmScriptManagerFrame = class(TFrame)
+  TRigmScriptManagerFrame = class(TRigmScriptPageFrame)
   private
     FWorkspace: TRigmWizardWorkspace; FRoot: string; FList: TListView; FStatus: TLabel; FOnNavigate: TRigmNavigateEvent;
     FCreating: Boolean;
@@ -34,16 +34,16 @@ begin
   Toolbar.AddIcon('ScriptResume','選択した台本・従来作品を再開',riOpen,0,OpenWork);
   Toolbar.AddSeparator; Toolbar.AddIcon('ScriptOpenLegacy','従来の作品ファイルを開く',riReference,0,ChooseWork);
   Toolbar.AddIcon('ScriptRefresh','一覧を更新',riRefresh,0,RefreshClick);
-  FStatus := TLabel.Create(Self); FStatus.Parent := Self; FStatus.Align := alBottom; FStatus.Height := 42;
+  FStatus := TRigmScriptLabel.Create(Self); FStatus.Parent := Self; FStatus.Align := alBottom; FStatus.Height := ScaleValue(42);
   FStatus.AutoSize := False; FStatus.WordWrap := True; FStatus.Name := 'ScriptLibraryStatus';
   FList := TListView.Create(Self); FList.Parent := Self; FList.Align := alClient; FList.ViewStyle := vsReport;
   FList.RowSelect := True; FList.ReadOnly := True; FList.Name := 'ScriptLibrary'; FList.HideSelection := False;
-  FList.Columns.Add.Caption := '題名'; FList.Columns[0].Width := 480;
-  FList.Columns.Add.Caption := '工程'; FList.Columns[1].Width := 170;
+  FList.Columns.Add.Caption := '題名'; FList.Columns[0].Width := ScaleValue(480);
+  FList.Columns.Add.Caption := '工程'; FList.Columns[1].Width := ScaleValue(170);
   FList.Columns.Add.Caption := '更新日時（PCの時刻）';
   if TTimeZone.Local.GetUtcOffset(Now).TotalMinutes=540 then FList.Columns[2].Caption := '更新日時（日本時間）';
-  FList.Columns[2].Width := 220;
-  FList.Columns.Add.Caption := '識別'; FList.Columns[3].Width := 100; FList.OnDblClick := OpenWork;
+  FList.Columns[2].Width := ScaleValue(220);
+  FList.Columns.Add.Caption := '識別'; FList.Columns[3].Width := ScaleValue(100); FList.OnDblClick := OpenWork;
   RefreshLibrary;
 end;
 procedure TRigmScriptManagerFrame.RefreshLibrary;

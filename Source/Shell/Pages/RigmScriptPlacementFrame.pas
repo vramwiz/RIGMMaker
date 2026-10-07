@@ -1,6 +1,6 @@
 ﻿unit RigmScriptPlacementFrame;
 interface
-uses System.Classes, System.JSON, System.Types, System.Generics.Collections, Vcl.Graphics,
+uses System.Classes, RigmScriptPageFrame, System.JSON, System.Types, System.Generics.Collections, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ImgList,
   Winapi.Messages, RigmWizardWorkspace, RigmScriptLayoutFrame, RigmThumbnailList;
 type
@@ -30,7 +30,7 @@ type
     property SnapToGrid: Boolean read FSnap write FSnap;
     property Dragging: Boolean read FDragging;
   end;
-  TRigmScriptPlacementFrame = class(TFrame)
+  TRigmScriptPlacementFrame = class(TRigmScriptPageFrame)
   private
     FWorkspace: TRigmWizardWorkspace; FSync: Boolean; FSelectionKey: string;
     FList: TListView; FImages: TImageList; FLoader: TRigmThumbnailList;
@@ -41,6 +41,8 @@ type
     procedure Options(Sender: TObject);
     function ThumbnailPath(Item: TListItem): string;
     procedure ThumbnailApplied(Sender: TObject; Item: TListItem; Metadata: TJSONObject);
+  protected
+    procedure ChangeScale(M,D: Integer; isDpiChange: Boolean); override;
   public
     constructor CreateForWorkspace(AOwner: TComponent; Workspace: TRigmWizardWorkspace);
     destructor Destroy; override;
@@ -174,21 +176,31 @@ end;
 constructor TRigmScriptPlacementFrame.CreateForWorkspace(AOwner: TComponent; Workspace: TRigmWizardWorkspace);
 begin
   inherited Create(AOwner); Align := alClient; FWorkspace := Workspace;
-  FGuide := TLabel.Create(Self); FGuide.Parent := Self; FGuide.Align := alTop; FGuide.Height := 58; FGuide.AutoSize := False; FGuide.WordWrap := True;
+  FGuide := TRigmScriptLabel.Create(Self); FGuide.Parent := Self; FGuide.Align := alTop; FGuide.Height := ScaleValue(58); FGuide.AutoSize := False; FGuide.WordWrap := True;
   FGuide.Caption := '第4段階：キャラ配置　枠内で移動、8点で拡縮。L字型ではキャラ側の領域へ収めます。'+#13#10+
     '左右反転は元画像の鏡像です。Nextで配置を保存し台本入力へ進みます。最終編集でも同じ配置を調整できます。';
-  var Side := TPanel.Create(Self); Side.Parent := Self; Side.Align := alLeft; Side.Width := 248; Side.Caption := ''; Side.BevelOuter := bvNone;
-  FAspect := TCheckBox.Create(Self); FAspect.Parent := Side; FAspect.Align := alTop; FAspect.Height := 28; FAspect.Caption := '縦横比を保持'; FAspect.Checked := True; FAspect.OnClick := Options;
-  FSnap := TCheckBox.Create(Self); FSnap.Parent := Side; FSnap.Align := alTop; FSnap.Top := 28; FSnap.Height := 28; FSnap.Caption := '10pxスナップ（FullHD基準）'; FSnap.Checked := True; FSnap.OnClick := Options;
-  FFlip := TCheckBox.Create(Self); FFlip.Parent := Side; FFlip.Align := alTop; FFlip.Top := 56; FFlip.Height := 28; FFlip.Caption := '左右反転'; FFlip.Name := 'ScriptPlacementFlip'; FFlip.OnClick := Flip;
-  FBounds := TLabel.Create(Self); FBounds.Name := 'ScriptPlacementBounds'; FBounds.Parent := Side; FBounds.Align := alTop; FBounds.Top := 84; FBounds.Height := 64; FBounds.AutoSize := False; FBounds.WordWrap := True;
+  var Side := TPanel.Create(Self); Side.Parent := Self; Side.Align := alLeft; Side.Width := ScaleValue(248); Side.Caption := ''; Side.BevelOuter := bvNone;
+  FAspect := TCheckBox.Create(Self); FAspect.Parent := Side; FAspect.Align := alTop; FAspect.Height := ScaleValue(28); FAspect.Caption := '縦横比を保持'; FAspect.Checked := True; FAspect.OnClick := Options;
+  FSnap := TCheckBox.Create(Self); FSnap.Parent := Side; FSnap.Align := alTop; FSnap.Top := ScaleValue(28); FSnap.Height := ScaleValue(28); FSnap.Caption := '10pxスナップ（FullHD基準）'; FSnap.Checked := True; FSnap.OnClick := Options;
+  FFlip := TCheckBox.Create(Self); FFlip.Parent := Side; FFlip.Align := alTop; FFlip.Top := ScaleValue(56); FFlip.Height := ScaleValue(28); FFlip.Caption := '左右反転'; FFlip.Name := 'ScriptPlacementFlip'; FFlip.OnClick := Flip;
+  FBounds := TRigmScriptLabel.Create(Self); FBounds.Name := 'ScriptPlacementBounds'; FBounds.Parent := Side; FBounds.Align := alTop; FBounds.Top := ScaleValue(84); FBounds.Height := ScaleValue(64); FBounds.AutoSize := False; FBounds.WordWrap := True;
   FImages := TImageList.Create(Self); FImages.ColorDepth := cd32Bit; FImages.Width := ScaleValue(56); FImages.Height := ScaleValue(72);
   FList := TListView.Create(Self); FList.Parent := Side; FList.Align := alClient; FList.Name := 'ScriptPlacementCharacters';
   FList.ViewStyle := vsReport; FList.ReadOnly := True; FList.RowSelect := True; FList.HideSelection := False; FList.SmallImages := FImages;
-  FList.Columns.Add.Caption := 'キャラ'; FList.Columns[0].Width := 228; FList.OnSelectItem := Selected;
+  FList.Columns.Add.Caption := 'キャラ'; FList.Columns[0].Width := ScaleValue(228); FList.OnSelectItem := Selected;
   FPreview := TRigmPlacementPreview.CreateForWorkspace(Self,Workspace); FPreview.Parent := Self;
   FLoader := TRigmThumbnailList.CreateForList(Self,Workspace.Thumbnails,FList,FImages);
   FLoader.OnPath := ThumbnailPath; FLoader.OnApplied := ThumbnailApplied;
+end;
+procedure TRigmScriptPlacementFrame.ChangeScale(M,D: Integer; isDpiChange: Boolean);
+begin
+  inherited;
+  if FImages=nil then Exit;
+  FImages.SetSize(MulDiv(56,M,96),MulDiv(72,M,96));
+  if FLoader<>nil then begin
+    FLoader.Reset; for var Item in FList.Items do Item.ImageIndex := -1;
+    if Visible then FLoader.Refresh;
+  end;
 end;
 destructor TRigmScriptPlacementFrame.Destroy;
 begin FPreview.CancelDrag; FLoader.Free; inherited; end;

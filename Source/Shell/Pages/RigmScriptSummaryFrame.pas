@@ -1,6 +1,6 @@
 ﻿unit RigmScriptSummaryFrame;
 interface
-uses System.Classes, System.JSON, Vcl.Forms, Vcl.Controls, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.ComCtrls, Vcl.Grids,
+uses System.Classes, RigmScriptPageFrame, System.JSON, Vcl.Forms, Vcl.Controls, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.ComCtrls, Vcl.Grids,
   RigmWizardWorkspace, RigmIconToolbar, RigmScriptTextFrame;
 type
   TRigmSummaryChartPreview = class(TCustomControl)
@@ -8,7 +8,7 @@ type
   protected procedure Paint; override;
   public constructor CreateForWorkspace(AOwner: TComponent; Workspace: TRigmWizardWorkspace);
   end;
-  TRigmScriptSummaryFrame = class(TFrame)
+  TRigmScriptSummaryFrame = class(TRigmScriptPageFrame)
   private
     FWorkspace: TRigmWizardWorkspace; FSync,FEditing: Boolean; FLoaded: string;
     FText,FSubtitle,FReading: TRigmScriptMemo; FTitle,FMinimum,FMaximum: TEdit;
@@ -42,30 +42,30 @@ begin
 end;
 constructor TRigmScriptSummaryFrame.CreateForWorkspace(AOwner: TComponent; Workspace: TRigmWizardWorkspace);
   function Memo(const Name,Caption: string; Top,Height: Integer): TRigmScriptMemo;
-  begin var Panel := TPanel.Create(Self); Panel.Parent := FGrid.Parent; Panel.Align := alTop; Panel.Top := Top; Panel.Height := Height; Panel.Caption := ''; Panel.BevelOuter := bvNone;
-    var L := TLabel.Create(Self); L.Parent := Panel; L.Align := alTop; L.Caption := Caption; L.Font.Height := -18;
-    Result := TRigmScriptMemo.Create(Self); Result.Parent := Panel; Result.Align := alClient; Result.Name := Name; Result.MaxLength := 2000; Result.Font.Height := -22; Result.ScrollBars := ssVertical; Result.OnChange := Changed; Result.OnKeyDown := Key;
+  begin var Panel := TPanel.Create(Self); Panel.Parent := FGrid.Parent; Panel.Align := alTop; Panel.Top := ScaleValue(Top); Panel.Height := ScaleValue(Height); Panel.Caption := ''; Panel.BevelOuter := bvNone;
+    var L := TRigmScriptLabel.Create(Self); L.Parent := Panel; L.Align := alTop; L.Caption := Caption; L.Font.Height := -ScaleValue(18);
+    Result := TRigmScriptMemo.Create(Self); Result.Parent := Panel; Result.Align := alClient; Result.Name := Name; Result.MaxLength := 2000; Result.Font.Height := -ScaleValue(22); Result.ScrollBars := ssVertical; Result.OnChange := Changed; Result.OnKeyDown := Key;
   end;
 begin
   inherited Create(AOwner); Align := alClient; FWorkspace := Workspace;
   var Tools := TRigmIconToolbar.Create(Self); Tools.Parent := Self; Tools.Align := alTop; Tools.Name := 'ScriptSummaryToolbar';
   Tools.AddIcon('ScriptSummaryEdit','Enter：総評の入力',riEditPreview,0,Edit); Tools.AddIcon('ScriptSummaryDone','入力完了（Ctrl+Enter / Esc）。途中の数値も保存',riComplete,0,Done); Tools.AddIcon('ScriptSummaryReady','人間の総評と値の確認完了',riComplete,0,Ready);
   Tools.AddSeparator; Tools.AddIcon('ScriptSummaryAddAxis','評価要素を追加（最大8）',riGroup,0,AddAxis); Tools.AddIcon('ScriptSummaryRemoveAxis','最後の評価要素を外す（最低3）',riDelete,0,RemoveAxis);
-  FGuide := TLabel.Create(Self); FGuide.Parent := Self; FGuide.Align := alBottom; FGuide.AutoSize := False; FGuide.WordWrap := True; FGuide.Height := 52; FGuide.Font.Height := -18; FGuide.Name := 'ScriptSummaryGuide';
-  var Left := TPanel.Create(Self); Left.Parent := Self; Left.Align := alLeft; Left.Width := 540; Left.Caption := ''; Left.BevelOuter := bvNone; Left.Padding.SetBounds(6,4,8,4);
-  FGrid := TStringGrid.Create(Self); FGrid.Parent := Left; FGrid.Align := alClient; FGrid.Name := 'ScriptSummaryAxes'; FGrid.ColCount := 2; FGrid.RowCount := 4; FGrid.FixedCols := 0; FGrid.FixedRows := 1; FGrid.DefaultRowHeight := 34; FGrid.ColWidths[0] := 340; FGrid.ColWidths[1] := 160; FGrid.Font.Height := -22; FGrid.Options := FGrid.Options+[goEditing]; FGrid.Cells[0,0] := '評価要素'; FGrid.Cells[1,0] := '今回の値'; FGrid.OnSetEditText := GridEdit; FGrid.OnKeyDown := Key;
+  FGuide := TRigmScriptLabel.Create(Self); FGuide.Parent := Self; FGuide.Align := alBottom; FGuide.AutoSize := False; FGuide.WordWrap := True; FGuide.Height := ScaleValue(52); FGuide.Font.Height := -ScaleValue(18); FGuide.Name := 'ScriptSummaryGuide';
+  var Left := TPanel.Create(Self); Left.Parent := Self; Left.Align := alLeft; Left.Width := ScaleValue(540); Left.Caption := ''; Left.BevelOuter := bvNone; Left.Padding.SetBounds(ScaleValue(6),ScaleValue(4),ScaleValue(8),ScaleValue(4));
+  FGrid := TStringGrid.Create(Self); FGrid.Parent := Left; FGrid.Align := alClient; FGrid.Name := 'ScriptSummaryAxes'; FGrid.ColCount := 2; FGrid.RowCount := 4; FGrid.FixedCols := 0; FGrid.FixedRows := 1; FGrid.DefaultRowHeight := ScaleValue(34); FGrid.ColWidths[0] := ScaleValue(340); FGrid.ColWidths[1] := ScaleValue(160); FGrid.Font.Height := -ScaleValue(22); FGrid.Options := FGrid.Options+[goEditing]; FGrid.Cells[0,0] := '評価要素'; FGrid.Cells[1,0] := '今回の値'; FGrid.OnSetEditText := GridEdit; FGrid.OnKeyDown := Key;
   FText := Memo('ScriptSummaryText','人間の総評（音声用。2000文字以内）',0,112);
   FSubtitle := Memo('ScriptSummarySubtitle','表示字幕（音声とは独立。空なら表示なし）',112,88);
   FSubtitle.MaxLength := 3000;
   FReading := Memo('ScriptSummaryReading','読み（空なら上の音声文を使用）',200,88);
-  var Options := TPanel.Create(Self); Options.Parent := Left; Options.Align := alTop; Options.Top := 288; Options.Height := 110; Options.Caption := ''; Options.BevelOuter := bvNone;
-  FRole := TComboBox.Create(Self); FRole.Parent := Options; FRole.SetBounds(0,0,300,36); FRole.Style := csDropDownList; FRole.Name := 'ScriptSummaryRole'; FRole.OnChange := Changed;
-  FKind := TComboBox.Create(Self); FKind.Parent := Options; FKind.SetBounds(308,0,190,36); FKind.Style := csDropDownList; FKind.Items.Add('レーダー'); FKind.Items.Add('棒'); FKind.Name := 'ScriptSummaryKind'; FKind.OnChange := Changed;
-  FTitle := TEdit.Create(Self); FTitle.Parent := Options; FTitle.SetBounds(0,40,498,30); FTitle.MaxLength := 120; FTitle.TextHint := 'チャート題名'; FTitle.Name := 'ScriptSummaryTitle'; FTitle.OnChange := Changed;
-  var LabelMin := TLabel.Create(Self); LabelMin.Parent := Options; LabelMin.SetBounds(0,78,90,28); LabelMin.Caption := '最小値';
-  FMinimum := TEdit.Create(Self); FMinimum.Parent := Options; FMinimum.SetBounds(90,76,135,30); FMinimum.MaxLength := 32; FMinimum.Name := 'ScriptSummaryMinimum'; FMinimum.OnChange := Changed;
-  var LabelMax := TLabel.Create(Self); LabelMax.Parent := Options; LabelMax.SetBounds(254,78,90,28); LabelMax.Caption := '最大値';
-  FMaximum := TEdit.Create(Self); FMaximum.Parent := Options; FMaximum.SetBounds(348,76,150,30); FMaximum.MaxLength := 32; FMaximum.Name := 'ScriptSummaryMaximum'; FMaximum.OnChange := Changed;
+  var Options := TPanel.Create(Self); Options.Parent := Left; Options.Align := alTop; Options.Top := ScaleValue(288); Options.Height := ScaleValue(110); Options.Caption := ''; Options.BevelOuter := bvNone;
+  FRole := TComboBox.Create(Self); FRole.Parent := Options; FRole.SetBounds(0,0,ScaleValue(300),ScaleValue(36)); FRole.Style := csDropDownList; FRole.Name := 'ScriptSummaryRole'; FRole.OnChange := Changed;
+  FKind := TComboBox.Create(Self); FKind.Parent := Options; FKind.SetBounds(ScaleValue(308),0,ScaleValue(190),ScaleValue(36)); FKind.Style := csDropDownList; FKind.Items.Add('レーダー'); FKind.Items.Add('棒'); FKind.Name := 'ScriptSummaryKind'; FKind.OnChange := Changed;
+  FTitle := TEdit.Create(Self); FTitle.Parent := Options; FTitle.SetBounds(0,ScaleValue(40),ScaleValue(498),ScaleValue(30)); FTitle.MaxLength := 120; FTitle.TextHint := 'チャート題名'; FTitle.Name := 'ScriptSummaryTitle'; FTitle.OnChange := Changed;
+  var LabelMin := TRigmScriptLabel.Create(Self); LabelMin.Parent := Options; LabelMin.SetBounds(0,ScaleValue(78),ScaleValue(90),ScaleValue(28)); LabelMin.Caption := '最小値';
+  FMinimum := TEdit.Create(Self); FMinimum.Parent := Options; FMinimum.SetBounds(ScaleValue(90),ScaleValue(76),ScaleValue(135),ScaleValue(30)); FMinimum.MaxLength := 32; FMinimum.Name := 'ScriptSummaryMinimum'; FMinimum.OnChange := Changed;
+  var LabelMax := TRigmScriptLabel.Create(Self); LabelMax.Parent := Options; LabelMax.SetBounds(ScaleValue(254),ScaleValue(78),ScaleValue(90),ScaleValue(28)); LabelMax.Caption := '最大値';
+  FMaximum := TEdit.Create(Self); FMaximum.Parent := Options; FMaximum.SetBounds(ScaleValue(348),ScaleValue(76),ScaleValue(150),ScaleValue(30)); FMaximum.MaxLength := 32; FMaximum.Name := 'ScriptSummaryMaximum'; FMaximum.OnChange := Changed;
   FPreview := TRigmSummaryChartPreview.CreateForWorkspace(Self,Workspace); FPreview.Parent := Self; FPreview.Align := alClient; FPreview.Name := 'ScriptSummaryPreview';
 end;
 function TRigmScriptSummaryFrame.Draft: TJSONObject;

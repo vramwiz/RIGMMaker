@@ -1,7 +1,7 @@
 ﻿unit RigmScriptLayoutFrame;
 
 interface
-uses System.Classes, System.Types, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.ExtCtrls, Vcl.StdCtrls, RigmWizardWorkspace;
+uses System.Classes, RigmScriptPageFrame, System.Types, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.ExtCtrls, Vcl.StdCtrls, RigmWizardWorkspace;
 type
   TRigmLayoutPreview = class(TCustomControl)
   private
@@ -16,7 +16,7 @@ type
     property Workspace: TRigmWizardWorkspace read FWorkspace;
     property ShowCharacters: Boolean read FShowCharacters write FShowCharacters;
   end;
-  TRigmScriptLayoutFrame = class(TFrame)
+  TRigmScriptLayoutFrame = class(TRigmScriptPageFrame)
   private
     FWorkspace: TRigmWizardWorkspace; FSync: Boolean;
     FChoices: TRadioGroup; FBackground: TComboBox; FGuide: TLabel;
@@ -121,18 +121,18 @@ end;
 constructor TRigmScriptLayoutFrame.CreateForWorkspace(AOwner: TComponent; Workspace: TRigmWizardWorkspace);
 begin
   inherited Create(AOwner); Align := alClient; FWorkspace := Workspace; DoubleBuffered := True;
-  FChoices := TRadioGroup.Create(Self); FChoices.Parent := Self; FChoices.Align := alTop; FChoices.Height := 78;
+  FChoices := TRadioGroup.Create(Self); FChoices.Parent := Self; FChoices.Align := alTop; FChoices.Height := ScaleValue(78);
   FChoices.Name := 'ScriptLayoutChoices'; FChoices.Caption := '第3段階：レイアウト選択（画面基準）'; FChoices.Columns := 3;
   FChoices.Items.Add('中央型：左・右にキャラ'); FChoices.Items.Add('L字型：左にキャラ／右に画像');
   FChoices.Items.Add('逆L字型：右にキャラ／左に画像'); FChoices.OnClick := Changed;
   var BackgroundRow := TPanel.Create(Self); BackgroundRow.Parent := Self; BackgroundRow.Align := alTop;
-  BackgroundRow.Height := 42; BackgroundRow.Top := FChoices.Height; BackgroundRow.BevelOuter := bvNone; BackgroundRow.Caption := '';
-  var LabelColor := TLabel.Create(Self); LabelColor.Parent := BackgroundRow; LabelColor.SetBounds(8,11,164,24); LabelColor.Caption := '中央型の共通背景色（仮）';
-  FBackground := TComboBox.Create(Self); FBackground.Parent := BackgroundRow; FBackground.SetBounds(260,7,180,28);
+  BackgroundRow.Height := ScaleValue(42); BackgroundRow.Top := FChoices.Height; BackgroundRow.BevelOuter := bvNone; BackgroundRow.Caption := '';
+  var LabelColor := TRigmScriptLabel.Create(Self); LabelColor.Parent := BackgroundRow; LabelColor.SetBounds(ScaleValue(8),ScaleValue(11),ScaleValue(164),ScaleValue(24)); LabelColor.Caption := '中央型の共通背景色（仮）';
+  FBackground := TComboBox.Create(Self); FBackground.Parent := BackgroundRow; FBackground.SetBounds(ScaleValue(260),ScaleValue(7),ScaleValue(180),ScaleValue(28));
   FBackground.Name := 'ScriptLayoutBackground'; FBackground.Style := csDropDownList;
   FBackground.Items.Add('暗色'); FBackground.Items.Add('明色'); FBackground.Items.Add('青色'); FBackground.OnChange := Changed;
-  FGuide := TLabel.Create(Self); FGuide.Parent := Self; FGuide.Align := alTop; FGuide.Top := 120;
-  FGuide.AutoSize := False; FGuide.Height := 58; FGuide.WordWrap := True; FGuide.Name := 'ScriptLayoutProgress';
+  FGuide := TRigmScriptLabel.Create(Self); FGuide.Parent := Self; FGuide.Align := alTop; FGuide.Top := ScaleValue(120);
+  FGuide.AutoSize := False; FGuide.Height := ScaleValue(58); FGuide.WordWrap := True; FGuide.Name := 'ScriptLayoutProgress';
   FPreview := TRigmLayoutPreview.CreateForWorkspace(Self,Workspace); FPreview.Parent := Self;
   FTimer := TTimer.Create(Self); FTimer.Enabled := False; FTimer.Interval := 100; FTimer.OnTimer := Poll;
 end;

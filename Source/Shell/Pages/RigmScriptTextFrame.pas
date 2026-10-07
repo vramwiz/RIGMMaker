@@ -1,6 +1,6 @@
 ﻿unit RigmScriptTextFrame;
 interface
-uses System.Classes, Vcl.Forms, Vcl.Controls, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.ComCtrls,
+uses System.Classes, RigmScriptPageFrame, Vcl.Forms, Vcl.Controls, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.ComCtrls,
   Winapi.Messages, RigmWizardWorkspace, RigmIconToolbar;
 type
   TRigmScriptMemo = class(TMemo)
@@ -13,7 +13,7 @@ type
   public
     property OnBeginInput: TNotifyEvent read FOnBeginInput write FOnBeginInput;
   end;
-  TRigmScriptTextFrame = class(TFrame)
+  TRigmScriptTextFrame = class(TRigmScriptPageFrame)
   private
     FWorkspace: TRigmWizardWorkspace; FSync: Boolean;
     FToolbar: TRigmIconToolbar; FParts: array[0..2] of TToolButton;
@@ -49,11 +49,11 @@ begin
     FParts[I] := FToolbar.AddIcon('ScriptTextPart'+I.ToString,SectionNames[I],riEditPreview,0,SelectSection,True); FParts[I].Tag := I;
   end;
   FToolbar.AddSeparator; FToolbar.AddIcon('ScriptTextReady','入力完了：AIの変更を許可する',riComplete,0,CompleteInput);
-  FHeading := TLabel.Create(Self); FHeading.Parent := Self; FHeading.Align := alTop; FHeading.AutoSize := False;
-  FHeading.Height := 38; FHeading.Font.Size := 16; FHeading.Name := 'ScriptTextHeading';
-  FGuide := TLabel.Create(Self); FGuide.Parent := Self; FGuide.Align := alBottom; FGuide.Height := 56;
+  FHeading := TRigmScriptLabel.Create(Self); FHeading.Parent := Self; FHeading.Align := alTop; FHeading.AutoSize := False;
+  FHeading.Height := ScaleValue(38); FHeading.Font.Size := 16; FHeading.Name := 'ScriptTextHeading';
+  FGuide := TRigmScriptLabel.Create(Self); FGuide.Parent := Self; FGuide.Align := alBottom; FGuide.Height := ScaleValue(56);
   FGuide.AutoSize := False; FGuide.WordWrap := True; FGuide.Name := 'ScriptTextGuide';
-  var Body := TPanel.Create(Self); Body.Parent := Self; Body.Align := alClient; Body.Caption := ''; Body.BevelOuter := bvNone; Body.Padding.SetBounds(16,8,16,8);
+  var Body := TPanel.Create(Self); Body.Parent := Self; Body.Align := alClient; Body.Caption := ''; Body.BevelOuter := bvNone; Body.Padding.SetBounds(ScaleValue(16),ScaleValue(8),ScaleValue(16),ScaleValue(8));
   for var I := 0 to 2 do begin
     FEditors[I] := TRigmScriptMemo.Create(Self); FEditors[I].Parent := Body; FEditors[I].Align := alClient;
     FEditors[I].Name := 'ScriptText'+I.ToString; FEditors[I].Tag := I; FEditors[I].Font.Name := 'Yu Gothic UI'; FEditors[I].Font.Size := 14;

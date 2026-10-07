@@ -1,10 +1,10 @@
 ﻿unit RigmScriptVoiceFrame;
 // 選択セリフのVOICEVOX調整・感情・試聴に集中する。原稿・字幕・人物は前工程で編集する。
 interface
-uses System.Classes, Vcl.Forms, Vcl.Controls, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.ComCtrls,
+uses System.Classes, RigmScriptPageFrame, Vcl.Forms, Vcl.Controls, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.ComCtrls,
   RigmWizardWorkspace, SerifVoicevoxSettingsFrame, RigmVoiceConnection, RigmBufferedControls;
 type
-  TRigmScriptVoiceFrame = class(TRigmBufferedFrame)
+  TRigmScriptVoiceFrame = class(TRigmScriptPageFrame)
   private
     FWorkspace: TRigmWizardWorkspace; FSync,FEditing,FActive: Boolean;
     FList: TListView; FState: TComboBox; FConnectionRow: TPanel; FLocate: TButton; FConnectionNotice: TLabel;
@@ -13,7 +13,6 @@ type
     FSettings: TFrameSerifVoicevoxSettings;
     FConnection: TRigmVoiceConnection;
     FShownSource,FShownAudio,FShownCue,FQueryError: string;
-    FContinuousButton: TButton;
     FActor,FGuide: TLabel; FReadyButton,FCancelButton: TButton;
     procedure QueryChanged(Sender: TObject; const QueryJson: string);
     procedure QueryError(Sender: TObject; const MessageText: string);
@@ -41,34 +40,88 @@ type
     function RequestFinish: Boolean; // 未確定の数値を失わず、離脱を止める。
   end;
 implementation
-uses System.SysUtils, System.JSON, System.Generics.Collections, SerifVoicevoxAudioSettings, Winapi.Windows, RigmJson, RigmMovieModel, RigmScriptCastingModel, RigmScriptVoiceSelection;
+uses System.SysUtils, System.JSON, System.Generics.Collections, System.Types, Vcl.Graphics, Vcl.Themes,
+  SerifVoicevoxAudioSettings, Winapi.Windows, Winapi.CommCtrl, RigmJson, RigmMovieModel, RigmScriptCastingModel, RigmScriptVoiceSelection;
 {$R *.dfm}
+type
+  TRigmVoiceListView = class(TRigmBufferedListView)
+  protected
+    function IsCustomDrawn(Target: TCustomDrawTarget; Stage: TCustomDrawStage): Boolean; override;
+    function CustomDrawItem(Item: TListItem; State: TCustomDrawState; Stage: TCustomDrawStage): Boolean; override;
+  end;
+const VoiceSelectionColor = $00D07000; // 字幕・配役一覧と同じ青地・白文字で選択を示す。
 const ValueKeys: array[0..5] of string = ('speedScale','pitchScale','intonationScale','volumeScale','prePhonemeLength','postPhonemeLength');
+function TRigmVoiceListView.IsCustomDrawn(Target: TCustomDrawTarget; Stage: TCustomDrawStage): Boolean;
+begin
+  Result := ((Target in [dtControl,dtItem]) and (Stage=cdPrePaint)) or inherited IsCustomDrawn(Target,Stage);
+end;
+function TRigmVoiceListView.CustomDrawItem(Item: TListItem; State: TCustomDrawState; Stage: TCustomDrawStage): Boolean;
+begin
+  if Stage<>cdPrePaint then Exit(inherited CustomDrawItem(Item,State,Stage));
+  Result := False;
+  var Row := Item.DisplayRect(drBounds); Row.Left := 0; Row.Right := ClientWidth;
+  var Saved := SaveDC(Canvas.Handle);
+  try
+    // ネイティブの内部バッファへ背景と文字を一緒に描き、黒い選択文字や空白の行を防ぐ。
+    IntersectClipRect(Canvas.Handle,Row.Left,Row.Top,Row.Right,Row.Bottom);
+    Canvas.Brush.Style := bsSolid;
+    Canvas.Brush.Color := StyleServices(Self).GetStyleColor(scListView);
+    Canvas.Font.Color := StyleServices(Self).GetSystemColor(clWindowText);
+    if Item.Selected then begin Canvas.Brush.Color := VoiceSelectionColor; Canvas.Font.Color := clWhite; end;
+    Canvas.FillRect(Row);
+    SetBkMode(Canvas.Handle,TRANSPARENT);
+    var Header := ListView_GetHeader(Handle);
+    var Padding := MulDiv(6,CurrentPPI,96);
+    for var Index := 0 to Columns.Count-1 do begin
+      var Cell: TRect; if not Header_GetItemRect(Header,Index,@Cell) then Continue;
+      MapWindowPoints(Header,Handle,Cell,2); Cell.Top := Row.Top; Cell.Bottom := Row.Bottom;
+      var CellSaved := SaveDC(Canvas.Handle);
+      try
+        IntersectClipRect(Canvas.Handle,Cell.Left,Cell.Top,Cell.Right,Cell.Bottom);
+        Inc(Cell.Left,Padding); Dec(Cell.Right,Padding);
+        var Text := Item.Caption;
+        if Index>0 then begin
+          Text := ''; if Index<=Item.SubItems.Count then Text := Item.SubItems[Index-1];
+        end;
+        var Flags: Cardinal := DT_SINGLELINE or DT_VCENTER or DT_END_ELLIPSIS or DT_NOPREFIX;
+        case Columns[Index].Alignment of
+          taCenter: Flags := Flags or DT_CENTER;
+          taRightJustify: Flags := Flags or DT_RIGHT;
+        end;
+        if Cell.Right>Cell.Left then DrawText(Canvas.Handle,PChar(Text),Length(Text),Cell,Flags);
+      finally RestoreDC(Canvas.Handle,CellSaved); end;
+    end;
+    if Item.Selected then begin
+      Canvas.Brush.Color := $00FFC762;
+      var Accent := Row; Accent.Right := MulDiv(3,CurrentPPI,96); Canvas.FillRect(Accent);
+    end;
+  finally RestoreDC(Canvas.Handle,Saved); end;
+end;
 constructor TRigmScriptVoiceFrame.CreateForWorkspace(AOwner: TComponent; Workspace: TRigmWizardWorkspace);
 begin
   inherited Create(AOwner); FWorkspace := Workspace; Align := alClient; DoubleBuffered := True;
-  var Footer := TRigmBufferedPanel.Create(Self); Footer.Parent := Self; Footer.Align := alBottom; Footer.Height := 38; Footer.Caption := ''; Footer.BevelOuter := bvNone;
-  FReadyButton := TButton.Create(Self); FReadyButton.Parent := Footer; FReadyButton.Align := alRight; FReadyButton.Width := 190; FReadyButton.Caption := '全セリフの音声確認完了'; FReadyButton.Name := 'ScriptVoiceReady'; FReadyButton.OnClick := Ready;
-  FCancelButton := TButton.Create(Self); FCancelButton.Parent := Footer; FCancelButton.Align := alRight; FCancelButton.Width := 96; FCancelButton.Caption := '停止・取消'; FCancelButton.Name := 'ScriptVoiceCancel'; FCancelButton.OnClick := Cancel; FCancelButton.Visible := False;
-  FGuide := TLabel.Create(Self); FGuide.Parent := Footer; FGuide.Align := alClient; FGuide.AutoSize := False; FGuide.WordWrap := True; FGuide.Name := 'ScriptVoiceGuide';
-  var RowsPanel := TRigmBufferedPanel.Create(Self); RowsPanel.Parent := Self; RowsPanel.Align := alLeft; RowsPanel.Width := 300; RowsPanel.Caption := ''; RowsPanel.BevelOuter := bvNone;
-  FContinuousButton := TButton.Create(Self); FContinuousButton.Parent := RowsPanel; FContinuousButton.Align := alBottom; FContinuousButton.Height := 38; FContinuousButton.Caption := '連続再生 (Shift+F5)'; FContinuousButton.Name := 'ScriptVoiceContinuous'; FContinuousButton.OnClick := Continuous;
-  FList := TRigmBufferedListView.Create(Self); FList.Parent := RowsPanel; FList.Align := alClient; FList.ViewStyle := vsReport; FList.RowSelect := True; FList.ReadOnly := True;
+  var Footer := TRigmBufferedPanel.Create(Self); Footer.Parent := Self; Footer.Align := alBottom; Footer.Height := ScaleValue(38); Footer.Caption := ''; Footer.BevelOuter := bvNone;
+  FReadyButton := TButton.Create(Self); FReadyButton.Parent := Footer; FReadyButton.Align := alRight; FReadyButton.Width := ScaleValue(190); FReadyButton.Caption := '全セリフの音声確認完了'; FReadyButton.Name := 'ScriptVoiceReady'; FReadyButton.OnClick := Ready;
+  FCancelButton := TButton.Create(Self); FCancelButton.Parent := Footer; FCancelButton.Align := alRight; FCancelButton.Width := ScaleValue(96); FCancelButton.Caption := '停止・取消'; FCancelButton.Name := 'ScriptVoiceCancel'; FCancelButton.OnClick := Cancel; FCancelButton.Visible := False;
+  FGuide := TRigmScriptLabel.Create(Self); FGuide.Parent := Footer; FGuide.Align := alClient; FGuide.AutoSize := False; FGuide.WordWrap := True; FGuide.Name := 'ScriptVoiceGuide';
+  var RowsPanel := TRigmBufferedPanel.Create(Self); RowsPanel.Parent := Self; RowsPanel.Align := alLeft; RowsPanel.Width := ScaleValue(300); RowsPanel.Caption := ''; RowsPanel.BevelOuter := bvNone;
+  FList := TRigmVoiceListView.Create(Self); FList.Parent := RowsPanel; FList.Align := alClient; FList.ViewStyle := vsReport; FList.RowSelect := True; FList.ReadOnly := True;
   FList.HideSelection := False; FList.Name := 'ScriptVoiceRows'; FList.OnSelectItem := Selected; FList.OnKeyDown := Key;
   FList.ParentDoubleBuffered := False; FList.DoubleBuffered := False;
-  FList.Columns.Add.Caption := '状態'; FList.Columns[0].Width := 112; FList.Columns.Add.Caption := '読み'; FList.Columns[1].Width := 178;
+  FList.Columns.Add.Caption := '状態'; FList.Columns[0].Width := ScaleValue(112); FList.Columns.Add.Caption := '読み'; FList.Columns[1].Width := ScaleValue(178);
   var Splitter := TSplitter.Create(Self); Splitter.Parent := Self; Splitter.Align := alLeft;
-  var Body := TRigmBufferedPanel.Create(Self); Body.Parent := Self; Body.Align := alClient; Body.Caption := ''; Body.BevelOuter := bvNone; Body.Padding.SetBounds(8,4,8,4);
-  FActor := TLabel.Create(Self); FActor.Parent := Body; FActor.Align := alTop; FActor.AutoSize := False; FActor.Height := 34; FActor.Name := 'ScriptVoiceActor';
-  FConnectionRow := TRigmBufferedPanel.Create(Self); FConnectionRow.Parent := Body; FConnectionRow.Align := alTop; FConnectionRow.Height := 32; FConnectionRow.Caption := ''; FConnectionRow.BevelOuter := bvNone;
-  FLocate := TButton.Create(Self); FLocate.Parent := FConnectionRow; FLocate.Align := alRight; FLocate.Width := 180; FLocate.Caption := 'VOICEVOXを手動設定'; FLocate.Name := 'ScriptVoiceLocateEngine'; FLocate.OnClick := LocateEngine; FLocate.Visible := False;
-  FConnectionNotice := TLabel.Create(Self); FConnectionNotice.Parent := FConnectionRow; FConnectionNotice.Align := alClient; FConnectionNotice.AutoSize := False; FConnectionNotice.WordWrap := True;
-  var StateRow := TRigmBufferedPanel.Create(Self); StateRow.Parent := Body; StateRow.Align := alTop; StateRow.Height := 34; StateRow.Caption := ''; StateRow.BevelOuter := bvNone;
-  var StateLabel := TLabel.Create(Self); StateLabel.Parent := StateRow; StateLabel.Align := alLeft; StateLabel.Width := 150; StateLabel.AutoSize := False; StateLabel.Caption := '感情'; StateLabel.Name := 'ScriptVoiceEmotionLabel';
+  var Body := TRigmBufferedPanel.Create(Self); Body.Parent := Self; Body.Align := alClient; Body.Caption := ''; Body.BevelOuter := bvNone; Body.Padding.SetBounds(ScaleValue(8),ScaleValue(4),ScaleValue(8),ScaleValue(4));
+  FActor := TRigmScriptLabel.Create(Self); FActor.Parent := Body; FActor.Align := alTop; FActor.AutoSize := False; FActor.Height := ScaleValue(34); FActor.Name := 'ScriptVoiceActor';
+  FConnectionRow := TRigmBufferedPanel.Create(Self); FConnectionRow.Parent := Body; FConnectionRow.Align := alTop; FConnectionRow.Height := ScaleValue(32); FConnectionRow.Caption := ''; FConnectionRow.BevelOuter := bvNone;
+  FLocate := TButton.Create(Self); FLocate.Parent := FConnectionRow; FLocate.Align := alRight; FLocate.Width := ScaleValue(180); FLocate.Caption := 'VOICEVOXを手動設定'; FLocate.Name := 'ScriptVoiceLocateEngine'; FLocate.OnClick := LocateEngine; FLocate.Visible := False;
+  FConnectionNotice := TRigmScriptLabel.Create(Self); FConnectionNotice.Parent := FConnectionRow; FConnectionNotice.Align := alClient; FConnectionNotice.AutoSize := False; FConnectionNotice.WordWrap := True;
+  var StateRow := TRigmBufferedPanel.Create(Self); StateRow.Parent := Body; StateRow.Align := alTop; StateRow.Height := ScaleValue(34); StateRow.Caption := ''; StateRow.BevelOuter := bvNone;
+  var StateLabel := TRigmScriptLabel.Create(Self); StateLabel.Parent := StateRow; StateLabel.Align := alLeft; StateLabel.Width := ScaleValue(150); StateLabel.AutoSize := False; StateLabel.Caption := '感情'; StateLabel.Name := 'ScriptVoiceEmotionLabel';
   FState := TComboBox.Create(Self); FState.Parent := StateRow; FState.Align := alClient; FState.Style := csDropDownList; FState.Name := 'ScriptVoiceState'; FState.OnChange := StateChanged;
   FSettings := TFrameSerifVoicevoxSettings.Create(Self); FSettings.Parent := Body; FSettings.Align := alClient; FSettings.Name := 'ScriptVoiceDetails'; FSettings.UseAdjustmentOnly;
   FSettings.OnQueryReady := QueryReady; FSettings.OnAudioChange := Changed; FSettings.OnAccentChange := QueryChanged; FSettings.OnError := QueryError; FSettings.OnPreview := Preview;
-  FActor.Top := 0; FConnectionRow.Top := 34; StateRow.Top := 66;
+  FSettings.OnContinuous := Continuous;
+  FActor.Top := 0; FConnectionRow.Top := ScaleValue(34); StateRow.Top := ScaleValue(66);
   FConnection := TRigmVoiceConnection.CreateForWorkspace(Self,FWorkspace); FConnection.OnChanged := ConnectionChanged;
 end;
 destructor TRigmScriptVoiceFrame.Destroy;
@@ -107,6 +160,11 @@ procedure TRigmScriptVoiceFrame.Ready(Sender: TObject);
 begin if not RequestFinish then Exit; try FWorkspace.CompleteVoice; except on E: Exception do FGuide.Caption := E.Message; end; end;
 procedure TRigmScriptVoiceFrame.Selected(Sender: TObject; Item: TListItem; Value: Boolean);
 begin
+  // 選択解除とWorkspaceからの選択更新も、行全幅を塗り直す。
+  if Item<>nil then begin
+    var Row := Item.DisplayRect(drBounds); Row.Left := 0; Row.Right := FList.ClientWidth;
+    InvalidateRect(FList.Handle,@Row,False);
+  end;
   if FSync or not Value then Exit; var Id := Item.SubItems[1];
   if not RequestFinish then begin FSync := True; try for var Entry in FList.Items do Entry.Selected := Entry.SubItems[1]=SelectedId; finally FSync := False; end; Exit; end;
   FWorkspace.SelectVoice(Id); RefreshState;
@@ -222,8 +280,7 @@ begin
     FReadyButton.Enabled := not FWorkspace.VoiceBusy and not FWorkspace.VoicePlaying and not FWorkspace.VoiceContinuous;
     FCancelButton.Visible := FWorkspace.VoiceBusy or FWorkspace.VoicePlaying or FWorkspace.VoiceContinuous;
     FSettings.SetPreviewActive(FWorkspace.VoicePlaying or FWorkspace.VoiceContinuous);
-    if FWorkspace.VoiceContinuous then FContinuousButton.Caption := '連続再生を停止' else FContinuousButton.Caption := '連続再生 (Shift+F5)';
-    FContinuousButton.Enabled := FWorkspace.VoiceContinuous or not FWorkspace.VoiceBusy;
+    FSettings.SetContinuousActive(FWorkspace.VoiceContinuous,FWorkspace.VoiceContinuous or not FWorkspace.VoiceBusy);
     var State := FWorkspace.VoiceStatus;
     try
       var Notice := '';

@@ -1,6 +1,6 @@
 ﻿unit RigmScriptClosingFrame;
 interface
-uses System.Classes, System.JSON, Vcl.Forms, Vcl.Controls, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Grids,
+uses System.Classes, RigmScriptPageFrame, System.JSON, Vcl.Forms, Vcl.Controls, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Grids,
   RigmWizardWorkspace, RigmScriptTextFrame;
 type
   TRigmScriptClosingPreview = class(TCustomControl)
@@ -8,7 +8,7 @@ type
   protected procedure Paint; override;
   public constructor CreateForWorkspace(AOwner: TComponent; W: TRigmWizardWorkspace; Mode: TComboBox);
   end;
-  TRigmScriptClosingFrame = class(TFrame)
+  TRigmScriptClosingFrame = class(TRigmScriptPageFrame)
   private
     FWorkspace: TRigmWizardWorkspace; FSync,FEditing: Boolean;
     FTitle,FEndSeconds,FThumbSeconds: TEdit; FChoice: array[0..2] of TComboBox; FPaths: array[0..2] of TLabel;
@@ -61,18 +61,18 @@ begin
   for var I := 0 to 2 do Tools.AddIcon('ScriptClosingAdopt'+I.ToString,AdoptHints[I],riOpen,I,Adopt);
   Tools.AddSeparator; Tools.AddIcon('ScriptClosingDone','途中設定の入力完了',riSave,0,Done); Tools.AddIcon('ScriptClosingReady','画像・表示順・YouTubeの実テンプレートと回避領域を確認完了',riComplete,0,Ready);
   Tools.AddIcon('ScriptClosingAddReserved','YouTube回避領域を追加（最大6）',riGroup,0,AddReserved); Tools.AddIcon('ScriptClosingRemoveReserved','最後の回避領域を外す（最低1）',riDelete,0,RemoveReserved);
-  FGuide := TLabel.Create(Self); FGuide.Parent := Self; FGuide.Align := alBottom; FGuide.Height := 70; FGuide.AutoSize := False; FGuide.WordWrap := True; FGuide.Font.Height := -17; FGuide.Name := 'ScriptClosingGuide';
-  var Left := TPanel.Create(Self); Left.Parent := Self; Left.Align := alLeft; Left.Width := 490; Left.Caption := ''; Left.BevelOuter := bvNone;
-  var Options := TPanel.Create(Self); Options.Parent := Left; Options.Align := alTop; Options.Height := 234; Options.Caption := ''; Options.BevelOuter := bvNone;
-  FTitle := TEdit.Create(Self); FTitle.Parent := Options; FTitle.SetBounds(8,8,470,32); FTitle.Name := 'ScriptClosingTitle'; FTitle.MaxLength := 128; FTitle.TextHint := '締めに表示する動画題名'; FTitle.OnChange := Changed;
-  for var I := 0 to 2 do begin FChoice[I] := TComboBox.Create(Self); FChoice[I].Parent := Options; FChoice[I].SetBounds(8,46+I*46,186,30); FChoice[I].Style := csDropDownList; FChoice[I].Items.Add('画像を省略'); FChoice[I].Items.Add('既存画像を採用'); FChoice[I].Name := 'ScriptClosingChoice'+I.ToString; FChoice[I].OnChange := Changed;
-    FPaths[I] := TLabel.Create(Self); FPaths[I].Parent := Options; FPaths[I].SetBounds(200,46+I*46,280,42); FPaths[I].AutoSize := False; FPaths[I].WordWrap := True; FPaths[I].Name := 'ScriptClosingPath'+I.ToString;
+  FGuide := TRigmScriptLabel.Create(Self); FGuide.Parent := Self; FGuide.Align := alBottom; FGuide.Height := ScaleValue(70); FGuide.AutoSize := False; FGuide.WordWrap := True; FGuide.Font.Height := -ScaleValue(17); FGuide.Name := 'ScriptClosingGuide';
+  var Left := TPanel.Create(Self); Left.Parent := Self; Left.Align := alLeft; Left.Width := ScaleValue(490); Left.Caption := ''; Left.BevelOuter := bvNone;
+  var Options := TPanel.Create(Self); Options.Parent := Left; Options.Align := alTop; Options.Height := ScaleValue(234); Options.Caption := ''; Options.BevelOuter := bvNone;
+  FTitle := TEdit.Create(Self); FTitle.Parent := Options; FTitle.SetBounds(ScaleValue(8),ScaleValue(8),ScaleValue(470),ScaleValue(32)); FTitle.Name := 'ScriptClosingTitle'; FTitle.MaxLength := 128; FTitle.TextHint := '締めに表示する動画題名'; FTitle.OnChange := Changed;
+  for var I := 0 to 2 do begin FChoice[I] := TComboBox.Create(Self); FChoice[I].Parent := Options; FChoice[I].SetBounds(ScaleValue(8),ScaleValue(46+I*46),ScaleValue(186),ScaleValue(30)); FChoice[I].Style := csDropDownList; FChoice[I].Items.Add('画像を省略'); FChoice[I].Items.Add('既存画像を採用'); FChoice[I].Name := 'ScriptClosingChoice'+I.ToString; FChoice[I].OnChange := Changed;
+    FPaths[I] := TRigmScriptLabel.Create(Self); FPaths[I].Parent := Options; FPaths[I].SetBounds(ScaleValue(200),ScaleValue(46+I*46),ScaleValue(280),ScaleValue(42)); FPaths[I].AutoSize := False; FPaths[I].WordWrap := True; FPaths[I].Name := 'ScriptClosingPath'+I.ToString;
   end;
-  var L := TLabel.Create(Self); L.Parent := Options; L.SetBounds(8,198,170,24); L.Caption := '終了／最後 秒';
-  FEndSeconds := TEdit.Create(Self); FEndSeconds.Parent := Options; FEndSeconds.SetBounds(184,192,130,32); FEndSeconds.Name := 'ScriptClosingEndSeconds'; FEndSeconds.MaxLength := 32; FEndSeconds.OnChange := Changed;
-  FThumbSeconds := TEdit.Create(Self); FThumbSeconds.Parent := Options; FThumbSeconds.SetBounds(324,192,148,32); FThumbSeconds.Name := 'ScriptClosingThumbnailSeconds'; FThumbSeconds.MaxLength := 32; FThumbSeconds.OnChange := Changed;
-  FSpeech := TMemo.Create(Self); FSpeech.Parent := Left; FSpeech.Align := alBottom; FSpeech.Height := 70; FSpeech.ReadOnly := True; FSpeech.ScrollBars := ssVertical; FSpeech.Name := 'ScriptClosingSpeech';
-  FGrid := TStringGrid.Create(Self); FGrid.Parent := Left; FGrid.Align := alClient; FGrid.Name := 'ScriptClosingRects'; FGrid.ColCount := 5; FGrid.RowCount := 5; FGrid.FixedCols := 1; FGrid.FixedRows := 1; FGrid.DefaultRowHeight := 36; FGrid.ColWidths[0] := 90; for var I := 1 to 4 do FGrid.ColWidths[I] := 92; FGrid.Options := FGrid.Options+[goEditing]; FGrid.Cells[0,0] := '領域'; FGrid.Cells[1,0] := 'X'; FGrid.Cells[2,0] := 'Y'; FGrid.Cells[3,0] := '幅'; FGrid.Cells[4,0] := '高さ'; FGrid.OnSetEditText := GridEdit;
+  var L := TRigmScriptLabel.Create(Self); L.Parent := Options; L.SetBounds(ScaleValue(8),ScaleValue(198),ScaleValue(170),ScaleValue(24)); L.Caption := '終了／最後 秒';
+  FEndSeconds := TEdit.Create(Self); FEndSeconds.Parent := Options; FEndSeconds.SetBounds(ScaleValue(184),ScaleValue(192),ScaleValue(130),ScaleValue(32)); FEndSeconds.Name := 'ScriptClosingEndSeconds'; FEndSeconds.MaxLength := 32; FEndSeconds.OnChange := Changed;
+  FThumbSeconds := TEdit.Create(Self); FThumbSeconds.Parent := Options; FThumbSeconds.SetBounds(ScaleValue(324),ScaleValue(192),ScaleValue(148),ScaleValue(32)); FThumbSeconds.Name := 'ScriptClosingThumbnailSeconds'; FThumbSeconds.MaxLength := 32; FThumbSeconds.OnChange := Changed;
+  FSpeech := TMemo.Create(Self); FSpeech.Parent := Left; FSpeech.Align := alBottom; FSpeech.Height := ScaleValue(70); FSpeech.ReadOnly := True; FSpeech.ScrollBars := ssVertical; FSpeech.Name := 'ScriptClosingSpeech';
+  FGrid := TStringGrid.Create(Self); FGrid.Parent := Left; FGrid.Align := alClient; FGrid.Name := 'ScriptClosingRects'; FGrid.ColCount := 5; FGrid.RowCount := 5; FGrid.FixedCols := 1; FGrid.FixedRows := 1; FGrid.DefaultRowHeight := ScaleValue(36); FGrid.ColWidths[0] := ScaleValue(90); for var I := 1 to 4 do FGrid.ColWidths[I] := ScaleValue(92); FGrid.Options := FGrid.Options+[goEditing]; FGrid.Cells[0,0] := '領域'; FGrid.Cells[1,0] := 'X'; FGrid.Cells[2,0] := 'Y'; FGrid.Cells[3,0] := '幅'; FGrid.Cells[4,0] := '高さ'; FGrid.OnSetEditText := GridEdit;
   var Right := TPanel.Create(Self); Right.Parent := Self; Right.Align := alClient; Right.Caption := ''; Right.BevelOuter := bvNone;
   FMode := TComboBox.Create(Self); FMode.Parent := Right; FMode.Align := alTop; FMode.Style := csDropDownList; FMode.Items.AddStrings(['締め（音声・題名・代表画像）','終了画像（点線は回避領域。書き出しに含めない）','最後のサムネイル']); FMode.ItemIndex := 0; FMode.Name := 'ScriptClosingPreviewMode'; FMode.OnChange := ModeChanged;
   FPreview := TRigmScriptClosingPreview.CreateForWorkspace(Self,W,FMode); FPreview.Parent := Right; FPreview.Align := alClient; FPreview.Name := 'ScriptClosingPreview';

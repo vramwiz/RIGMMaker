@@ -44,7 +44,11 @@ begin
   FVoiceSequencePhase := ''; FVoiceSequenceOrder := nil;
 end;
 procedure TRigmWizardWorkspace.CancelVoice;
-begin StopVoice; if FVoiceJob<>nil then FVoiceJob.Cancel; end;
+begin
+  StopVoice; if FVoiceJob<>nil then FVoiceJob.Cancel;
+  // 音声欄だけでなく上段Nextにも、停止後の再生・生成状態を通知する。
+  ScriptChanged;
+end;
 procedure TRigmWizardWorkspace.PollScriptVoice;
 begin
   if (FVoiceJob=nil) or not FVoiceJob.Done or FVoiceCollected then Exit; FVoiceCollected := True;
@@ -222,6 +226,8 @@ end;
 function TRigmWizardWorkspace.ScriptResumeView(Project: TRigmMovieProject): string;
 begin
   Result := JS(Project.ScriptWizard,'stage');
+  // 旧版のシーン画像画面で保存した台本も、未確認なら先にセリフの割当を表示する。
+  if (Result='scenes') and (JS(Project.ScriptWizard,'scene-assignmentStatus')<>'complete') then Result := 'scene-assignment';
   if (ScriptStageIndex(Result)>ScriptStageIndex('casting')) and (Project.ScriptWizard.GetValue('casting') is TJSONObject) and (MissingCastingVoices(Project)>0) then Result := 'casting';
 end;
 function TRigmWizardWorkspace.RestoreStoredCastingVoices(Project: TRigmMovieProject): Boolean;

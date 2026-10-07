@@ -31,11 +31,15 @@ type
   end;
 var RigmWizardMain: TRigmWizardMainForm;
 implementation
-uses System.SysUtils, Winapi.Windows, RigmAppSettings, RigmCharacterEditPage, RigmMovieWorkspaceFrame,
+uses System.SysUtils, System.Math, Winapi.Windows, RigmAppSettings, RigmCharacterEditPage, RigmMovieWorkspaceFrame,
   RigmHomeFrame, RigmCharacterManagerFrame, RigmScriptManagerFrame, RigmScriptCreatorFrame;
 constructor TRigmWizardMainForm.Create(AOwner: TComponent);
 begin
-  inherited CreateNew(AOwner); Caption := 'RIGM Maker'; Width := 1280; Height := 840;
+  inherited CreateScaledNew(AOwner,96);
+  // 96 DPIで構築する間は子のParentFontも同じDPIで継承させる。
+  // 未関連のフォントはTFont.AssignでシステムDPIに再換算され、後の拡大と二重になる。
+  Font.PixelsPerInch := 96; Font.IsDPIRelated := True;
+  var TargetPPI := Monitor.PixelsPerInch; Caption := 'RIGM Maker'; Width := 1280; Height := 840;
   // CreateNewは通常のメインフォーム生成フラグを通らないため、タスクバー表示を明示する。
   ShowInTaskBar := True; Icon.Assign(Application.Icon);
   Position := poScreenCenter; Font.Name := 'Yu Gothic UI'; Font.Size := 10; OnCloseQuery := Closing;
@@ -43,9 +47,12 @@ begin
   FRoot := RigmDocumentsDirectory;
   var Header := TPanel.Create(Self); Header.Parent := Self; Header.Align := alTop; Header.Height := 44; Header.BevelOuter := bvNone;
   var Button := TButton.Create(Self); Button.Parent := Header; Button.Align := alLeft; Button.Width := 140; Button.Caption := 'ホームへ戻る'; Button.Name := 'WizardHome'; Button.OnClick := Home;
-  FTitle := TLabel.Create(Self); FTitle.Parent := Header; FTitle.Align := alClient; FTitle.Layout := tlCenter; FTitle.Font.Size := 16;
+  FTitle := TLabel.Create(Self); FTitle.Parent := Header; FTitle.Align := alClient; FTitle.Layout := tlCenter; FTitle.Font.Size := 16; FTitle.Name := 'WizardTitle';
   FHost := TPanel.Create(Self); FHost.Parent := Self; FHost.Align := alClient; FHost.BevelOuter := bvNone;
   EnsureWorkspace; NavigateTo(apHome);
+  ScaleForPPI(TargetPPI);
+  Width := System.Math.Min(Width,Monitor.WorkareaRect.Width);
+  Height := System.Math.Min(Height,Monitor.WorkareaRect.Height);
 end;
 function TRigmWizardMainForm.EnsurePage(Page: TRigmAppPage): TFrame;
 begin

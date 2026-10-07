@@ -2,7 +2,7 @@
 
 // 配役を表示し、字幕専用編集と既存合成の字幕プレビューを同じWorkspaceに接続する。
 interface
-uses System.Classes, Vcl.Forms, Vcl.Controls, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.ComCtrls,
+uses System.Classes, RigmScriptPageFrame, Vcl.Forms, Vcl.Controls, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.ComCtrls,
   Vcl.Graphics, RigmWizardWorkspace, RigmIconToolbar, RigmScriptTextFrame;
 type
   TRigmSubtitlePreview = class(TCustomControl)
@@ -20,7 +20,7 @@ type
     property PageIndex: Integer read FPage; // 0始まり。プレビュー送りの境界判定用。
     property Bitmap: TBitmap read FBitmap; // 借用。表示中ページ。
   end;
-  TRigmScriptSubtitleFrame = class(TFrame)
+  TRigmScriptSubtitleFrame = class(TRigmScriptPageFrame)
   private
     FWorkspace: TRigmWizardWorkspace; FSync,FEditing: Boolean; FLoaded,FInputError: string;
     FList: TListView; FEditor,FNote: TRigmScriptMemo; FVoice: TMemo;
@@ -45,9 +45,82 @@ type
     property InputError: string read FInputError; // 遷移元の状態欄にも拒否理由を残す。
   end;
 implementation
-uses System.SysUtils, System.JSON, System.Math, System.Types, Winapi.Windows,
+uses System.SysUtils, System.JSON, System.Math, System.Types, Winapi.Windows, Winapi.Messages, Winapi.CommCtrl, Vcl.Themes,
   RigmJson, RigmMovieRendering, RigmMovieLayout, RigmScriptSubtitleModel, RigmScriptTextModel, RigmScriptCastingModel, RigmToolbarIcons;
 {$R *.dfm}
+type
+  TRigmSubtitleListView = class(TListView)
+  protected
+    procedure CreateWnd; override;
+    procedure WndProc(var Message: TMessage); override;
+    function IsCustomDrawn(Target: TCustomDrawTarget; Stage: TCustomDrawStage): Boolean; override;
+    function CustomDrawItem(Item: TListItem; State: TCustomDrawState; Stage: TCustomDrawStage): Boolean; override;
+  end;
+const SubtitleSelectionColor = $00D07000; // RGB(0,112,208)。非フォーカス時も明瞭な青を保つ。
+procedure TRigmSubtitleListView.CreateWnd;
+begin
+  inherited;
+  ListView_SetExtendedListViewStyleEx(Handle,LVS_EX_DOUBLEBUFFER,LVS_EX_DOUBLEBUFFER);
+end;
+procedure TRigmSubtitleListView.WndProc(var Message: TMessage);
+const ManagedStyles = LVS_EX_DOUBLEBUFFER or LVS_EX_INFOTIP or LVS_EX_LABELTIP;
+begin
+  if Message.Msg=LVM_SETEXTENDEDLISTVIEWSTYLE then begin
+    // RowSelect等のResetExStylesでも内部バッファを失わない。全文は下の本文欄で表示する。
+    if Message.WParam<>0 then Message.WParam := Message.WParam or ManagedStyles;
+    Message.LParam := (Message.LParam and not (LVS_EX_INFOTIP or LVS_EX_LABELTIP)) or LVS_EX_DOUBLEBUFFER;
+  end else if Message.Msg=WM_ERASEBKGND then begin
+    // 背景もListViewの内部バッファで合成し、ホバー前に画面を空白へ戻さない。
+    Message.Result := 1; Exit;
+  end;
+  inherited;
+end;
+function TRigmSubtitleListView.IsCustomDrawn(Target: TCustomDrawTarget; Stage: TCustomDrawStage): Boolean;
+begin
+  Result := ((Target in [dtControl,dtItem]) and (Stage=cdPrePaint)) or inherited IsCustomDrawn(Target,Stage);
+end;
+function TRigmSubtitleListView.CustomDrawItem(Item: TListItem; State: TCustomDrawState; Stage: TCustomDrawStage): Boolean;
+begin
+  if Stage<>cdPrePaint then Exit(inherited CustomDrawItem(Item,State,Stage));
+  Result := False;
+  var Row := Item.DisplayRect(drBounds); Row.Left := 0; Row.Right := ClientWidth;
+  var Saved := SaveDC(Canvas.Handle);
+  try
+    IntersectClipRect(Canvas.Handle,Row.Left,Row.Top,Row.Right,Row.Bottom);
+    Canvas.Brush.Style := bsSolid;
+    Canvas.Brush.Color := StyleServices(Self).GetStyleColor(scListView);
+    Canvas.Font.Color := StyleServices(Self).GetSystemColor(clWindowText);
+    if Item.Selected then begin Canvas.Brush.Color := SubtitleSelectionColor; Canvas.Font.Color := clWhite; end;
+    Canvas.FillRect(Row);
+    SetBkMode(Canvas.Handle,TRANSPARENT);
+    var Header := ListView_GetHeader(Handle);
+    var Padding := MulDiv(6,CurrentPPI,96);
+    for var Index := 0 to Columns.Count-1 do begin
+      var Cell: TRect; if not Header_GetItemRect(Header,Index,@Cell) then Continue;
+      // ヘッダー座標から変換し、列の移動・幅変更・横スクロールにも同じクリップを使う。
+      MapWindowPoints(Header,Handle,Cell,2); Cell.Top := Row.Top; Cell.Bottom := Row.Bottom;
+      var CellSaved := SaveDC(Canvas.Handle);
+      try
+        IntersectClipRect(Canvas.Handle,Cell.Left,Cell.Top,Cell.Right,Cell.Bottom);
+        Inc(Cell.Left,Padding); Dec(Cell.Right,Padding);
+        var Text := Item.Caption;
+        if Index>0 then begin
+          Text := ''; if Index<=Item.SubItems.Count then Text := Item.SubItems[Index-1];
+        end;
+        var Flags: Cardinal := DT_SINGLELINE or DT_VCENTER or DT_END_ELLIPSIS or DT_NOPREFIX;
+        case Columns[Index].Alignment of
+          taCenter: Flags := Flags or DT_CENTER;
+          taRightJustify: Flags := Flags or DT_RIGHT;
+        end;
+        if Cell.Right>Cell.Left then DrawText(Canvas.Handle,PChar(Text),Length(Text),Cell,Flags);
+      finally RestoreDC(Canvas.Handle,CellSaved); end;
+    end;
+    if Item.Selected then begin
+      Canvas.Brush.Color := $00FFC762;
+      var Accent := Row; Accent.Right := MulDiv(3,CurrentPPI,96); Canvas.FillRect(Accent);
+    end;
+  finally RestoreDC(Canvas.Handle,Saved); end;
+end;
 constructor TRigmSubtitlePreview.CreateForWorkspace(AOwner: TComponent; Workspace: TRigmWizardWorkspace);
 begin inherited Create(AOwner); FWorkspace := Workspace; FBitmap := Vcl.Graphics.TBitmap.Create; FBitmap.PixelFormat := pf32bit; DoubleBuffered := True; end;
 destructor TRigmSubtitlePreview.Destroy;
@@ -90,23 +163,25 @@ begin
   FToolbar.AddIcon('ScriptSubtitleReady','字幕入力完了（Ctrl+Enter / Esc、次の工程へは上段Next）',riComplete,0,Complete);
   FToolbar.AddSeparator; FToolbar.AddIcon('ScriptSubtitlePrevious','前の字幕ページ',riUp,0,Page).Tag := -1;
   FToolbar.AddIcon('ScriptSubtitleFollowing','次の字幕プレビューページ',riDown,0,Page).Tag := 1;
-  FGuide := TLabel.Create(Self); FGuide.Parent := Self; FGuide.Align := alBottom; FGuide.AutoSize := False; FGuide.WordWrap := True; FGuide.Height := 70; FGuide.Name := 'ScriptSubtitleGuide';
-  FList := TListView.Create(Self); FList.Parent := Self; FList.Align := alLeft; FList.Width := 310; FList.ViewStyle := vsReport;
+  FGuide := TRigmScriptLabel.Create(Self); FGuide.Parent := Self; FGuide.Align := alBottom; FGuide.AutoSize := False; FGuide.WordWrap := True; FGuide.Height := ScaleValue(70); FGuide.Name := 'ScriptSubtitleGuide';
+  FList := TRigmSubtitleListView.Create(Self); FList.Parent := Self; FList.Align := alLeft; FList.Width := ScaleValue(310); FList.ViewStyle := vsReport;
+  // ListViewの内部バッファだけで合成する。親からのVCLバッファ継承は列描画を壊す。
+  FList.ParentDoubleBuffered := False; FList.DoubleBuffered := False;
   FList.ReadOnly := True; FList.RowSelect := True; FList.HideSelection := False; FList.OnSelectItem := Selected; FList.OnKeyDown := HandleKey; FList.Name := 'ScriptSubtitleRows';
-  FList.Columns.Add.Caption := '配役'; FList.Columns[0].Width := 60;
-  FList.Columns.Add.Caption := '表示字幕'; FList.Columns[1].Width := 240;
+  FList.Columns.Add.Caption := '配役'; FList.Columns[0].Width := ScaleValue(60);
+  FList.Columns.Add.Caption := '表示字幕'; FList.Columns[1].Width := ScaleValue(240);
   var Splitter := TSplitter.Create(Self); Splitter.Parent := Self; Splitter.Align := alLeft;
   var Body := TPanel.Create(Self); Body.Parent := Self; Body.Align := alClient; Body.Caption := ''; Body.BevelOuter := bvNone;
-  FActor := TLabel.Create(Self); FActor.Parent := Body; FActor.Align := alTop; FActor.AutoSize := False; FActor.Height := 38; FActor.Name := 'ScriptSubtitleActor';
-  FPreview := TRigmSubtitlePreview.CreateForWorkspace(Self,Workspace); FPreview.Parent := Body; FPreview.Align := alTop; FPreview.Height := 110; FPreview.Name := 'ScriptSubtitlePreview';
-  var VoicePanel := TPanel.Create(Self); VoicePanel.Parent := Body; VoicePanel.Align := alBottom; VoicePanel.Top := 10000; VoicePanel.Height := 88; VoicePanel.BevelOuter := bvNone; VoicePanel.Caption := '';
-  var VoiceLabel := TLabel.Create(Self); VoiceLabel.Parent := VoicePanel; VoiceLabel.Align := alTop; VoiceLabel.AutoSize := False; VoiceLabel.Height := 22; VoiceLabel.Font.Height := -18; VoiceLabel.Caption := '音声文（保持・読取専用）';
-  FVoice := TMemo.Create(Self); FVoice.Parent := VoicePanel; FVoice.Align := alClient; FVoice.Font.Height := -22; FVoice.ReadOnly := True; FVoice.ScrollBars := ssVertical; FVoice.Name := 'ScriptSubtitleVoice';
-  var NotePanel := TPanel.Create(Self); NotePanel.Parent := Body; NotePanel.Align := alBottom; NotePanel.Top := 0; NotePanel.Height := 74; NotePanel.BevelOuter := bvNone; NotePanel.Caption := '';
-  var NoteLabel := TLabel.Create(Self); NoteLabel.Parent := NotePanel; NoteLabel.Align := alTop; NoteLabel.AutoSize := False; NoteLabel.Height := 22; NoteLabel.Font.Height := -18; NoteLabel.Caption := '字幕のメモ';
-  FNote := TRigmScriptMemo.Create(Self); FNote.Parent := NotePanel; FNote.Align := alClient; FNote.Font.Height := -22; FNote.ReadOnly := True; FNote.MaxLength := 2048; FNote.ScrollBars := ssVertical; FNote.Name := 'ScriptSubtitleNote';
+  FActor := TRigmScriptLabel.Create(Self); FActor.Parent := Body; FActor.Align := alTop; FActor.AutoSize := False; FActor.Height := ScaleValue(38); FActor.Name := 'ScriptSubtitleActor';
+  FPreview := TRigmSubtitlePreview.CreateForWorkspace(Self,Workspace); FPreview.Parent := Body; FPreview.Align := alTop; FPreview.Height := ScaleValue(110); FPreview.Name := 'ScriptSubtitlePreview';
+  var VoicePanel := TPanel.Create(Self); VoicePanel.Parent := Body; VoicePanel.Align := alBottom; VoicePanel.Top := ScaleValue(10000); VoicePanel.Height := ScaleValue(88); VoicePanel.BevelOuter := bvNone; VoicePanel.Caption := '';
+  var VoiceLabel := TRigmScriptLabel.Create(Self); VoiceLabel.Parent := VoicePanel; VoiceLabel.Align := alTop; VoiceLabel.AutoSize := False; VoiceLabel.Height := ScaleValue(22); VoiceLabel.Font.Height := -ScaleValue(18); VoiceLabel.Caption := '音声文（保持・読取専用）';
+  FVoice := TMemo.Create(Self); FVoice.Parent := VoicePanel; FVoice.Align := alClient; FVoice.Font.Height := -ScaleValue(22); FVoice.ReadOnly := True; FVoice.ScrollBars := ssVertical; FVoice.Name := 'ScriptSubtitleVoice';
+  var NotePanel := TPanel.Create(Self); NotePanel.Parent := Body; NotePanel.Align := alBottom; NotePanel.Top := 0; NotePanel.Height := ScaleValue(74); NotePanel.BevelOuter := bvNone; NotePanel.Caption := '';
+  var NoteLabel := TRigmScriptLabel.Create(Self); NoteLabel.Parent := NotePanel; NoteLabel.Align := alTop; NoteLabel.AutoSize := False; NoteLabel.Height := ScaleValue(22); NoteLabel.Font.Height := -ScaleValue(18); NoteLabel.Caption := '字幕のメモ';
+  FNote := TRigmScriptMemo.Create(Self); FNote.Parent := NotePanel; FNote.Align := alClient; FNote.Font.Height := -ScaleValue(22); FNote.ReadOnly := True; FNote.MaxLength := 2048; FNote.ScrollBars := ssVertical; FNote.Name := 'ScriptSubtitleNote';
   FNote.OnChange := Changed; FNote.OnBeginInput := BeginInput; FNote.OnKeyDown := EditKey;
-  FEditor := TRigmScriptMemo.Create(Self); FEditor.Parent := Body; FEditor.Align := alClient; FEditor.Font.Height := -26;
+  FEditor := TRigmScriptMemo.Create(Self); FEditor.Parent := Body; FEditor.Align := alClient; FEditor.Font.Height := -ScaleValue(26);
   FEditor.ReadOnly := True; FEditor.MaxLength := 3000; FEditor.ScrollBars := ssVertical; FEditor.Name := 'ScriptSubtitleText';
   FEditor.OnChange := Changed; FEditor.OnBeginInput := BeginInput; FEditor.OnKeyDown := EditKey;
 end;
@@ -141,6 +216,11 @@ begin
 end;
 procedure TRigmScriptSubtitleFrame.Selected(Sender: TObject; Item: TListItem; Selected: Boolean);
 begin
+  // 選択と選択解除の両方で全幅を更新し、非フォーカス時の文字色も保持する。
+  if Item<>nil then begin
+    var Row := Item.DisplayRect(drBounds); Row.Left := 0; Row.Right := FList.ClientWidth;
+    InvalidateRect(FList.Handle,@Row,False);
+  end;
   if FSync or not Selected then Exit; var Id := Item.SubItems[1];
   if not RequestFinish then begin
     FSync := True; try for var Entry in FList.Items do Entry.Selected := Entry.SubItems[1]=FLoaded; finally FSync := False; end; Exit;
@@ -185,33 +265,53 @@ begin
 end;
 procedure TRigmScriptSubtitleFrame.RefreshState;
 begin
+  if FSync then Exit;
   var P := FWorkspace.ScriptDraft; if (P=nil) or (P.ScriptWizard.GetValue('subtitles')=nil) then Exit;
   var Id := JS(JO(P.ScriptWizard,'subtitles'),'selectedCue'); var C := P.Cue(Id); if C=nil then Exit;
-  FSync := True; FList.Items.BeginUpdate;
+  var Rebuild := FList.Items.Count<>P.Cues.Count;
+  if not Rebuild then for var I := 0 to P.Cues.Count-1 do
+    if (FList.Items[I].SubItems.Count<>2) or (FList.Items[I].SubItems[1]<>P.Cues[I].Id) then begin Rebuild := True; Break; end;
+  var SelectionChanged := FLoaded<>Id;
+  FSync := True;
+  // 選択通知の途中でItems.Clearするとネイティブ一覧の描画状態が壊れる。
+  // 行構成が同じなら項目を保ち、実際に変わった文字・選択だけを反映する。
+  if Rebuild then FList.Items.BeginUpdate;
   try
-    FList.Items.Clear;
-    for var Cue in P.Cues do begin
-      var Item := FList.Items.Add;
-      Item.Caption := ScriptCueRole(P,Cue.Id).ToString; Item.SubItems.Add(Cue.Subtitle.Replace(#13#10,' / ')); Item.SubItems.Add(Cue.Id);
-      if Cue.Id=Id then begin Item.Selected := True; Item.Focused := True; end;
+    if Rebuild then FList.Items.Clear;
+    for var I := 0 to P.Cues.Count-1 do begin
+      var Cue := P.Cues[I]; var Item: TListItem;
+      if Rebuild then begin Item := FList.Items.Add; Item.SubItems.Add(''); Item.SubItems.Add(Cue.Id); end
+      else Item := FList.Items[I];
+      var Role := ScriptCueRole(P,Cue.Id).ToString; if Item.Caption<>Role then Item.Caption := Role;
+      var Text := Cue.Subtitle.Replace(#13#10,' / '); if Item.SubItems[0]<>Text then Item.SubItems[0] := Text;
+      if Item.Selected<>(Cue.Id=Id) then Item.Selected := Cue.Id=Id;
+      if (Cue.Id=Id) and not Item.Focused then Item.Focused := True;
     end;
-    if FList.Selected<>nil then FList.Selected.MakeVisible(False);
-    if (FLoaded<>Id) or not FEditing then begin
-      if FLoaded<>Id then FEditing := False; FEditor.Text := C.Subtitle; FNote.Text := C.SubtitleNote;
+    if (Rebuild or SelectionChanged) and (FList.Selected<>nil) then FList.Selected.MakeVisible(False);
+    if SelectionChanged or not FEditing then begin
+      if SelectionChanged then FEditing := False;
+      if FEditor.Text<>C.Subtitle then FEditor.Text := C.Subtitle;
+      if FNote.Text<>C.SubtitleNote then FNote.Text := C.SubtitleNote;
       FEditor.ReadOnly := not FEditing; FNote.ReadOnly := not FEditing; FLoaded := Id;
     end;
-    FVoice.Text := C.Text; var RoleNumber := ScriptCueRole(P,Id); FActor.Caption := RoleNumber.ToString+' / '+JS(CastingRole(P,RoleNumber),'name');
-    FGuide.Caption := '↑↓：セリフ選択 / ←→：最初の折返し移動 / Enter：表示文・改行・メモの編集。'+#13#10+'Ctrl+Enter / Esc：入力完了。原稿と音声文は保持します。';
+    if FVoice.Text<>C.Text then FVoice.Text := C.Text;
+    var RoleNumber := ScriptCueRole(P,Id); var Actor := RoleNumber.ToString+' / '+JS(CastingRole(P,RoleNumber),'name');
+    if FActor.Caption<>Actor then FActor.Caption := Actor;
+    var Guide := '↑↓：セリフ選択 / ←→：最初の折返し移動 / Enter：表示文・改行・メモの編集。'+#13#10+'Ctrl+Enter / Esc：入力完了。原稿と音声文は保持します。';
     var Problem := ScriptSubtitleBlockReason(P,False);
     TToolButton(FToolbar.FindComponent('ScriptSubtitleEdit')).Enabled := Problem='';
     TToolButton(FToolbar.FindComponent('ScriptSubtitleReady')).Enabled := Problem='';
-    if Problem<>'' then FGuide.Caption := Problem+' 以前の字幕とメモは保持しています。'
-    else if FEditing then FGuide.Caption := FGuide.Caption+#13#10+'入力中：完了するまでNextへ進めません。'
-    else if JS(P.ScriptWizard,'subtitlesStatus')='complete' then FGuide.Caption := FGuide.Caption+#13#10+'字幕入力完了：上段のNextで保存し、読み・音声調整へ進めます。'
-    else FGuide.Caption := FGuide.Caption+#13#10+'字幕入力完了のチェックアイコンを押してから、上段のNextで音声へ進んでください。';
-    if FInputError<>'' then FGuide.Caption := FInputError;
+    if Problem<>'' then Guide := Problem+' 以前の字幕とメモは保持しています。'
+    else if FEditing then Guide := Guide+#13#10+'入力中：上段のNextで入力を確認・保存し、読み・音声調整へ進めます。'
+    else if JS(P.ScriptWizard,'subtitlesStatus')='complete' then Guide := Guide+#13#10+'字幕入力完了：上段のNextで保存し、読み・音声調整へ進めます。'
+    else Guide := Guide+#13#10+'上段のNextで字幕入力を確認・保存し、読み・音声調整へ進んでください。';
+    if FInputError<>'' then Guide := FInputError;
+    if FGuide.Caption<>Guide then FGuide.Caption := Guide;
     FPreview.RefreshPreview; UpdatePageButtons;
-  finally FList.Items.EndUpdate; FSync := False; end;
+  finally
+    try if Rebuild then FList.Items.EndUpdate;
+    finally FSync := False; end;
+  end;
 end;
 procedure TRigmScriptSubtitleFrame.SetActive(Value: Boolean);
 begin if not Value and FEditing then RequestFinish; end;
