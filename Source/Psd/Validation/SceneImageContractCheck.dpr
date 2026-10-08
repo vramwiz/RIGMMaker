@@ -1,5 +1,5 @@
 ﻿program SceneImageContractCheck;
-// Isolated future native verification. Not compiled or run during the no-build task.
+// Isolated native verification. Optional generated-image folder and owned fixture root.
 {$APPTYPE CONSOLE}
 uses System.SysUtils, System.Classes, System.JSON, System.Hash, System.IOUtils,
   Vcl.Imaging.pngimage, RigmMovieModel, RigmMovieComposition, RigmJson, PsdJson,
@@ -11,7 +11,8 @@ begin if not Value then raise Exception.Create(MessageText); Inc(Checks); end;
 procedure Reject(Action: TProc; const MessageText: string);
 begin var Rejected := False; try Action(); except on E: Exception do Rejected := True; end; Check(Rejected,MessageText); end;
 begin
-  Directory := TPath.Combine(TPath.GetTempPath,'RIGM-scene-contract-'+PsdJson.NewId);
+  var FixtureRoot := ParamStr(2); if FixtureRoot='' then FixtureRoot := TPath.GetTempPath;
+  Directory := TPath.Combine(FixtureRoot,'RIGM-scene-contract-'+PsdJson.NewId);
   ForceDirectories(Directory); P := TRigmMovieProject.Create;
   try
     ImagePath := TPath.Combine(Directory,'fixture.png'); var Image := TPngImage.CreateBlank(COLOR_RGB,8,32,16);
@@ -59,6 +60,27 @@ begin
     Check(P.Scenes[0].Image=Copied,'partition preserves previous image');
     var AfterCue := P.Cues[0].Json; try Check(AfterCue.ToJSON=BeforeText,'cue text/voice unchanged'); finally AfterCue.Free; end;
     Check(THashSHA2.GetHashStringFromFile(ImagePath)=SourceHash,'source image preserved');
+    if ParamStr(1)<>'' then begin
+      for var I := 1 to 4 do begin
+        var Source := TPath.Combine(ParamStr(1),Format('scene-%.3d.png',[I]));
+        var GeneratedHash := THashSHA2.GetHashStringFromFile(Source);
+        var Managed := CopyCheckedMovieImage(Source,TPath.Combine(Directory,'GeneratedImages'),GeneratedHash);
+        Check(CheckedMovieImageHash(Managed,True)=GeneratedHash,'generated PNG including caBX decodes and copies '+I.ToString);
+        Check(CopyCheckedMovieImage(Source,TPath.Combine(Directory,'GeneratedImages'),GeneratedHash)=Managed,'generated image copy is idempotent '+I.ToString);
+        Check(THashSHA2.GetHashStringFromFile(Source)=GeneratedHash,'generated original preserved '+I.ToString);
+      end;
+      var Bytes := TFile.ReadAllBytes(TPath.Combine(ParamStr(1),'scene-001.png')); var Offset := 8; var Altered := False;
+      while Offset+12<=Length(Bytes) do begin
+        var Size := Int64(Bytes[Offset])*16777216+Int64(Bytes[Offset+1])*65536+Int64(Bytes[Offset+2])*256+Bytes[Offset+3];
+        if (Bytes[Offset+4]=Ord('c')) and (Bytes[Offset+5]=Ord('a')) and (Bytes[Offset+6]=Ord('B')) and (Bytes[Offset+7]=Ord('X')) and (Size>0) then begin
+          Bytes[Offset+8] := Bytes[Offset+8] xor 1; Altered := True; Break;
+        end;
+        Inc(Offset,Size+12);
+      end;
+      Check(Altered,'generated fixture contains caBX metadata');
+      var Corrupt := TPath.Combine(Directory,'corrupt-cabx.png'); TFile.WriteAllBytes(Corrupt,Bytes);
+      Reject(procedure begin CheckedMovieImageHash(Corrupt,True); end,'caBX metadata CRC corruption rejected');
+    end;
     Writeln(Checks.ToString+' native model/image assertions passed. Fixture retained at '+Directory);
   except on E: Exception do begin Writeln(E.ClassName+': '+E.Message); ExitCode := 1; end; end;
   P.Free;

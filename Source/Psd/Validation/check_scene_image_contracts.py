@@ -1,8 +1,8 @@
 """Read-only source checks and adversarial temporary image fixtures; no Delphi build/app.
 
-The separate SceneImageContractCheck.dpr is future native coverage, not an executed
-test in the no-build task. This script checks cross-layer safety invariants and
-fixture expectations independently using Pillow.
+The separate SceneImageContractCheck.dpr and ScenesGuiProbe.dpr provide native
+coverage. This script independently checks source invariants and fixture
+expectations using Pillow; its result does not imply native execution.
 """
 from pathlib import Path
 import hashlib, io, json, struct, sys, tempfile, zlib
@@ -35,7 +35,8 @@ approve = body(model, 'procedure SetScriptSceneApproved', 'procedure ApplyScript
 check('Inc(S.ImageEditEpoch)' in approve and "PsdJson.Put(R,'state','cancelled')" in approve, 'approve/unlock invalidates in-flight results')
 check("Name='script-set-scene-approved'" not in workspace and "Name='script-unlock-scene'" not in workspace, 'pipes cannot unlock approvals')
 ready = body(model, 'function ScriptSceneReady', 'function ScriptScenesReady')
-check('not Scene.ImageApproved' in ready and "Scene.Image=''" in ready and 'Scene.ImageApprovalKey=ScriptSceneFingerprint' in ready, 'ready requires checked valid image and current context')
+check('not Scene.ImageApproved' in ready and 'if SceneNeedsImage(Scene) then' in ready and "Scene.Image=''" in ready and 'Scene.ImageApprovalKey=ScriptSceneFingerprint' in ready, 'ready requires human confirmation/current context; image validated only when displayed')
+check('if Value and SceneNeedsImage(S) then' in approve, 'text/empty rows can be confirmed without an image')
 check('ScriptScenesReady(FScriptDraft,True)' in closing, 'editor entry forces uncached full validation')
 check(closing.index("StoreScript(P,'editor')")<closing.index('Session.SetProject'), 'save precedes editor session publication')
 check('ScriptScenesAdvanceReason' in workspace and 'ScriptScenesAdvanceReason' in closing, 'Next/status/editor share progress predicate')
@@ -48,10 +49,14 @@ check(delivery.index('CopyCheckedMovieImage')<delivery.rindex('RequireSceneImage
 check('MOVEFILE_REPLACE_EXISTING' not in body(asset,'function CopyCheckedMovieImage','function MovieImageTransferSchema'), 'managed import never overwrites originals or collisions')
 for token in ['FILE_FLAG_OPEN_REPARSE_POINT','FILE_ATTRIBUTE_REPARSE_POINT','CREATE_NEW','FlushFileBuffers','ExpectedHash','Bitmap.Assign(Picture.Graphic)','Png.CheckCRC := True']:
     check(token in asset, f'safe import: {token}')
+directory_guard = body(asset, 'procedure HoldImageDirectories', 'procedure CheckPngPixels')
+check('var Current := Root' in directory_guard and 'ExcludeTrailingPathDelimiter(Root)' not in directory_guard, 'image directory guard preserves absolute drive root')
 check('HeaderSize=40' in asset and 'Colors>256' in asset and 'Int64(HeaderSize)+14>Stream.Size' in asset, 'BMP allocation bounded before native decoder')
-check('Result.Left := MaxInt' in ui, 'left-column order preserved')
-columns = [ui.index("Column('"+x) for x in ['シーン','画像要望','画像補足','要求画像','確定']]
-check(columns==sorted(columns), 'scene/requirement/caption/preview/check order')
+check("['シーン','画像要望・修正指示（Codexへ）','補足文（動画表示）／配置','要求画像']" in ui, 'shared headers follow scene/instruction/caption/image order')
+check('ScaleValue(88)' in ui and 'HeaderHeight+I*H' in ui, 'one compact row per scene')
+check('Feedback:' not in ui and 'FPreview' not in ui and 'Mode: TComboBox' not in ui, 'separate corrections/mode/fixed preview removed')
+check('SceneInputDisplayMode(Prompt,Description)' in ui and 'SceneImageInstruction(S)' in ui, 'automatic display and legacy instruction merging')
+check("PositionNames: array[0..4]" in ui and "Approved.Caption := '確定'" in ui, 'five caption positions and concise confirmation checkbox')
 check('S.ImageApproved' in ui and 'Row.Prompt.ReadOnly' in ui and 'Row.Description.ReadOnly' in ui, 'approved row input locked')
 check('UpdateScriptSceneInputs(A)' in ui, 'row inputs apply atomically through model')
 check('Row.SceneId' in ui and 'FRows[I].SceneId<>P.Scenes[I].Id' in ui, 'row reuse follows stable IDs')
@@ -71,7 +76,7 @@ def png_preflight(data):
         if kind==b'IHDR':
             if len(kinds)!=1 or n!=13: return False
             geometry=struct.unpack('>IIBBBBB',payload)
-        elif kind not in [b'PLTE',b'IDAT',b'IEND',b'tRNS',b'gAMA',b'cHRM',b'sRGB',b'pHYs',b'tEXt',b'sBIT',b'bKGD',b'tIME']: return False
+        elif kind not in [b'PLTE',b'IDAT',b'IEND',b'tRNS',b'gAMA',b'cHRM',b'sRGB',b'pHYs',b'tEXt',b'sBIT',b'bKGD',b'tIME',b'caBX']: return False
         if kind==b'IDAT': pixels+=payload
         pos+=n+12
         if kind==b'IEND' and (n!=0 or pos!=len(data)): return False
@@ -111,6 +116,10 @@ with tempfile.TemporaryDirectory(prefix='rigm-scene-contract-') as td:
         check(not fixture_accept(data[:len(data)//2],ext), f'fixture truncated {fmt}')
     bad=bytearray(original['.png']); bad[-8]^=1
     check(not fixture_accept(bytes(bad),'.png'), 'fixture PNG CRC rejection')
+    provenance=original['.png'][:-12]+chunk(b'caBX',b'opaque provenance metadata')+original['.png'][-12:]
+    check(fixture_accept(provenance,'.png'), 'fixture caBX provenance accepted without changing pixels')
+    bad_provenance=bytearray(provenance); bad_provenance[-17]^=1
+    check(not fixture_accept(bytes(bad_provenance),'.png'), 'fixture caBX CRC corruption rejected')
     huge=b'\x89PNG\r\n\x1a\n'+chunk(b'IHDR',struct.pack('>IIBBBBB',8193,1,8,2,0,0,0))+chunk(b'IEND',b'')
     check(not fixture_accept(huge,'.png'), 'fixture oversized dimensions rejected before decode')
     malicious=bytearray(original['.bmp']); struct.pack_into('<I',malicious,14,0x7ffffff0)
@@ -138,4 +147,4 @@ with tempfile.TemporaryDirectory(prefix='rigm-scene-contract-') as td:
         check((td/('fixture'+ext)).read_bytes()==data, f'fixture original {ext} preserved')
     check(len(list(managed.iterdir()))==3, 'fixture same base name does not collide across images')
 
-print(json.dumps({'passed':len(checks),'checks':checks,'limitations':['No Delphi compilation or product execution; native model harness supplied for later user build.','Fixture image checks use independent Pillow decoder, not VCL.']},ensure_ascii=False,indent=2))
+print(json.dumps({'passed':len(checks),'checks':checks,'limitations':['This script itself does not compile or execute Delphi; native harness results are recorded separately.','Fixture image checks use independent Pillow decoder, not VCL.']},ensure_ascii=False,indent=2))

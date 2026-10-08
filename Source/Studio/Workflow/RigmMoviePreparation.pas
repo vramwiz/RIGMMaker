@@ -27,7 +27,7 @@ begin
     except Result := Result+'|unreadable'; end;
   end;
   Result := Result+'|'+Project.ThemeBackground;
-  for var Scene in Project.Scenes do Result := Result+'|'+Scene.Image;
+  for var Scene in Project.Scenes do Result := Result+'|'+Scene.DisplayMode+'|'+Scene.Image;
   for var C in Project.Cues do Result := Result+'|'+C.Id+'|'+C.Acting.MouthMode+'|'+C.Acting.BlinkMode+'|'+C.Acting.Variants.ToJSON;
   if (Project.CharacterFile<>'') and (Project.CharacterFile<>'@sample') then
     try var P := ResolveMoviePath(Project.FileName,Project.CharacterFile);
@@ -138,7 +138,7 @@ begin
     not FileExists(ResolveMoviePath(Project.FileName,Character.FileName)) then begin
     CharacterOK := False; Issue('character_missing','Character source is missing: '+Character.FileName,'movie-update-character','export',True,Character.Id);
   end;
-  for var Scene in Project.Scenes do if (Scene.Image<>'') and not FileExists(ResolveMoviePath(Project.FileName,Scene.Image)) then begin
+  for var Scene in Project.Scenes do if MatchText(Scene.DisplayMode,['image','both']) and (Scene.Image<>'') and not FileExists(ResolveMoviePath(Project.FileName,Scene.Image)) then begin
     CharacterOK := False; Issue('scene_image_missing','Scene image is missing: '+Scene.Image,'movie-update-scene','export',True,Scene.Id);
   end;
   if (Project.CharacterFile='') and (Project.Characters.Count=0) then Issue('character_none','キャラクター未選択です。字幕中心の動画は作れます。人物を出すにはRIGMを選択してください。','movie-update-project','character',False)

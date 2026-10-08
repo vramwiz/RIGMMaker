@@ -1,7 +1,7 @@
 ﻿unit RigmScriptVoiceEffectsFrame;
 // Aul2 controller widgets and async per-cue audition, preserving original WAV files.
 interface
-uses System.Classes, System.Generics.Collections, Winapi.Messages, RigmScriptPageFrame,
+uses System.Classes, System.Types, System.Generics.Collections, Winapi.Messages, RigmScriptPageFrame,
   Vcl.Controls, Vcl.Forms, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls, Vcl.Buttons, RigmBufferedControls,
   RigmWizardWorkspace, RigmAul2EffectDefinition, RigmAul2VolumeControl, RigmAul2LampSwitch,
   RigmVoiceEffectsPreview, VoicevoxToolbarButtons, RigmEffectsPlayback, RigmEffectsAnalysis,
@@ -10,7 +10,9 @@ type
   TRigmScriptVoiceEffectsFrame = class(TRigmScriptPageFrame)
   private
     FWorkspace: TRigmWizardWorkspace; FList: TListView; FSync,FActive,FLoop,FWantPlay: Boolean;
-    FEffect,FMode: TComboBox; FLamp: TAul2LampSwitch; FKnobs: TScrollBox;
+    FEffect: TListBox; FMode,FPreset: TComboBox; FApplyPreset: TButton;
+    FEffectStates: TArray<Boolean>; FShownEffect: Integer;
+    FLamp: TAul2LampSwitch; FKnobs: TScrollBox;
     FVolumes: TArray<TAul2VolumeControl>; FDefinition: TControllerEffectDefinition;
     FNotice,FHelp,FModeLabel,FGraphLabel,FMeasure,FTransportLabel: TLabel;
     FBody: TScrollBox; FContent: TPanel; FSettingsGraph: TCustomControl;
@@ -23,6 +25,9 @@ type
     procedure Selected(Sender: TObject; Item: TListItem; Value: Boolean);
     procedure Resized(Sender: TObject);
     procedure EffectChanged(Sender: TObject);
+    procedure DrawEffect(Sender: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
+    procedure RefreshEffectStates;
+    procedure ApplyPreset(Sender: TObject);
     procedure ParameterChanged(Sender: TObject);
     procedure VolumeChanged(Sender: TObject; const ValueText: string; var Accept: Boolean);
     procedure CommitParameters(ChangedControl: TAul2VolumeControl=nil; const NewText: string='');
@@ -46,10 +51,10 @@ type
     procedure StopPreview;
   end;
 implementation
-uses System.SysUtils, System.Math, System.JSON, System.IOUtils, System.Types,
+uses System.SysUtils, System.Math, System.JSON, System.IOUtils,
   Winapi.Windows, Winapi.CommCtrl, Vcl.Graphics, Vcl.Themes,
   RigmAul2DelayGraph, RigmAul2EqGraph, RigmAul2CompressorGraph, RigmAul2DistortionGraph,
-  RigmAul2BitCrusherGraph, RigmAul2NoiseGateGraph, RigmAul2LimiterGraph, RigmJson, PsdJson, RigmMovieModel, RigmVoiceEffects, RigmVoiceEffectSettings, RigmAudioFilePaths;
+  RigmAul2BitCrusherGraph, RigmAul2NoiseGateGraph, RigmAul2LimiterGraph, RigmJson, PsdJson, RigmMovieModel, RigmVoiceEffects, RigmVoiceEffectSettings, RigmVoiceEffectPresets, RigmAudioFilePaths;
 {$R *.dfm}
 type
   TRigmEffectsListView = class(TRigmBufferedListView)
@@ -125,6 +130,23 @@ begin
   FList.ReadOnly := True; FList.HideSelection := False; FList.OnSelectItem := Selected;
   FList.Columns.Add.Caption := 'セリフ'; FList.Columns[0].Width := ScaleValue(236);
   var Splitter := TSplitter.Create(Self); Splitter.Parent := Self; Splitter.Align := alLeft;
+  Splitter.Left := Rows.Width;
+  var Effects := TRigmBufferedPanel.Create(Self); Effects.Parent := Self;
+  Effects.Align := alLeft; Effects.Left := Rows.Width+Splitter.Width;
+  Effects.Width := ScaleValue(184); Effects.BevelOuter := bvNone; Effects.Caption := '';
+  Effects.Name := 'ScriptEffectListPanel';
+  var EffectLabel := TRigmScriptLabel.Create(Self); EffectLabel.Parent := Effects; EffectLabel.Align := alTop;
+  EffectLabel.AutoSize := False; EffectLabel.Height := ScaleValue(28);
+  EffectLabel.Caption := 'エフェクター（緑＝ON）';
+  FEffect := TListBox.Create(Self); FEffect.Parent := Effects; FEffect.Align := alClient;
+  FEffect.Style := lbOwnerDrawFixed; FEffect.StyleElements := [];
+  FEffect.Color := $00202020; FEffect.Font.Color := clWhite;
+  FEffect.Name := 'ScriptEffectKind'; FEffect.OnClick := EffectChanged; FEffect.OnDrawItem := DrawEffect;
+  SetLength(FEffectStates,CONTROLLER_EFFECT_COUNT);
+  for var I := 0 to CONTROLLER_EFFECT_COUNT-1 do begin
+    var D: TControllerEffectDefinition; GetControllerEffectDefinition(I,D); FEffect.Items.Add(D.DisplayName);
+  end;
+  FEffect.ItemIndex := 0;
   FBody := TScrollBox.Create(Self); FBody.Parent := Self; FBody.Align := alClient;
   FBody.BorderStyle := bsNone; FBody.VertScrollBar.Tracking := True; FBody.HorzScrollBar.Tracking := True;
   FContent := TRigmBufferedPanel.Create(Self); FContent.Parent := FBody; FContent.BevelOuter := bvNone;
@@ -138,12 +160,14 @@ begin
   FPlay.UseParentBackground; FLoopPlay.UseParentBackground; FStop.UseParentBackground;
   FTransportLabel := LabelAt('ScriptEffectsTransportLabel','再生　／　ループ　／　停止');
   FTransportLabel.SetBounds(ScaleValue(122),ScaleValue(9),ScaleValue(260),ScaleValue(24));
-  FEffect := TComboBox.Create(Self); FEffect.Parent := FContent; FEffect.Style := csDropDownList;
-  FEffect.Name := 'ScriptEffectKind'; FEffect.OnChange := EffectChanged;
-  for var I := 0 to CONTROLLER_EFFECT_COUNT-1 do begin
-    var D: TControllerEffectDefinition; GetControllerEffectDefinition(I,D); FEffect.Items.Add(D.DisplayName);
-  end;
-  FEffect.ItemIndex := 0;
+  FApplyPreset := TButton.Create(Self); FApplyPreset.Parent := FContent;
+  FApplyPreset.Name := 'ScriptEffectApplyPreset'; FApplyPreset.Caption := '採用'; FApplyPreset.OnClick := ApplyPreset;
+  FApplyPreset.Hint := '選択中のセリフへプリセットを採用。「なし」は全エフェクターを初期値へ戻します。';
+  FApplyPreset.ShowHint := True;
+  FPreset := TComboBox.Create(Self); FPreset.Parent := FContent; FPreset.Style := csDropDownList;
+  FPreset.Name := 'ScriptEffectPreset';
+  for var I := 0 to VOICE_EFFECT_PRESET_COUNT-1 do FPreset.Items.Add(VoiceEffectPresetName(I));
+  FPreset.ItemIndex := 0; FPreset.Hint := 'プリセットを選び、左の「採用」を押してください。'; FPreset.ShowHint := True;
   FLamp := TAul2LampSwitch.Create(Self); FLamp.Parent := FContent; FLamp.Name := 'ScriptEffectOn'; FLamp.OnClick := ParameterChanged;
   FHelp := LabelAt('ScriptEffectDescription','');
   FModeLabel := LabelAt('ScriptEffectModeLabel','');
@@ -214,6 +238,7 @@ begin
 end;
 procedure TRigmScriptVoiceEffectsFrame.Resized(Sender: TObject);
 begin
+  if FEffect<>nil then FEffect.ItemHeight := ScaleValue(26);
   if FList<>nil then FList.Columns[0].Width := Max(ScaleValue(120),FList.ClientWidth-ScaleValue(24));
   if (FContent=nil) or (FNotice=nil) then Exit;
   var W := Max(ScaleValue(340),FBody.ClientWidth-ScaleValue(18)); var Gap := ScaleValue(6);
@@ -222,7 +247,8 @@ begin
   FLoopPlay.SetBounds(ScaleValue(42),0,ScaleValue(34),ScaleValue(34));
   FStop.SetBounds(ScaleValue(78),0,ScaleValue(34),ScaleValue(34));
   FTransportLabel.SetBounds(ScaleValue(122),ScaleValue(9),W-ScaleValue(128),ScaleValue(24));
-  FEffect.SetBounds(Gap,ScaleValue(40),W-Gap*2,ScaleValue(28));
+  FApplyPreset.SetBounds(Gap,ScaleValue(40),ScaleValue(64),ScaleValue(28));
+  FPreset.SetBounds(ScaleValue(76),ScaleValue(40),W-ScaleValue(82),ScaleValue(28));
   FLamp.SetBounds(Gap,ScaleValue(74),ScaleValue(78),ScaleValue(30));
   FHelp.SetBounds(ScaleValue(90),ScaleValue(74),W-ScaleValue(96),ScaleValue(40));
   var Y := ScaleValue(116);
@@ -256,6 +282,7 @@ begin
   FSync := True;
   try
     GetControllerEffectDefinition(FEffect.ItemIndex,FDefinition);
+    FShownEffect := FEffect.ItemIndex;
     FLamp.Checked := VoiceEffectValue(C.AudioEffects,FDefinition.UseItemName)<>0;
     FLamp.PanelColor := FDefinition.VolumeColor; FLamp.TextColor := FDefinition.TextColor;
     FContent.Color := FDefinition.BackgroundColor; FKnobs.Color := FDefinition.BackgroundColor;
@@ -278,11 +305,65 @@ begin
       V.PanelColor := FDefinition.VolumeColor; V.Color := FDefinition.ThemeColor; V.AccentColor := FDefinition.IndicatorColor;
       V.TextColor := FDefinition.TextColor; V.ValueText := FloatToStr(VoiceEffectValue(C.AudioEffects,D.ItemName),TFormatSettings.Invariant); V.OnValueChange := VolumeChanged;
     end;
-    FShownSettings := CueVoiceEffectsStamp(C); UpdateGraphs; Resized(Self); UpdateMeasurements;
+    FShownSettings := CueVoiceEffectsStamp(C); RefreshEffectStates; UpdateGraphs; Resized(Self); UpdateMeasurements;
   finally FSync := False; end;
 end;
 procedure TRigmScriptVoiceEffectsFrame.EffectChanged(Sender: TObject);
-begin if not FSync then ShowParameters; end;
+begin
+  if FSync or (FEffect.ItemIndex<0) then Exit;
+  for var V in FVolumes do if not V.CommitPendingValue then begin
+    FEffect.ItemIndex := FShownEffect;
+    FNotice.Caption := '数値を確認してからエフェクターを切り替えてください。'; Exit;
+  end;
+  ShowParameters;
+end;
+procedure TRigmScriptVoiceEffectsFrame.RefreshEffectStates;
+begin
+  var P := FWorkspace.ScriptDraft; if P=nil then Exit;
+  var C := P.Cue(SelectedId); if C=nil then Exit;
+  var Changed := False;
+  for var I := 0 to High(FEffectStates) do begin
+    var D: TControllerEffectDefinition; GetControllerEffectDefinition(I,D);
+    var Enabled := VoiceEffectValue(C.AudioEffects,D.UseItemName)<>0;
+    if FEffectStates[I]<>Enabled then begin FEffectStates[I] := Enabled; Changed := True; end;
+  end;
+  if Changed then FEffect.Invalidate;
+end;
+procedure TRigmScriptVoiceEffectsFrame.DrawEffect(Sender: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
+begin
+  if (Index<0) or (Index>=Length(FEffectStates)) then Exit;
+  var C := FEffect.Canvas; C.Font.Assign(FEffect.Font); C.Brush.Style := bsSolid;
+  C.Brush.Color := FEffect.Color; C.Font.Color := clWhite;
+  if FEffectStates[Index] then begin C.Brush.Color := $003D5030; C.Font.Color := $0097EDAB; end;
+  if Index=FEffect.ItemIndex then begin
+    C.Brush.Color := $00D07000;
+    if FEffectStates[Index] then C.Brush.Color := $00507628;
+  end;
+  C.FillRect(Rect); SetBkMode(C.Handle,TRANSPARENT);
+  var TextRect := Rect; Inc(TextRect.Left,ScaleValue(6)); Dec(TextRect.Right,ScaleValue(34));
+  DrawText(C.Handle,PChar(FEffect.Items[Index]),-1,TextRect,DT_SINGLELINE or DT_VCENTER or DT_END_ELLIPSIS or DT_NOPREFIX);
+  if FEffectStates[Index] then begin
+    TextRect := Rect; TextRect.Right := Min(Rect.Right,FEffect.ClientWidth)-ScaleValue(8);
+    TextRect.Left := TextRect.Right-ScaleValue(28);
+    DrawText(C.Handle,'ON',2,TextRect,DT_SINGLELINE or DT_VCENTER or DT_RIGHT);
+  end;
+  if odFocused in State then C.DrawFocusRect(Rect);
+end;
+procedure TRigmScriptVoiceEffectsFrame.ApplyPreset(Sender: TObject);
+begin
+  if FSync or (FPreset.ItemIndex<0) then Exit;
+  var P := FWorkspace.ScriptDraft; if (P=nil) or (P.Cue(SelectedId)=nil) then Exit;
+  // 採用は全設定の置換。入力途中のノブ値もプリセット値へ置き換える。
+  var Settings := CreateVoiceEffectPreset(FPreset.ItemIndex);
+  try
+    FWorkspace.EditVoiceEffects(SelectedId,Settings);
+    ShowParameters;
+    if FWantPlay and (FLoop or (FJob<>nil)) then FRenderDue := GetTickCount64+280;
+    FNotice.Caption := '「'+FPreset.Text+'」を選択中のセリフへ採用しました。';
+    if FLoop and FWantPlay then FNotice.Caption := FNotice.Caption+' 次のループから反映します。'
+    else FNotice.Caption := FNotice.Caption+' 次回の再生・動画出力に反映します。';
+  finally Settings.Free; end;
+end;
 procedure TRigmScriptVoiceEffectsFrame.ParameterChanged(Sender: TObject);
 begin CommitParameters; end;
 procedure TRigmScriptVoiceEffectsFrame.VolumeChanged(Sender: TObject; const ValueText: string; var Accept: Boolean);
@@ -306,7 +387,7 @@ begin
     end;
     FShownSettings := VoiceEffectSettingsStamp(Settings); // Prevent reentrant refresh replacing active knob.
     FWorkspace.EditVoiceEffects(SelectedId,Settings);
-    UpdateGraphs; UpdateMeasurements;
+    RefreshEffectStates; UpdateGraphs; UpdateMeasurements;
     if FWantPlay and (FLoop or (FJob<>nil)) then begin
       FRenderDue := GetTickCount64+280;
       if FLoop then FNotice.Caption := '調整を保存しました。処理後、次のループから反映します。'
@@ -453,7 +534,7 @@ begin
   if (P<>nil) and (P.Cue(SelectedId)<>nil) then Current := CueEffectPreviewKey(P,P.Cue(SelectedId));
   var MeasuredKey := FReadyKey; if FPlayingAnalysis<>nil then MeasuredKey := FPlaybackKey;
   if MeasuredKey<>Current then State := State+'（前回の試聴設定。次の再生で更新）';
-  FMeasure.Caption := State+'：'+FEffect.Text+' RMS '+Db(M.InputRms)+' → '+Db(M.OutputRms)+' dBFS / 差分RMS '+Db(M.ResidualRms)+' dBFS'+#13#10+
+  FMeasure.Caption := State+'：'+FEffect.Items[FEffect.ItemIndex]+' RMS '+Db(M.InputRms)+' → '+Db(M.OutputRms)+' dBFS / 差分RMS '+Db(M.ResidualRms)+' dBFS'+#13#10+
     '最終出力 Peak '+Db(Chain.OutputPeak)+' dBFS。差分は出力−入力の実測値です。';
 end;
 

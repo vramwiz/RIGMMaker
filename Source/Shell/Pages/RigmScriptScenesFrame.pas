@@ -1,5 +1,5 @@
 ﻿unit RigmScriptScenesFrame;
-// Stable scene IDs own each row; numbers are display-only. Approval is a separate right-hand checkbox.
+// 固定sceneIdのコンパクトな入力行。要望・修正指示は1欄、確定は画像下のチェック。
 interface
 uses System.Classes, System.Generics.Collections, RigmScriptPageFrame, Vcl.Forms,
   Vcl.Controls, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Graphics, RigmWizardWorkspace,
@@ -9,40 +9,42 @@ type
   TRigmSceneImageRow = class(TRigmBufferedPanel)
   public
     SceneId,ImageStamp: string;
-    Number,Info: TLabel;
-    Prompt,Description,Feedback: TRigmScriptMemo;
+    Number: TLabel;
+    Prompt,Description: TRigmScriptMemo;
     Picture: TImage;
     Approved: TCheckBox;
-    Mode: TComboBox;
+    Position: TComboBox;
     constructor CreateRow(AOwner: TRigmScriptScenesFrame; const Id: string);
-  end;
-  TRigmScriptScenePreview = class(TCustomControl)
-  private FWorkspace: TRigmWizardWorkspace;
-  protected procedure Paint; override;
-  public constructor CreateForWorkspace(AOwner: TComponent; Workspace: TRigmWizardWorkspace);
+    procedure Arrange(NumberWidth,PromptWidth,DescriptionWidth,ImageWidth: Integer);
   end;
   TRigmScriptScenesFrame = class(TRigmScriptPageFrame)
   private
     FWorkspace: TRigmWizardWorkspace;
-    FSync,FEditing,FActive: Boolean;
+    FSync,FEditing,FLayout: Boolean;
     FRows: TObjectList<TRigmSceneImageRow>;
     FScroll: TScrollBox;
     FGuide: TLabel;
+    FDialogue: TPanel;
+    FDialogueCaption: TLabel;
+    FDialogueText: TEdit;
     FToolbar: TRigmIconToolbar;
-    FPreview: TRigmScriptScenePreview;
-    FPreviewStamp: string;
+    FHeader: TPanel;
+    FHeaders: TArray<TLabel>;
+    procedure LayoutRows;
+    procedure LayoutChanged(Sender: TObject);
     procedure Changed(Sender: TObject);
     procedure FocusRow(Sender: TObject);
+    procedure RefreshDialogue;
     procedure Checked(Sender: TObject);
     procedure Key(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure Done(Sender: TObject);
     procedure Adopt(Sender: TObject);
     procedure RequestImage(Sender: TObject);
     procedure CancelImage(Sender: TObject);
-    procedure Preview(Sender: TObject);
     function RowFor(Sender: TObject): TRigmSceneImageRow;
     function SelectedId: string;
   protected
+    procedure Resize; override;
     procedure ChangeScale(M,D: Integer; isDpiChange: Boolean); override;
   public
     constructor CreateForWorkspace(AOwner: TComponent; Workspace: TRigmWizardWorkspace);
@@ -56,50 +58,39 @@ uses System.SysUtils, System.JSON, System.Math, System.Types, Vcl.Dialogs,
   Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, Winapi.Windows, RigmJson, RigmToolbarIcons,
   RigmScriptScenesModel, RigmMovieModel, RigmMovieImageTransfer, RigmScriptTextModel;
 {$R *.dfm}
-const Modes: array[0..3] of string = ('both','image','text','none');
+const
+  Positions: array[0..4] of string = ('below-image','image-top','image-center','image-bottom','screen-top');
+  PositionNames: array[0..4] of string = ('画像の下','画像の上部','画像の中央','画像の下部','画面上部');
 constructor TRigmSceneImageRow.CreateRow(AOwner: TRigmScriptScenesFrame; const Id: string);
-  function Column(const Caption: string; Width: Integer): TPanel;
+  function Memo(const Name: string; Limit: Integer): TRigmScriptMemo;
   begin
-    Result := TRigmBufferedPanel.Create(Self); Result.Parent := Self; Result.Left := MaxInt; Result.Align := alLeft;
-    Result.Width := MulDiv(Width,CurrentPPI,96); Result.BevelOuter := bvNone; Result.Caption := '';
-    Result.Padding.SetBounds(6,4,6,4);
-    var L := TRigmScriptLabel.Create(Self); L.Parent := Result; L.Align := alTop; L.Caption := Caption;
-    L.Font.Height := -MulDiv(16,CurrentPPI,96);
+    Result := TRigmScriptMemo.Create(Self); Result.Parent := Self; Result.Name := Name;
+    Result.MaxLength := Limit; Result.ScrollBars := ssVertical;
+    Result.OnChange := AOwner.Changed; Result.OnKeyDown := AOwner.Key; Result.OnEnter := AOwner.FocusRow;
   end;
 begin
-  inherited Create(AOwner); SceneId := Id; Parent := AOwner.FScroll; Align := alNone; Width := MulDiv(960,CurrentPPI,96);
-  Height := MulDiv(210,CurrentPPI,96); BevelOuter := bvLowered; Caption := '';
-  var C := Column('シーン',70); Number := TRigmScriptLabel.Create(Self); Number.Parent := C; Number.Align := alTop;
-  Number.Font.Height := -MulDiv(22,CurrentPPI,96);
-  C := Column('画像要望（Codexへ）',250);
-  Feedback := TRigmScriptMemo.Create(Self); Feedback.Parent := C; Feedback.Align := alBottom; Feedback.Height := MulDiv(62,CurrentPPI,96);
-  Feedback.MaxLength := 8000; Feedback.ScrollBars := ssVertical; Feedback.OnChange := AOwner.Changed; Feedback.OnKeyDown := AOwner.Key; Feedback.OnEnter := AOwner.FocusRow;
-  var L := TRigmScriptLabel.Create(Self); L.Parent := C; L.Align := alBottom; L.Caption := '修正指示（動画には表示しません）';
-  Prompt := TRigmScriptMemo.Create(Self); Prompt.Parent := C; Prompt.Align := alClient; Prompt.MaxLength := 8000;
-  Prompt.ScrollBars := ssVertical; Prompt.OnChange := AOwner.Changed; Prompt.OnKeyDown := AOwner.Key; Prompt.OnEnter := AOwner.FocusRow;
-  C := Column('画像補足テキスト（動画に表示）',250);
-  Mode := TComboBox.Create(Self); Mode.Parent := C; Mode.Align := alBottom; Mode.Style := csDropDownList;
-  Mode.Items.Add('画像と補足文'); Mode.Items.Add('画像のみ'); Mode.Items.Add('補足文のみ'); Mode.Items.Add('表示なし（画像は保持）'); Mode.ItemIndex := 0;
-  Mode.OnChange := AOwner.Changed; Mode.OnEnter := AOwner.FocusRow;
-  Description := TRigmScriptMemo.Create(Self); Description.Parent := C; Description.Align := alClient; Description.MaxLength := 3000;
-  Description.ScrollBars := ssVertical; Description.OnChange := AOwner.Changed; Description.OnKeyDown := AOwner.Key; Description.OnEnter := AOwner.FocusRow;
-  C := Column('要求画像のプレビュー',240);
-  Info := TRigmScriptLabel.Create(Self); Info.Parent := C; Info.Align := alBottom; Info.AutoSize := False; Info.Height := MulDiv(46,CurrentPPI,96); Info.WordWrap := True;
-  Picture := TImage.Create(Self); Picture.Parent := C; Picture.Align := alClient; Picture.Center := True; Picture.Proportional := True; Picture.Stretch := True;
-  C := Column('確定 / 更新を保護',150);
-  Approved := TCheckBox.Create(Self); Approved.Parent := C; Approved.Align := alTop; Approved.Height := MulDiv(36,CurrentPPI,96);
-  Approved.Caption := 'この画像で確定'; Approved.OnClick := AOwner.Checked;
-  L := TRigmScriptLabel.Create(Self); L.Parent := C; L.Align := alClient; L.WordWrap := True; L.AutoSize := False;
-  L.Caption := '修正時はチェックを外します。全件確定後、上段Nextで保存して動画編集へ進みます。';
+  inherited Create(AOwner); SceneId := Id; Parent := AOwner.FScroll; Align := alNone;
+  Height := MulDiv(88,CurrentPPI,96); BevelOuter := bvLowered; Caption := '';
+  Number := TRigmScriptLabel.Create(Self); Number.Parent := Self; Number.AutoSize := False;
+  Prompt := Memo('SceneImageInstruction',16004); Description := Memo('SceneDescription',3000);
+  Position := TComboBox.Create(Self); Position.Parent := Self; Position.Name := 'SceneDescriptionPosition';
+  Position.Style := csDropDownList; for var Text in PositionNames do Position.Items.Add(Text);
+  Position.ItemIndex := 0; Position.OnChange := AOwner.Changed; Position.OnEnter := AOwner.FocusRow;
+  Picture := TImage.Create(Self); Picture.Parent := Self; Picture.Center := True; Picture.Proportional := True; Picture.Stretch := True;
+  Approved := TCheckBox.Create(Self); Approved.Parent := Self; Approved.Name := 'SceneApproved';
+  Approved.Caption := '確定'; Approved.OnClick := AOwner.Checked; Approved.OnEnter := AOwner.FocusRow;
 end;
-constructor TRigmScriptScenePreview.CreateForWorkspace(AOwner: TComponent; Workspace: TRigmWizardWorkspace);
-begin inherited Create(AOwner); FWorkspace := Workspace; DoubleBuffered := True; end;
-procedure TRigmScriptScenePreview.Paint;
+procedure TRigmSceneImageRow.Arrange(NumberWidth,PromptWidth,DescriptionWidth,ImageWidth: Integer);
 begin
-  Canvas.Brush.Color := clBlack; Canvas.FillRect(ClientRect); var B := FWorkspace.ScenePreview;
-  if (B=nil) or (B.Width=0) then begin Canvas.Font.Color := clSilver; Canvas.TextOut(10,10,'選択シーンの動画配置プレビュー'); Exit; end;
-  var K := Min(ClientWidth/B.Width,ClientHeight/B.Height); var W := Round(B.Width*K); var H := Round(B.Height*K);
-  Canvas.StretchDraw(Rect((ClientWidth-W) div 2,(ClientHeight-H) div 2,(ClientWidth+W) div 2,(ClientHeight+H) div 2),B);
+  var Gap := MulDiv(4,CurrentPPI,96); var ComboHeight := MulDiv(24,CurrentPPI,96);
+  Number.SetBounds(Gap,Gap,NumberWidth-Gap*2,Height-Gap*2);
+  Prompt.SetBounds(NumberWidth+Gap,Gap,PromptWidth-Gap*2,Height-Gap*2);
+  var X := NumberWidth+PromptWidth+Gap;
+  Description.SetBounds(X,Gap,DescriptionWidth-Gap*2,Height-ComboHeight-Gap*3);
+  Position.SetBounds(X,Height-ComboHeight-Gap,DescriptionWidth-Gap*2,ComboHeight);
+  X := NumberWidth+PromptWidth+DescriptionWidth+Gap;
+  Picture.SetBounds(X,Gap,ImageWidth-Gap*2,Height-ComboHeight-Gap*3);
+  Approved.SetBounds(X,Height-ComboHeight-Gap,ImageWidth-Gap*2,ComboHeight);
 end;
 constructor TRigmScriptScenesFrame.CreateForWorkspace(AOwner: TComponent; Workspace: TRigmWizardWorkspace);
 begin
@@ -110,33 +101,95 @@ begin
   FToolbar.AddIcon('ScriptSceneRequest','未確定シーンの画像要求を準備。要望入力後、Codexへ作業を指示してください',riRefresh,0,RequestImage);
   FToolbar.AddIcon('ScriptSceneAdopt','選択行へ既存ローカル画像をコピーして採用',riOpen,0,Adopt);
   FToolbar.AddIcon('ScriptSceneCancel','選択行の画像要求を取り消す',riDelete,0,CancelImage);
-  FToolbar.AddIcon('ScriptScenePreview','選択行の動画配置プレビューを更新',riPreview,0,Preview);
   FGuide := TRigmScriptLabel.Create(Self); FGuide.Parent := Self; FGuide.Align := alBottom; FGuide.AutoSize := False; FGuide.WordWrap := True;
-  FGuide.Height := ScaleValue(54); FGuide.Name := 'ScriptSceneGuide';
-  FPreview := TRigmScriptScenePreview.CreateForWorkspace(Self,Workspace); FPreview.Parent := Self; FPreview.Align := alBottom; FPreview.Height := ScaleValue(128);
+  FGuide.Height := ScaleValue(32); FGuide.Name := 'ScriptSceneGuide';
+  FDialogue := TRigmBufferedPanel.Create(Self); FDialogue.Parent := Self; FDialogue.BevelOuter := bvNone;
+  FDialogue.Caption := ''; FDialogue.Height := ScaleValue(32); FDialogue.Align := alBottom;
+  FDialogue.Name := 'ScriptSceneDialogue'; FDialogue.Padding.SetBounds(ScaleValue(4),ScaleValue(4),ScaleValue(4),ScaleValue(4));
+  FDialogueCaption := TRigmScriptLabel.Create(Self); FDialogueCaption.Parent := FDialogue;
+  FDialogueCaption.AutoSize := False; FDialogueCaption.Width := ScaleValue(144); FDialogueCaption.Align := alLeft;
+  FDialogueCaption.Layout := tlCenter; FDialogueCaption.Caption := 'シーンのセリフ';
+  FDialogueText := TEdit.Create(Self); FDialogueText.Parent := FDialogue; FDialogueText.Align := alClient;
+  FDialogueText.Name := 'ScriptSceneDialogueText'; FDialogueText.ReadOnly := True;
+  FDialogueText.TabStop := False; FDialogueText.AutoSelect := False;
   FScroll := TScrollBox.Create(Self); FScroll.Parent := Self; FScroll.Align := alClient; FScroll.BorderStyle := bsNone;
-  FScroll.VertScrollBar.Tracking := True; FScroll.HorzScrollBar.Tracking := True; FScroll.HorzScrollBar.Range := ScaleValue(960); FScroll.Name := 'ScriptSceneRows';
+  FScroll.VertScrollBar.Tracking := True; FScroll.HorzScrollBar.Tracking := True; FScroll.Name := 'ScriptSceneRows';
+  FScroll.OnResize := LayoutChanged;
+  FHeader := TRigmBufferedPanel.Create(Self); FHeader.Parent := FScroll; FHeader.BevelOuter := bvNone; FHeader.Caption := '';
+  FHeader.ParentBackground := False; FHeader.ParentColor := False; FHeader.Color := clBlack; FHeader.StyleElements := [];
+  FHeader.Name := 'ScriptSceneHeader'; SetLength(FHeaders,4);
+  var Captions: TArray<string> := ['シーン','画像要望・修正指示（Codexへ）','補足文（動画表示）／配置','要求画像'];
+  for var I := 0 to High(FHeaders) do begin
+    FHeaders[I] := TLabel.Create(Self); FHeaders[I].Parent := FHeader;
+    FHeaders[I].AutoSize := False; FHeaders[I].Caption := Captions[I];
+    FHeaders[I].Transparent := False; FHeaders[I].ParentColor := False;
+    FHeaders[I].Color := clBlack; FHeaders[I].Font.Color := clWhite; FHeaders[I].StyleElements := [];
+  end;
+  LayoutRows;
 end;
 destructor TRigmScriptScenesFrame.Destroy;
 begin FRows.Free; inherited; end;
 procedure TRigmScriptScenesFrame.ChangeScale(M,D: Integer; isDpiChange: Boolean);
-begin inherited; if FScroll<>nil then begin FScroll.HorzScrollBar.Range := ScaleValue(960); for var I := 0 to FRows.Count-1 do FRows[I].SetBounds(0,I*ScaleValue(210),ScaleValue(960),ScaleValue(210)); end; end;
+begin inherited; LayoutRows; end;
+procedure TRigmScriptScenesFrame.Resize;
+begin inherited; LayoutRows; end;
+procedure TRigmScriptScenesFrame.LayoutChanged(Sender: TObject);
+begin LayoutRows; end;
+procedure TRigmScriptScenesFrame.LayoutRows;
+begin
+  if FLayout or (FScroll=nil) or (FHeader=nil) or (Length(FHeaders)<>4) then Exit;
+  FLayout := True;
+  try
+  var W := Max(ScaleValue(800),FScroll.ClientWidth);
+  var Sizes: TArray<Integer> := [ScaleValue(56),0,0,ScaleValue(180)];
+  Sizes[1] := (W-Sizes[0]-Sizes[3]) div 2; Sizes[2] := W-Sizes[0]-Sizes[1]-Sizes[3];
+  var H := ScaleValue(88); var HeaderHeight := ScaleValue(28);
+  var X := -FScroll.HorzScrollBar.Position; var Y := -FScroll.VertScrollBar.Position;
+  FScroll.DisableAlign;
+  try
+    FHeader.SetBounds(X,Y,W,HeaderHeight); var Left := 0;
+    for var I := 0 to High(FHeaders) do begin
+      FHeaders[I].SetBounds(Left+ScaleValue(4),ScaleValue(4),Sizes[I]-ScaleValue(8),HeaderHeight-ScaleValue(4));
+      Inc(Left,Sizes[I]);
+    end;
+    for var I := 0 to FRows.Count-1 do begin
+      FRows[I].SetBounds(X,Y+HeaderHeight+I*H,W,H); FRows[I].Arrange(Sizes[0],Sizes[1],Sizes[2],Sizes[3]);
+    end;
+    FScroll.HorzScrollBar.Range := W; FScroll.VertScrollBar.Range := HeaderHeight+FRows.Count*H;
+  finally FScroll.EnableAlign; end;
+  finally FLayout := False; end;
+end;
 function TRigmScriptScenesFrame.SelectedId: string;
 begin Result := JS(JO(FWorkspace.ScriptDraft.ScriptWizard,'scenes'),'selectedScene'); end;
 function TRigmScriptScenesFrame.RowFor(Sender: TObject): TRigmSceneImageRow;
 begin
   Result := nil; for var Row in FRows do
-    if (Sender=Row.Prompt) or (Sender=Row.Description) or (Sender=Row.Feedback) or (Sender=Row.Approved) or (Sender=Row.Mode) then Exit(Row);
+    if (Sender=Row.Prompt) or (Sender=Row.Description) or (Sender=Row.Approved) or (Sender=Row.Position) then Exit(Row);
 end;
 procedure TRigmScriptScenesFrame.FocusRow(Sender: TObject);
 begin
   if FSync then Exit; var Row := RowFor(Sender); if Row=nil then Exit;
-  try FWorkspace.SelectScriptScene(Row.SceneId); except on E: Exception do FGuide.Caption := E.Message; end;
+  try FWorkspace.SelectScriptScene(Row.SceneId); RefreshDialogue; except on E: Exception do FGuide.Caption := E.Message; end;
+end;
+procedure TRigmScriptScenesFrame.RefreshDialogue;
+begin
+  var P := FWorkspace.ScriptDraft; var S := P.Scene(SelectedId);
+  var Text := TStringBuilder.Create;
+  try
+    if S<>nil then for var C in P.Cues do if C.Scene=S.Id then begin
+      if Text.Length>0 then Text.Append(' ');
+      Text.Append(C.Text.Replace(#13#10,' ').Replace(#13,' ').Replace(#10,' '));
+    end;
+    var Value := Text.ToString;
+    if FDialogueText.Text<>Value then FDialogueText.Text := Value;
+  finally Text.Free; end;
+  if S=nil then FDialogueCaption.Caption := 'シーンのセリフ'
+  else FDialogueCaption.Caption := Format('シーン %d のセリフ',[P.Scenes.IndexOf(S)+1]);
 end;
 procedure TRigmScriptScenesFrame.Changed(Sender: TObject);
 begin
   if FSync then Exit; FEditing := True; FWorkspace.BeginScriptTextEdit;
-  FGuide.Caption := '入力中。Ctrl+Enter / Esc または入力反映アイコンで反映します。画像確定は右端チェックです。';
+  FGuide.Caption := 'Ctrl+Enter / 入力反映で保存。画像下の「確定」で入力を保護し、修正時はチェックを外します。';
 end;
 function TRigmScriptScenesFrame.RequestFinish: Boolean;
 begin
@@ -144,10 +197,13 @@ begin
   try
     for var Row in FRows do begin
       var S := FWorkspace.ScriptDraft.Scene(Row.SceneId); if S=nil then raise Exception.Create('シーン構成が変わりました。入力を保持しています。');
-      if (Row.Mode.ItemIndex<0) then raise Exception.Create('表示方法を選択してください。');
-      if (S.ImagePrompt=NormalizeScriptText(Row.Prompt.Text)) and (S.Description=NormalizeScriptText(Row.Description.Text)) and (S.ImageFeedback=NormalizeScriptText(Row.Feedback.Text)) and (S.DisplayMode=Modes[Row.Mode.ItemIndex]) then Continue;
+      if Row.Position.ItemIndex<0 then raise Exception.Create('補足の配置を選択してください。');
+      var Prompt := NormalizeScriptText(Row.Prompt.Text); var Description := NormalizeScriptText(Row.Description.Text);
+      var Mode := SceneInputDisplayMode(Prompt,Description); var Position := Positions[Row.Position.ItemIndex];
+      if (NormalizeScriptText(SceneImageInstruction(S))=Prompt) and (S.Description=Description) and
+        (S.DescriptionPosition=Position) and (S.ImageApproved or (S.DisplayMode=Mode)) then Continue;
       var O := TJSONObject.Create; A.AddElement(O); O.AddPair('id',Row.SceneId); O.AddPair('prompt',Row.Prompt.Text); O.AddPair('description',Row.Description.Text);
-      O.AddPair('feedback',Row.Feedback.Text); O.AddPair('mode',Modes[Row.Mode.ItemIndex]);
+      O.AddPair('feedback',''); O.AddPair('mode',Mode); O.AddPair('descriptionPosition',Position);
     end;
     FSync := True;
     try FWorkspace.UpdateScriptSceneInputs(A); FEditing := False; FWorkspace.EndScriptTextEdit; finally FSync := False; end;
@@ -179,8 +235,6 @@ procedure TRigmScriptScenesFrame.RequestImage(Sender: TObject);
 begin if not RequestFinish then Exit; try FWorkspace.RequestUnapprovedScriptImages; except on E: Exception do FGuide.Caption := E.Message; end; end;
 procedure TRigmScriptScenesFrame.CancelImage(Sender: TObject);
 begin if not RequestFinish then Exit; try FWorkspace.CancelScriptSceneImage(SelectedId); except on E: Exception do FGuide.Caption := E.Message; end; end;
-procedure TRigmScriptScenesFrame.Preview(Sender: TObject);
-begin if not RequestFinish then Exit; try FWorkspace.PreviewScriptScene(True); except on E: Exception do FGuide.Caption := E.Message; end; end;
 procedure TRigmScriptScenesFrame.RefreshState;
 begin
   if FSync then Exit; var P := FWorkspace.ScriptDraft; if (P=nil) or (P.ScriptWizard.GetValue('scenes')=nil) then Exit;
@@ -190,40 +244,35 @@ begin
     if not Rebuild then for var I := 0 to P.Scenes.Count-1 do if FRows[I].SceneId<>P.Scenes[I].Id then begin Rebuild := True; Break; end;
     if Rebuild then begin
       if FEditing then Exit; FScroll.DisableAlign;
-      try FRows.Clear; for var S in P.Scenes do begin var Row := TRigmSceneImageRow.CreateRow(Self,S.Id); Row.Top := FRows.Count*ScaleValue(210); FRows.Add(Row); end;
+      try FRows.Clear; for var S in P.Scenes do begin var Row := TRigmSceneImageRow.CreateRow(Self,S.Id); FRows.Add(Row); end;
       finally FScroll.EnableAlign; end;
+      LayoutRows;
     end;
     var Ready := 0;
     for var I := 0 to FRows.Count-1 do begin
       var Row := FRows[I]; var S := P.Scene(Row.SceneId); if S=nil then Continue;
       Row.Number.Caption := (I+1).ToString;
       if not FEditing then begin
-        if Row.Prompt.Text<>S.ImagePrompt then Row.Prompt.Text := S.ImagePrompt;
+        var Prompt := SceneImageInstruction(S); if Row.Prompt.Text<>Prompt then Row.Prompt.Text := Prompt;
         if Row.Description.Text<>S.Description then Row.Description.Text := S.Description;
-        if Row.Feedback.Text<>S.ImageFeedback then Row.Feedback.Text := S.ImageFeedback;
-        for var M := 0 to 3 do if Modes[M]=S.DisplayMode then Row.Mode.ItemIndex := M;
+        for var M := 0 to High(Positions) do if Positions[M]=S.DescriptionPosition then Row.Position.ItemIndex := M;
       end;
-      Row.Prompt.ReadOnly := S.ImageApproved; Row.Description.ReadOnly := S.ImageApproved; Row.Feedback.ReadOnly := S.ImageApproved;
-      Row.Mode.Enabled := not S.ImageApproved; Row.Approved.Checked := S.ImageApproved;
-      var Info := '画像なし'; var Stamp := ''; var Path := ResolveMoviePath(P.FileName,S.Image);
+      Row.Prompt.ReadOnly := S.ImageApproved; Row.Description.ReadOnly := S.ImageApproved;
+      Row.Position.Enabled := not S.ImageApproved; Row.Approved.Checked := S.ImageApproved;
+      var Stamp := ''; var Path := ResolveMoviePath(P.FileName,S.Image);
       try
-        if S.Image<>'' then begin Stamp := Path+'|'+CheckedMovieImageHash(Path); Info := '未確定'; end;
-        if (Stamp<>Row.ImageStamp) or (Stamp='') then begin
+        Row.Picture.Hint := ''; Row.Picture.ShowHint := False;
+        if S.Image<>'' then Stamp := Path+'|'+CheckedMovieImageHash(Path);
+        if Stamp<>Row.ImageStamp then begin
           Row.Picture.Picture.Assign(nil); if Stamp<>'' then Row.Picture.Picture.LoadFromFile(Path); Row.ImageStamp := Stamp;
         end;
-        if ScriptSceneReady(P,S) then begin Info := '確定 / 更新保護中'; Inc(Ready); end
-        else if S.ImageApproved then Info := '再確認が必要：チェックを外して再設定';
-      except on E: Exception do begin Row.Picture.Picture.Assign(nil); Row.ImageStamp := ''; Info := '画像読込失敗：'+E.Message; end; end;
-      if S.Id=SelectedId then Info := '選択中 / '+Info;
-      Row.Info.Caption := Info;
+      except on E: Exception do begin Row.Picture.Picture.Assign(nil); Row.ImageStamp := ''; Row.Picture.Hint := '画像読込失敗：'+E.Message; Row.Picture.ShowHint := True; end; end;
+      if ScriptSceneReady(P,S) then Inc(Ready);
     end;
-    if not FEditing then FGuide.Caption := Format('確定 %d / %d。要望入力後はCodexへ作業を指示してください。未確定行だけ更新されます。全件確定後、上段Nextで保存して動画編集へ。',[Ready,P.Scenes.Count]);
-    if FActive and not FEditing then try FWorkspace.PreviewScriptScene; except on E: Exception do FGuide.Caption := E.Message; end;
-    var State := FWorkspace.ScriptScenePreviewStatus;
-    try var Stamp := P.Id+'|'+SelectedId+'|'+JS(State,'path')+'|'+JS(State,'error'); if Stamp<>FPreviewStamp then begin FPreviewStamp := Stamp; FPreview.Invalidate; end;
-    finally State.Free; end;
+    RefreshDialogue;
+    if not FEditing then FGuide.Caption := Format('確定 %d / %d。要望のある未確定行を要求します。全件確定後、Nextで動画編集へ。',[Ready,P.Scenes.Count]);
   finally FSync := False; end;
 end;
 procedure TRigmScriptScenesFrame.SetActive(Value: Boolean);
-begin FActive := Value; end;
+begin if Value then RefreshState; end;
 end.

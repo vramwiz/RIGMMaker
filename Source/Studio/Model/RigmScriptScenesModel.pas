@@ -5,7 +5,10 @@ uses System.JSON, RigmMovieModel, RigmMovieComposition;
 procedure PrepareScriptScenes(Project: TRigmMovieProject; RequireVoiceConfirmation: Boolean = True);
 procedure ValidateScriptScenes(Project: TRigmMovieProject);
 procedure RequireScriptScenes(Project: TRigmMovieProject);
-procedure EditScriptScene(Project: TRigmMovieProject; const Id,Description,Prompt,Mode: string);
+procedure EditScriptScene(Project: TRigmMovieProject; const Id,Description,Prompt,Mode: string; const Position: string='');
+function SceneImageInstruction(Scene: TRigmMovieScene): string; // 旧要望・修正指示を欠落なく1欄へ表示する。
+function SceneInputDisplayMode(const Prompt,Description: string): string;
+function SceneNeedsImage(Scene: TRigmMovieScene): Boolean;
 procedure EditScriptSceneFeedback(Project: TRigmMovieProject; const Id,Feedback: string);
 procedure RequireEditableScriptScene(Project: TRigmMovieProject; const Id: string);
 procedure SetScriptSceneApproved(Project: TRigmMovieProject; const Id: string; Value: Boolean);
@@ -22,6 +25,22 @@ procedure RequireSceneImageRequest(Project: TRigmMovieProject; const Id,RequestI
 function ScriptScenesSummary(Project: TRigmMovieProject): TJSONObject;
 implementation
 uses System.SysUtils, System.Hash, System.Generics.Collections, RigmJson, PsdJson, RigmScriptCastingModel, RigmScriptVoiceModel, RigmScriptTextModel, RigmMovieChart, RigmMovieImageTransfer;
+function SceneImageInstruction(Scene: TRigmMovieScene): string;
+begin
+  Result := Scene.ImagePrompt;
+  if Scene.ImageFeedback.Trim<>'' then begin
+    if Result.Trim<>'' then Result := Result+#13#10+#13#10;
+    Result := Result+Scene.ImageFeedback;
+  end;
+end;
+function SceneInputDisplayMode(const Prompt,Description: string): string;
+begin
+  Result := 'none';
+  if Prompt.Trim<>'' then begin Result := 'image'; if Description.Trim<>'' then Result := 'both'; end
+  else if Description.Trim<>'' then Result := 'text';
+end;
+function SceneNeedsImage(Scene: TRigmMovieScene): Boolean;
+begin Result := (Scene.DisplayMode='both') or (Scene.DisplayMode='image'); end;
 procedure ValidateText(const Text: string; Limit: Integer);
 begin
   if Length(Text)>Limit then raise Exception.Create('シーンの文章が長すぎます。');
@@ -65,21 +84,23 @@ begin
   for var V in JA(O,'requests') do begin
     if not (V is TJSONObject) then raise Exception.Create('画像要求の保存形式が不正です。');
     var R := TJSONObject(V);
-    if (JS(R,'requestId')='') or (JS(R,'sceneId')='') or (Length(JS(R,'fingerprint'))<>64) or (Length(JS(R,'prompt'))>8000) then raise Exception.Create('画像要求の識別情報が不正です。');
+    if (JS(R,'requestId')='') or (JS(R,'sceneId')='') or (Length(JS(R,'fingerprint'))<>64) or (Length(JS(R,'prompt'))>16004) then raise Exception.Create('画像要求の識別情報が不正です。');
   end;
   for var S in Project.Scenes do begin
-    ValidateText(S.Description,3000); ValidateText(S.ImagePrompt,8000); ValidateText(S.ImageFeedback,8000); S.Validate;
+    ValidateText(S.Description,3000); ValidateText(S.ImagePrompt,16004); ValidateText(S.ImageFeedback,8000); S.Validate;
     var HasCue := False; for var C in Project.Cues do if C.Scene=S.Id then HasCue := True;
     if not HasCue then raise Exception.Create('シーンには1つ以上のセリフが必要です。');
   end;
 end;
-procedure EditScriptScene(Project: TRigmMovieProject; const Id,Description,Prompt,Mode: string);
+procedure EditScriptScene(Project: TRigmMovieProject; const Id,Description,Prompt,Mode: string; const Position: string);
 begin
   RequireScriptScenes(Project); RequireEditableScriptScene(Project,Id); var S := Project.Scene(Id);
-  var D := NormalizeScriptText(Description); var P := NormalizeScriptText(Prompt); ValidateText(D,3000); ValidateText(P,8000);
+  var D := NormalizeScriptText(Description); var P := NormalizeScriptText(Prompt); ValidateText(D,3000); ValidateText(P,16004);
   var O := S.Json;
   try PsdJson.Put(O,'description',D); PsdJson.Put(O,'imagePrompt',P); PsdJson.Put(O,'displayMode',Mode);
-    var Copy := TRigmMovieScene.FromJson(O); try S.Description := Copy.Description; S.ImagePrompt := Copy.ImagePrompt; S.DisplayMode := Copy.DisplayMode; finally Copy.Free; end;
+    if Position<>'' then PsdJson.Put(O,'descriptionPosition',Position);
+    var Copy := TRigmMovieScene.FromJson(O); try S.Description := Copy.Description; S.ImagePrompt := Copy.ImagePrompt;
+      S.DisplayMode := Copy.DisplayMode; S.DescriptionPosition := Copy.DescriptionPosition; finally Copy.Free; end;
   finally O.Free; end;
   PsdJson.Put(Project.ScriptWizard,'scenesStatus','in-progress');
 end;
@@ -99,7 +120,7 @@ begin
   RequireScriptScenes(Project); var S := Project.Scene(Id); if S=nil then raise Exception.Create('対象シーンがありません。');
   if S.ImageApproved=Value then Exit;
   if S.ImageEditEpoch=MaxInt then raise Exception.Create('画像編集世代の上限です。');
-  if Value then begin
+  if Value and SceneNeedsImage(S) then begin
     if S.Image='' then raise Exception.Create('画像を用意してから確定してください。');
     CheckedMovieImageHash(ResolveMoviePath(Project.FileName,S.Image),True);
   end;
@@ -124,8 +145,11 @@ function ScriptSceneReady(Project: TRigmMovieProject; Scene: TRigmMovieScene; Fo
 begin
   Result := False;
   try
-    if not Scene.ImageApproved or (Scene.Image='') then Exit;
-    CheckedMovieImageHash(ResolveMoviePath(Project.FileName,Scene.Image),Force);
+    if not Scene.ImageApproved then Exit;
+    if SceneNeedsImage(Scene) then begin
+      if Scene.Image='' then Exit;
+      CheckedMovieImageHash(ResolveMoviePath(Project.FileName,Scene.Image),Force);
+    end;
     Result := Scene.ImageApprovalKey=ScriptSceneFingerprint(Project,Scene.Id);
   except on E: Exception do Result := False; end;
 end;
@@ -161,11 +185,13 @@ function RequestScriptSceneImage(Project: TRigmMovieProject; const Id: string): 
 begin
   RequireScriptScenes(Project); var S := Project.Scene(Id); if S=nil then raise Exception.Create('対象シーンがありません。');
   RequireEditableScriptScene(Project,Id);
-  if S.ImagePrompt.Trim='' then raise Exception.Create('Codexへの画像指示を入力してください。');
+  var Prompt := SceneImageInstruction(S);
+  if Prompt.Trim='' then raise Exception.Create('Codexへの画像指示を入力してください。');
+  ValidateText(Prompt,16004);
   var Fingerprint := ScriptSceneFingerprint(Project,Id);
   var A := JA(JO(Project.ScriptWizard,'scenes'),'requests'); for var I := A.Count-1 downto 0 do if JS(TJSONObject(A[I]),'sceneId')=Id then A.Remove(I).Free;
   Result := TJSONObject.Create; A.AddElement(Result); Result.AddPair('requestId',PsdJson.NewId); Result.AddPair('sceneId',Id); AddN(Result,'sceneNumber',ScriptSceneNumber(Project,Id));
-  Result.AddPair('fingerprint',Fingerprint); Result.AddPair('prompt',S.ImagePrompt); Result.AddPair('feedback',S.ImageFeedback); Result.AddPair('state','pending'); Result.AddPair('provider','external-codex');
+  Result.AddPair('fingerprint',Fingerprint); Result.AddPair('prompt',Prompt); Result.AddPair('feedback',''); Result.AddPair('state','pending'); Result.AddPair('provider','external-codex');
 end;
 procedure RequireSceneImageRequest(Project: TRigmMovieProject; const Id,RequestId: string);
 begin

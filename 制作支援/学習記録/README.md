@@ -16,6 +16,7 @@
 | 髪の分離、後ろ髪の補完 | 取込・検証済み、後ろ髪の採用判断は確認待ち。肌素体には後続修正あり | [髪の分離](AIArtToPSD/Sample/hair_separation_trial_20261002/learning_record.json) |
 | 最終ベースへ背景透過を引き継ぐ | ミスと再発防止を記録。修正を検証、見た目は確認待ち | [背景透過](AIArtToPSD/Sample/syncroh2_blonde_native_20261002/background-alpha-fix/learning_record.json) |
 | 口・目・眉の差分をまとめて追加 | 取込・保存・検証済み、ユーザーの見た目は確認待ち | [表情一式](AIArtToPSD/Sample/syncroh2_expressions_20261002/learning_record.json) |
+| 台本のシーン画像・ジャンル固定・前シーン参照 | ユーザーの制作方針を記録。生成・採用の状態は記録本体を参照 | [シーン画像の連続性](RIGM/20261008-scene-image-continuity/learning_record.json) |
 
 原画の両目の髪除去、両眉・口の周囲透明化の成功は、各 [目](AIArtToPSD/Sample/eyes_no_hair_20261001/README.md)・[眉](AIArtToPSD/Sample/brows_only_20261001/README.md)・[口](AIArtToPSD/Sample/mouth_only_20261001/README.md) の制作記録にも保存されている。
 過去の失敗・途中結果も原文の評価とともに保持した。制作時の一般ルールは [RIGM 用パーツ分解](../制作手順/パーツ分解.md) と [差分作成](../制作手順/差分作成.md) を使う。

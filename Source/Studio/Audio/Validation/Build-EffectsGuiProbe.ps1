@@ -1,7 +1,8 @@
 ﻿param(
   [string]$OutDir=(Join-Path ([IO.Path]::GetTempPath()) ('rigm-effects-gui-'+[guid]::NewGuid().ToString('N').Substring(0,8))),
   [ValidateSet('Debug','Release')][string]$Configuration='Debug',
-  [switch]$Run
+  [switch]$Run,
+  [switch]$PresetsOnly
 )
 $ErrorActionPreference='Stop'
 [Console]::OutputEncoding=[Text.Encoding]::UTF8
@@ -45,7 +46,9 @@ if($Run){
   $stdout=Join-Path $runRoot 'stdout.txt'
   $stderr=Join-Path $runRoot 'stderr.txt'
   # Launch only the copied test executable. It owns its window/workspace/PCM/settings/pipe.
-  $ownedProbe=Start-Process -FilePath $exe -ArgumentList ('"'+$runRoot+'"') -WindowStyle Hidden -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru
+  $runArguments='"'+$runRoot+'"'
+  if($PresetsOnly){$runArguments+=' --presets-only'}
+  $ownedProbe=Start-Process -FilePath $exe -ArgumentList $runArguments -WindowStyle Hidden -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru
   $ownedProbe.WaitForExit()
   Write-Output ('Owned probe PID '+$ownedProbe.Id+' exited '+$ownedProbe.ExitCode)
   Write-Output ('Probe reports and native VCL client PNGs: '+$runRoot)

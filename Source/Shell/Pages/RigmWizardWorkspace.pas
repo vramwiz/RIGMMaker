@@ -116,7 +116,7 @@ type
     function VoiceCatalog: TJSONArray; // 借用。実APIの直近一覧。
     procedure SelectScriptScene(const Id: string);
     procedure MoveScriptScene(Delta: Integer);
-    procedure EditScriptScene(const Id,Description,Prompt,Mode: string);
+    procedure EditScriptScene(const Id,Description,Prompt,Mode: string; const Position: string='');
     procedure AdoptScriptSceneImage(const Id,Path: string);
     procedure RequestScriptSceneImage(const Id: string);
     procedure CancelScriptSceneImage(const Id: string);
@@ -228,7 +228,12 @@ begin
       SetScriptSceneStart(JS(Args,'cueId'),JB(Args,'startsScene'));
     end
     else if Name='script-select-scene' then SelectScriptScene(JS(Args,'sceneId'))
-    else if Name='script-edit-scene' then begin var S := FScriptDraft.Scene(JS(Args,'sceneId')); if S=nil then raise Exception.Create('シーンがありません。'); EditScriptScene(S.Id,JS(Args,'description',S.Description),JS(Args,'prompt',S.ImagePrompt),JS(Args,'displayMode',S.DisplayMode)); if Args.GetValue('feedback')<>nil then EditScriptSceneFeedback(S.Id,JS(Args,'feedback')); end
+    else if Name='script-edit-scene' then begin
+      var S := FScriptDraft.Scene(JS(Args,'sceneId')); if S=nil then raise Exception.Create('シーンがありません。');
+      var Description := JS(Args,'description',S.Description); var Prompt := JS(Args,'prompt',S.ImagePrompt);
+      EditScriptScene(S.Id,Description,Prompt,JS(Args,'displayMode',SceneInputDisplayMode(Prompt,Description)),JS(Args,'descriptionPosition',S.DescriptionPosition));
+      if Args.GetValue('feedback')<>nil then EditScriptSceneFeedback(S.Id,JS(Args,'feedback'));
+    end
     else if Name='script-adopt-scene-image' then DeliverScriptSceneImage(Args)
     else if Name='script-request-unapproved-images' then RequestUnapprovedScriptImages
     else if Name='script-request-scene-image' then RequestScriptSceneImage(JS(Args,'sceneId'))
@@ -314,7 +319,7 @@ begin
     ScriptSchema.AddPair('script-scene-assignment',PsdJson.ObjectText('{"projectId":"required","revision":"required","offset":0,"limit":50}'));
     ScriptSchema.AddPair('script-set-scene-start',PsdJson.ObjectText('{"projectId":"required","revision":"required","cueId":"from scene-assignment; first row fixed","startsScene":"required boolean"}'));
     for var CommandName in ['script-select-scene','script-request-scene-image','script-cancel-scene-image'] do ScriptSchema.AddPair(CommandName,PsdJson.ObjectText('{"projectId":"required","revision":"required","sceneId":"from scenes"}'));
-    ScriptSchema.AddPair('script-edit-scene',PsdJson.ObjectText('{"projectId":"required","revision":"required","sceneId":"from scenes","description":"optional <=3000 UTF16","prompt":"optional <=8000 UTF16","displayMode":"both/image/text/none","feedback":"optional Codex revision instructions <=8000; independent of on-screen description"}'));
+    ScriptSchema.AddPair('script-edit-scene',PsdJson.ObjectText('{"projectId":"required","revision":"required","sceneId":"from scenes","description":"optional <=3000 UTF16","prompt":"image instructions including corrections <=16004 UTF16","displayMode":"optional both/image/text/none; omitted infers from prompt/description","descriptionPosition":"below-image/image-top/image-center/image-bottom/screen-top","feedback":"legacy corrections <=8000 UTF16; combined with prompt for requests"}'));
     ScriptSchema.AddPair('script-adopt-scene-image',PsdJson.ObjectText('{"projectId":"required","revision":"required","sceneId":"from scenes","path":"local PNG/JPEG/BMP inside data root (no bytes)","requestId":"current pending request required","sha256":"required 64 hex","provenance":"external-generated/existing-material/test-fixture"}'));
     for var CommandName in ['script-complete-scenes','script-preview-scene','script-request-unapproved-images'] do ScriptSchema.AddPair(CommandName,PsdJson.ObjectText('{"projectId":"required","revision":"required"}'));
     ScriptSchema.AddPair('script-set-summary-choice',PsdJson.ObjectText('{"projectId":"required","revision":"required","choice":"none/yes; no chart values invented"}'));

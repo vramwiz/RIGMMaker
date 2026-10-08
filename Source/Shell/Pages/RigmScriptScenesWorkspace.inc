@@ -8,12 +8,13 @@ begin
 end;
 procedure TRigmWizardWorkspace.MoveScriptScene(Delta: Integer);
 begin var S := FScriptDraft.Scene(JS(JO(FScriptDraft.ScriptWizard,'scenes'),'selectedScene')); SelectScriptScene(FScriptDraft.Scenes[EnsureRange(FScriptDraft.Scenes.IndexOf(S)+Delta,0,FScriptDraft.Scenes.Count-1)].Id); end;
-procedure TRigmWizardWorkspace.EditScriptScene(const Id,Description,Prompt,Mode: string);
+procedure TRigmWizardWorkspace.EditScriptScene(const Id,Description,Prompt,Mode: string; const Position: string);
 begin
   if CurrentScriptStage<>'scenes' then raise Exception.Create('シーン工程で操作してください。');
   var S := FScriptDraft.Scene(Id); if S=nil then raise Exception.Create('シーンがありません。');
-  if (S.Description=NormalizeScriptText(Description)) and (S.ImagePrompt=NormalizeScriptText(Prompt)) and (S.DisplayMode=Mode) then Exit;
-  RigmScriptScenesModel.EditScriptScene(FScriptDraft,Id,Description,Prompt,Mode); FScriptDraft.Changed; ScriptChanged;
+  if (S.Description=NormalizeScriptText(Description)) and (S.ImagePrompt=NormalizeScriptText(Prompt)) and (S.DisplayMode=Mode) and
+    ((Position='') or (S.DescriptionPosition=Position)) then Exit;
+  RigmScriptScenesModel.EditScriptScene(FScriptDraft,Id,Description,Prompt,Mode,Position); FScriptDraft.Changed; ScriptChanged;
 end;
 procedure TRigmWizardWorkspace.AdoptScriptSceneImage(const Id,Path: string);
 begin
@@ -45,7 +46,7 @@ begin
   try
     for var V in Inputs do begin
       var O := V as TJSONObject; var Id := JS(O,'id');
-      RigmScriptScenesModel.EditScriptScene(P,Id,JS(O,'description'),JS(O,'prompt'),JS(O,'mode'));
+      RigmScriptScenesModel.EditScriptScene(P,Id,JS(O,'description'),JS(O,'prompt'),JS(O,'mode'),JS(O,'descriptionPosition'));
       RigmScriptScenesModel.EditScriptSceneFeedback(P,Id,JS(O,'feedback'));
     end;
     // Publish all rows only after every value has passed model validation.
@@ -71,7 +72,7 @@ procedure TRigmWizardWorkspace.RequestUnapprovedScriptImages;
 begin
   if (CurrentScriptStage<>'scenes') or FScriptTextEditing then raise Exception.Create('入力を完了してから画像要求を作成してください。');
   RequireScriptScenes(FScriptDraft); var Count := 0;
-  for var S in FScriptDraft.Scenes do if not S.ImageApproved and (S.ImagePrompt.Trim<>'') then begin
+  for var S in FScriptDraft.Scenes do if not S.ImageApproved and (SceneImageInstruction(S).Trim<>'') then begin
     RigmScriptScenesModel.RequestScriptSceneImage(FScriptDraft,S.Id); Inc(Count);
   end;
   if Count=0 then raise Exception.Create('要望のある未確定シーンがありません。');
@@ -85,7 +86,7 @@ begin
   if VoiceBusy or VoicePlaying or VoiceContinuous then Exit('音声生成・再生を停止してください。');
   if Trim(JS(FScriptDraft.ScriptWizard,'titleInput'))='' then Exit('題名を入力してください。');
   if JS(FScriptDraft.ScriptWizard,'scene-assignmentStatus')<>'complete' then Exit('シーン割当をNextで保存してください。');
-  if not ScriptScenesReady(FScriptDraft) then Exit('全シーンの画像を用意し、右端の確定チェックを入れてください。');
+  if not ScriptScenesReady(FScriptDraft) then Exit('画像を使うシーンには画像を用意し、全シーンの確定チェックを入れてください。');
   for var C in FScriptDraft.Cues do if not FScriptDraft.AudioReady(C) then Exit('音声変更を確認してください。');
   Result := CastingAdvanceReason(False);
 end;

@@ -1,0 +1,51 @@
+﻿{
+  "generator": "built-in image_gen",
+  "genre": {
+    "value": "穏やかな現代の日常ファンタジー",
+    "source": "inferred_for_test"
+  },
+  "referencePolicy": "scene n references previous scene; scene 4 also references the original environment and key",
+  "prompts": [
+    {
+      "scene": 1,
+      "prompt": "Use case: illustration-story. Asset type: RIGM Maker narrated story scene image, landscape 16:9, one finished frame, no montage. Primary user request (Japanese): 散歩道を歩いている. Context: the narrator recalls finding a mysterious lost object yesterday while walking the familiar neighborhood path. Genre for this test: gentle contemporary everyday fantasy, a slight sense of mystery, calm and inviting, not horror. Style/medium: high quality Japanese storybook environmental illustration, subtle watercolor and gouache texture, softly drawn realistic proportions, natural warm late-afternoon light, coherent subdued greens and warm neutrals. Scene: first-person view along a familiar small-town pedestrian walking path beside greenery and modest residential walls. Camera/framing: natural eye-level walking viewpoint, the path gently leads ahead, enough concrete paving visible near foreground for a subsequent close view of a small key. Only a tiny, unobtrusive hint of the walker's muted navy coat cuff at a lower edge if needed; do not depict a face or a full main character. Keep the scene ordinary with a gentle air of anticipation; do not reveal a magical door or strong magic yet. No written text, captions, logos, borders or watermark. Do not include the RIGM UI, narrator avatar or subtitle. Preserve clean readability at small in-video thumbnail scale. Generate a single standalone wide illustration.",
+      "generatedPath": "C:\\Users\\vramw\\.codex\\generated_images\\01a119ac-103f-7321-9a32-eed1ed3e4fc5\\exec-19a7b7fc-5927-48b3-945a-ed148f6a2755.png",
+      "savedPath": "D:\\DelphiProg\\MyApp\\RIGMMaker\\output\\imagegen\\scene-test-20261008-2db5fc6d\\scene-001.png",
+      "references": []
+    },
+    {
+      "scene": 2,
+      "prompt": "Use case: illustration-story. Asset type: RIGM Maker narrated story scene, landscape 16:9, single frame. Input image 1 role: the immediately preceding story scene, a continuity and visual-style reference, not an edit target. Primary user request: 足元に小さな銀色の鍵が落ちている. Dialogue: a small silver key lies at the narrator's feet, its curious shape seems vaguely familiar but is unknown. Generate the next beat of the SAME walk: shift the first-person camera downward and closer to the SAME path paving near the walker's feet. A SINGLE small old-fashioned silver key with a subtly unusual asymmetrical ornamental bow and three simple teeth lies diagonally on the paving as the clear focal point. Make the key small in-world but large enough within the close framing to read. Retain the preceding image's environmental design, paving material, late-afternoon light, color palette and watercolor/gouache Japanese storybook style. A partial toe of a simple shoe at the very bottom may establish scale; no face, no extra person, no hands picking it up yet. Mystery stays gentle: no neon glow, no magic spectacle, no door revealed. No text, captions, UI, avatar, border, logo or watermark. One wide standalone illustration. Continuity details observed in the previous frame: warm sunset, irregular pale stone slab path, dark simple metal railing on the left, vine-covered pale stone residential wall on the right, distant small-town hillside. Maintain these details in the softly out-of-focus margins of the downward close-up.",
+      "generatedPath": "C:\\Users\\vramw\\.codex\\generated_images\\01a119ac-103f-7321-9a32-eed1ed3e4fc5\\exec-a05027d9-98d7-41e1-ac40-8bb14ec676bc.png",
+      "savedPath": "D:\\DelphiProg\\MyApp\\RIGMMaker\\output\\imagegen\\scene-test-20261008-2db5fc6d\\scene-002.png",
+      "references": [
+        "C:\\Users\\vramw\\.codex\\generated_images\\01a119ac-103f-7321-9a32-eed1ed3e4fc5\\exec-19a7b7fc-5927-48b3-945a-ed148f6a2755.png"
+      ]
+    },
+    {
+      "scene": 3,
+      "prompt": "Use case: illustration-story. Asset type: narrated scene illustration for RIGM Maker, landscape 16:9, one frame. Input image 1 role: the immediately preceding silver-key scene, continuity and visual-style reference, not an edit target. Primary user request: ポケットに入れた瞬間、なんだか手のひらがじんわりと温かくなる. Dialogue context: after slipping the found key into a pocket the hand feels gently warm; the narrator only speculates that it might open a secret door somewhere in town. Next beat of the SAME walk: a natural first-person close-up looking down at one hand just inside the pocket of a simple muted navy coat, the relaxed wrist and a small portion of palm visible at the pocket opening. The SAME small silver key from the preceding frame is partly visible beside the hand at the opening; match its bow and teeth. Suggest a faint, soft warm amber reflected light around the palm/pocket opening to express subtle warmth, physically gentle and understated, not flames, not a painful burn or beam. Keep anatomy natural with exactly one coherent visible hand. The familiar walking path remains softly visible behind this foreground detail; keep paving, lighting, palette, and the same watercolor/gouache storybook style. Do not reveal an actual secret door yet. No added person or face. No text, subtitles, logos, UI, borders or watermarks. Single wide illustration. Match the key seen in the reference: an antique silver key with a rounded three-lobed ornamental ring bow, a tiny spherical nub, a short slim shaft and a compact stepped toothed bit. Match the warm stone slab path and the dark metal railing on its left.",
+      "generatedPath": "C:\\Users\\vramw\\.codex\\generated_images\\01a119ac-103f-7321-9a32-eed1ed3e4fc5\\exec-0c248314-afad-4aa0-b3b9-0dba120cb294.png",
+      "savedPath": "D:\\DelphiProg\\MyApp\\RIGMMaker\\output\\imagegen\\scene-test-20261008-2db5fc6d\\scene-003.png",
+      "references": [
+        "C:\\Users\\vramw\\.codex\\generated_images\\01a119ac-103f-7321-9a32-eed1ed3e4fc5\\exec-a05027d9-98d7-41e1-ac40-8bb14ec676bc.png"
+      ]
+    },
+    {
+      "scene": 4,
+      "prompt": "Use case: illustration-story. Asset type: narrated story scene image, landscape 16:9, single finished frame. Input image 1 role: immediately preceding pocket/key scene as continuity and visual-style reference, not an edit target. Primary user request: 「もしその扉を見つけたら、君も一緒に来てくれる？ さあ、今からその扉を探しに行こう。」をイメージする. Continue the SAME gentle contemporary fantasy walk in the SAME neighborhood and late-afternoon light. Pull the first-person viewpoint back up to a wide forward-looking composition, a familiar path leading toward a small inviting side lane between residential walls and greenery, suggesting that a search is just beginning. At the lower edge a hand in the SAME muted navy coat sleeve holds the SAME small unusual silver key loosely and naturally, recognizable but secondary to the inviting route ahead; keep the silver key design from the reference. Suggest an invitation to the viewer through the welcoming composition, without inventing a second person. The door has NOT been found in the dialogue: do not depict an open magical portal or confirmed secret door; the destination stays an intriguing unseen possibility beyond the bend. Retain watercolor/gouache Japanese storybook illustration style, soft realistic proportions, consistent restrained warm-neutral and green palette. No UI, narrator avatar, captions, lettering, logos, border or watermark. One standalone wide scene. Additional input roles: reference image 2 (the earlier key-on-paving scene) defines the key's exact identity and small scale: silver, three rounded open loops on its bow with a tiny ball nub, a short straight shaft, compact small stepped bit. Reference image 3 (the original wide walking scene) defines the environment: sunset over distant small-town hills, irregular pale stone slab path, dark metal railing to the left and vine-covered pale stone residential walls to the right. Use all three to retain continuity. The hand should appear only small along the lower edge, with natural anatomy and the key about palm length; no oversized hand or key.",
+      "referenceScenes": [
+        3,
+        2,
+        1
+      ],
+      "generatedPath": "C:\\Users\\vramw\\.codex\\generated_images\\01a119ac-103f-7321-9a32-eed1ed3e4fc5\\exec-f1e03566-de2a-4f57-a28f-97bfa3ed4e53.png",
+      "savedPath": "D:\\DelphiProg\\MyApp\\RIGMMaker\\output\\imagegen\\scene-test-20261008-2db5fc6d\\scene-004.png",
+      "references": [
+        "C:\\Users\\vramw\\.codex\\generated_images\\01a119ac-103f-7321-9a32-eed1ed3e4fc5\\exec-0c248314-afad-4aa0-b3b9-0dba120cb294.png",
+        "C:\\Users\\vramw\\.codex\\generated_images\\01a119ac-103f-7321-9a32-eed1ed3e4fc5\\exec-a05027d9-98d7-41e1-ac40-8bb14ec676bc.png",
+        "C:\\Users\\vramw\\.codex\\generated_images\\01a119ac-103f-7321-9a32-eed1ed3e4fc5\\exec-19a7b7fc-5927-48b3-945a-ed148f6a2755.png"
+      ]
+    }
+  ]
+}

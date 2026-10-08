@@ -1,0 +1,238 @@
+﻿{
+  "date": "2026-10-08",
+  "visualInspection": {
+    "scene1": "walking path",
+    "limitation": "Exact key tooth geometry is not pixel-identical across frames.",
+    "continuity": "stone path, left metal railing, right stone wall, warm sunset, navy clothing and silver key reused",
+    "scene3": "pocket and gentle palm warmth",
+    "status": "assistant_reviewed_not_user_approved",
+    "scene2": "key near feet",
+    "scene4": "inviting route to begin looking for the door; no magical portal revealed"
+  },
+  "images": [
+    {
+      "path": "D:\\DelphiProg\\MyApp\\RIGMMaker\\output\\imagegen\\scene-test-20261008-2db5fc6d\\scene-001.png",
+      "width": 1672,
+      "height": 941,
+      "mode": "RGB",
+      "bytes": 3099523,
+      "sha256": "5648b3709a6d947f969cad383e0b341ceb485a440ef5b8cbcfad46458d10720f",
+      "pngChunks": [
+        "IDAT",
+        "IEND",
+        "IHDR",
+        "caBX"
+      ],
+      "decode": "passed"
+    },
+    {
+      "path": "D:\\DelphiProg\\MyApp\\RIGMMaker\\output\\imagegen\\scene-test-20261008-2db5fc6d\\scene-002.png",
+      "width": 1672,
+      "height": 941,
+      "mode": "RGB",
+      "bytes": 2893795,
+      "sha256": "29779f4c4c43c24b14ef48630d7b04af4d7c04b7f2ea4c86987be742f3425016",
+      "pngChunks": [
+        "IDAT",
+        "IEND",
+        "IHDR",
+        "caBX"
+      ],
+      "decode": "passed"
+    },
+    {
+      "path": "D:\\DelphiProg\\MyApp\\RIGMMaker\\output\\imagegen\\scene-test-20261008-2db5fc6d\\scene-003.png",
+      "width": 1672,
+      "height": 941,
+      "mode": "RGB",
+      "bytes": 2498154,
+      "sha256": "1044e5cdae138ee550261c80aef432dd6ceb682d485595bcd159f82c43aabba7",
+      "pngChunks": [
+        "IDAT",
+        "IEND",
+        "IHDR",
+        "caBX"
+      ],
+      "decode": "passed"
+    },
+    {
+      "path": "D:\\DelphiProg\\MyApp\\RIGMMaker\\output\\imagegen\\scene-test-20261008-2db5fc6d\\scene-004.png",
+      "width": 1672,
+      "height": 941,
+      "mode": "RGB",
+      "bytes": 3213610,
+      "sha256": "fd9b5679663bfbebd6a9b0d20f189e5b24662d48dc6a79ade86101b5c0b7bda0",
+      "pngChunks": [
+        "IDAT",
+        "IEND",
+        "IHDR",
+        "caBX"
+      ],
+      "decode": "passed"
+    }
+  ],
+  "applicationImport": {
+    "message": "システム エラー。コード: 2。指定されたファイルが見つかりません。",
+    "code": "command_failed",
+    "projectSave": "not_executed",
+    "command": "app-script-adopt-scene-image",
+    "status": "failed_first_scene_remaining_not_attempted",
+    "currentSceneImages": [
+      {
+        "sceneNumber": 1,
+        "image": "",
+        "imageApproved": false
+      },
+      {
+        "sceneNumber": 2,
+        "image": "",
+        "imageApproved": false
+      },
+      {
+        "sceneNumber": 3,
+        "image": "",
+        "imageApproved": false
+      },
+      {
+        "sceneNumber": 4,
+        "image": "",
+        "imageApproved": false
+      }
+    ],
+    "humanConfirmation": "not_executed",
+    "phase": "initial_attempt_with_old_running_executable"
+  },
+  "additionalCompatibilityFinding": {
+    "relationToObservedFileError": "not_confirmed",
+    "currentAppAllowsChunk": false,
+    "pngChunk": "caBX",
+    "source": "RigmMovieImageTransfer.pas PNG chunk allowlist",
+    "foundIn": "all four original generated PNGs",
+    "action": "record_for_later_fix; generated originals preserved",
+    "phase": "initial_inspection_before_corrective_source_change"
+  },
+  "generation": "completed_four_scenes_in_order",
+  "correctiveVerification": {
+    "date": "2026-10-08",
+    "userInstruction": "パイプで通信し、元画像の生成先から台本用のフォルダにコピーし、該当する画像の参照または再描画を修正してビルド",
+    "status": "source_fixed_debug_release_built_isolated_pipeline_passed",
+    "fileErrorCause": "Drive-root trailing delimiter removed: D:\\ became D:, making D:Users resolve below the drive current directory. Reproduced code 2 using the same production function.",
+    "fixes": [
+      "Preserve the absolute drive root while holding image directories.",
+      "Accept opaque caBX metadata with existing file bounds/chunk-count/CRC validation; no metadata interpretation or pixel conversion."
+    ],
+    "deliverySequence": [
+      "generator original copied to Exchange",
+      "named-pipe adoption command",
+      "checked copy into project Images",
+      "scene.image managed path updated",
+      "change notification reloads and redraws matching row image"
+    ],
+    "native": {
+      "passed": 36,
+      "generatedPNGs": 4,
+      "originalSHA256": "unchanged",
+      "metadata": "caBX retained",
+      "corruptMetadataCRC": "rejected",
+      "drive": "D:",
+      "result": "C:\\Users\\vramw\\AppData\\Local\\Temp\\rigm-image-copy-002a27f2\\native-result.txt"
+    },
+    "gui": {
+      "passed": 728,
+      "pipeInteractions": 18,
+      "drive": "D:",
+      "generatedScene1": "copied, adopted and row image refreshed",
+      "visualEvidence": "D:\\Temp\\rigm-image-copy-002a27f2\\Gui\\run\\scene-with-requested-image.png",
+      "visualInspection": "assistant reviewed isolated VCL frame render",
+      "result": "D:\\Temp\\rigm-image-copy-002a27f2\\Gui\\run\\result.json"
+    },
+    "static": {
+      "passed": 68,
+      "result": "C:\\Users\\vramw\\AppData\\Local\\Temp\\rigm-image-copy-002a27f2\\static-result.json"
+    },
+    "builds": {
+      "Win64Debug": "passed",
+      "Win64Release": "passed",
+      "output": "C:\\Users\\vramw\\AppData\\Local\\Temp\\rigm-image-copy-002a27f2",
+      "normalExecutable": "not replaced by this task; external modification observed at final check"
+    },
+    "liveProject": "not retried; normal executable changed outside this isolated build, content unverified; no normal app process at final check",
+    "humanConfirmation": "not executed on user project",
+    "deferredRequestUIConcern": "unchanged, recorded for later",
+    "finalWorkspaceObservation": {
+      "normalExecutableSHA256": "00739E2EEBBB89C312202F16186915AA60B337B24EAD9D9042EBA9E0FEDE51F1",
+      "normalExecutableModified": "2026-10-08T15:07:07",
+      "normalProcessRunning": false,
+      "resDprojIniSHA256": "unchanged"
+    }
+  },
+  "liveDeliveryVerification": {
+    "date": "2026-10-08",
+    "status": "passed_four_images_adopted_and_visible_in_live_scene_screen",
+    "projectId": "{F38EC9E5-987F-428A-808C-08C3ADDE4A85}",
+    "processId": 15952,
+    "revisionBefore": 266,
+    "revisionAfter": 277,
+    "delivery": "original PNG -> Exchange -> named pipe adoption -> project Images -> scene reference and row repaint",
+    "scenes": [
+      {
+        "sceneNumber": 1,
+        "sceneId": "{480BACC9-D3D7-465D-92A4-1D15F7C19095}",
+        "requestId": "{EB3805CB-E8DF-4673-9468-91691ED80AE4}",
+        "image": "D:\\Users\\take6\\RIGMMaker\\Projects\\{F38EC9E5-987F-428A-808C-08C3ADDE4A85}\\Images\\5648b3709a6d947f969cad383e0b341ceb485a440ef5b8cbcfad46458d10720f.png",
+        "imagePath": "D:\\Users\\take6\\RIGMMaker\\Projects\\{F38EC9E5-987F-428A-808C-08C3ADDE4A85}\\Images\\5648b3709a6d947f969cad383e0b341ceb485a440ef5b8cbcfad46458d10720f.png",
+        "sha256": "5648b3709a6d947f969cad383e0b341ceb485a440ef5b8cbcfad46458d10720f",
+        "originalUnchanged": true,
+        "imageApproved": false,
+        "requestState": "adopted",
+        "revision": 267
+      },
+      {
+        "sceneNumber": 2,
+        "sceneId": "{671C7A5A-8028-409F-80C5-EE812E0C758E}",
+        "requestId": "{F6F8E418-80A8-49E7-AB27-6CDA47D90E6E}",
+        "image": "D:\\Users\\take6\\RIGMMaker\\Projects\\{F38EC9E5-987F-428A-808C-08C3ADDE4A85}\\Images\\29779f4c4c43c24b14ef48630d7b04af4d7c04b7f2ea4c86987be742f3425016.png",
+        "imagePath": "D:\\Users\\take6\\RIGMMaker\\Projects\\{F38EC9E5-987F-428A-808C-08C3ADDE4A85}\\Images\\29779f4c4c43c24b14ef48630d7b04af4d7c04b7f2ea4c86987be742f3425016.png",
+        "sha256": "29779f4c4c43c24b14ef48630d7b04af4d7c04b7f2ea4c86987be742f3425016",
+        "originalUnchanged": true,
+        "imageApproved": false,
+        "requestState": "adopted",
+        "revision": 268
+      },
+      {
+        "sceneNumber": 3,
+        "sceneId": "{B67F57E3-3C32-4D7D-9FE2-9CF28B9D196F}",
+        "requestId": "{EF24E8A7-97E8-417C-AF1D-B89A7A025535}",
+        "image": "D:\\Users\\take6\\RIGMMaker\\Projects\\{F38EC9E5-987F-428A-808C-08C3ADDE4A85}\\Images\\1044e5cdae138ee550261c80aef432dd6ceb682d485595bcd159f82c43aabba7.png",
+        "imagePath": "D:\\Users\\take6\\RIGMMaker\\Projects\\{F38EC9E5-987F-428A-808C-08C3ADDE4A85}\\Images\\1044e5cdae138ee550261c80aef432dd6ceb682d485595bcd159f82c43aabba7.png",
+        "sha256": "1044e5cdae138ee550261c80aef432dd6ceb682d485595bcd159f82c43aabba7",
+        "originalUnchanged": true,
+        "imageApproved": false,
+        "requestState": "adopted",
+        "revision": 269
+      },
+      {
+        "sceneNumber": 4,
+        "sceneId": "{E4374DB5-F33E-4542-B380-54D7D30FCCF9}",
+        "requestId": "{2F380A18-749D-43A0-BDA5-0C421CDC2AB7}",
+        "image": "D:\\Users\\take6\\RIGMMaker\\Projects\\{F38EC9E5-987F-428A-808C-08C3ADDE4A85}\\Images\\fd9b5679663bfbebd6a9b0d20f189e5b24662d48dc6a79ade86101b5c0b7bda0.png",
+        "imagePath": "D:\\Users\\take6\\RIGMMaker\\Projects\\{F38EC9E5-987F-428A-808C-08C3ADDE4A85}\\Images\\fd9b5679663bfbebd6a9b0d20f189e5b24662d48dc6a79ade86101b5c0b7bda0.png",
+        "sha256": "fd9b5679663bfbebd6a9b0d20f189e5b24662d48dc6a79ade86101b5c0b7bda0",
+        "originalUnchanged": true,
+        "imageApproved": false,
+        "requestState": "adopted",
+        "revision": 270
+      }
+    ],
+    "visualInspection": "Computer Use live window screenshot inspected: scene 1 path, scene 2 key near feet, scene 3 pocket/hand, scene 4 setting off on the path; all four visible in corresponding rows",
+    "sceneContentPreserved": true,
+    "generatedOriginalHashes": "unchanged",
+    "managedImageHashes": "match original files",
+    "projectFileUnchanged": true,
+    "modified": true,
+    "textEditing": false,
+    "humanConfirmation": "not performed; four imageApproved values false",
+    "saveAndReopen": "not performed",
+    "evidenceDirectory": "C:\\Users\\vramw\\AppData\\Local\\Temp\\rigm-live-images-20261008-15952"
+  }
+}

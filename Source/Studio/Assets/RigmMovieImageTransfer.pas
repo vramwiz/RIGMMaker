@@ -78,7 +78,8 @@ begin
 end;
 procedure HoldImageDirectories(const Directory: string; Held: TList<THandle>; CreateMissing: Boolean);
 begin
-  var Root := TPath.GetPathRoot(Directory); var Current := ExcludeTrailingPathDelimiter(Root);
+  // Keep D:\ rooted: D: would resolve relative to that drive's current directory.
+  var Root := TPath.GetPathRoot(Directory); var Current := Root;
   for var Part in Directory.Substring(Length(Root)).Split(['\']) do begin
     if Part='' then Continue; Current := TPath.Combine(Current,Part);
     if CreateMissing and not DirectoryExists(Current) and not CreateDir(Current) then RaiseLastOSError;
@@ -140,8 +141,10 @@ begin
       var Kind := string(Char(B[4]))+Char(B[5])+Char(B[6])+Char(B[7]);
       if Kind='IHDR' then begin
         if HeaderFound or (Chunks<>1) or (Count<>13) then raise ERigm.Create('Duplicate or misplaced PNG header'); HeaderFound := True;
-      end else if not MatchStr(Kind,['PLTE','IDAT','IEND','tRNS','gAMA','cHRM','sRGB','pHYs','tEXt','sBIT','bKGD','tIME']) then
-        raise ERigm.Create('Unsupported PNG chunk (animated/compressed metadata is excluded)');
+      // caBX is opaque provenance metadata in generated PNGs. Preserve it, check
+      // its bounds and CRC below, and never interpret or decompress its payload.
+      end else if not MatchStr(Kind,['PLTE','IDAT','IEND','tRNS','gAMA','cHRM','sRGB','pHYs','tEXt','sBIT','bKGD','tIME','caBX']) then
+        raise ERigm.Create('Unsupported PNG chunk: '+Kind+' (animated/compressed metadata is excluded)');
       if (Kind='PLTE') and ((Count=0) or (Count>768) or (Count mod 3<>0)) then raise ERigm.Create('Invalid PNG palette');
       if (Kind='tRNS') and (Count>256) then raise ERigm.Create('Invalid PNG transparency');
       if ((Kind='gAMA') and (Count<>4)) or ((Kind='cHRM') and (Count<>32)) or ((Kind='sRGB') and (Count<>1)) or

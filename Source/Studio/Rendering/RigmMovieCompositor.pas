@@ -154,7 +154,7 @@ begin
   if (Cue=nil) or (Cue.SpeakerId<>Character.SpeakerId) or (Acting.ImageAttention='off') then Exit;
   var Start,SceneLocal: Double; var Scene := Project.SceneAt(Seconds,Start,SceneLocal);
   var HasImage := Cue.Background<>'';
-  if Scene<>nil then HasImage := HasImage or (Scene.Image<>'');
+  if Scene<>nil then HasImage := HasImage or ((Scene.Image<>'') and MatchText(Scene.DisplayMode,['image','both']));
   if not HasImage then Exit;
   var Explaining := Acting.ImageAttention='head';
   if Acting.ImageAttention='auto' then begin
@@ -261,7 +261,7 @@ begin
           if not FileExists(ResolveMoviePath(Project.FileName,JS(TJSONObject(V),'image'))) then raise ERigm.Create('Motion frame image is missing');
       finally P.Free; end;
     end;
-    for var S in Project.Scenes do if (S.Image<>'') and not FileExists(ResolveMoviePath(Project.FileName,S.Image)) then
+    for var S in Project.Scenes do if MatchText(S.DisplayMode,['image','both']) and (S.Image<>'') and not FileExists(ResolveMoviePath(Project.FileName,S.Image)) then
       raise ERigm.Create('Scene image is missing: '+S.Image);
     for var V in Project.EndCards do if not FileExists(ResolveMoviePath(Project.FileName,JS(TJSONObject(V),'image'))) then raise ERigm.Create('終了画像・サムネイルが見つかりません。');
     for var S in Project.Scenes do if S.Animation.GetValue('closingCard') is TJSONObject then begin var Card := JO(S.Animation,'closingCard'); if (JS(Card,'representativeChoice')='use') and not FileExists(ResolveMoviePath(Project.FileName,JS(Card,'image'))) then raise ERigm.Create('締め代表画像が見つかりません。'); end;
@@ -341,6 +341,7 @@ begin
       var ImageRect := BaseRect(ImageBounds.Left,ImageBounds.Top,ImageBounds.Right,ImageBounds.Bottom);
       var DescriptionRect := ScaleLayoutRect(MovieLayoutRegions(Project.Layout,Project.LDirection).Description,Project.Width,Project.Height);
       if S<>nil then begin
+        DescriptionRect := ScaleLayoutRect(MovieDescriptionRegion(Project.Layout,Project.LDirection,S.DescriptionPosition),Project.Width,Project.Height);
         var SceneImage := S.Image;
         if (SceneImage='') and (C<>nil) then SceneImage := C.Background;
         var Closing: TJSONObject := nil; if S.Animation.GetValue('closingCard') is TJSONObject then Closing := JO(S.Animation,'closingCard');

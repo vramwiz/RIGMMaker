@@ -134,7 +134,8 @@ begin
   if Name='update-scene' then begin
     var LockedScene := RequiredScene;
     if LockedScene.ImageApproved and ((Args.GetValue('image')<>nil) or (Args.GetValue('imagePrompt')<>nil) or
-      (Args.GetValue('description')<>nil) or (Args.GetValue('displayMode')<>nil) or (Args.GetValue('imageFeedback')<>nil)) then
+      (Args.GetValue('description')<>nil) or (Args.GetValue('displayMode')<>nil) or (Args.GetValue('imageFeedback')<>nil) or
+      (Args.GetValue('descriptionPosition')<>nil)) then
       raise ERigm.Create('Scene image is approved. Uncheck approval in the image stage before changing its image or caption.');
     if Args.GetValue('chart')<>nil then begin
       if not(Args.GetValue('chart') is TJSONObject) then raise ERigm.Create('Scene chart must be an object');
@@ -153,6 +154,7 @@ begin
     end;
     var S := RequiredScene; StringValue(S.Title,'title'); StringValue(S.Description,'description'); StringValue(S.ImagePrompt,'imagePrompt');
     StringValue(S.DisplayMode,'displayMode');
+    StringValue(S.DescriptionPosition,'descriptionPosition');
     if Args.GetValue('image')<>nil then begin
       if not (Args.GetValue('image') is TJSONString) then raise ERigm.Create('Scene image must be a local path string');
       var Path := JS(Args,'image');

@@ -8,6 +8,7 @@ type
     Image, Description, Subtitle, LeftCharacters, RightCharacters, Supplement: TRectF;
   end;
 function MovieLayoutRegions(const Layout, Direction: string): TRigmLayoutRegions;
+function MovieDescriptionRegion(const Layout,Direction,Position: string): TRectF;
 function ScaleLayoutRect(const Ratio: TRectF; Width, Height: Integer): TRect;
 function MovieLayoutGuide(const Choice: string; Width, Height: Integer): TJSONObject;
 function LayoutChoice(const Layout, Direction: string): string;
@@ -43,6 +44,18 @@ begin
 end;
 function ScaleLayoutRect(const Ratio: TRectF; Width, Height: Integer): TRect;
 begin Result := Rect(Round(Ratio.Left*Width),Round(Ratio.Top*Height),Round(Ratio.Right*Width),Round(Ratio.Bottom*Height)); end;
+function MovieDescriptionRegion(const Layout,Direction,Position: string): TRectF;
+begin
+  var Regions := MovieLayoutRegions(Layout,Direction); Result := Regions.Description;
+  var Image := Regions.Image;
+  if Position='image-top' then Result := RectF(Image.Left+0.01,Image.Top+0.015,Image.Right-0.01,Image.Top+0.135)
+  else if Position='image-center' then begin
+    var Center := (Image.Top+Image.Bottom)/2;
+    Result := RectF(Image.Left+0.01,Center-0.06,Image.Right-0.01,Center+0.06);
+  end
+  else if Position='image-bottom' then Result := RectF(Image.Left+0.01,Image.Bottom-0.135,Image.Right-0.01,Image.Bottom-0.015)
+  else if Position='screen-top' then Result := RatioRect(190,105,1730,235);
+end;
 function LayoutChoice(const Layout, Direction: string): string;
 begin
   Result := 'theme';

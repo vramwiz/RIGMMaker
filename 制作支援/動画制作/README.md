@@ -60,7 +60,7 @@ Debug SHA256: E4E8C09D9E4B7668EF743875EFF52508BF3CCF3E72DDCF8DDCFA9ECF22602CAA
 
 ## 2026-10-04 GUI MP4書き出しの現行手順
 
-1. 検証済みRelease `D:\DelphiProg\RIGMMaker\RIGMMaker.timeline-export-20261004T090459.exe` で作品を開く。現在の通常EXEも作品open起動検証済み。両者のSHA256と保管先はnote.md先頭を参照する。
+1. 検証済みRelease `D:\DelphiProg\RIGMMaker\RIGMMaker.timeline-export-20261004T090459.exe` で作品を開く。現在の通常EXEも作品open起動検証済み。両者のSHA256と保管先は[当時の開発履歴](../../note-history.md)を参照する。
 2. 「ファイル → 動画を書き出す → MP4（映像・音声）...」、またはプレビューの「MP4出力...」（Ctrl+Shift+E）を押し、新しい保存先を選ぶ。
 3. 進捗表示を待ち、完了後に「保存先を開く」。処理中は「書き出しを中止」で中止できる。
 
@@ -68,7 +68,7 @@ Debug SHA256: E4E8C09D9E4B7668EF743875EFF52508BF3CCF3E72DDCF8DDCFA9ECF22602CAA
 
 GUIで実際に生成した実画像/実音声MP4は `C:\Users\zan12\Documents\RIGMMaker\Projects\星灯り郵便局-20261004T064959615\Exports\星灯り郵便局-GUI書出し確認-20261004.mp4`。元作品・既存MP4は変更なし。時間と四トラックはDPIに追従する16論理pxの文字で、各オブジェクトの内容を表示する。
 
-検証済み範囲と未検証範囲、全1980項目、回収記録は `../../note.md` と `../../Win64/Validation/timeline-export-release-verification.json`。再実行はTests/Run-TimelineExportValidation.ps1のSourceMovieに実作品を指定する。これは4シーン実画像/音声作品用の隔離GUIテストで、全MP4出力には数分かかる。パイプAPIの64/5/43コマンドと素材/作品形式は今回変更していない。以下の段階別件数は過去の記録である。
+検証済み範囲と未検証範囲、全1980項目、回収記録は [開発履歴](../../note-history.md) と `../../Win64/Validation/timeline-export-release-verification.json`。再実行はTests/Run-TimelineExportValidation.ps1のSourceMovieに実作品を指定する。これは4シーン実画像/音声作品用の隔離GUIテストで、全MP4出力には数分かかる。パイプAPIの64/5/43コマンドと素材/作品形式は今回変更していない。以下の段階別件数は過去の記録である。
 
 通常の RIGMMaker.exe を起動し、上部アイコンのプレビュー／制作／キャラクター登録を使う。最近の作業と開いている文書から作品を選び、別作品を開いても既存の入力を保持する。制作ページは参加チェックと設定対象を分け、人物・声・基準配置・明示場面・場面画像・説明を設定する。プレビューでドラッグと8個のサイズハンドルを使い、字幕と音声本文を別々に編集できる。本文だけの編集では音声を自動生成せず、明示した再生成で必要なcueを更新する。目と口のPSD差分を優先し、生成表情は初期無効。全体モーションの画像列登録・選択・停止も扱える。
 
@@ -94,5 +94,5 @@ GUIで実際に生成した実画像/実音声MP4は `C:\Users\zan12\Documents\R
 Win64 Debug/Release、回帰1473項目、独立デコード50項目、実音声プレビュー32項目・同期7項目の計1562項目成功。[最終検証記録](../../Win64/Validation/anime-release-verification.json)を参照。VCL PaintToの配置画像と実描画フレームを確認した。主観的な試聴、全GUIの手動目視、物理モニター間DPI移動は未実施。公開・アップロードは行っていない。
 
 任意の一括APIは [互換用の一括操作](AI一括制作例.md) に記録している。以前の段階の記録は履歴として残し、今回の完成状態を優先する。
-2026-10-04 UI整理版：通常の `D:\DelphiProg\RIGMMaker\RIGMMaker.exe` に最終Releaseを反映済み。開く／保存／別名保存／履歴はメニューに移動し、3ページのアイコンと再生／停止は保持。履歴は実ファイルごとに1件、復旧コピーは別管理。右側はスプリッターと縦スクロール、再生中の静的UI更新抑止に対応した。movie 64／app 5／core 43の共通パイプ契約は維持。起動中の他インスタンスが存在する場合は実履歴の自動移行を延期し、単独の新版起動時に安全に移行する。今回1835項目の検証記録と未検証範囲は `note.md` と `Win64/Validation/ui-revision-release-verification.json` を参照。
-2026-10-04 メディア修正版：通常起動は `D:\DelphiProg\RIGMMaker\RIGMMaker.exe`。ファイル → 最近の作品 → 「星灯り郵便局・シーン編集版 [星灯り郵便局-画像付き編集版.rigmovie]」を開く。実作品は `C:\Users\zan12\Documents\RIGMMaker\Projects\星灯り郵便局-20261004T064959615\星灯り郵便局-画像付き編集版.rigmovie`、最終MP4は `C:\Users\zan12\Documents\RIGMMaker\Projects\星灯り郵便局-20261004T064959615\Exports\星灯り郵便局-画像付き編集版.mp4`。開くと停止・位置0、作業フォルダーにImages/Audio/Characters/Exportsを保管。シーン画像と共通背景は別項目で、画像採用は検証付きコピー・未保存のまま、明示保存後の再読込でも画像を維持する。標準出力はMP4。全体モーション4種は実キャラクター描画の回転/移動PNG列で、通常口パクを止める間も音声・字幕は続ける。全体モーションを停止するとLABの五母音口パクを使う。元作品と旧MP4は保持。SourceMatchedの人間確認は不要で、実際の素材不良は停止する。現行の実装・2080項目検証・未検証範囲は `../../note.md` と `../../Win64/Validation/media-release-verification.json`。API数はmovie64/app5/core43を維持し、新コマンドは追加していない。
+2026-10-04 UI整理版：通常の `D:\DelphiProg\RIGMMaker\RIGMMaker.exe` に最終Releaseを反映済み。開く／保存／別名保存／履歴はメニューに移動し、3ページのアイコンと再生／停止は保持。履歴は実ファイルごとに1件、復旧コピーは別管理。右側はスプリッターと縦スクロール、再生中の静的UI更新抑止に対応した。movie 64／app 5／core 43の共通パイプ契約は維持。起動中の他インスタンスが存在する場合は実履歴の自動移行を延期し、単独の新版起動時に安全に移行する。今回1835項目の検証記録と未検証範囲は [開発履歴](../../note-history.md) と `Win64/Validation/ui-revision-release-verification.json` を参照。
+2026-10-04 メディア修正版：通常起動は `D:\DelphiProg\RIGMMaker\RIGMMaker.exe`。ファイル → 最近の作品 → 「星灯り郵便局・シーン編集版 [星灯り郵便局-画像付き編集版.rigmovie]」を開く。実作品は `C:\Users\zan12\Documents\RIGMMaker\Projects\星灯り郵便局-20261004T064959615\星灯り郵便局-画像付き編集版.rigmovie`、最終MP4は `C:\Users\zan12\Documents\RIGMMaker\Projects\星灯り郵便局-20261004T064959615\Exports\星灯り郵便局-画像付き編集版.mp4`。開くと停止・位置0、作業フォルダーにImages/Audio/Characters/Exportsを保管。シーン画像と共通背景は別項目で、画像採用は検証付きコピー・未保存のまま、明示保存後の再読込でも画像を維持する。標準出力はMP4。全体モーション4種は実キャラクター描画の回転/移動PNG列で、通常口パクを止める間も音声・字幕は続ける。全体モーションを停止するとLABの五母音口パクを使う。元作品と旧MP4は保持。SourceMatchedの人間確認は不要で、実際の素材不良は停止する。現行の実装・2080項目検証・未検証範囲は [開発履歴](../../note-history.md) と `../../Win64/Validation/media-release-verification.json`。API数はmovie64/app5/core43を維持し、新コマンドは追加していない。

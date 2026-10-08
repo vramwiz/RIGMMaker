@@ -8,7 +8,7 @@ uses
   RigmWizardWorkspace, RigmScriptVoiceEffectsFrame, RigmMovieModel,
   RigmMovieComposition, RigmScriptTextModel, RigmScriptReviewModel,
   RigmScriptCastingModel, RigmScriptVoiceModel, RigmMovieLayout,
-  RigmVoiceEffects, RigmVoiceEffectSettings, RigmAul2EffectDefinition,
+  RigmVoiceEffects, RigmVoiceEffectSettings, RigmVoiceEffectPresets, RigmAul2EffectDefinition,
   RigmAul2VolumeControl, RigmAul2LampSwitch, VoicevoxToolbarButtons,
   RigmJson, PsdJson, RigmMovieAudio, RigmAudioFilePaths, RigmVoiceEffectsPreview;
 {$R *.res}
@@ -206,8 +206,8 @@ end;
 
 procedure SelectEffect(Index: Integer);
 begin
-  var Combo := Host.Frame.FindComponent('ScriptEffectKind') as TComboBox;
-  Combo.ItemIndex := Index; Combo.OnChange(Combo); Pump(20);
+  var List := Host.Frame.FindComponent('ScriptEffectKind') as TListBox;
+  List.ItemIndex := Index; List.OnClick(List); Pump(20);
 end;
 
 function VolumeEdit(Volume: TAul2VolumeControl): TEdit;
@@ -309,7 +309,7 @@ begin
       Host.Form.Realign; Host.Layout; Pump(100);
       var CaseName := PPI.ToString+'ppi-size'+Size.ToString;
       Check(Host.Frame.CurrentPPI=PPI,CaseName+' frame has requested PPI');
-      for var Name in ['ScriptEffectsPlay','ScriptEffectsLoop','ScriptEffectsStop','ScriptEffectKind','ScriptEffectOn'] do
+      for var Name in ['ScriptEffectsPlay','ScriptEffectsLoop','ScriptEffectsStop','ScriptEffectPreset','ScriptEffectApplyPreset','ScriptEffectOn'] do
         ReachAndMeasure(Host.Frame.FindComponent(Name) as TControl,CaseName);
       for var EffectIndex := 0 to CONTROLLER_EFFECT_COUNT-1 do begin
         SelectEffect(EffectIndex); var Definition: TControllerEffectDefinition;
@@ -339,6 +339,119 @@ begin
     end;
   end;
   Check(ScriptFingerprint(Host.Workspace.ScriptDraft)=BeforeText,'DPI/layout exploration preserves manuscript');
+end;
+
+procedure CheckPresets;
+  procedure Adopt(Index: Integer);
+  begin
+    var Combo := Host.Frame.FindComponent('ScriptEffectPreset') as TComboBox;
+    var Apply := Host.Frame.FindComponent('ScriptEffectApplyPreset') as TButton;
+    Combo.ItemIndex := Index;
+    // 実ボタンのクリック経路を通す。コンボの選択自体には副作用がない。
+    Apply.Perform(WM_LBUTTONDOWN,MK_LBUTTON,MakeLParam(8,8));
+    Apply.Perform(WM_LBUTTONUP,0,MakeLParam(8,8)); Pump(30);
+  end;
+  procedure CheckRowColor(Index: Integer; Active: Boolean; const CaseName: string);
+  begin
+    var List := Host.Frame.FindComponent('ScriptEffectKind') as TListBox;
+    List.TopIndex := Index; List.Update; Pump(10);
+    var Bitmap := TBitmap.Create;
+    try
+      Bitmap.SetSize(List.Width,List.Height); List.PaintTo(Bitmap.Canvas,0,0);
+      var R := List.ItemRect(Index);
+      var Color := ColorToRGB(Bitmap.Canvas.Pixels[4,(R.Top+R.Bottom) div 2]);
+      var Expected: TColor := $00202020;
+      if Active then Expected := $003D5030;
+      if List.ItemIndex=Index then begin Expected := $00D07000; if Active then Expected := $00507628; end;
+      if Color<>ColorToRGB(Expected) then begin
+        Writeln('COLOR actual=',IntToHex(Color,8),' expected=',IntToHex(ColorToRGB(Expected),8),
+          ' top=',R.Top,' bottom=',R.Bottom,' listPPI=',List.CurrentPPI);
+        var Png := TPngImage.Create;
+        try Png.Assign(Bitmap); Png.SaveToFile(TPath.Combine(OutputRoot,'row-color-failure.png')); finally Png.Free; end;
+      end;
+      Check(Color=ColorToRGB(Expected),CaseName+' rendered row color '+Index.ToString);
+    finally Bitmap.Free; end;
+  end;
+begin
+  SelectRow(0);
+  var List := Host.Frame.FindComponent('ScriptEffectKind') as TListBox;
+  var Combo := Host.Frame.FindComponent('ScriptEffectPreset') as TComboBox;
+  var Apply := Host.Frame.FindComponent('ScriptEffectApplyPreset') as TButton;
+  Check(List.Items.Count=20,'twenty effect types in listbox');
+  Check(Combo.Items.Count=18,'eighteen reference preset choices');
+  var P := Host.Workspace.ScriptDraft;
+  var OtherStamp := CueVoiceEffectsStamp(P.Cue(Cue1));
+  var Export := TJSONArray.Create;
+  try
+    for var I := 0 to VOICE_EFFECT_PRESET_COUNT-1 do begin
+      Check(Combo.Items[I]=VoiceEffectPresetName(I),'preset name '+I.ToString);
+      var Before := CueVoiceEffectsStamp(P.Cue(Cue0));
+      Combo.ItemIndex := I; Pump(20);
+      Check(CueVoiceEffectsStamp(P.Cue(Cue0))=Before,'selection alone preserves cue '+I.ToString);
+      Adopt(I);
+      var Expected := CreateVoiceEffectPreset(I);
+      try
+        Check(CueVoiceEffectsStamp(P.Cue(Cue0))=VoiceEffectSettingsStamp(Expected),'button adopts complete preset '+I.ToString);
+        Check(Expected.Count=100,'preset covers all one hundred parameters '+I.ToString);
+      finally Expected.Free; end;
+      Check(CueVoiceEffectsStamp(P.Cue(Cue1))=OtherStamp,'preset leaves other cue unchanged '+I.ToString);
+      var Entry := TJSONObject.Create; Export.AddElement(Entry);
+      AddN(Entry,'index',I); Entry.AddPair('name',Combo.Items[I]);
+      Entry.AddPair('settings',P.Cue(Cue0).AudioEffects.Clone as TJSONObject);
+    end;
+    TFile.WriteAllText(TPath.Combine(OutputRoot,'adopted-presets.json'),Export.ToJSON,TEncoding.UTF8);
+  finally Export.Free; end;
+  Adopt(5); List.TopIndex := 0;
+  var ClickRow := List.ItemRect(0);
+  List.Perform(WM_LBUTTONDOWN,MK_LBUTTON,MakeLParam(8,(ClickRow.Top+ClickRow.Bottom) div 2));
+  List.Perform(WM_LBUTTONUP,0,MakeLParam(8,(ClickRow.Top+ClickRow.Bottom) div 2)); Pump(20);
+  Check((List.ItemIndex=0) and not (Host.Frame.FindComponent('ScriptEffectOn') as TAul2LampSwitch).Checked,
+    'native list click selects Delay controls');
+  List.Perform(WM_KEYDOWN,VK_DOWN,0); List.Perform(WM_KEYUP,VK_DOWN,0); Pump(20);
+  Check((List.ItemIndex=1) and (Host.Frame.FindComponent('ScriptEffectOn') as TAul2LampSwitch).Checked,
+    'native arrow key selects enabled EQ controls');
+  CheckRowColor(1,True,'preset selected ON');
+  SelectEffect(0); CheckRowColor(1,True,'preset unselected ON'); CheckRowColor(0,False,'preset selected OFF');
+  var Lamp := Host.Frame.FindComponent('ScriptEffectOn') as TAul2LampSwitch;
+  Lamp.Checked := True; Lamp.OnClick(Lamp); Pump(20); CheckRowColor(0,True,'manual switch ON');
+  Lamp.Checked := False; Lamp.OnClick(Lamp); Pump(20); CheckRowColor(0,False,'manual switch OFF');
+  SelectRow(1); CheckRowColor(1,False,'other cue OFF'); SelectRow(0); CheckRowColor(1,True,'return restores ON');
+  SelectEffect(18); SetGain(-8);
+  var Edit := VolumeEdit(Host.Frame.FindComponent('ScriptEffectValue0') as TAul2VolumeControl);
+  Edit.Text := 'invalid'; SelectEffect(1);
+  Check(List.ItemIndex=18,'invalid knob input retains previous effect');
+  Adopt(0);
+  Check(not VoiceEffectsEnabled(P.Cue(Cue0).AudioEffects),'none disables every effect');
+  Check(VoiceEffectValue(P.Cue(Cue0).AudioEffects,'Out: Gain(dB)')=0,'none replaces manual and pending values with defaults');
+  Check(Host.Frame.RequestFinish,'none clears invalid numeric input');
+  Adopt(6); var SavedStamp := CueVoiceEffectsStamp(P.Cue(Cue0));
+  Host.Workspace.SaveScriptDraft; Host.Workspace.OpenScriptDraft(SavedPath); Pump(50);
+  P := Host.Workspace.ScriptDraft;
+  Check(CueVoiceEffectsStamp(P.Cue(Cue0))=SavedStamp,'preset settings survive save and reopen');
+  for var PPI in [96,144,192,96] do begin
+    Host.Form.Scaled := True; Host.Form.ScaleForPPI(PPI); Host.Form.Scaled := False;
+    Host.Form.ClientWidth := MulDiv(1280,PPI,96); Host.Form.ClientHeight := MulDiv(800,PPI,96);
+    Host.Layout; Pump(60);
+    var Rows := Host.Frame.FindComponent('ScriptVoiceEffectsRows') as TListView;
+    var RowPos := Rows.ClientToScreen(Point(Rows.Width,0));
+    var ListPos := List.ClientToScreen(Point(0,0)); var SettingsPos := Combo.ClientToScreen(Point(0,0));
+    Check((RowPos.X<=ListPos.X) and (ListPos.X+List.Width<=SettingsPos.X),'cue-list-settings order '+PPI.ToString);
+    Check((Apply.Left+Apply.Width<Combo.Left) and (Apply.Top=Combo.Top),'adopt button left of combo '+PPI.ToString);
+    Check(List.ItemHeight=MulDiv(26,PPI,96),'list row scales with DPI '+PPI.ToString);
+    SelectEffect(19); CheckRowColor(19,True,'last effect scroll '+PPI.ToString);
+    SelectEffect(1); List.TopIndex := 0; CheckRowColor(1,True,'saved preset ON '+PPI.ToString);
+    Capture('preset-layout-'+PPI.ToString);
+  end;
+  Adopt(0); SelectEffect(0);
+  Button('ScriptEffectsLoop').Execute;
+  WaitFor('preset audition loop begins',function: Boolean begin Result := PreviewReady(Cue0) and PlayOpened(True); end);
+  var OriginalPreview := P.Cue(Cue0).EffectAudioKey;
+  Adopt(6);
+  Check(CueEffectPreviewKey(P,P.Cue(Cue0))<>OriginalPreview,'adoption invalidates old preview settings');
+  WaitFor('loop adopts telephone preset',function: Boolean begin Result := PreviewReady(Cue0) and PlayOpened(True) and MeasuredCurrent; end);
+  Adopt(0);
+  WaitFor('loop adopts reset defaults',function: Boolean begin Result := PreviewReady(Cue0) and PlayOpened(True) and MeasuredCurrent; end);
+  Button('ScriptEffectsStop').Execute; Pump(50); Check(not StopEnabled,'preset loop stops normally');
 end;
 
 procedure CheckPlayback;
@@ -540,7 +653,8 @@ begin
       Host.Frame.SetActive(True); Host.Form.Update; Pump(200);
       Check(AreDpiAwarenessContextsEqual(GetWindowDpiAwarenessContext(Host.Form.Handle),
         DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2),'owned host uses PerMonitorV2');
-      CheckLayout; CheckPlayback; CheckLongAudioPaths;
+      CheckPresets; CheckLayout;
+      if ParamStr(2)<>'--presets-only' then begin CheckPlayback; CheckLongAudioPaths; end;
       Check(THashSHA2.GetHashStringFromFile(Source0)=SourceHash0,'original PCM one remains unchanged');
       Check(THashSHA2.GetHashStringFromFile(Source1)=SourceHash1,'original PCM two remains unchanged');
       Check(ScriptFingerprint(Host.Workspace.ScriptDraft)=ManuscriptHash,'full UI/playback/Next run preserves manuscript');

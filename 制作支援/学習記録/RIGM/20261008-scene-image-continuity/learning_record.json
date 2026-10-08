@@ -1,0 +1,209 @@
+﻿{
+  "schemaVersion": 1,
+  "recordType": "rigm_scene_image_generation_learning",
+  "date": "2026-10-08",
+  "purpose": "第12段階のシーン画像生成テストと、ジャンル・シリーズ・隣接場面の連続性に関するユーザー指示の記録",
+  "status": "images_generated_delivered_and_live_display_verified_awaiting_human_confirmation_and_save",
+  "userFeedback": "台本制作時にジャンルやシリーズを決めて画像生成のジャンルを固定していく。今回はテスト。要求を上から順に読み、ジャンルと要望の要素から補足してよい。第2画像は第1画像の次として、話が大きく変わらなければ前の画像を参照して続きとして生成する。指示を該当する学習データへ記録する。",
+  "reusableRules": [
+    "シーン番号の上から順に生成する。適用対象の識別には最新作品の固定sceneIdを用いる。",
+    "作品のジャンル・シリーズの設定がある場合はそれを優先して画風を固定する。未設定のテスト時に推定したジャンルは、ユーザーが確定した設定と区別して記録する。",
+    "明示的な画像要望を優先し、関連するセリフとジャンルから自然な情景・構図を補足してよい。",
+    "話が大きく変わらない隣接シーンは直前の生成画像を参照し、登場物・場所・光・画風を継続する。場面転換の明示があれば新しい要望を優先する。",
+    "ユーザー要望、セリフ、補足した生成指示、参照画像、生成結果、パイプでの採用と人間の見た目の評価を分けて残す。",
+    "GUIの未反映入力を推測して置換しない。入力反映後の要望と最新の要求IDを取得してから生成・採用する。",
+    "生成先の原画像をExchangeへコピーし、パイプで管理Imagesへのコピーと参照更新を依頼する。成功応答と該当行の再読込・再描画を確認し、原画像を保持する。"
+  ],
+  "imageSpecificConditions": [
+    "穏やかな現代ファンタジーのイラスト調。これは今回のテスト用推定で、ユーザー確定のシリーズ設定ではない。",
+    "1→2→3の順で直前の絵を参照。4は3に加えて1の情景と2の鍵を参照。",
+    "全画像1672×941 RGB PNG。元のcaBXメタデータを保持。"
+  ],
+  "method": "built-in image_gen; sequential generation with previous scene as continuity reference",
+  "verification": {
+    "projectSaveAndReload": "not_run",
+    "assistantVisualEvaluation": "reviewed",
+    "userVisualEvaluation": "not_reviewed",
+    "applicationImport": "four scenes adopted via named pipe; managed hashes match originals; all four live GUI thumbnails inspected",
+    "pixelAndAlpha": "four RGB PNGs decoded; dimensions and SHA256 recorded"
+  },
+  "lessons": [
+    "入力反映後の要望を読むことで、4シーンの明示的な画像要素が揃った。",
+    "画風・場所・光と重要な小物を直前画像から継続すると、同じ物語として自然につながる。",
+    "画像生成の成功・アプリへのコピーと参照更新・人間の見た目の確定を分けて記録する。最初の実作品採用は失敗したが、後続修正後の隔離作品ではパイプ採用と行画像更新が成功した。",
+    "ファイル参照エラーはD:\\をD:へ変えてドライブ相対参照にしたディレクトリ検査で再現した。ルート区切りを保持して修正。生成PNGのcaBXは別の阻害要因で、サイズ・CRC検査を維持して不透明なメタデータとして対応した。",
+    "修正版をユーザーがビルド・起動した後、実作品でも4枚のコピー・パイプ採用・行内表示が成功した。初回失敗履歴は保持し、ユーザー確定と保存再開は未確認として区別する。"
+  ],
+  "limitations": [
+    "今回の生成テストは、将来のジャンル・シリーズ選択UIの実装を意味しない。"
+  ],
+  "unverified": [
+    "ユーザーによる画像の確定",
+    "作品保存後の再開"
+  ],
+  "artifacts": {
+    "projectId": "{F38EC9E5-987F-428A-808C-08C3ADDE4A85}",
+    "finalImages": [
+      "D:\\DelphiProg\\MyApp\\RIGMMaker\\output\\imagegen\\scene-test-20261008-2db5fc6d\\scene-001.png",
+      "D:\\DelphiProg\\MyApp\\RIGMMaker\\output\\imagegen\\scene-test-20261008-2db5fc6d\\scene-002.png",
+      "D:\\DelphiProg\\MyApp\\RIGMMaker\\output\\imagegen\\scene-test-20261008-2db5fc6d\\scene-003.png",
+      "D:\\DelphiProg\\MyApp\\RIGMMaker\\output\\imagegen\\scene-test-20261008-2db5fc6d\\scene-004.png"
+    ],
+    "prompts": "prompts.json",
+    "verification": "verification.json"
+  },
+  "genre": {
+    "visualStyle": "穏やかな現代ファンタジーの水彩・ガッシュ調ストーリーイラスト",
+    "source": "inferred from dialogue; not a user-confirmed series setting",
+    "value": "日常の散歩から秘密の扉へ進む、穏やかな現代ファンタジー"
+  },
+  "sourceScenes": [
+    {
+      "sceneNumber": 1,
+      "id": "{480BACC9-D3D7-465D-92A4-1D15F7C19095}",
+      "imagePrompt": "散歩道を歩いている\r\n",
+      "description": "",
+      "imageRequest": {
+        "requestId": "{EB3805CB-E8DF-4673-9468-91691ED80AE4}",
+        "sceneId": "{480BACC9-D3D7-465D-92A4-1D15F7C19095}",
+        "sceneNumber": 1,
+        "fingerprint": "8836d256bbd5e590c4d218fc7b5d6dddf8e4d7e25532d7cdcaca1dfd7bc52704",
+        "prompt": "散歩道を歩いている\r\n",
+        "feedback": "",
+        "state": "pending",
+        "provider": "external-codex",
+        "current": true
+      },
+      "sourceCues": [
+        {
+          "cueId": "{3D23CED6-9A65-4972-A4A9-A970E31F0176}",
+          "sourceText": "あのね、実は昨日、"
+        },
+        {
+          "cueId": "{B1937781-5791-4B1C-A6E5-CA3D9909E6BA}",
+          "sourceText": "不思議な落とし物を見つけたんだ。"
+        },
+        {
+          "cueId": "{2D5EE834-802B-4CF1-BA26-3F44E73E77CD}",
+          "sourceText": "いつもの散歩道を歩いていたら、"
+        }
+      ]
+    },
+    {
+      "sceneNumber": 2,
+      "id": "{671C7A5A-8028-409F-80C5-EE812E0C758E}",
+      "imagePrompt": "足元に小さな銀色の鍵が落ちている",
+      "description": "",
+      "imageRequest": {
+        "requestId": "{F6F8E418-80A8-49E7-AB27-6CDA47D90E6E}",
+        "sceneId": "{671C7A5A-8028-409F-80C5-EE812E0C758E}",
+        "sceneNumber": 2,
+        "fingerprint": "7f8352a358da9226ce5068e53b96e9ddd8824f09649f25d01ca019968e371211",
+        "prompt": "足元に小さな銀色の鍵が落ちている",
+        "feedback": "",
+        "state": "pending",
+        "provider": "external-codex",
+        "current": true
+      },
+      "sourceCues": [
+        {
+          "cueId": "{5F7C68DF-0EC2-457D-815D-9CA0B7BCFDAF}",
+          "sourceText": "足元に小さな銀色の鍵が落ちていて。"
+        },
+        {
+          "cueId": "{E7BB675D-B8BD-4EEF-8852-300D4B3147CA}",
+          "sourceText": "どこかで見覚えがあるような、"
+        },
+        {
+          "cueId": "{3897A7FE-4703-45A1-B338-9886F36A0455}",
+          "sourceText": "でも絶対に知らない、奇妙な形をした鍵。"
+        }
+      ]
+    },
+    {
+      "sceneNumber": 3,
+      "id": "{B67F57E3-3C32-4D7D-9FE2-9CF28B9D196F}",
+      "imagePrompt": "ポケットに入れた瞬間、 なんだか手のひらがじんわりと温かくなる",
+      "description": "",
+      "imageRequest": {
+        "requestId": "{EF24E8A7-97E8-417C-AF1D-B89A7A025535}",
+        "sceneId": "{B67F57E3-3C32-4D7D-9FE2-9CF28B9D196F}",
+        "sceneNumber": 3,
+        "fingerprint": "5b31db0e819c9e2dc3c68823f22ecb76fb08c6e8e9e9c7231ee65d504b3720a1",
+        "prompt": "ポケットに入れた瞬間、 なんだか手のひらがじんわりと温かくなる",
+        "feedback": "",
+        "state": "pending",
+        "provider": "external-codex",
+        "current": true
+      },
+      "sourceCues": [
+        {
+          "cueId": "{C947B304-5373-4BF9-BB15-80CE5184282D}",
+          "sourceText": "ポケットに入れた瞬間、"
+        },
+        {
+          "cueId": "{331E5B28-CE17-461A-AF05-A0C6F74FE9EA}",
+          "sourceText": "なんだか手のひらがじんわりと温かくなった。"
+        },
+        {
+          "cueId": "{4F628919-1912-40D6-92F3-D924A41A3D16}",
+          "sourceText": "もしかしたら、この街のどこかにある、"
+        },
+        {
+          "cueId": "{2C0C2762-F056-4954-B3C7-5E683AD8BC5A}",
+          "sourceText": "秘密の扉を開けるためのものかもしれない。"
+        }
+      ]
+    },
+    {
+      "sceneNumber": 4,
+      "id": "{E4374DB5-F33E-4542-B380-54D7D30FCCF9}",
+      "imagePrompt": "もしその扉を見つけたら、 君も一緒に来てくれる？ さあ、今からその扉を探しに行こう。　をイメージする",
+      "description": "",
+      "imageRequest": {
+        "requestId": "{2F380A18-749D-43A0-BDA5-0C421CDC2AB7}",
+        "sceneId": "{E4374DB5-F33E-4542-B380-54D7D30FCCF9}",
+        "sceneNumber": 4,
+        "fingerprint": "bc7df8c242f644a549e4e40f53050e17306093a2fa762e3817373fce6d3a0f17",
+        "prompt": "もしその扉を見つけたら、 君も一緒に来てくれる？ さあ、今からその扉を探しに行こう。　をイメージする",
+        "feedback": "",
+        "state": "pending",
+        "provider": "external-codex",
+        "current": true
+      },
+      "sourceCues": [
+        {
+          "cueId": "{D6485F1A-DC73-4C3A-AF0D-343476AD24B6}",
+          "sourceText": "もしその扉を見つけたら、"
+        },
+        {
+          "cueId": "{B82256C4-F59D-4C0C-BC19-25BA1F6429A3}",
+          "sourceText": "君も一緒に来てくれる？"
+        },
+        {
+          "cueId": "{83CE2728-ADF9-45BC-A1BA-5D6E784A7641}",
+          "sourceText": "さあ、今からその扉を探しに行こう。"
+        }
+      ]
+    }
+  ],
+  "followUpIssues": [
+    {
+      "scope": "要求UIの動作・生成と反映の境界・実行状態のわかりやすさ",
+      "userStatement": "あとで修正課題とするが、アプリから要求するのは問題が起きそうで怖い",
+      "status": "recorded_for_later",
+      "implementation": "今回は未変更"
+    },
+    {
+      "issue": "生成画像のアプリ受渡しでファイル参照エラー",
+      "cause": "HoldImageDirectories stripped the drive-root delimiter, turning D:\\ into drive-relative D:; reproduced from repository working directory",
+      "details": "verification.json",
+      "status": "fixed_and_live_delivery_verified"
+    },
+    {
+      "issue": "内蔵画像生成PNGのcaBXメタデータと現行PNG許可リストの互換性",
+      "details": "caBXを不透明な付加メタデータとして許可。サイズ・CRCを検査し内容は展開せず原画像を保持。4枚の実PNGでコピーを確認し、CRC破損も拒否。",
+      "status": "fixed_and_live_delivery_verified"
+    }
+  ]
+}

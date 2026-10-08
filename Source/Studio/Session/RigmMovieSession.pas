@@ -112,7 +112,8 @@ begin
       (Imported.ImageEditEpoch<>Existing.ImageEditEpoch) or
       not SameText(ResolveMoviePath(Next.FileName,Imported.Image),ResolveMoviePath(Current.FileName,Existing.Image)) or
       (Imported.Description<>Existing.Description) or (Imported.ImagePrompt<>Existing.ImagePrompt) or
-      (Imported.ImageFeedback<>Existing.ImageFeedback) or (Imported.DisplayMode<>Existing.DisplayMode) then
+      (Imported.ImageFeedback<>Existing.ImageFeedback) or (Imported.DisplayMode<>Existing.DisplayMode) or
+      (Imported.DescriptionPosition<>Existing.DescriptionPosition) then
       raise ERigm.Create('Approved scene image/caption cannot be changed by a model commit. Uncheck image approval in the image stage first.');
     var OldCard := Existing.Animation.GetValue('closingCard'); var NewCard := Imported.Animation.GetValue('closingCard');
     if ((OldCard=nil)<>(NewCard=nil)) then raise ERigm.Create('Approved closing image cannot be replaced');
