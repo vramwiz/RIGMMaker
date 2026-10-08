@@ -1171,3 +1171,17 @@ Win64 Debug/Releaseを隔離出力先でコンパイルし成功。既存ScenesG
 computer-useスキルの@oai/skyをnode_replで使用。返されたRIGM Makerウィンドウを選び、最小化されていた画面を復元して採用前後を読取。採用後の通常アプリ実画面で1行目の散歩道、2行目の足元の鍵、3行目のポケットと手、4行目の扉を探しに出る道の4サムネイルを実際に確認した。隔離描画ではなく実作品の画面である。人間の確定チェック・Next・作品保存・アプリ再起動は操作していない。見た目の採用判断と保存再開はユーザー確認として残す。
 
 作業ログ・採用引数・返答・前後状態・ハッシュ照合はC:/Users/vramw/AppData/Local/Temp/rigm-live-images-20261008-15952に保持。最初に試したapp-script-schemaはUnknown workspace operationで拒否されたため、既存の文書と実装のコマンド定義を参照した。未知コマンドによる変更はない。学習記録のverification.jsonへliveDeliveryVerificationを追記し、初回失敗・隔離検証の履歴は保持。note.mdとnote-tasks.mdは完了した受渡し・表示確認を整理し、確定・保存再開だけを残した。製品コード変更・追加ビルド・コミット・プッシュなし。
+
+## 2026-10-08 題名画面へ台本種類「アニメ批評」「漫画紹介」を追加
+
+ユーザーの依頼に合わせ、題名入力欄の下へ「台本の種類」のコンボボックスを追加した。表示名はアニメ批評／漫画紹介、保存IDはanime-review／manga-introduction。選択したIDを.rigmovie内のscriptWizard.scriptTypeへ保存し、既存の保存・Next・終了時保存を使う。新規・旧台本とも選択前は未設定。種類未設定を新しい工程停止条件にはせず、既存台本を自動分類しない。
+
+種類一覧はSource/Studio/Model/RigmScriptTypes.pasへ集約し、GUI・状態・schemaの候補一覧を共通化した。将来の追加は一覧を拡張し、保存済みIDを変更しない。未知の有効な固定IDは読み込み・題名編集・保存で保持し、GUIには未対応の種類（ID）として表示する。不正な非文字列や不正なID形式の保存データは拒否し原ファイルを保持する。現在選択できる種類以外を新たに設定するパイプ操作は拒否する。
+
+app-script-statusはscriptType/scriptTypeName/scriptTypesを返し、app-script-listの各作品も種類を識別できる。app-schemaのworkspaceからscript-set-typeと候補一覧を取得でき、app-script-set-typeは現在のprojectId/revision/scriptTypeでGUIと同じ更新を使う。入力編集中、古いrevision、別作品への適用は既存の拒否を共用。同じIDは変更なし。空文字は未設定に戻す。作品形式を示す既存kindとは別のフィールド。分類だけの変更で原稿・配役・音声・シーン画像・工程完了を変更しない。
+
+Win64 Debug/Releaseを専用出力でビルド成功。従来からの警告13件とヒントは残り、今回追加・変更した種類モデルと画面に新しい警告はない。エラー0。Source/Psd/Validation/ScriptTypeCheck.dprの29項目と実パイプ6通信が成功し、所有プロセスPID9468はexit0。両種類のGUI選択、実保存と独立LoadMovie、別Workspaceへの再開、旧台本と将来種類の保持、一覧の識別、不正値・古いrevisionの拒否、96/144/192 DPIの配置を確認。title-96.pngとtitle-192.pngの隔離VCL描画を実際に見て題名・種類・案内の順を確認した。実ユーザー作品の種類は変更していない。
+
+証跡: C:/Users/vramw/AppData/Local/Temp/rigm-script-types-e319b6ee。AppDebug/build.log、AppRelease/build.log、ProbeDebug/build.log、Run/result.json、Run/pipe-done.json、Run/title-*.png、OwnedDataの保存・再開fixture。Build-Isolated.ps1を保持し、検証DPRと通常RESを同名で専用フォルダへコピーしてコンパイルした。検証の第1回ビルドはPsdJson.Putに整数オーバーロードがないため失敗し、検証用引数をTJSONNumberで構築するよう直して最終成功した。通常EXE・RES・dproj・VoicevoxEngine.iniは作業開始時のSHA256と一致。通常アプリ/IDEを停止・再起動・置換せず、コミット・プッシュなし。
+
+短いnote.mdへ種類仕様のリンク、note-basics.mdへ固定IDの基本事項を追加。詳細はSource/Shell/Pages/SCRIPT-TYPES-20261008.md。種類の分類と画像の画風・ジャンル・シリーズ設定は別で、後者や校正情報の拡張課題は未実装のまま保持する。

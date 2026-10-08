@@ -5,7 +5,7 @@ uses System.Classes, RigmScriptPageFrame, System.JSON, Vcl.Controls, Vcl.Forms, 
 type
   TRigmScriptCreatorFrame = class(TRigmScriptPageFrame,IRigmPageLifecycle)
   private
-    FWorkspace: TRigmWizardWorkspace; FRoot: string; FTitle: TEdit; FStatus,FProgress: TLabel;
+    FWorkspace: TRigmWizardWorkspace; FRoot: string; FTitle: TEdit; FScriptType: TComboBox; FStatus,FProgress: TLabel;
     FToolbar: TRigmIconToolbar; FSave: TToolButton; FSync: Boolean;
     FTitleStage,FCharactersStage,FLayoutStage,FPlacementStage,FTextStage,FReviewStage,FCastingStage,FSubtitleStage,FVoiceStage,FEffectsStage,FSceneAssignmentStage,FScenesStage,FSummaryStage,FClosingStage,FNext: TToolButton;
     FText: TRigmScriptTextFrame; FReview: TRigmScriptReviewFrame; FCasting: TRigmScriptCastingFrame; FSubtitles: TRigmScriptSubtitleFrame; FVoice: TRigmScriptVoiceFrame;
@@ -29,6 +29,7 @@ type
     procedure ThumbnailApplied(Sender: TObject; Item: TListItem; Metadata: TJSONObject);
     function GetCreator: TRigmMovieCreator;
     procedure Changed(Sender: TObject);
+    procedure ScriptTypeChanged(Sender: TObject);
     procedure RefreshScript(Sender: TObject);
     procedure SaveWork(Sender: TObject);
     procedure ReturnToLibrary(Sender: TObject);
@@ -47,7 +48,7 @@ type
   end;
 implementation
 uses System.SysUtils, System.IOUtils, System.Math, Vcl.Graphics, Winapi.Windows, Winapi.CommCtrl,
-  RigmJson, RigmToolbarIcons, RigmCharacterCatalog, PsdJson, RigmScriptPlacementModel;
+  RigmJson, RigmToolbarIcons, RigmCharacterCatalog, PsdJson, RigmScriptPlacementModel, RigmScriptTypes;
 {$R *.dfm}
 constructor TRigmScriptCreatorFrame.CreateForWorkspace(AOwner: TComponent; Workspace: TRigmWizardWorkspace; const Root: string);
 begin
@@ -90,19 +91,27 @@ begin
   LabelTitle.AutoSize := False; LabelTitle.Font.Size := 18; LabelTitle.Caption := '台本の題名'; LabelTitle.Name := 'ScriptTitleHeading';
   FTitle := TEdit.Create(Self); FTitle.Parent := Body; FTitle.Align := alTop; FTitle.Height := ScaleValue(42);
   FTitle.Font.Size := 16; FTitle.MaxLength := 128; FTitle.Name := 'ScriptTitle'; FTitle.TextHint := 'あとで見つけやすい題名を入力'; FTitle.OnChange := Changed;
-  var Guide := TRigmScriptLabel.Create(Self); Guide.Parent := Body; Guide.Align := alTop; Guide.Top := FTitle.Top+FTitle.Height;
+  var TypeHeading := TRigmScriptLabel.Create(Self); TypeHeading.Parent := Body; TypeHeading.Align := alTop;
+  TypeHeading.AutoSize := False; TypeHeading.Height := ScaleValue(32); TypeHeading.Caption := '台本の種類'; TypeHeading.Name := 'ScriptTypeHeading';
+  FScriptType := TComboBox.Create(Self); FScriptType.Parent := Body; FScriptType.Align := alTop;
+  FScriptType.Style := csDropDownList; FScriptType.Font.Size := 12; FScriptType.Name := 'ScriptType';
+  FScriptType.TextHint := '種類を選択（未設定）';
+  for var I := 0 to ScriptTypeCount-1 do FScriptType.Items.Add(ScriptTypeName(ScriptTypeId(I)));
+  FScriptType.ItemIndex := -1; FScriptType.OnChange := ScriptTypeChanged;
+  var Guide := TRigmScriptLabel.Create(Self); Guide.Parent := Body; Guide.Align := alTop; Guide.Top := FScriptType.Top+FScriptType.Height;
   Guide.AutoSize := False; Guide.Height := ScaleValue(94); Guide.WordWrap := True;
   Guide.Name := 'ScriptTitleGuide';
-  Guide.Caption := '題名を入力し、Nextのチェックアイコンでキャラ選択へ進んでください。'+#13#10+
+  Guide.Caption := '台本の種類を選べます。題名を入力し、Nextのチェックアイコンでキャラ選択へ進んでください。'+#13#10+
     '戻る・ホーム・終了でも途中の題名を保存し、台本管理から続けられます。'+#13#10+
     'Nextは内容と移動先を一緒に保存します。再開時は最後にNextで到達した画面を開きます。';
   FProgress := TRigmScriptLabel.Create(Self); FProgress.Parent := Body; FProgress.Align := alTop; FProgress.Top := Guide.Top+Guide.Height;
   FProgress.AutoSize := False; FProgress.Height := ScaleValue(40); FProgress.Name := 'ScriptTitleProgress';
-  // 早期にParentを接続しても、見出し→入力欄→案内→進捗の既定順を保つ。
+  // 見出し→題名→種類→案内→進捗の順に配置し、DPI変更時は既存のスクロールを使う。
   Body.DisableAlign;
   try
     LabelTitle.Top := 0; FTitle.Top := LabelTitle.Height;
-    Guide.Top := FTitle.Top+FTitle.Height; FProgress.Top := Guide.Top+Guide.Height;
+    TypeHeading.Top := FTitle.Top+FTitle.Height; FScriptType.Top := TypeHeading.Top+TypeHeading.Height;
+    Guide.Top := FScriptType.Top+FScriptType.Height; FProgress.Top := Guide.Top+Guide.Height;
   finally Body.EnableAlign; end;
   FCharactersBody := TRigmBufferedPanel.Create(Self); FCharactersBody.Parent := Self; FCharactersBody.Align := alClient;
   FCharactersBody.BevelOuter := bvNone; FCharactersBody.Caption := ''; FCharactersBody.ShowCaption := False;
@@ -187,6 +196,12 @@ begin
     FSync := True;
     try
       if FTitle.Text<>JS(State,'title') then FTitle.Text := JS(State,'title');
+      var TypeId := JS(State,'scriptType');
+      // 将来の種類を旧版で開いても、表示・保持し、別の種類へ自動置換しない。
+      while FScriptType.Items.Count>ScriptTypeCount do FScriptType.Items.Delete(FScriptType.Items.Count-1);
+      FScriptType.ItemIndex := ScriptTypeIndex(TypeId);
+      if (TypeId<>'') and (FScriptType.ItemIndex<0) then
+        FScriptType.ItemIndex := FScriptType.Items.Add(ScriptTypeName(TypeId));
       if not JB(State,'hasProject') then Exit;
       var Wizard := JO(State,'wizard'); var IsScenes := JS(Wizard,'stage')='scenes'; var IsSummary := JS(Wizard,'stage')='summary'; var IsSummaryEdit := JS(Wizard,'stage')='summary-edit'; var IsClosing := JS(Wizard,'stage')='closing'; var IsVoice := JS(Wizard,'stage')='voice'; var IsCharacters := JS(Wizard,'stage')='characters'; var IsLayout := JS(Wizard,'stage')='layout';
       var IsEffects := JS(Wizard,'stage')='voice-effects';
@@ -297,6 +312,12 @@ begin
   if FSync then Exit;
   try FWorkspace.SetScriptTitle(FTitle.Text);
   except on E: Exception do FStatus.Caption := E.Message; end;
+end;
+procedure TRigmScriptCreatorFrame.ScriptTypeChanged(Sender: TObject);
+begin
+  if FSync or (FScriptType.ItemIndex<0) or (FScriptType.ItemIndex>=ScriptTypeCount) then Exit;
+  try FWorkspace.SetScriptType(ScriptTypeId(FScriptType.ItemIndex));
+  except on E: Exception do begin FStatus.Caption := E.Message; end; end;
 end;
 procedure TRigmScriptCreatorFrame.SaveWork(Sender: TObject);
 begin

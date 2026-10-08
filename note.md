@@ -25,6 +25,7 @@ RIGMキャラクターの編集と、台本・音声・字幕・シーン画像�
 | 制作手順・他のノート | [制作支援](制作支援/README.md)、[参照元note](制作支援/元資料/AIArtToPSD/note.md) |
 | 動画制作 | [利用手順](制作支援/動画制作/README.md)、[制作仕様](制作支援/動画制作/仕様.md) |
 | パイプ通信 | [パイプ手順](制作支援/パイプ/README.md) |
+| 台本の種類 | [種類選択・保存識別](Source/Shell/Pages/SCRIPT-TYPES-20261008.md) |
 | シーン画像・学習記録 | [画像受渡し](Source/Shell/Pages/IMAGE-WORKFLOW-20261007.md)、[学習記録一覧](制作支援/学習記録/README.md) |
 
 ## 更新ルール

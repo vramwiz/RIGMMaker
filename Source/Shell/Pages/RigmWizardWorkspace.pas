@@ -61,6 +61,7 @@ type
     procedure NewScriptDraft;
     procedure OpenScriptDraft(const Path: string);
     procedure SetScriptTitle(const Value: string);
+    procedure SetScriptType(const Value: string); // 固定ID。GUIとパイプの共通更新。
     procedure SetScriptStage(const Value: string);
     procedure SetScriptCharacters(Paths: TJSONArray);
     procedure SetScriptLayout(const Choice, BackgroundTone: string);
@@ -173,7 +174,7 @@ type
 implementation
 uses RigmVoiceEffects, RigmVoiceEffectSettings, System.IOUtils, System.Math, System.DateUtils, System.StrUtils, Winapi.Windows, RigmJson, RigmAppSettings, PsdSession,
   PsdCharacter, PsdJson, PsdPackage, PsdProduction, RigmEditor, PsdImport, RigmStorage,
-  System.Hash, ArtDocument, PsdWorkspace, RigmCharacterCatalog, RigmMovieLayout, RigmScriptPlacementModel, RigmScriptTextModel, RigmScriptReviewModel, RigmScriptCastingModel, RigmScriptSubtitleModel, RigmScriptVoiceModel, RigmScriptVoiceSelection, System.SyncObjs, Winapi.MMSystem, RigmScriptScenesModel, RigmScriptSceneAssignmentModel, RigmScriptSummaryModel, RigmScriptClosingModel, RigmMovieCompositor, RigmMovieWorkspace, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg;
+  System.Hash, ArtDocument, PsdWorkspace, RigmCharacterCatalog, RigmMovieLayout, RigmScriptPlacementModel, RigmScriptTextModel, RigmScriptReviewModel, RigmScriptCastingModel, RigmScriptSubtitleModel, RigmScriptVoiceModel, RigmScriptVoiceSelection, System.SyncObjs, Winapi.MMSystem, RigmScriptScenesModel, RigmScriptSceneAssignmentModel, RigmScriptSummaryModel, RigmScriptClosingModel, RigmMovieCompositor, RigmMovieWorkspace, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, RigmScriptTypes;
 constructor TRigmWizardWorkspace.Create(AOwner: TComponent);
 begin
   inherited; FSessions := TObjectList<TRigmMovieSession>.Create(True);
@@ -218,7 +219,7 @@ begin
   if Name.StartsWith('script-image-transfer-') then Exit(ExecuteScriptImageTransfer(Name.Substring(7),Args));
   if Name='script-new' then begin NewScriptDraft; if Assigned(FOnNavigate) then FOnNavigate(Self,apScriptCreate,''); Exit(ScriptStatus); end;
   if Name='script-open' then begin OpenWork(FPipe.Workspace.Resolve(JS(Args,'path'))); Exit(ScriptStatus); end;
-  if MatchText(Name,['script-set-title','script-save','script-set-stage','script-set-characters','script-set-layout','script-next','script-set-placement','script-select-placement','script-set-text','script-select-section','script-request-review','script-submit-review','script-request-casting','script-submit-casting','script-select-casting','script-split-casting','script-merge-casting','script-select-subtitle','script-edit-subtitle','script-set-subtitle-break','script-select-voice','script-edit-voice','script-select-voice-effects','script-edit-voice-effects','script-set-voice-engine','script-refresh-voice','script-bind-voice','script-bind-voice-person','script-set-voice-state','script-save-character-voice','script-generate-voice','script-cancel-voice','script-set-scene-start','script-select-scene','script-edit-scene','script-adopt-scene-image','script-request-unapproved-images','script-request-scene-image','script-cancel-scene-image','script-complete-scenes','script-preview-scene','script-set-summary-choice','script-set-summary','script-complete-summary','script-set-closing','script-adopt-closing-image','script-complete-closing']) then begin
+  if MatchText(Name,['script-set-title','script-set-type','script-save','script-set-stage','script-set-characters','script-set-layout','script-next','script-set-placement','script-select-placement','script-set-text','script-select-section','script-request-review','script-submit-review','script-request-casting','script-submit-casting','script-select-casting','script-split-casting','script-merge-casting','script-select-subtitle','script-edit-subtitle','script-set-subtitle-break','script-select-voice','script-edit-voice','script-select-voice-effects','script-edit-voice-effects','script-set-voice-engine','script-refresh-voice','script-bind-voice','script-bind-voice-person','script-set-voice-state','script-save-character-voice','script-generate-voice','script-cancel-voice','script-set-scene-start','script-select-scene','script-edit-scene','script-adopt-scene-image','script-request-unapproved-images','script-request-scene-image','script-cancel-scene-image','script-complete-scenes','script-preview-scene','script-set-summary-choice','script-set-summary','script-complete-summary','script-set-closing','script-adopt-closing-image','script-complete-closing']) then begin
     if VoiceContinuous and (Name<>'script-cancel-voice') then raise Exception.Create('連続再生を停止してから変更してください。');
     if FPlacementEditing or FScriptTextEditing then raise Exception.Create('GUIで入力中です。入力完了アイコンを押してから再取得してください。');
     if (FScriptDraft=nil) or (JS(Args,'projectId')<>FScriptDraft.Id) or (JI(Args,'revision',-1)<>FScriptDraft.Revision) then
@@ -278,6 +279,10 @@ begin
     else if Name='script-request-review' then RequestReview
     else if Name='script-submit-review' then SubmitReview(Args)
     else if Name='script-set-title' then SetScriptTitle(JS(Args,'title'))
+    else if Name='script-set-type' then begin
+      if not (Args.GetValue('scriptType') is TJSONString) then raise Exception.Create('scriptTypeは文字列で指定してください。');
+      SetScriptType(JS(Args,'scriptType'));
+    end
     else if Name='script-set-stage' then SetScriptStage(JS(Args,'stage'))
     else if Name='script-set-layout' then SetScriptLayout(JS(Args,'choice'),JS(Args,'backgroundTone'))
     else if Name='script-next' then NextScriptDraft
@@ -309,6 +314,8 @@ begin
     Result := PsdJson.ObjectText('{"workspaceCommandPrefix":"app-","movieCommandPrefix":"movie-","psdCommandPrefix":"psd-","workspace":{"status":{},"library":{},"switch-page":{"page":"home|preview|create|characters|scripts|character-edit","propertyPage":"optional"},"open-work":{"path":".rigmovie"},"edit-character":{"path":".psdchar|.psd|.rigm"},"register-character":{"path":"file within dataRoot","name":"optional"}}}');
     var ScriptSchema := PsdJson.ObjectText('{"script-status":{},"script-list":{"offset":0,"limit":50},"script-new":{},"script-open":{"path":"Projects/<UID>/project.rigmovie"},"script-set-title":{"projectId":"from script-status","revision":"from script-status","title":"<=128 characters"},"script-save":{"projectId":"from script-status","revision":"from script-status"}}');
     ScriptSchema.AddPair('script-character-library',TJSONObject.Create);
+    ScriptSchema.AddPair('script-set-type',PsdJson.ObjectText('{"projectId":"from script-status","revision":"from script-status","scriptType":"ID from scriptTypes; empty clears classification"}'));
+    ScriptSchema.AddPair('scriptTypes',ScriptTypesJson);
     ScriptSchema.AddPair('script-set-stage',PsdJson.ObjectText('{"projectId":"from script-status","revision":"from script-status","stage":"title|characters|layout|placement|text|review|casting|subtitles (backward only)"}'));
     ScriptSchema.AddPair('script-subtitles',PsdJson.ObjectText('{"projectId":"required","revision":"required","offset":0,"limit":1}'));
     ScriptSchema.AddPair('script-select-subtitle',PsdJson.ObjectText('{"projectId":"required","revision":"required","cueId":"from subtitles"}'));
@@ -518,6 +525,7 @@ begin
     (JS(Project.ScriptWizard,'updatedAt')='') or ((Project.ScriptWizard.GetValue('casting')=nil) and ((Project.Cues.Count<>0) or (Project.Scenes.Count<>0))) then
     raise Exception.Create('台本工程の状態が不正です。元ファイルは変更しません。');
   Project.BindCharacterPlacements;
+  ValidateScriptType(Project);
   for var C in Project.Characters do if (C.PlacementRef='') or (Project.Placement(C.PlacementRef)=nil) then
     raise Exception.Create('台本工程のキャラは共通配置への参照が必要です。');
   if Project.ScriptWizard.GetValue('scriptText')<>nil then ValidateScriptText(JO(Project.ScriptWizard,'scriptText'))
@@ -589,7 +597,7 @@ begin
   end;
   if (FScriptDraft<>nil) and FScriptDraft.Modified then SaveScriptDraft(False);
   var P := TRigmMovieProject.Create;
-  P.Title := '題名未入力'; P.ScriptWizard := PsdJson.ObjectText('{"format":"RIGMMaker.ScriptWizard","schemaVersion":1,"stage":"title","titleStatus":"in-progress","titleInput":"","charactersStatus":"in-progress","selectedCharacters":[]}');
+  P.Title := '題名未入力'; P.ScriptWizard := PsdJson.ObjectText('{"format":"RIGMMaker.ScriptWizard","schemaVersion":1,"stage":"title","titleStatus":"in-progress","titleInput":"","scriptType":"","charactersStatus":"in-progress","selectedCharacters":[]}');
   var Time := ScriptUtcNow; P.ScriptWizard.AddPair('createdAt',Time); P.ScriptWizard.AddPair('updatedAt',Time);
   if FileExists(ScriptPath(P)) then begin P.Free; raise Exception.Create('UIDの保存先が既に存在します。'); end;
   P.Modified := True; FScriptDrafts.Add(P); FScriptDraft := P; FScriptViewStage := 'title';
@@ -628,6 +636,14 @@ begin
   for var Ch in Value do if Ord(Ch)<32 then raise Exception.Create('題名に改行・制御文字は使えません。');
   if JS(FScriptDraft.ScriptWizard,'titleInput')=Value then Exit;
   PsdJson.Put(FScriptDraft.ScriptWizard,'titleInput',Value); PsdJson.Put(FScriptDraft.ScriptWizard,'titleStatus','in-progress');
+  FScriptDraft.Changed; ScriptChanged;
+end;
+procedure TRigmWizardWorkspace.SetScriptType(const Value: string);
+begin
+  if FScriptDraft=nil then raise Exception.Create('台本を新規作成または再開してください。');
+  if (Value<>'') and (ScriptTypeIndex(Value)<0) then raise Exception.Create('対応していない台本種類です。');
+  if ProjectScriptType(FScriptDraft)=Value then Exit;
+  PsdJson.Put(FScriptDraft.ScriptWizard,'scriptType',Value);
   FScriptDraft.Changed; ScriptChanged;
 end;
 function TRigmWizardWorkspace.Thumbnails: TRigmThumbnailCache;
@@ -1209,6 +1225,9 @@ begin
   if FScriptDraft=nil then begin if (FActive<>nil) and (FActive.Project.ScriptWizard<>nil) and (JS(FActive.Project.ScriptWizard,'stage')='editor') then begin Result.AddPair('editorProjectId',FActive.Project.Id); Result.AddPair('editorPath',FActive.Project.FileName); end; Exit; end;
   Result.AddPair('projectId',FScriptDraft.Id); AddN(Result,'revision',FScriptDraft.Revision);
   Result.AddPair('title',JS(FScriptDraft.ScriptWizard,'titleInput')); Result.AddPair('savedTitle',FScriptDraft.Title);
+  Result.AddPair('scriptType',ProjectScriptType(FScriptDraft));
+  Result.AddPair('scriptTypeName',ScriptTypeName(ProjectScriptType(FScriptDraft)));
+  Result.AddPair('scriptTypes',ScriptTypesJson);
   Result.AddPair('path',FScriptDraft.FileName); Result.AddPair('modified',TJSONBool.Create(FScriptDraft.Modified));
   Result.AddPair('resumeStage',ScriptResumeView(FScriptDraft));
   var Wizard := TJSONObject.Create;
@@ -1262,6 +1281,7 @@ begin
         var P := LoadMovie(W.Resolve(Paths[I]));
         try
           PsdJson.Put(Entry,'title',P.Title); Entry.AddPair('projectId',P.Id);
+          Entry.AddPair('scriptType',ProjectScriptType(P)); Entry.AddPair('scriptTypeName',ScriptTypeName(ProjectScriptType(P)));
           if P.ScriptWizard<>nil then begin
             if JS(P.ScriptWizard,'stage')<>'editor' then CheckScript(P); if not SameText(Paths[I],ScriptPath(P)) then raise Exception.Create('UIDと保存先が一致しません。');
             PsdJson.Put(Entry,'kind','wizard'); Entry.AddPair('stage',JS(P.ScriptWizard,'stage'));
