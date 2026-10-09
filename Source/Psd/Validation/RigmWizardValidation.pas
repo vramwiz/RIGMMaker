@@ -22,7 +22,7 @@ implementation
 uses System.SysUtils, System.Classes, System.JSON, System.IOUtils, System.Hash, System.Math, System.Types, System.DateUtils, System.Generics.Collections,
   Vcl.Forms, Vcl.Controls, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls, System.UITypes,
   VoicevoxToolbarButtons, RigmPageNavigation, PsdStudioFrame, PsdJson, RigmCharacterEditPage,
-  RigmScriptCreatorFrame, RigmMovieWorkspaceFrame, RigmJson, Winapi.Windows, Winapi.Messages,
+  RigmScriptCreatorFrame, RigmScriptNavigationProbe, RigmMovieWorkspaceFrame, RigmJson, Winapi.Windows, Winapi.Messages,
   PsdPreviewControl, PsdSettingsPanel, PsdMotionReferenceForm, Vcl.Graphics, Vcl.Imaging.pngimage,
   PsdSession, PsdProduction, RigmCharacterCatalog, RigmCharacterManagerFrame, PsdWorkspace,
   PsdPackage, RigmLegacyEditorFrame, Winapi.ShellAPI, Winapi.ShlObj, Winapi.KnownFolders, Winapi.ActiveX, System.Win.ComObj, System.StrUtils, ArtLayerList, RigmModel, ArtDocument,
@@ -301,8 +301,8 @@ begin
       var NewButton := TToolButton(Bar.FindComponent('ScriptNew')); NewButton.Click;
       var Id := W.ScriptDraft.Id; var Path := W.ScriptDraft.FileName;
       var Frame := Main.PageInstance(apScriptCreate); var Title := TEdit(Frame.FindComponent('ScriptTitle'));
-      var TitleBar := TToolBar(Frame.FindComponent('ScriptTitleToolbar'));
-      var Save := TToolButton(TitleBar.FindComponent('ScriptSave')); var Back := TToolButton(TitleBar.FindComponent('ScriptReturn'));
+      var TitleBar := TComponent(Frame);
+      var Save := TButton(TitleBar.FindComponent('ScriptSave')); var Back := TButton(TitleBar.FindComponent('ScriptReturn'));
       Check((Main.CurrentPage=apScriptCreate) and FileExists(Path) and (Title.Text='') and not Save.Enabled,
         'new creates saved empty title draft in UID folder',Results);
       Check(SameText(ExtractFileName(ExtractFileDir(Path)),Id) and (ExtractFileName(Path)='project.rigmovie'),
@@ -418,9 +418,9 @@ begin
       finally Resume.Free; end;
     end else begin
       TToolButton(Bar.FindComponent('ScriptNew')).Click;
-      var Frame := Main.PageInstance(apScriptCreate); var Toolbar := TToolBar(Frame.FindComponent('ScriptTitleToolbar'));
-      var Title := TEdit(Frame.FindComponent('ScriptTitle')); var Save := TToolButton(Toolbar.FindComponent('ScriptSave'));
-      var Next := TToolButton(Toolbar.FindComponent('ScriptNext')); var Back := TToolButton(Toolbar.FindComponent('ScriptReturn'));
+      var Frame := Main.PageInstance(apScriptCreate); var Toolbar := TComponent(Frame);
+      var Title := TEdit(Frame.FindComponent('ScriptTitle')); var Save := TButton(Toolbar.FindComponent('ScriptSave'));
+      var Next := TRigmScriptStageProbe.CreateForFrame(Toolbar,W); var Back := TButton(Toolbar.FindComponent('ScriptReturn'));
       var Id := W.ScriptDraft.Id; var Path := W.ScriptDraft.FileName;
       Check(not Next.Enabled,'unconfirmed title cannot advance',Results);
       W.ScriptDraft.ScriptWizard.RemovePair('selectedCharacters').Free;
@@ -430,7 +430,7 @@ begin
       Check(W.ScriptDraft.ScriptWizard.GetValue('selectedCharacters')=nil,'existing title-only wizard opens without forced metadata migration',Results);
       Check(Next.Enabled and (JS(W.ScriptDraft.ScriptWizard,'stage')='title'),'title confirmation enables manual next and stays at title',Results);
       Next.Click; var List := TListView(Frame.FindComponent('ScriptCharacters'));
-      Check(List.Showing and (JS(W.ScriptDraft.ScriptWizard,'stage')='characters') and Next.Visible,
+      Check(List.Showing and (JS(W.ScriptDraft.ScriptWizard,'stage')='characters') and not Next.Visible,
         'manual next opens only character stage',Results);
       var Failed := False; try W.SaveScriptDraft(True); except on E: Exception do Failed := True; end;
       Check(Failed and not Save.Enabled,'minimum one selected character required for confirmation',Results);
@@ -473,7 +473,7 @@ begin
       try Check((JA(ProjectJson,'speakers').ToJSON=SpeakersBefore) and (W.ScriptDraft.Characters.Count=0) and (W.ScriptDraft.Cues.Count=0) and
         (W.ScriptDraft.Scenes.Count=0),'selection preserves existing speakers and creates no voice layout or script body',Results); finally ProjectJson.Free; end;
       CaptureUiWindow(Main,ResultPath,'.characters');
-      TToolButton(Toolbar.FindComponent('ScriptTitleStage')).Click;
+      ClickScriptStage(Toolbar,'title');
       Check(Title.Showing and (JA(W.ScriptDraft.ScriptWizard,'selectedCharacters').Count=2),'returning to title retains selections',Results);
       Title.Text := '題名を修正してもキャラを保持'; Save.Click; Next.Click;
       Check(PsdItem.Checked and RigItem.Checked and (JA(W.ScriptDraft.ScriptWizard,'selectedCharacters').Count=2),'title editing and returning restore selections',Results);
@@ -1159,8 +1159,8 @@ begin
     end else begin
       TToolButton(TToolBar(Manager.FindComponent('ScriptLibraryToolbar')).FindComponent('ScriptNew')).Click;
     end;
-    var Creator := Main.PageInstance(apScriptCreate); var Toolbar := TToolBar(Creator.FindComponent('ScriptTitleToolbar'));
-    var Save := TToolButton(Toolbar.FindComponent('ScriptSave')); var Next := TToolButton(Toolbar.FindComponent('ScriptNext'));
+    var Creator := Main.PageInstance(apScriptCreate); var Toolbar := TComponent(Creator);
+    var Save := TButton(Toolbar.FindComponent('ScriptSave')); var Next := TRigmScriptStageProbe.CreateForFrame(Toolbar,W);
     if not Reopen then begin
       Check(Creator.FindComponent('RigmScriptLayoutFrame')=nil,'layout page is not eagerly created',Results);
       TEdit(Creator.FindComponent('ScriptTitle')).Text := 'レイアウト構図の所有検証'; Save.Click; Next.Click;
@@ -1171,7 +1171,7 @@ begin
       Check((JA(W.ScriptDraft.ScriptWizard,'selectedCharacters').Count=2) and Next.Visible and Next.Enabled,
         'confirmed multiple characters enable manual next',Results);
       Next.Click;
-      Check((JS(W.ScriptDraft.ScriptWizard,'stage')='layout') and not Next.Visible,'manual next opens layout and stops at stage three',Results);
+      Check((JS(W.ScriptDraft.ScriptWizard,'stage')='layout') and Next.Visible,'manual next opens layout and stops at stage three',Results);
     end;
     var LayoutFrame: TRigmScriptLayoutFrame := nil;
     for var I := 0 to Creator.ComponentCount-1 do if Creator.Components[I] is TRigmScriptLayoutFrame then LayoutFrame := TRigmScriptLayoutFrame(Creator.Components[I]);
@@ -1201,14 +1201,14 @@ begin
       var FHD := ScaleLayoutRect(Left.Image,1920,1080); var HD := ScaleLayoutRect(Left.Image,1280,720);
       Check((FHD.Left=800) and (FHD.Right=1860) and (HD.Left=533) and (HD.Bottom=447) and
         (Abs(Left.Image.Left-(1-Right.Image.Right))<0.0001),'existing FHD layout scales by ratio and mirrors horizontally',Results);
-      TToolButton(Toolbar.FindComponent('ScriptCharactersStage')).Click;
+      ClickScriptStage(Toolbar,'characters');
       Check((JS(W.ScriptDraft.ScriptWizard,'charactersStatus')='complete') and TListView(Creator.FindComponent('ScriptCharacters')).Showing,
         'back to character stage keeps confirmed selection',Results);
-      TToolButton(Toolbar.FindComponent('ScriptLayoutStage')).Click;
+      ClickScriptStage(Toolbar,'layout');
       Check((Choice.ItemIndex=2) and (W.ScriptDraft.Id=Id),'returning to layout retains reverse L choice',Results);
       Save.Click;
       Check((JS(W.ScriptDraft.ScriptWizard,'layoutStatus')='complete') and not W.ScriptDraft.Modified,'human confirms layout without advancing',Results);
-      TToolButton(Toolbar.FindComponent('ScriptReturn')).Click;
+      TButton(Toolbar.FindComponent('ScriptReturn')).Click;
       for var Item in List.Items do if SameText(Item.SubItems[3],Path) then List.Selected := Item;
       Check((List.Selected<>nil) and (List.Selected.SubItems[0]='レイアウト：確認済み'),'library displays saved layout stage',Results);
       List.OnDblClick(List);
@@ -1250,9 +1250,9 @@ begin
         Check((W.ScriptDraft.Id=JS(Resume,'projectId')) and (W.CurrentScriptStage='placement'),'restart resumes last Next destination and same UID',Results);
       finally Resume.Free; end;
     end else TToolButton(TToolBar(Manager.FindComponent('ScriptLibraryToolbar')).FindComponent('ScriptNew')).Click;
-    var Creator := Main.PageInstance(apScriptCreate); var Toolbar := TToolBar(Creator.FindComponent('ScriptTitleToolbar'));
-    var Title := TEdit(Creator.FindComponent('ScriptTitle')); var Next := TToolButton(Toolbar.FindComponent('ScriptNext'));
-    var Back := TToolButton(Toolbar.FindComponent('ScriptReturn')); var Path := W.ScriptDraft.FileName; var Id := W.ScriptDraft.Id;
+    var Creator := Main.PageInstance(apScriptCreate); var Toolbar := TComponent(Creator);
+    var Title := TEdit(Creator.FindComponent('ScriptTitle')); var Next := TRigmScriptStageProbe.CreateForFrame(Toolbar,W);
+    var Back := TButton(Toolbar.FindComponent('ScriptReturn')); var Path := W.ScriptDraft.FileName; var Id := W.ScriptDraft.Id;
     if not Reopen then begin
       Check(not Next.Enabled,'empty title cannot advance',Results);
       Title.Text := 'Next保存とキャラ配置の所有検証'; Check(Next.Enabled,'title input alone enables Next without Save confirmation',Results);
@@ -1276,11 +1276,11 @@ begin
       Next.Click; Saved := LoadMovie(Path);
       try Check((JS(Saved.ScriptWizard,'stage')='layout') and (JA(Saved.ScriptWizard,'selectedCharacters').Count=2),
         'character Next persists layout destination with selection',Results); finally Saved.Free; end;
-      TToolButton(Toolbar.FindComponent('ScriptTitleStage')).Click; Title.Text := '戻った題名の下書きを保全'; Back.Click;
+      ClickScriptStage(Toolbar,'title'); Title.Text := '戻った題名の下書きを保全'; Back.Click;
       W.OpenScriptDraft(Path); Main.NavigateTo(apScriptCreate);
       Check((W.CurrentScriptStage='layout') and (JS(W.ScriptDraft.ScriptWizard,'titleInput')='戻った題名の下書きを保全'),
         'backward draft saves preserve edits and last Next resume destination',Results);
-      Next.Click; Check((W.CurrentScriptStage='placement') and not Next.Visible and not W.ScriptDraft.Modified,
+      Next.Click; Check((W.CurrentScriptStage='placement') and Next.Visible and not W.ScriptDraft.Modified,
         'layout Next saves and displays placement with stage five unavailable',Results);
     end;
     var Frame: TRigmScriptPlacementFrame := nil;
@@ -1322,7 +1322,7 @@ begin
         (Placement(W.ScriptDraft,First).ToJSON=StoredRect),'preview resize changes display only and maps back to FullHD coordinates',Results);
       Main.SetBounds(40,40,1280,840); Application.ProcessMessages;
       CaptureUiWindow(Main,ResultPath,'.placement');
-      TToolButton(Toolbar.FindComponent('ScriptLayoutStage')).Click;
+      ClickScriptStage(Toolbar,'layout');
       var LayoutFrame: TRigmScriptLayoutFrame := nil;
       for var I := 0 to Creator.ComponentCount-1 do if Creator.Components[I] is TRigmScriptLayoutFrame then LayoutFrame := TRigmScriptLayoutFrame(Creator.Components[I]);
       var Choice := TRadioGroup(LayoutFrame.FindComponent('ScriptLayoutChoices')); Choice.ItemIndex := 1; Choice.OnClick(Choice);
@@ -1341,7 +1341,7 @@ begin
       Start := DragPoint(Preview.CharacterBounds(First)); Mouse(Preview,WM_LBUTTONDOWN,Start); Mouse(Preview,WM_MOUSEMOVE,Point(Start.X-2000,Start.Y-2000));
       Mouse(Preview,WM_LBUTTONUP,Point(Start.X-2000,Start.Y-2000)); B := PlacementRect(Placement(W.ScriptDraft,First));
       Check((B.Left>=Area.Left-0.01) and (B.Top>=Area.Top-0.01),'drag is clamped to L character area',Results);
-      TToolButton(Toolbar.FindComponent('ScriptCharactersStage')).Click; Back.Click;
+      ClickScriptStage(Toolbar,'characters'); Back.Click;
       W.OpenScriptDraft(Path); Main.NavigateTo(apScriptCreate);
       Check((W.CurrentScriptStage='placement') and Frame.Showing,'back and exit resume last Next placement destination',Results);
       var CanClose := True; Main.OnCloseQuery(Main,CanClose); Check(CanClose,'close saves current draft',Results);

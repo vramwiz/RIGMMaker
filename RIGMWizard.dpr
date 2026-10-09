@@ -3,6 +3,8 @@
 // 単一メインフォームの中間成果。通常版の入口・EXEを置き換えない隔離検証用。
 uses System.SysUtils, System.IOUtils, System.Classes, Vcl.Forms,
   RigmWizardMainForm in 'Source\Shell\RigmWizardMainForm.pas',
+  RigmScriptResearchModel in 'Source\Studio\Model\RigmScriptResearchModel.pas',
+  RigmScriptNavigationProbe in 'Source\Psd\Validation\RigmScriptNavigationProbe.pas',
   RigmWizardValidation in 'Source\Psd\Validation\RigmWizardValidation.pas';
 begin
   Application.Initialize; Application.MainFormOnTaskbar := True; Application.Title := 'RIGM Maker';

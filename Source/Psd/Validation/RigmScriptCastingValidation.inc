@@ -24,7 +24,7 @@ begin
         finally ReopenedProject.Free; end;
       finally Resume.Free; end;
     end else begin W.NewScriptDraft; Main.NavigateTo(apScriptCreate); end;
-    var Creator := Main.PageInstance(apScriptCreate); var Toolbar := TToolBar(Creator.FindComponent('ScriptTitleToolbar')); var Next := TToolButton(Toolbar.FindComponent('ScriptNext'));
+    var Creator := Main.PageInstance(apScriptCreate); var Toolbar := TComponent(Creator); var Next := TRigmScriptStageProbe.CreateForFrame(Toolbar,W);
     if not Reopen then begin
       TEdit(Creator.FindComponent('ScriptTitle')).Text := '配役工程の分離した確認作品'; Next.Click; WaitThumbnailLibrary(W);
       var Deadline := GetTickCount64+5000; var Ready: Integer;
@@ -77,7 +77,7 @@ begin
       W.ScriptDraft.Cues[1].Subtitle := '字幕表示だけを変更'; W.ScriptDraft.Changed;
       Check(W.ScriptDraft.Cues[1].Text<>W.ScriptDraft.Cues[1].Subtitle,'voice text and display subtitle remain independent',Results);
       var StableId := W.ScriptDraft.Cues[2].Id; var StableSpeaker := W.ScriptDraft.Cues[2].SpeakerId;
-      TToolButton(Toolbar.FindComponent('ScriptTextStage')).Click; W.SetScriptText('opening','観測所へようこそ。今回は架空の案内です。'); W.EndScriptTextEdit;
+      ClickScriptStage(Toolbar,'text'); W.SetScriptText('opening','観測所へようこそ。今回は架空の案内です。'); W.EndScriptTextEdit;
       var StaleCopy := W.ScriptDraft.Clone;
       try Rejected := False; try RequestScriptCasting(StaleCopy); except on E: Exception do Rejected := True; end;
         Check(Rejected and (JS(JO(StaleCopy.ScriptWizard,'casting'),'state')='stale'),'request cannot reactivate obsolete casting after raw source edit',Results);

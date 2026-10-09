@@ -112,7 +112,7 @@ begin
     FGrid.RowCount := JA(D,'reserved').Count+2; for var Row := 1 to FGrid.RowCount-1 do begin var O := JO(D,'rect'); if Row>1 then O := TJSONObject(JA(D,'reserved')[Row-2]); FGrid.Cells[0,Row] := '画像'; if Row>1 then FGrid.Cells[0,Row] := '回避'+(Row-1).ToString; var Col := 1; for var Key in ['x','y','width','height'] do begin FGrid.Cells[Col,Row] := JS(O,Key); Inc(Col); end; end;
     FSpeech.Clear; for var V in JA(JO(P.ScriptWizard,'casting'),'rows') do if JS(TJSONObject(V),'section')='closing' then FSpeech.Lines.Add(P.Cue(JS(TJSONObject(V),'cueId')).Text); FSpeech.SelStart := 0; FSpeech.Perform(183,0,0);
   end;
-  FGuide.Caption := '座標は画面割合0～1。回避領域は仮配置です。YouTubeで使う実テンプレートに合わせ確認してください。クリック要素は作りません。締めセリフの変更は台本入力へ。Nextで完成内容を保存して動画編集へ。'; FPreview.Invalidate;
+  FGuide.Caption := '座標は画面割合0～1。回避領域は仮配置です。YouTubeで使う実テンプレートに合わせ確認してください。クリック要素は作りません。締めセリフの変更は台本入力へ。左の工程リストで完成内容を保存して動画編集へ。'; FPreview.Invalidate;
   finally FSync := False; end;
 end;
 end.

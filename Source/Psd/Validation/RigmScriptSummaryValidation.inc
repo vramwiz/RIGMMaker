@@ -13,7 +13,7 @@ begin
   var Report := TJSONObject.Create; var Results := TJSONArray.Create; Report.AddPair('checks',Results);
   try
     var W := Main.Workspace; W.OpenScriptDraft(Trim(TFile.ReadAllText(TPath.Combine(Main.DataRoot,'fixture-project.txt'),TEncoding.UTF8))); Main.NavigateTo(apScriptCreate); WaitThumbnailLibrary(W);
-    var Creator := Main.PageInstance(apScriptCreate); var Tools := TToolBar(Creator.FindComponent('ScriptTitleToolbar')); var Next := TToolButton(Tools.FindComponent('ScriptNext'));
+    var Creator := Main.PageInstance(apScriptCreate); var Tools := TComponent(Creator); var Next := TRigmScriptStageProbe.CreateForFrame(Tools,W);
     var Before := PrimaryCues(W.ScriptDraft); var Cast := CastingFingerprint(W.ScriptDraft); var Source := ScriptFingerprint(W.ScriptDraft); var Placements := JA(W.ScriptDraft.ScriptWizard,'placements').ToJSON;
     if Reopen then begin
       var Saved := ParseObject(TFile.ReadAllText(ResultPath+'.resume.json',TEncoding.UTF8)); var Json := W.ScriptDraft.Json;
@@ -26,9 +26,9 @@ begin
         W.CompleteVoice; Next.Click; Check((W.CurrentScriptStage='closing') and not W.ScriptDraft.Modified,'summary voice Next saves closing destination first',Results);
         var ExtraId := ScriptSummaryCue(W.ScriptDraft).Id; var ExtraJson := ScriptSummaryCue(W.ScriptDraft).Json; var Wave := ResolveMoviePath(W.ScriptDraft.FileName,ScriptSummaryCue(W.ScriptDraft).WaveFile); var WaveHash := THashSHA2.GetHashStringFromFile(Wave);
         try
-          TToolButton(Tools.FindComponent('ScriptSummaryStage')).Click; W.SetScriptSummaryChoice('none'); Next.Click;
+          ClickScriptStage(Tools,'summary'); W.SetScriptSummaryChoice('none'); Next.Click;
           Check((W.ScriptDraft.Cues.Count=6) and (ScriptSummaryCue(W.ScriptDraft)=nil) and FileExists(Wave),'omitting summary removes only owned extra cue and retains draft/audio archive',Results);
-          TToolButton(Tools.FindComponent('ScriptSummaryStage')).Click; W.SetScriptSummaryChoice('yes'); Next.Click; W.CompleteScriptSummary; Next.Click;
+          ClickScriptStage(Tools,'summary'); W.SetScriptSummaryChoice('yes'); Next.Click; W.CompleteScriptSummary; Next.Click;
           Check(W.CurrentScriptStage='voice','confirmed current pipe/human draft reaches voice without rewriting displayed memo: '+TLabel(Creator.FindComponent('ScriptTitleStatus')).Caption,Results);
           var C := ScriptSummaryCue(W.ScriptDraft); var J := C.Json; try Check((C.Id=ExtraId) and (J.ToJSON=ExtraJson.ToJSON) and W.ScriptDraft.AudioReady(C) and (THashSHA2.GetHashStringFromFile(Wave)=WaveHash),'re-enabling unchanged summary restores same identifiers and ready real audio',Results); finally J.Free; end;
           W.CompleteVoice; Next.Click;
@@ -38,14 +38,14 @@ begin
     end else begin
       Check((W.CurrentScriptStage='summary') and (W.ScriptDraft.Cues.Count=6),'owned scene fixture begins at summary with six ready cues',Results);
       W.SetScriptSummaryChoice('none'); Next.Click; Check((W.CurrentScriptStage='closing') and not W.ScriptDraft.Modified and (W.ScriptDraft.ScriptWizard.GetValue('summaryData')=nil),'no summary naturally skips without creating evaluation',Results);
-      TToolButton(Tools.FindComponent('ScriptSummaryStage')).Click; W.SetScriptSummaryChoice('yes'); Next.Click; Check((W.CurrentScriptStage='summary-edit') and not W.ScriptDraft.Modified,'yes saves chart input destination before transition',Results);
+      ClickScriptStage(Tools,'summary'); W.SetScriptSummaryChoice('yes'); Next.Click; Check((W.CurrentScriptStage='summary-edit') and not W.ScriptDraft.Modified,'yes saves chart input destination before transition',Results);
       var Frame: TRigmScriptSummaryFrame := nil; for var I := 0 to Creator.ComponentCount-1 do if Creator.Components[I] is TRigmScriptSummaryFrame then Frame := TRigmScriptSummaryFrame(Creator.Components[I]); Check((Frame<>nil) and Frame.Showing,'lazy summary input retains main form',Results);
       var D := JO(JO(W.ScriptDraft.ScriptWizard,'summaryData'),'draft'); Check((JS(D,'text')='') and (JI(D,'role')=0) and (JS(TJSONObject(JA(D,'items')[0]),'value')=''),'empty input contains no fabricated evaluation or actor',Results);
       var SummaryTools := TToolBar(Frame.FindComponent('ScriptSummaryToolbar')); TToolButton(SummaryTools.FindComponent('ScriptSummaryEdit')).Click;
       TMemo(Frame.FindComponent('ScriptSummaryText')).Text := '確認作品の総評です。'; TMemo(Frame.FindComponent('ScriptSummarySubtitle')).Text := '架空作品：字幕は独立'; TMemo(Frame.FindComponent('ScriptSummaryReading')).Text := 'かくにんさくひんのそうひょうです。';
       var Role := TComboBox(Frame.FindComponent('ScriptSummaryRole')); Role.ItemIndex := 0; Role.OnChange(Role);
       var Grid := TStringGrid(Frame.FindComponent('ScriptSummaryAxes')); Grid.Cells[0,1] := '確認A'; Grid.Cells[1,1] := '-'; Grid.Cells[0,2] := '確認B'; Grid.Cells[1,2] := '3'; Grid.Cells[0,3] := '確認C'; Grid.Cells[1,3] := '4'; Grid.OnSetEditText(Grid,1,1,'-');
-      Check(W.ScriptTextEditing,'human summary input owns shared edit lock',Results); CaptureUiWindow(Main,ResultPath,'.editing'); TToolButton(SummaryTools.FindComponent('ScriptSummaryDone')).Click; TToolButton(Tools.FindComponent('ScriptSave')).Click;
+      Check(not W.ScriptTextEditing,'human summary input does not lock communication',Results); CaptureUiWindow(Main,ResultPath,'.editing'); TToolButton(SummaryTools.FindComponent('ScriptSummaryDone')).Click; TButton(Tools.FindComponent('ScriptSave')).Click;
       var Disk := LoadMovie(W.ScriptDraft.FileName); try Check(JS(TJSONObject(JA(JO(JO(Disk.ScriptWizard,'summaryData'),'draft'),'items')[0]),'value')='-','incomplete numeric text is safely saved without invented number',Results); finally Disk.Free; end;
       var Rejected := False; try W.CompleteScriptSummary; except on E: Exception do Rejected := True; end; Check(Rejected,'invalid numeric draft blocks confirmation and advancement',Results);
       CaptureUiWindow(Main,ResultPath,'.pipe'); Check(JS(JO(JO(W.ScriptDraft.ScriptWizard,'summaryData'),'draft'),'text')='架空の確認作品だけの総評です。','real pipe applies explicit human fixture draft',Results);

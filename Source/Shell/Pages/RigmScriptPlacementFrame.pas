@@ -178,7 +178,7 @@ begin
   inherited Create(AOwner); Align := alClient; FWorkspace := Workspace;
   FGuide := TRigmScriptLabel.Create(Self); FGuide.Parent := Self; FGuide.Align := alTop; FGuide.Height := ScaleValue(58); FGuide.AutoSize := False; FGuide.WordWrap := True;
   FGuide.Caption := '第4段階：キャラ配置　枠内で移動、8点で拡縮。L字型ではキャラ側の領域へ収めます。'+#13#10+
-    '左右反転は元画像の鏡像です。Nextで配置を保存し台本入力へ進みます。最終編集でも同じ配置を調整できます。';
+    '左右反転は元画像の鏡像です。左の工程リストで配置を保存し台本入力へ進みます。最終編集でも同じ配置を調整できます。';
   var Side := TPanel.Create(Self); Side.Parent := Self; Side.Align := alLeft; Side.Width := ScaleValue(248); Side.Caption := ''; Side.BevelOuter := bvNone;
   FAspect := TCheckBox.Create(Self); FAspect.Parent := Side; FAspect.Align := alTop; FAspect.Height := ScaleValue(28); FAspect.Caption := '縦横比を保持'; FAspect.Checked := True; FAspect.OnClick := Options;
   FSnap := TCheckBox.Create(Self); FSnap.Parent := Side; FSnap.Align := alTop; FSnap.Top := ScaleValue(28); FSnap.Height := ScaleValue(28); FSnap.Caption := '10pxスナップ（FullHD基準）'; FSnap.Checked := True; FSnap.OnClick := Options;

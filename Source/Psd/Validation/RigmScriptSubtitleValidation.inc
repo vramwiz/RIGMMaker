@@ -11,7 +11,7 @@ begin
   var Report := TJSONObject.Create; var Results := TJSONArray.Create; Report.AddPair('checks',Results);
   try
     var W := Main.Workspace; W.OpenScriptDraft(Trim(TFile.ReadAllText(TPath.Combine(Main.DataRoot,'fixture-project.txt'),TEncoding.UTF8))); Main.NavigateTo(apScriptCreate);
-    var Creator := Main.PageInstance(apScriptCreate); var Toolbar := TToolBar(Creator.FindComponent('ScriptTitleToolbar')); var Next := TToolButton(Toolbar.FindComponent('ScriptNext'));
+    var Creator := Main.PageInstance(apScriptCreate); var Toolbar := TComponent(Creator); var Next := TRigmScriptStageProbe.CreateForFrame(Toolbar,W);
     if Reopen then begin
       var Resume := ParseObject(TFile.ReadAllText(ResultPath+'.resume.json',TEncoding.UTF8)); var Json := W.ScriptDraft.Json;
       try Check(W.CurrentScriptStage='subtitles','restart resumes saved subtitle destination',Results);
@@ -42,7 +42,7 @@ begin
       try OtherJson := Other.ToJSON; finally Other.Free; end;
       Press(List,VK_DOWN); Check(JS(JO(W.ScriptDraft.ScriptWizard,'subtitles'),'selectedCue')=W.ScriptDraft.Cues[1].Id,'down selects next speech',Results);
       Press(List,VK_UP); Check(JS(JO(W.ScriptDraft.ScriptWizard,'subtitles'),'selectedCue')=Id,'up selects previous speech',Results);
-      Press(List,VK_RETURN); Check(W.ScriptTextEditing and not Editor.ReadOnly,'Enter opens display details and holds human input lock',Results);
+      Press(List,VK_RETURN); Check(not W.ScriptTextEditing and not Editor.ReadOnly,'Enter opens display details without locking communication',Results);
       Editor.Text := 'AB'+Char($D83D)+Char($DE00)+'CDEF'+#13#10+'後ろの表示文'+#13#10+'最後の行'; Note.Text := '字幕専用の確認メモ';
       Check((Cue.Text=Voice) and (ScriptFingerprint(W.ScriptDraft)=Raw) and (W.ScriptDraft.AudioFingerprint(Cue)=Audio) and (Cue.Scene=Scene),'human display edits leave raw voice audio fingerprint and scene intact',Results);
       Other := W.ScriptDraft.Cues[2].Json; try Check(Other.ToJSON=OtherJson,'display edits never propagate to other section cue',Results); finally Other.Free; end;
@@ -76,7 +76,7 @@ begin
         finally Rendered.Free; end;
       finally Cropped.Free; Composition.Free; end;
       TToolButton(Tools.FindComponent('ScriptSubtitleFollowing')).Click; CaptureUiWindow(Main,ResultPath,'.pages');
-      TToolButton(Toolbar.FindComponent('ScriptCastingStage')).Click; Next.Click; Cue := W.ScriptDraft.Cue(Id);
+      ClickScriptStage(Toolbar,'casting'); Next.Click; Cue := W.ScriptDraft.Cue(Id);
       Check((W.CurrentScriptStage='subtitles') and (Cue.Subtitle=StringOfChar('あ',250)) and (Cue.SubtitleNote='字幕専用の確認メモ'),'back to casting and Next preserve display edits and notes',Results);
       var StaleCopy := W.ScriptDraft.Clone;
       try InvalidateScriptCasting(StaleCopy); var StaleRejected := False;

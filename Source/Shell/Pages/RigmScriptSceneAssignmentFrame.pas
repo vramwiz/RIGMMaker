@@ -131,7 +131,7 @@ begin
       if Item.Data=nil then ListView_SetItemState(FList.Handle,I,0,LVIS_STATEIMAGEMASK);
     end;
     // 最初のセリフには開始チェックを表示しない。Spaceで操作されても割当は変えない。
-    FInfo.Caption := P.Cues.Count.ToString+'セリフ / '+P.Scenes.Count.ToString+'シーン。Nextで割当を保存し、シーンごとの画像・説明文へ進みます。';
+    FInfo.Caption := P.Cues.Count.ToString+'セリフ / '+P.Scenes.Count.ToString+'シーン。左の工程リストで割当を保存し、シーンごとの画像・説明文へ進みます。';
   finally if Rebuild then FList.Items.EndUpdate; FSync := WasSync; end;
 end;
 end.

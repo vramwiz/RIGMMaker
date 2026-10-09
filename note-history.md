@@ -1185,3 +1185,51 @@ Win64 Debug/Releaseを専用出力でビルド成功。従来からの警告13�
 証跡: C:/Users/vramw/AppData/Local/Temp/rigm-script-types-e319b6ee。AppDebug/build.log、AppRelease/build.log、ProbeDebug/build.log、Run/result.json、Run/pipe-done.json、Run/title-*.png、OwnedDataの保存・再開fixture。Build-Isolated.ps1を保持し、検証DPRと通常RESを同名で専用フォルダへコピーしてコンパイルした。検証の第1回ビルドはPsdJson.Putに整数オーバーロードがないため失敗し、検証用引数をTJSONNumberで構築するよう直して最終成功した。通常EXE・RES・dproj・VoicevoxEngine.iniは作業開始時のSHA256と一致。通常アプリ/IDEを停止・再起動・置換せず、コミット・プッシュなし。
 
 短いnote.mdへ種類仕様のリンク、note-basics.mdへ固定IDの基本事項を追加。詳細はSource/Shell/Pages/SCRIPT-TYPES-20261008.md。種類の分類と画像の画風・ジャンル・シリーズ設定は別で、後者や校正情報の拡張課題は未実装のまま保持する。
+
+## 2026-10-09 台本制作を文字の保存ボタンと左の工程リストへ変更
+
+ユーザーの依頼に合わせ、台本制作時の共通ヘッダー「ホームへ戻る／台本作成」を非表示にし、最上部へ「保存して台本管理へ」「保存」と現在の段階番号・工程名を配置した。上部の工程アイコンとNextを撤去し、左側のリストを選んで工程を行き来する。現在工程は青、移動不可になった到達済み工程は無効色。条件が整うと次工程をリストへ追加する。登録キャラの再読込はキャラ画面の文字ボタンへ移動した。右側に各工程の編集画面を保持し、既存のスクロールとシーンの固定セリフ行を使う。
+
+工程IDと次工程・可否・表示名をRigmScriptNavigationModelへ集約し、Workspaceとリストで移動先を共用した。通常はシーン画像から動画編集へ直接進み、旧台本の総評選択・総評入力・音声から締めへの分岐も保持。次工程の選択は従来の入力確認、字幕・音声の確認処理、保存して移動先を記録する処理を通す。到達済み工程へ戻っても再開先を保ち、保存失敗・無効な題名は現在の工程と入力を保持する。選択キャラの検査未完了や空の台本文では次工程を解除しない。入力終了・サムネイルの準備完了でリストを再評価する。各画面のNextという案内も工程リストの表現へ揃えた。保存形式とパイプコマンド名は変更していない。
+
+Win64 Debug/Releaseを専用出力でビルド成功、エラー0。従来の警告13件は両構成で残り、新しい警告はない。ScriptNavigationCheck.dprの41項目がexit0で成功。新規・次工程の条件付き表示、旧総評分岐、題名→キャラの実保存、前工程への復帰、保存して台本管理へ・同一フレームへの再開、無効な題名、外部変更による保存失敗で入力と元ファイルを保持すること、台本なしの表示更新、96/144/192 DPI、第12段階の12シーンと要望・補足文、狭くなった編集欄の収まりを確認した。音声・画像の確定条件は状態モデルの分岐検証で、実ユーザー作品の確定操作ではない。隔離VCLのtitle-96/192.pngとscenes-96.pngを読んで配置と工程強調を確認し、シーンの実コントロール内の文字列も照合した。通常デスクトップのユーザー画面は操作していない。
+
+既存の工程別検証で消したツールボタンを参照しないようRigmScriptNavigationProbe経由のリスト選択へ移行した。今回は既存検証の全項目を再実行していない。初期ビルドでSystem.Typesの重複指定を修正し、新規検証のTRigmMovieScene参照ユニットとfixtureのlayoutStatus不足を修正。最初の描画では現在工程の色が目立たなかったため、現在工程を明示的な青で塗るよう直して再確認した。仕上げ確認では台本なし状態のwizard参照を避け、工程リストを空にできる検証も追加した。
+
+証跡: C:/Users/vramw/AppData/Local/Temp/rigm-stage-list-ff029e11。AppDebug/build.log、AppRelease/build.log、ProbeDebug/build.log、Run4/result.json、Run4/title-*.png、Run4/scenes-96.png、所有fixture、Build-Isolated.ps1。通常RIGMMaker.exe、dpr、RES、dprojのSHA256は開始時と一致し、通常アプリPID9488を停止・再起動・置換していない。実作品への変更、コミット・プッシュなし。仕様はSource/Shell/Pages/SCRIPT-NAVIGATION-20261009.mdへまとめ、短いnote.mdにはリンクだけを追加した。
+
+## 2026-10-09 IDEビルドの追加ユニット未登録を修正
+
+ユーザー報告を受け、RIGMMaker.dprojのDCC_UnitSearchPathをそのまま使った隔離コンパイルでF2613「RigmScriptNavigationProbeが見つかりません」を再現した。前回の隔離ビルドはSource以下の全フォルダを検索対象にしていたため、検証ユニットを追加した際のプロジェクト登録漏れを見逃していた。
+
+RIGMMaker.dprとRIGMWizard.dprへRigmScriptNavigationProbeの明示パスを登録し、通常dprojにもDCCReferenceを追加した。検索パスの全フォルダ追加は行わず、製品の設定と同じパスでRIGMMaker Win64 Debug／Release、RIGMWizard Win64 Debugの3ビルドがexit0。通常版は既存警告13件・エラー0。今回の変更はビルド時の参照登録だけで、UIや保存処理は変更していない。
+
+証跡はC:/Users/vramw/AppData/Local/Temp/rigm-build-fix-37cab49d。before.logに再現したF2613、Build-ProjectPath.ps1と構成別build.logに修正後の結果を保持する。通常EXEは置換せず、実行中のユーザーアプリ・実作品も操作していない。今後の製品ビルド検証はdprojと同じ検索パスを使い、全フォルダ探索によって登録漏れを隠さない。
+
+
+## 2026-10-09：工程リストを1行化・第6段階の作品情報確認
+
+ユーザー指定に合わせ、工程リストを「第6段階  作品情報・掘り下げ確認」の1行表示、30px基準に変更。第6段階は旧review IDと後続工程を保ち、作品タイトル・候補・概要・人間の確認チェックと、既定／追加要素の折りたたみ一覧へ変更した。Codexへ送信するUIは追加していない。1候補の自動選択と人間だけの作品承認、確認中の自動展開、情報なしを含む確定、追加項目の進行制限を実装した。
+
+原稿は変更せず、候補・詳細・参照URL・確認者・展開状態を保存する。再検索・候補変更・タイトル変更で承認と調査内容を解除し、解除前のデータをresearchArchivesへ保管。種類変更時は既定要素も未定義へ戻す。種類・件数を製品コードに固定せず、将来の種類別定義ファイルと現在台本へのパイプ設定を用意した。詳細は[第6段階の仕様](Source/Shell/Pages/SCRIPT-RESEARCH-20261009.md)。
+
+既存のNamed Pipe封筒とprojectId/revision検査にresearchId／workIdを追加。読取は短い一覧と1件の詳細へ分け、作品の外部自動承認・異作品・古い版・不正候補の部分更新を拒否する。全項目の確定後、情報ありの項目だけをresearchIntegrationへ渡して既存の配役工程へ進む。自然な文章統合そのものと具体的な要素定義は次の課題としてnote-tasks.mdに残した。
+
+最終検証はWin64/Validation/Research-20261009-092155。独立した確認用キャラと台本によるGUI／モデル77項目、実Named Pipe30項目、工程リスト回帰41項目が成功。候補変更、台本種類変更、保存再開、原稿保持、次工程保存、96/144/192 DPIを確認した。テスト結果・候補は輸送fixtureであり、実在作品のWeb検索ではない。画像は所有フォームのVCL PaintTo記録。途中でPrintWindowの取得が失敗したため、最終記録はPaintToとMemo値の照合を使用した。旧校正UI向けを含む全工程の旧検証一式と物理モニター間のDPI移動は今回実行していない。
+
+dprojの検索パスでWin64 Debug／Releaseともビルド成功、エラー0、新規警告0、既存警告は両構成13件。通常アプリが起動していないことを確認し、直前EXEを同検証フォルダのRIGMMaker-before-research.exeへ保持して通常RIGMMaker.exeを最終Releaseに更新した。SHA256はD8DB9F8506204AC4267C53B67B61C3BDC80A9CC612AA591CEDCEF90DC318B7C6。ユーザーの台本・設定・元素材へ試験命令を送らず、実作品の検索・画像生成・保存は行っていない。git diff --checkも成功。
+
+
+## 2026-10-09 台本入力ロックの廃止と工程リスト幅の調整
+
+ユーザーの方針変更で、台本制作の全UIはフォーカス・キー・マウス・IME操作を通信上の「入力中」として扱わない。WorkspaceのScriptTextEditingは互換getterから常にfalseを返し、BeginScriptTextEdit／EndScriptTextEditで状態を変えない。既存パイプのtextEditingもfalse。第6段階はタイトル欄のフォーカスを残したまま候補・概要・タイトルを反映する。第5段階のロック解除案内と全体の「入力中」表示を変更した。画面ごとの下書き・数値検証、作品・画像の人間による確定、projectId／revision／要求ID／作品IDの照合、配置ドラッグ・音声処理の排他は維持する。
+
+左の工程リストは未到達を含む全段階の文字幅を現在のフォントとDPIで測り、内外の余白だけを加えて幅を決める。縦・横スクロールバーを非表示とし、低いウィンドウでも矢印・Home／End・ホイールで移動できる。バーを消しただけではホイールが効かなかったため、ホイール差分を累積してWindowsのスクロール行数設定に従う処理を追加した。他の工程画面の横幅・スクロールは指示に従い保留した。
+
+検証：ScriptResearchCheckのGUI／モデル84項目、実Named Pipe31通信、ScriptNavigationCheck111項目がすべて成功（計226）。台本文と作品タイトルへの実フォーカス・キー操作、フォーカスを残した状態での台本文・候補・概要・タイトル更新、古いrevision／作品IDの拒否、人間の作品承認を外部から代行できないこと、保存再開、全工程の入力フック、96／144／192 DPIの全工程文字幅とバー非表示、低いウィンドウでの末尾選択・ホイール移動を確認した。隔離VCL描画のtitle-192.pngとscenes-96.pngを確認した。ユーザーの通常アプリ画面・実作品へテストデータを送った確認ではない。
+
+既存の工程別検証の旧ロック期待値もfalseへ合わせ、入力中拒否のテストは古いrevisionによる拒否へ変更した。7本のPowerShellスクリプトは構文解析で確認し、旧工程別fixtureの全実行は今回行っていない。初回コンパイルでgetterをフィールド宣言の途中に置いたE2169を修正。初回追加テストでは第5段階にまだ存在しないresearchへJSを呼んだnil参照を修正。これらは最終結果で解消している。
+
+dprojと同じ検索パスでWin64 Debug／Releaseともビルド成功。エラー0、新規警告0、既存警告13件は各構成に残る。通常アプリが終了していることを確認し、元EXEをRIGMMaker-before-input-policy.exeへ保持して通常RIGMMaker.exeを最終Releaseへ更新した。SHA256は7BB08B78CAA87BC483CE6236F3419EBCF261B4CFC03162034A57719CA6AE62D0。実作品・設定・元素材への試験命令や強制終了・再起動は行わず、コミット・プッシュなし。git diff --check成功。
+
+証跡：Win64/Validation/InputPolicy-20261009-dda05dca。ResearchFinal/run/result.json・pipe-done.json、Navigation3/run/result.json・描画画像、Debug／Release/build.log、verification.json、再実行用Build-Project.ps1／Run-Navigation.ps1。Research2に初回nil参照、Navigationに初回ホイール失敗の結果を保持する。note.mdには保留した右側のスクロール課題だけを追加し、現在の通信・一覧仕様はSCRIPT-NAVIGATION-20261009.mdへ記録した。

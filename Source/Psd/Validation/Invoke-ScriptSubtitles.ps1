@@ -54,11 +54,10 @@ for($phase=0;$phase -lt 2;$phase++){
    if($rows.Count -ne 4 -or $null -ne $status.data.wizard.subtitles.rows){throw 'Subtitle pagination or summary invalid'}
    $checks.Add('bounded subtitle reads show cast display voice and note separately')
    if($request.stage -eq '.editing'){
-    if(-not $status.data.textEditing){throw 'Human subtitle edit lock missing'}
-    foreach($command in @('app-script-edit-subtitle','app-script-set-subtitle-break','app-script-set-title','app-script-new')){
-     if((Invoke-Pipe $pipe $command ($common+@{cueId=$rows[0].cueId;subtitle='上書き';offset=4;title='上書き'})).ok){throw ('Human lock accepted '+$command)}
-     $checks.Add('human subtitle edit lock rejects '+$command)
-    }
+    if($status.data.textEditing){throw 'Subtitle input unexpectedly locked communication'}
+    $stale=@{projectId=$common.projectId;revision=($common.revision-1);cueId=$rows[0].cueId;subtitle='上書き'}
+    if((Invoke-Pipe $pipe 'app-script-edit-subtitle' $stale).ok){throw 'Stale subtitle revision accepted'}
+    $checks.Add('subtitle input is unlocked and stale revision is rejected')
    }elseif($request.stage -eq '.pipe'){
     $before=$rows | ConvertTo-Json -Depth 8 -Compress
     foreach($change in @(@{revision=($common.revision-1)},@{projectId='wrong'},@{cueId='unknown'},@{subtitle=('あ'*3001)},@{note=('あ'*2049)})){

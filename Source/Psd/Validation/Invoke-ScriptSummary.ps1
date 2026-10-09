@@ -26,7 +26,11 @@ for($phase=0;$phase -lt 3;$phase++){
   if($null -ne $request -and $request.pid -eq $process.Id -and -not $captured.ContainsKey($request.token)){
    $connection=Get-Content (Join-Path $root ('Exchange\workspace-'+$process.Id+'.json')) -Raw -Encoding utf8 | ConvertFrom-Json;if($connection.pid -ne $process.Id -or $connection.dataRoot -ne $root){throw 'Owned connection differs'};$pipe=$connection.commandPipe;$common=Current $pipe;$summary=Require-Ok (Invoke-Pipe $pipe 'app-script-summary' $common)
    if($request.stage -eq '.editing'){
-    foreach($command in @('app-script-set-summary','app-script-complete-summary','app-script-next','app-script-new')){if((Invoke-Pipe $pipe $command ($common+@{draft=$summary.data.draft})).ok){throw 'Human edit lock bypassed'};$checks.Add('human summary lock rejects '+$command)}
+    $status=Require-Ok (Invoke-Pipe $pipe 'app-script-status' @{})
+    if($status.textEditing){throw 'Summary input unexpectedly locked communication'}
+    $stale=@{projectId=$common.projectId;revision=($common.revision-1)}
+    if((Invoke-Pipe $pipe 'app-script-set-summary' $stale).ok){throw 'Stale summary revision accepted'}
+    $checks.Add('summary input is unlocked and stale revision is rejected')
    }elseif($request.stage -eq '.pipe'){
     $before=$summary | ConvertTo-Json -Depth 12 -Compress
     foreach($change in @(@{revision=($common.revision-1)},@{projectId='wrong'},@{text=('あ'*2001)},@{text=('A'+[char]1)},@{role=10},@{role=1.5},@{minimum=0},@{kind='fake'})){

@@ -47,12 +47,12 @@ begin
     var Known: PWideChar := nil; OleCheck(SHGetKnownFolderPath(FOLDERID_Documents,0,0,Known));
     try var Expected := TPath.Combine(string(Known),'RIGMMaker'); if DirectoryExists('D:\Users\take6\RIGMMaker') then Expected := 'D:\Users\take6\RIGMMaker'; Check(SameText(RigmDefaultDocumentsDirectory,Expected),'existing legacy default is retained, absent default uses current KnownDocuments without creation',Results); finally CoTaskMemFree(Known); end;
     var W := Main.Workspace; W.OpenScriptDraft(Trim(TFile.ReadAllText(TPath.Combine(Main.DataRoot,'fixture-project.txt'),TEncoding.UTF8))); Main.NavigateTo(apScriptCreate);
-    var Creator := Main.PageInstance(apScriptCreate); var Toolbar := TToolBar(Creator.FindComponent('ScriptTitleToolbar')); var Next := TToolButton(Toolbar.FindComponent('ScriptNext'));
+    var Creator := Main.PageInstance(apScriptCreate); var Toolbar := TComponent(Creator); var Next := TRigmScriptStageProbe.CreateForFrame(Toolbar,W);
     if Reopen then begin
       var Resume := ParseObject(TFile.ReadAllText(ResultPath+'.resume.json',TEncoding.UTF8)); var Json := W.ScriptDraft.Json;
       try Check((W.CurrentScriptStage='summary') and (Json.ToJSON=JS(Resume,'project')),'restart resumes saved summary destination with exact project',Results); finally Json.Free; Resume.Free; end;
       var Radio := TRadioGroup(Creator.FindComponent('ScriptSummaryChoice')); Check((Radio.ItemIndex=0) and not Next.Visible,'explicit summary omission survives restart without fabricated chart',Results);
-      TToolButton(Toolbar.FindComponent('ScriptScenesStage')).Click;
+      ClickScriptStage(Toolbar,'scenes');
     end else begin
       Check(W.CurrentScriptStage='voice','copied completed Stage9 fiction begins at voice',Results);
       W.RefreshVoiceCatalog; WaitVoice(W); W.BindVoice(2,108,'1bd6b32b-d650-4072-bbe5-1d0ef4aaa28b');
@@ -65,13 +65,13 @@ begin
     if Reopen then begin
       WaitPreview(W); Check((List.Items.Count=W.ScriptDraft.Scenes.Count) and (List.SmallImages.Count=List.Items.Count) and (W.ScenePreview<>nil),'saved material reloads real thumbnails and common preview',Results);
       for var C in W.ScriptDraft.Cues do Check(W.ScriptDraft.AudioReady(C),'scene restart preserves real ready WAV '+C.Id,Results);
-      CaptureUiWindow(Main,ResultPath,'.reopened'); TToolButton(Toolbar.FindComponent('ScriptSummaryStage')).Click;
+      CaptureUiWindow(Main,ResultPath,'.reopened'); ClickScriptStage(Toolbar,'summary');
     end else begin
       var Before := CuesJson(W.ScriptDraft); var BeforeCharacters := CharactersJson(W.ScriptDraft); var Cast := CastingFingerprint(W.ScriptDraft); var Source := ScriptFingerprint(W.ScriptDraft);
       var BeforePlacements := JA(W.ScriptDraft.ScriptWizard,'placements').ToJSON; var BeforeSpeakers := SpeakersJson(W.ScriptDraft); Check(JA(W.ScriptDraft.ScriptWizard,'placements').Count=2,'fiction contains two saved character placements',Results);
       var Id := W.ScriptDraft.Scenes[0].Id; TToolButton(Tools.FindComponent('ScriptSceneEdit')).Click;
       TMemo(Frame.FindComponent('ScriptSceneDescription')).Text := '確認用の色図。架空作品の説明文です。'; TMemo(Frame.FindComponent('ScriptScenePrompt')).Text := '確認PNG転送。意味的画像生成は行わない。';
-      Check(W.ScriptTextEditing,'human scene text uses shared input lock',Results); CaptureUiWindow(Main,ResultPath,'.editing'); TToolButton(Tools.FindComponent('ScriptSceneDone')).Click;
+      Check(not W.ScriptTextEditing,'human scene text does not lock communication',Results); CaptureUiWindow(Main,ResultPath,'.editing'); TToolButton(Tools.FindComponent('ScriptSceneDone')).Click;
       W.AdoptScriptSceneImage(Id,TPath.Combine(Main.DataRoot,'local-fixture.png')); var Local := W.ScriptDraft.Scene(Id).Image;
       Check(FileExists(Local) and (THashSHA2.GetHashStringFromFile(Local)=THashSHA2.GetHashStringFromFile(TPath.Combine(Main.DataRoot,'local-fixture.png'))),'local image is decoded and copied with original bytes',Results);
       TToolButton(Tools.FindComponent('ScriptSceneRequest')).Click; Check(JS(ScriptSceneRequest(W.ScriptDraft,Id),'state')='pending','external request remains pending without dummy generation',Results);
@@ -85,7 +85,7 @@ begin
       for var I := 1 to W.ScriptDraft.Scenes.Count-1 do begin W.SelectScriptScene(W.ScriptDraft.Scenes[I].Id); var Mode := TComboBox(Frame.FindComponent('ScriptSceneMode')); Mode.ItemIndex := 3; Mode.OnChange(Mode); end;
       W.SelectScriptScene(Id); TToolButton(Tools.FindComponent('ScriptSceneReady')).Click; Check(Next.Enabled,'explicit per-scene choices enable Next after confirmation',Results); Next.Click;
       Check((W.CurrentScriptStage='summary') and not W.ScriptDraft.Modified,'scene Next saves summary destination and all materials first',Results);
-      var Radio := TRadioGroup(Creator.FindComponent('ScriptSummaryChoice')); Check(Radio.ItemIndex=-1,'summary starts without guessed choice',Results); Radio.ItemIndex := 0; Radio.OnClick(Radio); TToolButton(Toolbar.FindComponent('ScriptSave')).Click;
+      var Radio := TRadioGroup(Creator.FindComponent('ScriptSummaryChoice')); Check(Radio.ItemIndex=-1,'summary starts without guessed choice',Results); Radio.ItemIndex := 0; Radio.OnClick(Radio); TButton(Toolbar.FindComponent('ScriptSave')).Click;
       CaptureUiWindow(Main,ResultPath,'.saved'); var Resume := TJSONObject.Create; var Json := W.ScriptDraft.Json;
       try Resume.AddPair('project',Json.ToJSON); TFile.WriteAllText(ResultPath+'.resume.json',Resume.ToJSON,TEncoding.UTF8); finally Json.Free; Resume.Free; end;
     end;

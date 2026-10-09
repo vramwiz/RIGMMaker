@@ -18,14 +18,14 @@ begin
 end;
 procedure TRigmWizardWorkspace.AdoptScriptSceneImage(const Id,Path: string);
 begin
-  if (CurrentScriptStage<>'scenes') or FScriptTextEditing then raise Exception.Create('画像入力を完了してから採用してください。');
+  if (CurrentScriptStage<>'scenes') or ScriptTextEditing then raise Exception.Create('画像入力を完了してから採用してください。');
   RequireScriptScenes(FScriptDraft); RequireEditableScriptScene(FScriptDraft,Id);
   var Copied := CopyCheckedMovieImage(Path,TPath.Combine(ExtractFileDir(ScriptPath(FScriptDraft)),'Images'));
   ApplyScriptSceneImage(FScriptDraft,Id,Copied,''); FScriptDraft.Changed; ScriptChanged;
 end;
 procedure TRigmWizardWorkspace.DeliverScriptSceneImage(Args: TJSONObject);
 begin
-  if (CurrentScriptStage<>'scenes') or FScriptTextEditing then raise Exception.Create('画像工程の入力を完了してから再取得してください。');
+  if (CurrentScriptStage<>'scenes') or ScriptTextEditing then raise Exception.Create('画像工程の入力を完了してから再取得してください。');
   var Id := JS(Args,'sceneId'); var RequestId := JS(Args,'requestId');
   RequireSceneImageRequest(FScriptDraft,Id,RequestId);
   var Provenance := JS(Args,'provenance'); if not MatchStr(Provenance,['external-generated','existing-material','test-fixture']) then raise Exception.Create('画像の由来を指定してください。');
@@ -63,14 +63,14 @@ begin
 end;
 procedure TRigmWizardWorkspace.SetScriptSceneApproved(const Id: string; Value: Boolean);
 begin
-  if (CurrentScriptStage<>'scenes') or FScriptTextEditing then raise Exception.Create('入力を完了してから確定チェックを操作してください。');
+  if (CurrentScriptStage<>'scenes') or ScriptTextEditing then raise Exception.Create('入力を完了してから確定チェックを操作してください。');
   // Only the actual GUI checkbox calls this method. No pipe can silently unlock a scene.
   RigmScriptScenesModel.SetScriptSceneApproved(FScriptDraft,Id,Value);
   FScriptDraft.Changed; ScriptChanged;
 end;
 procedure TRigmWizardWorkspace.RequestUnapprovedScriptImages;
 begin
-  if (CurrentScriptStage<>'scenes') or FScriptTextEditing then raise Exception.Create('入力を完了してから画像要求を作成してください。');
+  if (CurrentScriptStage<>'scenes') or ScriptTextEditing then raise Exception.Create('入力を完了してから画像要求を作成してください。');
   RequireScriptScenes(FScriptDraft); var Count := 0;
   for var S in FScriptDraft.Scenes do if not S.ImageApproved and (SceneImageInstruction(S).Trim<>'') then begin
     RigmScriptScenesModel.RequestScriptSceneImage(FScriptDraft,S.Id); Inc(Count);
@@ -82,10 +82,10 @@ function TRigmWizardWorkspace.ScriptScenesAdvanceReason: string;
 begin
   Result := '';
   if FScriptDraft=nil then Exit('作品を開いてください。');
-  if FScriptTextEditing or FPlacementEditing then Exit('画像要望・補足文の入力を完了してください。');
+  if ScriptTextEditing or FPlacementEditing then Exit('画像要望・補足文の入力を完了してください。');
   if VoiceBusy or VoicePlaying or VoiceContinuous then Exit('音声生成・再生を停止してください。');
   if Trim(JS(FScriptDraft.ScriptWizard,'titleInput'))='' then Exit('題名を入力してください。');
-  if JS(FScriptDraft.ScriptWizard,'scene-assignmentStatus')<>'complete' then Exit('シーン割当をNextで保存してください。');
+  if JS(FScriptDraft.ScriptWizard,'scene-assignmentStatus')<>'complete' then Exit('シーン割当を左の工程リストで保存してください。');
   if not ScriptScenesReady(FScriptDraft) then Exit('画像を使うシーンには画像を用意し、全シーンの確定チェックを入れてください。');
   for var C in FScriptDraft.Cues do if not FScriptDraft.AudioReady(C) then Exit('音声変更を確認してください。');
   Result := CastingAdvanceReason(False);
@@ -118,7 +118,7 @@ begin
 end;
 procedure TRigmWizardWorkspace.PreviewScriptScene(Force: Boolean);
 begin
-  if (CurrentScriptStage<>'scenes') or FScriptTextEditing then Exit; RequireScriptScenes(FScriptDraft);
+  if (CurrentScriptStage<>'scenes') or ScriptTextEditing then Exit; RequireScriptScenes(FScriptDraft);
   var Key := ScenePreviewKey; if not Force and (Key=FSceneJobKey) and (FSceneJob<>nil) then Exit;
   if FSceneJob<>nil then begin FSceneJob.Cancel; FSceneRetired.Add(FSceneJob); FSceneJob := nil; end;
   var Id := JS(JO(FScriptDraft.ScriptWizard,'scenes'),'selectedScene'); var Time := ScriptSceneStart(FScriptDraft,Id)+Min(0.05,FScriptDraft.SceneDuration(FScriptDraft.Scene(Id))/2);
@@ -168,7 +168,7 @@ end;
 function TRigmWizardWorkspace.ExecuteScriptImageTransfer(const Name: string; Args: TJSONObject): TJSONObject;
 begin
   if MatchText(Name,['image-transfer-begin','image-transfer-adopt']) then begin
-    if FScriptTextEditing or FPlacementEditing or (CurrentScriptStage<>'scenes') then raise Exception.Create('GUI入力を完了してから画像を取得・採用してください。');
+    if ScriptTextEditing or FPlacementEditing or (CurrentScriptStage<>'scenes') then raise Exception.Create('GUI入力を完了してから画像を取得・採用してください。');
     if (FScriptDraft=nil) or (JS(Args,'projectId')<>FScriptDraft.Id) or (JI(Args,'revision',-1)<>FScriptDraft.Revision) then raise Exception.Create('最新projectId/revisionで画像を取得・採用してください。');
   end;
   if Name='image-transfer-begin' then begin
@@ -204,7 +204,7 @@ begin
 end;
 procedure TRigmWizardWorkspace.CompleteScriptSummary;
 begin
-  if (CurrentScriptStage<>'summary-edit') or FScriptTextEditing then raise Exception.Create('総評入力を完了してください。'); var Copy := FScriptDraft.Clone;
+  if (CurrentScriptStage<>'summary-edit') or ScriptTextEditing then raise Exception.Create('総評入力を完了してください。'); var Copy := FScriptDraft.Clone;
   try MaterializeScriptSummary(Copy); finally Copy.Free; end; PsdJson.Put(JO(FScriptDraft.ScriptWizard,'summaryData'),'status','complete'); FScriptDraft.Changed; ScriptChanged;
 end;
 function TRigmWizardWorkspace.ReadScriptSummary(Args: TJSONObject): TJSONObject;

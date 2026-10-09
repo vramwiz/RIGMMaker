@@ -7,7 +7,7 @@ uses System.Classes, System.JSON, Vcl.Forms, Vcl.Controls, Vcl.ExtCtrls, Vcl.Std
 type
   TRigmWizardMainForm = class(TForm)
   private
-    FRoot: string; FHost: TPanel; FTitle: TLabel;
+    FRoot: string; FHost,FHeader: TPanel; FTitle: TLabel;
     FPages: array[TRigmAppPage] of TFrame;
     FCurrentPage: TRigmAppPage;
     FWorkspace: TRigmWizardWorkspace;
@@ -45,9 +45,9 @@ begin
   Position := poScreenCenter; Font.Name := 'Yu Gothic UI'; Font.Size := 10; OnCloseQuery := Closing;
   KeyPreview := True; OnKeyDown := CommonKey;
   FRoot := RigmDocumentsDirectory;
-  var Header := TPanel.Create(Self); Header.Parent := Self; Header.Align := alTop; Header.Height := 44; Header.BevelOuter := bvNone;
-  var Button := TButton.Create(Self); Button.Parent := Header; Button.Align := alLeft; Button.Width := 140; Button.Caption := 'ホームへ戻る'; Button.Name := 'WizardHome'; Button.OnClick := Home;
-  FTitle := TLabel.Create(Self); FTitle.Parent := Header; FTitle.Align := alClient; FTitle.Layout := tlCenter; FTitle.Font.Size := 16; FTitle.Name := 'WizardTitle';
+  FHeader := TPanel.Create(Self); FHeader.Parent := Self; FHeader.Align := alTop; FHeader.Height := 44; FHeader.BevelOuter := bvNone; FHeader.Name := 'WizardHeader';
+  var Button := TButton.Create(Self); Button.Parent := FHeader; Button.Align := alLeft; Button.Width := 140; Button.Caption := 'ホームへ戻る'; Button.Name := 'WizardHome'; Button.OnClick := Home;
+  FTitle := TLabel.Create(Self); FTitle.Parent := FHeader; FTitle.Align := alClient; FTitle.Layout := tlCenter; FTitle.Font.Size := 16; FTitle.Name := 'WizardTitle';
   FHost := TPanel.Create(Self); FHost.Parent := Self; FHost.Align := alClient; FHost.BevelOuter := bvNone;
   EnsureWorkspace; NavigateTo(apHome);
   ScaleForPPI(TargetPPI);
@@ -93,6 +93,7 @@ begin
   var Previous := FPages[FCurrentPage];
   if Previous<>nil then begin if Supports(Previous,IRigmPageLifecycle,Lifecycle) then Lifecycle.SetActive(False); Previous.Visible := False; end;
   FCurrentPage := Page; Target.Visible := True; Target.BringToFront; FTitle.Caption := '  '+RigmPageTitle(Page);
+  FHeader.Visible := Page<>apScriptCreate;
   if FWorkspace<>nil then FWorkspace.CurrentPage := Page;
   try
     if Loading then begin

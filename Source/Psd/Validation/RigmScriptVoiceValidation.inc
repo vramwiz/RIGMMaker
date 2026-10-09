@@ -36,7 +36,7 @@ begin
   try
     VerifyVoicePersonState(Results);
     var W := Main.Workspace; W.OpenScriptDraft(Trim(TFile.ReadAllText(TPath.Combine(Main.DataRoot,'fixture-project.txt'),TEncoding.UTF8))); Main.NavigateTo(apScriptCreate);
-    var Creator := Main.PageInstance(apScriptCreate); var Toolbar := TToolBar(Creator.FindComponent('ScriptTitleToolbar')); var Next := TToolButton(Toolbar.FindComponent('ScriptNext'));
+    var Creator := Main.PageInstance(apScriptCreate); var Toolbar := TComponent(Creator); var Next := TRigmScriptStageProbe.CreateForFrame(Toolbar,W);
     if Reopen then begin
       var Resume := ParseObject(TFile.ReadAllText(ResultPath+'.resume.json',TEncoding.UTF8)); var Json := W.ScriptDraft.Json;
       try Check(W.CurrentScriptStage='voice','restart resumes saved voice screen',Results); Check(Json.ToJSON=JS(Resume,'project'),'binding reading query audio metadata and selection survive restart',Results);
@@ -90,14 +90,14 @@ begin
       Press(List,VK_DOWN); Check((StateChoice.ItemIndex>=0) and (W.ScriptDraft.Speaker(W.ScriptDraft.Cues[1].SpeakerId).StyleId=108),'next used character retains its explicit casting voice',Results); Press(List,VK_UP);
       var C := W.ScriptDraft.Cues[0]; var Id := C.Id; var Source := C.Text; var Subtitle := C.Subtitle; var Scene := C.Scene; var Raw := ScriptFingerprint(W.ScriptDraft);
       var PriorReading := C.VoiceReading; VoiceValueEdit(Frame,0).Text := '0.97'; VoiceValueEdit(Frame,1).Text := '0.02';
-      Check(W.ScriptTextEditing and (C.VoiceReading=PriorReading) and (C.Text=Source) and (C.Subtitle=Subtitle) and (C.Scene=Scene) and (ScriptFingerprint(W.ScriptDraft)=Raw),'VOICEVOX query edits retain reading raw subtitle scene and cast source',Results);
+      Check(not W.ScriptTextEditing and (C.VoiceReading=PriorReading) and (C.Text=Source) and (C.Subtitle=Subtitle) and (C.Scene=Scene) and (ScriptFingerprint(W.ScriptDraft)=Raw),'VOICEVOX query edits retain reading raw subtitle scene and cast source',Results);
       var Settings := C.VoiceSettings.Clone as TJSONObject;
       try var Bad := Settings.Clone as TJSONObject; try PsdJson.Put(Bad,'speedScale',TJSONNumber.Create(9)); var Rejected := False;
         try W.EditVoice(Id,'上書き',Bad); except on E: Exception do Rejected := True; end; Check(Rejected and (C.VoiceReading=PriorReading),'invalid query atomically rejects reading overwrite',Results);
       finally Bad.Free; end; finally Settings.Free; end;
       VoiceValueEdit(Frame,0).Text := '-'; Check(not Frame.RequestFinish,'incomplete numeric input blocks leaving without discarding typed value',Results);
       Check(VoiceValueEdit(Frame,0).Text='-','incomplete typed value retained',Results); VoiceValueEdit(Frame,0).Text := '0.97';
-      CaptureUiWindow(Main,ResultPath,'.editing'); Check(Frame.RequestFinish,'valid numeric adjustment finishes',Results); Check(not W.ScriptTextEditing,'input complete releases common pipe edit guard',Results);
+      CaptureUiWindow(Main,ResultPath,'.editing'); Check(Frame.RequestFinish,'valid numeric adjustment finishes',Results); Check(not W.ScriptTextEditing,'numeric input confirmation leaves communication unlocked',Results);
       Press(List,VK_F5); WaitVoice(W); Check(W.ScriptDraft.AudioReady(C) and FileExists(C.LabFile),'F5 generates and previews one real WAV and phoneme LAB',Results);
       var Pcm := TRigmPcm.Load(C.WaveFile); try Check((Pcm.Duration>0.2) and (Length(Pcm.Samples)>1000),'real PCM is nonempty and measured',Results); finally Pcm.Free; end;
       for var I := 1 to W.ScriptDraft.Cues.Count-1 do Check(W.ScriptDraft.Cues[I].WaveFile='','selected generation leaves other cue audio untouched '+I.ToString,Results);

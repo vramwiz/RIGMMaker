@@ -109,7 +109,7 @@ begin
       FGrid.RowCount := JA(D,'items').Count+1; for var I := 0 to JA(D,'items').Count-1 do begin var O := TJSONObject(JA(D,'items')[I]); FGrid.Cells[0,I+1] := JS(O,'label'); FGrid.Cells[1,I+1] := JS(O,'value'); end; FLoaded := P.Id;
     end;
     FText.ReadOnly := not FEditing; FSubtitle.ReadOnly := not FEditing; FReading.ReadOnly := not FEditing;
-    FGuide.Caption := '人間の評価値を入力し確認完了。Nextで総評の追加音声だけをVOICEVOX工程へ。'; FPreview.Invalidate;
+    FGuide.Caption := '人間の評価値を入力し確認完了。左の工程リストで総評の追加音声だけをVOICEVOX工程へ。'; FPreview.Invalidate;
   finally FSync := False; end;
 end;
 end.

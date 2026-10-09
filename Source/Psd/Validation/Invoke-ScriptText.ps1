@@ -64,16 +64,17 @@ for($phase=0;$phase -lt 2;$phase++){
       if($invalid.ok){throw 'Different read project accepted'}
       $pipeChecks+=@('bounded status for long text','three-page long text and surrogate preservation','surrogate middle offset rejected','long section tail patch','old read revision rejected','different read project rejected')
      } elseif($request.stage -eq '.editing'){
-      if(-not $status.data.textEditing){throw 'Typing edit guard missing'}
+      if($status.data.textEditing){throw 'Text input unexpectedly locked communication'}
       foreach($section in @('opening','body','closing')){
        $read=Invoke-OwnedPipe $connection.commandPipe 'app-script-text' ($common+@{section=$section})
        if(-not $read.ok -or $read.data.text.Length -eq 0){throw 'Read during typing failed'}
       }
-      foreach($command in @('app-script-set-text','app-script-select-section','app-script-next','app-script-set-title')){
-       $invalid=Invoke-OwnedPipe $connection.commandPipe $command ($common+@{section='body';text='競合';title='競合'})
-       if($invalid.ok){throw ('Typing lock accepted '+$command)}
-      }
-      $pipeChecks+=@('all sections readable during typing','text update rejected during typing','section switch rejected during typing','Next rejected during typing','title overwrite rejected during typing')
+      $text=Invoke-OwnedPipe $connection.commandPipe 'app-script-text' ($common+@{section='body'})
+      $accepted=Invoke-OwnedPipe $connection.commandPipe 'app-script-set-text' ($common+@{section='body';text=$text.data.text})
+      if(-not $accepted.ok){throw 'Focused text input rejected current pipe update'}
+      $stale=@{projectId=$common.projectId;revision=($common.revision-1);section='body';text='競合'}
+      if((Invoke-OwnedPipe $connection.commandPipe 'app-script-set-text' $stale).ok){throw 'Stale text revision accepted'}
+      $pipeChecks+=@('all sections readable during typing','current text update accepted without leaving input','stale text revision rejected')
      } else {
       if($status.data.textEditing){throw 'Input complete did not unlock'}
       $read=Invoke-OwnedPipe $connection.commandPipe 'app-script-text' ($common+@{section='body'})

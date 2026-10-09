@@ -42,7 +42,11 @@ for($phase=0;$phase -lt 2;$phase++){
    $connection=Get-Content (Join-Path $root ('Exchange\workspace-'+$process.Id+'.json')) -Raw -Encoding utf8 | ConvertFrom-Json;if($connection.pid -ne $process.Id -or $connection.dataRoot -ne $root){throw 'Owned connection differs'};$pipe=$connection.commandPipe;$common=Current $pipe
    if($request.stage -ne '.saved'){$scenes=Require-Ok (Invoke-Pipe $pipe 'app-script-scenes' $common);$row=$scenes.rows[0];if($scenes.rows.Count -ne 1 -or -not $scenes.hasMore){throw 'Scene pagination differs'}}
    if($request.stage -eq '.editing'){
-    foreach($command in @('app-script-edit-scene','app-script-request-scene-image','app-script-next','app-script-image-transfer-begin','app-script-new')){if((Invoke-Pipe $pipe $command ($common+@{sceneId=$row.id;description='上書き';prompt='上書き';displayMode='none';requestId='missing'})).ok){throw 'Human edit lock bypassed'};$checks.Add('human scene lock rejects '+$command)}
+    $status=Require-Ok (Invoke-Pipe $pipe 'app-script-status' @{})
+    if($status.textEditing){throw 'Scene input unexpectedly locked communication'}
+    $stale=@{projectId=$common.projectId;revision=($common.revision-1)}
+    if((Invoke-Pipe $pipe 'app-script-edit-scene' $stale).ok){throw 'Stale scenes revision accepted'}
+    $checks.Add('scenes input is unlocked and stale revision is rejected')
    }elseif($request.stage -eq '.transfer'){
     if($row.imageRequest.state -ne 'pending' -or -not $row.imageRequest.current){throw 'Pending request missing'};$before=$row.imagePath
     $beforeRow=$row | ConvertTo-Json -Depth 8 -Compress

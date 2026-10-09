@@ -270,7 +270,7 @@ begin
       if ScriptSceneReady(P,S) then Inc(Ready);
     end;
     RefreshDialogue;
-    if not FEditing then FGuide.Caption := Format('確定 %d / %d。要望のある未確定行を要求します。全件確定後、Nextで動画編集へ。',[Ready,P.Scenes.Count]);
+    if not FEditing then FGuide.Caption := Format('確定 %d / %d。要望のある未確定行を要求します。全件確定後、左の工程リストで動画編集へ。',[Ready,P.Scenes.Count]);
   finally FSync := False; end;
 end;
 procedure TRigmScriptScenesFrame.SetActive(Value: Boolean);

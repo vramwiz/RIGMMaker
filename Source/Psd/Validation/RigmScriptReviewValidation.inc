@@ -32,8 +32,8 @@ begin
     end else begin
       W.NewScriptDraft; Main.NavigateTo(apScriptCreate);
     end;
-    var Creator := Main.PageInstance(apScriptCreate); var Toolbar := TToolBar(Creator.FindComponent('ScriptTitleToolbar'));
-    var Next := TToolButton(Toolbar.FindComponent('ScriptNext'));
+    var Creator := Main.PageInstance(apScriptCreate); var Toolbar := TComponent(Creator);
+    var Next := TRigmScriptStageProbe.CreateForFrame(Toolbar,W);
     if not Reopen then begin
       TEdit(Creator.FindComponent('ScriptTitle')).Text := '校正工程の分離した確認作品'; Next.Click;
       WaitThumbnailLibrary(W);
@@ -79,7 +79,7 @@ begin
       Check(JS(ScriptSection(W.ScriptDraft,'body'),'text').Contains('語語'),'human choice preserves current text',Results);
       SelectItem(Frame,'last'); var Proposal := TMemo(Frame.FindComponent('ScriptReviewProposal'));
       Proposal.SetFocus; Proposal.Text := 'ここで説明を終えます。';
-      Check(W.ScriptTextEditing and (JS(ReviewItem(W.ScriptDraft,'last'),'editedDraft')=Proposal.Text),'manual edit is locked and retained in project',Results);
+      Check(not W.ScriptTextEditing and (JS(ReviewItem(W.ScriptDraft,'last'),'editedDraft')=Proposal.Text),'manual edit is retained without locking communication',Results);
       CaptureUiWindow(Main,ResultPath,'.editing');
       TToolButton(TToolBar(Frame.FindComponent('ScriptReviewToolbar')).FindComponent('ScriptReviewHold')).Click;
       Check((JS(ReviewItem(W.ScriptDraft,'last'),'decision')='hold') and JS(ScriptSection(W.ScriptDraft,'body'),'text').Contains('最後の行'),'hold leaves original text intact',Results);
@@ -92,7 +92,7 @@ begin
       W.SaveScriptDraft(False);
       var Snapshot := W.ScriptDraft.Clone;
       try ValidateScriptReview(Snapshot); Check(ScriptFingerprint(Snapshot)=JS(JO(Snapshot.ScriptWizard,'review'),'fingerprint'),'clone preserves reviewed source fingerprint',Results); finally Snapshot.Free; end;
-      TToolButton(Toolbar.FindComponent('ScriptTextStage')).Click;
+      ClickScriptStage(Toolbar,'text');
       W.SetScriptText('body',JS(ScriptSection(W.ScriptDraft,'body'),'text')+#13#10+'人が追記しました。'); W.EndScriptTextEdit;
       Check(JS(JO(W.ScriptDraft.ScriptWizard,'review'),'state')='stale','human raw edit invalidates old review',Results);
       Next.Click;

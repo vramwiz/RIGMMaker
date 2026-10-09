@@ -48,7 +48,7 @@ begin
   for var I := 0 to 2 do begin
     FParts[I] := FToolbar.AddIcon('ScriptTextPart'+I.ToString,SectionNames[I],riEditPreview,0,SelectSection,True); FParts[I].Tag := I;
   end;
-  FToolbar.AddSeparator; FToolbar.AddIcon('ScriptTextReady','入力完了：AIの変更を許可する',riComplete,0,CompleteInput);
+  FToolbar.AddSeparator; FToolbar.AddIcon('ScriptTextReady','入力内容を確認する',riComplete,0,CompleteInput);
   FHeading := TRigmScriptLabel.Create(Self); FHeading.Parent := Self; FHeading.Align := alTop; FHeading.AutoSize := False;
   FHeading.Height := ScaleValue(38); FHeading.Font.Size := 16; FHeading.Name := 'ScriptTextHeading';
   FGuide := TRigmScriptLabel.Create(Self); FGuide.Parent := Self; FGuide.Align := alBottom; FGuide.Height := ScaleValue(56);
@@ -66,9 +66,8 @@ destructor TRigmScriptTextFrame.Destroy;
 begin FWorkspace.EndScriptTextEdit; inherited; end;
 procedure TRigmScriptTextFrame.UpdateGuide;
 begin
-  if FWorkspace.ScriptTextEditing then FGuide.Caption := '入力中：AIの変更を停止しています。入力完了のチェックアイコンで解除できます。'
-  else FGuide.Caption := '入力完了：AIはパイプで取得・変更できます。再び入力を始めると変更を停止します。';
-  FGuide.Caption := FGuide.Caption+#13#10+'戻る・終了・任意の保存で文章を保存します。Nextで保存して校正へ進み、Codexへ入力完了を伝えてください。';
+  FGuide.Caption := 'Codexはフォーカスや入力操作に関係なく、パイプで現在の台本を取得・変更できます。';
+  FGuide.Caption := FGuide.Caption+#13#10+'戻る・終了・任意の保存で文章を保存します。左の工程リストで保存して作品情報・掘り下げ確認へ進みます。';
 end;
 procedure TRigmScriptTextFrame.BeginInput(Sender: TObject);
 begin if FSync then Exit; FWorkspace.BeginScriptTextEdit; UpdateGuide; end;

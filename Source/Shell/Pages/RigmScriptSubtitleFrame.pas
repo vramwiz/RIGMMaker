@@ -160,7 +160,7 @@ begin
   inherited Create(AOwner); Align := alClient; FWorkspace := Workspace;
   FToolbar := TRigmIconToolbar.Create(Self); FToolbar.Parent := Self; FToolbar.Align := alTop; FToolbar.Name := 'ScriptSubtitleToolbar';
   FToolbar.AddIcon('ScriptSubtitleEdit','Enter：表示字幕・改行・メモを編集',riEditPreview,0,Detail);
-  FToolbar.AddIcon('ScriptSubtitleReady','字幕入力完了（Ctrl+Enter / Esc、次の工程へは上段Next）',riComplete,0,Complete);
+  FToolbar.AddIcon('ScriptSubtitleReady','字幕入力完了（Ctrl+Enter / Esc、次の工程へは左の工程リスト）',riComplete,0,Complete);
   FToolbar.AddSeparator; FToolbar.AddIcon('ScriptSubtitlePrevious','前の字幕ページ',riUp,0,Page).Tag := -1;
   FToolbar.AddIcon('ScriptSubtitleFollowing','次の字幕プレビューページ',riDown,0,Page).Tag := 1;
   FGuide := TRigmScriptLabel.Create(Self); FGuide.Parent := Self; FGuide.Align := alBottom; FGuide.AutoSize := False; FGuide.WordWrap := True; FGuide.Height := ScaleValue(70); FGuide.Name := 'ScriptSubtitleGuide';
@@ -302,9 +302,9 @@ begin
     TToolButton(FToolbar.FindComponent('ScriptSubtitleEdit')).Enabled := Problem='';
     TToolButton(FToolbar.FindComponent('ScriptSubtitleReady')).Enabled := Problem='';
     if Problem<>'' then Guide := Problem+' 以前の字幕とメモは保持しています。'
-    else if FEditing then Guide := Guide+#13#10+'入力中：上段のNextで入力を確認・保存し、読み・音声調整へ進めます。'
-    else if JS(P.ScriptWizard,'subtitlesStatus')='complete' then Guide := Guide+#13#10+'字幕入力完了：上段のNextで保存し、読み・音声調整へ進めます。'
-    else Guide := Guide+#13#10+'上段のNextで字幕入力を確認・保存し、読み・音声調整へ進んでください。';
+    else if FEditing then Guide := Guide+#13#10+'字幕の編集内容は左の工程リストで確認・保存して音声調整へ進めます。'
+    else if JS(P.ScriptWizard,'subtitlesStatus')='complete' then Guide := Guide+#13#10+'字幕入力完了：左の工程リストで保存し、読み・音声調整へ進めます。'
+    else Guide := Guide+#13#10+'左の工程リストで字幕入力を確認・保存し、読み・音声調整へ進んでください。';
     if FInputError<>'' then Guide := FInputError;
     if FGuide.Caption<>Guide then FGuide.Caption := Guide;
     FPreview.RefreshPreview; UpdatePageButtons;

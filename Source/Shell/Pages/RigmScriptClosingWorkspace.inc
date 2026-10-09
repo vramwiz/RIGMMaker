@@ -6,7 +6,7 @@ begin
 end;
 procedure TRigmWizardWorkspace.AdoptScriptClosingImage(const Kind,Path: string);
 begin
-  if (CurrentScriptStage<>'closing') or FScriptTextEditing then raise Exception.Create('締め入力を完了してから画像を採用してください。');
+  if (CurrentScriptStage<>'closing') or ScriptTextEditing then raise Exception.Create('締め入力を完了してから画像を採用してください。');
   if not MatchStr(Kind,['representative','endImage','thumbnailImage']) then raise Exception.Create('画像種別が不正です。');
   if not FileExists(Path) or not MatchText(ExtractFileExt(Path),['.png','.jpg','.jpeg','.bmp']) then raise Exception.Create('既存PNG/JPEG/BMPを選んでください。');
   if TFile.GetSize(Path)>RigmImageMaxBytes then raise Exception.Create('画像は32MB以内です。');
@@ -20,7 +20,7 @@ begin
 end;
 procedure TRigmWizardWorkspace.CompleteScriptClosing;
 begin
-  if (CurrentScriptStage<>'closing') or FScriptTextEditing or VoiceBusy then raise Exception.Create('締め入力・音声ジョブを完了してください。');
+  if (CurrentScriptStage<>'closing') or ScriptTextEditing or VoiceBusy then raise Exception.Create('締め入力・音声ジョブを完了してください。');
   if ScriptClosingScene(FScriptDraft)='' then raise Exception.Create('締めのセリフがありません。台本入力で締めを書いてください。');
   var Cast := ScriptCastingSummary(FScriptDraft); try if (JS(Cast,'state')='stale') or (JI(Cast,'pending')<>0) or (JI(Cast,'unassigned')<>0) then raise Exception.Create('配役を確認してください。'); finally Cast.Free; end;
   if not ScriptScenesReady(FScriptDraft) then raise Exception.Create('シーンを確認してください。');
@@ -38,7 +38,7 @@ begin
 end;
 procedure TRigmWizardWorkspace.FinishScriptToEditor;
 begin
-  if not MatchStr(CurrentScriptStage,['scenes','closing']) or FScriptTextEditing or FPlacementEditing or VoiceBusy or VoicePlaying or VoiceContinuous then raise Exception.Create('入力・音声処理を完了してください。');
+  if not MatchStr(CurrentScriptStage,['scenes','closing']) or ScriptTextEditing or FPlacementEditing or VoiceBusy or VoicePlaying or VoiceContinuous then raise Exception.Create('入力・音声処理を完了してください。');
   var FromScenes := CurrentScriptStage='scenes';
   var Reason := ScriptScenesAdvanceReason; if Reason<>'' then raise Exception.Create(Reason);
   if not ScriptScenesReady(FScriptDraft,True) then raise Exception.Create('画像の欠損・読込失敗があります。確定を外して画像を再設定してください。');

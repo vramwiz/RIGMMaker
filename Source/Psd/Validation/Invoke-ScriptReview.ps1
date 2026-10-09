@@ -1,4 +1,4 @@
-param([Parameter(Mandatory=$true)][string]$ExecutablePath,[Parameter(Mandatory=$true)][string]$OutputDirectory,[string]$DataRoot=([IO.Path]::Combine([Environment]::GetFolderPath('MyDocuments'),'RIGMMaker')))
+﻿param([Parameter(Mandatory=$true)][string]$ExecutablePath,[Parameter(Mandatory=$true)][string]$OutputDirectory,[string]$DataRoot=([IO.Path]::Combine([Environment]::GetFolderPath('MyDocuments'),'RIGMMaker')))
 $ErrorActionPreference='Stop'
 [Console]::OutputEncoding=[Text.UTF8Encoding]::new($false)
 $root=Join-Path $env:TEMP ('RIGMMaker-ScriptReview-'+[guid]::NewGuid().ToString('N'))
@@ -78,11 +78,10 @@ for($phase=0;$phase -lt 2;$phase++){
     if((Invoke-Pipe $pipe 'app-script-submit-review' $packet).ok){throw 'Repeated obsolete submission accepted'}
     $checks.Add('actual pipe reads source and submits anchored proposals');$checks.Add('bounded review pagination');$checks.Add('duplicate result rejected')
    }elseif($request.stage -eq '.editing'){
-    if(-not $status.data.textEditing){throw 'Human review editing lock missing'}
-    foreach($command in @('app-script-request-review','app-script-set-title','app-script-new')){
-     if((Invoke-Pipe $pipe $command ($common+@{title='上書き'})).ok){throw ('Human lock accepted '+$command)}
-     $checks.Add('human review edit lock rejects '+$command)
-    }
+    if($status.data.textEditing){throw 'Review input unexpectedly locked communication'}
+    $stale=@{projectId=$common.projectId;revision=($common.revision-1)}
+    if((Invoke-Pipe $pipe 'app-script-request-review' $stale).ok){throw 'Stale review revision accepted'}
+    $checks.Add('review input is unlocked and stale revision is rejected')
     if(-not (Invoke-Pipe $pipe 'app-script-text' ($common+@{section='body'})).ok){throw 'Read during human editing failed'}
     $checks.Add('source readable during human review edit')
    }

@@ -153,7 +153,7 @@ begin
     FBackground.Enabled := Choice='theme';
     var State := '選択中'; if JS(P.ScriptWizard,'layoutStatus')='complete' then State := '確認済み';
     FGuide.Caption := 'レイアウト：'+State+'　／　構図見本：FullHD 1920×1080（16:9）'+#13#10+
-      'キャラは選択順で仮表示しています。Nextで構図と移動先を保存し、キャラ配置へ進みます。';
+      'キャラは選択順で仮表示しています。左の工程リストで構図と移動先を保存し、キャラ配置へ進みます。';
     FPreview.Invalidate;
   finally FSync := False; end;
 end;

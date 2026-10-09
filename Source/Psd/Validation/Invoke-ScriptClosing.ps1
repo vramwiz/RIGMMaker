@@ -29,7 +29,11 @@ for($phase=0;$phase -lt 3;$phase++){
    if($request.stage -in @('.editing','.pipe','.adopt')){
     $common=Current $pipe;$closing=Require-Ok (Invoke-Pipe $pipe 'app-script-closing' $common)
     if($request.stage -eq '.editing'){
-     foreach($command in @('app-script-set-closing','app-script-complete-closing','app-script-next','app-script-new')){if((Invoke-Pipe $pipe $command ($common+@{draft=$closing.closing.draft})).ok){throw 'Human edit lock bypassed'};$checks.Add('human closing lock rejects '+$command)}
+     $status=Require-Ok (Invoke-Pipe $pipe 'app-script-status' @{})
+     if($status.textEditing){throw 'Closing input unexpectedly locked communication'}
+     $stale=@{projectId=$common.projectId;revision=($common.revision-1)}
+     if((Invoke-Pipe $pipe 'app-script-set-closing' $stale).ok){throw 'Stale closing revision accepted'}
+     $checks.Add('closing input is unlocked and stale revision is rejected')
     }elseif($request.stage -eq '.pipe'){
      $before=$closing | ConvertTo-Json -Depth 12 -Compress
      foreach($change in @(@{revision=($common.revision-1)},@{projectId='wrong'},@{title=('あ'*129)},@{endChoice='fake'},@{endSeconds=1})){

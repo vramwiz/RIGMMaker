@@ -8,6 +8,8 @@ uses
   Vcl.Themes,
   Vcl.Styles,
   RigmWizardMainForm in 'Source\Shell\RigmWizardMainForm.pas',
+  RigmScriptResearchModel in 'Source\Studio\Model\RigmScriptResearchModel.pas',
+  RigmScriptNavigationProbe in 'Source\Psd\Validation\RigmScriptNavigationProbe.pas',
   RigmWizardValidation in 'Source\Psd\Validation\RigmWizardValidation.pas';
 
 {$R *.res}

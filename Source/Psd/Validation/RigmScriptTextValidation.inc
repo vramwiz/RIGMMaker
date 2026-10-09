@@ -23,9 +23,9 @@ begin
       var Manager := Main.PageInstance(apScripts);
       TToolButton(TToolBar(Manager.FindComponent('ScriptLibraryToolbar')).FindComponent('ScriptNew')).Click;
     end;
-    var Creator := Main.PageInstance(apScriptCreate); var Toolbar := TToolBar(Creator.FindComponent('ScriptTitleToolbar'));
-    var Title := TEdit(Creator.FindComponent('ScriptTitle')); var Next := TToolButton(Toolbar.FindComponent('ScriptNext'));
-    var Back := TToolButton(Toolbar.FindComponent('ScriptReturn')); var Path := W.ScriptDraft.FileName; var Id := W.ScriptDraft.Id; var A: TJSONObject;
+    var Creator := Main.PageInstance(apScriptCreate); var Toolbar := TComponent(Creator);
+    var Title := TEdit(Creator.FindComponent('ScriptTitle')); var Next := TRigmScriptStageProbe.CreateForFrame(Toolbar,W);
+    var Back := TButton(Toolbar.FindComponent('ScriptReturn')); var Path := W.ScriptDraft.FileName; var Id := W.ScriptDraft.Id; var A: TJSONObject;
     if not Reopen then begin
       Title.Text := '台本の3区分入力と保存再開の確認'; Next.Click;
       WaitThumbnailLibrary(W); Sleep(120); Application.ProcessMessages;
@@ -66,10 +66,10 @@ begin
       TToolButton(Parts.FindComponent('ScriptTextReady')).Click; CaptureUiWindow(Main,ResultPath,'.long');
       Check(JS(ScriptSection(W.ScriptDraft,'body'),'text')=LongText+'追記。','actual pipe reads long chunks and patches full section tail',Results);
       Body.Text := '今回のテーマについて説明します。'+#13#10+'台本の本文だけを入力します。'; Body.SetFocus; Body.Perform(WM_KEYDOWN,VK_END,0);
-      Check(W.ScriptTextEditing,'focus and actual key input acquire shared typing lock',Results);
+      Check(not W.ScriptTextEditing,'focus and key input do not lock communication',Results);
       CaptureUiWindow(Main,ResultPath,'.editing');
-      Check(JS(ScriptSection(W.ScriptDraft,'body'),'text')=NormalizeScriptText(Body.Text),'pipe rejection retains human text',Results);
-      TToolButton(Parts.FindComponent('ScriptTextReady')).Click; Check(not W.ScriptTextEditing,'input complete icon releases AI mutation lock',Results);
+      Check(JS(ScriptSection(W.ScriptDraft,'body'),'text')=NormalizeScriptText(Body.Text),'stale pipe revision retains human text',Results);
+      TToolButton(Parts.FindComponent('ScriptTextReady')).Click; Check(not W.ScriptTextEditing,'input confirmation leaves communication unlocked',Results);
       CaptureUiWindow(Main,ResultPath,'.pipe');
       Check(Body.Text='今回のテーマについて説明します。'+#13#10+'台本の本文だけを入力します。'+#13#10+'パイプから追記しました。','actual pipe change refreshes visible memo',Results);
       Check(not W.ScriptDraft.Modified,'pipe save persists text without advancing destination',Results);
@@ -120,11 +120,11 @@ begin
         end;
       finally EditorProject.Free; end;
       var TextState := JO(W.ScriptDraft.ScriptWizard,'scriptText').ToJSON;
-      TToolButton(Toolbar.FindComponent('ScriptTitleStage')).Click; Title.Text := '戻った題名と3区分を保持'; Back.Click;
+      ClickScriptStage(Toolbar,'title'); Title.Text := '戻った題名と3区分を保持'; Back.Click;
       W.OpenScriptDraft(Path); Main.NavigateTo(apScriptCreate);
       Check((W.CurrentScriptStage='text') and (JO(W.ScriptDraft.ScriptWizard,'scriptText').ToJSON=TextState) and
         (W.ScriptDraft.Title='戻った題名と3区分を保持'),'backward edits and exit resume text with all raw sections',Results);
-      Body.SetFocus; Body.Perform(WM_KEYDOWN,VK_END,0); Check(W.ScriptTextEditing,'typing again reacquires lock',Results);
+      Body.SetFocus; Body.Perform(WM_KEYDOWN,VK_END,0); Check(not W.ScriptTextEditing,'typing again does not lock communication',Results);
       var CanClose := True; Main.OnCloseQuery(Main,CanClose); Check(CanClose,'close saves active text input',Results);
       CaptureUiWindow(Main,ResultPath,'.text');
       var Resume := TJSONObject.Create;

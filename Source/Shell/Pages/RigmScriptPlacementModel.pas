@@ -13,7 +13,7 @@ uses System.SysUtils, System.Math, System.Generics.Collections, RigmJson, PsdJso
 function ScriptStageName(const Stage: string): string;
 begin
   if Stage='title' then Result := '題名' else if Stage='characters' then Result := 'キャラ選択'
-  else if Stage='layout' then Result := 'レイアウト選択' else if Stage='placement' then Result := 'キャラ配置' else if Stage='text' then Result := '台本入力' else if Stage='review' then Result := '校正' else if Stage='casting' then Result := '配役' else if Stage='subtitles' then Result := '字幕' else if Stage='voice' then Result := '音声調整' else if Stage='voice-effects' then Result := '音声エフェクト' else if Stage='scene-assignment' then Result := 'セリフのシーン割当' else if Stage='scenes' then Result := 'シーン画像・説明' else if Stage='summary' then Result := '総評の有無' else if Stage='summary-edit' then Result := '総評入力・チャート' else if Stage='closing' then Result := '締め設定' else if Stage='editor' then Result := '動画編集' else Result := Stage;
+  else if Stage='layout' then Result := 'レイアウト選択' else if Stage='placement' then Result := 'キャラ配置' else if Stage='text' then Result := '台本入力' else if Stage='review' then Result := '作品情報・掘り下げ確認' else if Stage='casting' then Result := '配役' else if Stage='subtitles' then Result := '字幕' else if Stage='voice' then Result := '音声調整' else if Stage='voice-effects' then Result := '音声エフェクト' else if Stage='scene-assignment' then Result := 'セリフのシーン割当' else if Stage='scenes' then Result := 'シーン画像・説明' else if Stage='summary' then Result := '総評の有無' else if Stage='summary-edit' then Result := '総評入力・チャート' else if Stage='closing' then Result := '締め設定' else if Stage='editor' then Result := '動画編集' else Result := Stage;
 end;
 function ScriptStageIndex(const Stage: string): Integer;
 begin

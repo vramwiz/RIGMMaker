@@ -1,13 +1,13 @@
 ﻿unit RigmScriptCreatorFrame;
 interface
-uses System.Classes, RigmScriptPageFrame, System.JSON, Vcl.Controls, Vcl.Forms, Vcl.StdCtrls, RigmBufferedControls, Vcl.ComCtrls, Vcl.ExtCtrls, Vcl.ImgList, RigmWizardWorkspace,
-  RigmMovieCreator, RigmPageNavigation, RigmIconToolbar, RigmThumbnailList, RigmScriptLayoutFrame, RigmScriptPlacementFrame, RigmScriptTextFrame, RigmScriptReviewFrame, RigmScriptCastingFrame, RigmScriptSubtitleFrame, RigmScriptVoiceFrame, RigmScriptVoiceEffectsFrame, RigmScriptSceneAssignmentFrame, RigmScriptScenesFrame, RigmScriptSummaryFrame, RigmScriptClosingFrame;
+uses System.Classes, System.Types, RigmScriptPageFrame, System.JSON, Vcl.Controls, Vcl.Forms, Vcl.StdCtrls, RigmBufferedControls, Vcl.ComCtrls, Vcl.ExtCtrls, Vcl.ImgList, RigmWizardWorkspace,
+  RigmMovieCreator, RigmPageNavigation, RigmThumbnailList, RigmScriptLayoutFrame, RigmScriptPlacementFrame, RigmScriptTextFrame, RigmScriptReviewFrame, RigmScriptCastingFrame, RigmScriptSubtitleFrame, RigmScriptVoiceFrame, RigmScriptVoiceEffectsFrame, RigmScriptSceneAssignmentFrame, RigmScriptScenesFrame, RigmScriptSummaryFrame, RigmScriptClosingFrame;
 type
   TRigmScriptCreatorFrame = class(TRigmScriptPageFrame,IRigmPageLifecycle)
   private
     FWorkspace: TRigmWizardWorkspace; FRoot: string; FTitle: TEdit; FScriptType: TComboBox; FStatus,FProgress: TLabel;
-    FToolbar: TRigmIconToolbar; FSave: TToolButton; FSync: Boolean;
-    FTitleStage,FCharactersStage,FLayoutStage,FPlacementStage,FTextStage,FReviewStage,FCastingStage,FSubtitleStage,FVoiceStage,FEffectsStage,FSceneAssignmentStage,FScenesStage,FSummaryStage,FClosingStage,FNext: TToolButton;
+    FHeader,FSidebar,FBody: TPanel; FSave,FReturn,FReload: TButton; FStageLabel: TLabel; FSync: Boolean;
+    FStages: TListBox; FStageIds: TArray<string>; FStageEnabled: TArray<Boolean>;
     FText: TRigmScriptTextFrame; FReview: TRigmScriptReviewFrame; FCasting: TRigmScriptCastingFrame; FSubtitles: TRigmScriptSubtitleFrame; FVoice: TRigmScriptVoiceFrame;
     FScenes: TRigmScriptScenesFrame; FSummaryBody: TPanel; FSummaryChoice: TRadioGroup; FSummaryEdit: TRigmScriptSummaryFrame; FClosingEdit: TRigmScriptClosingFrame;
     FEffects: TRigmScriptVoiceEffectsFrame;
@@ -21,8 +21,10 @@ type
     FCreator: TRigmMovieCreator; // 旧コードの明示利用用。通常は生成・表示しない。
     procedure SummaryChoiceChanged(Sender: TObject);
     procedure SelectStage(Sender: TObject);
-    procedure NextWork(Sender: TObject);
-    procedure ChangeStage(Sender: TObject; Advance: Boolean); // Nextと工程選択を明示的に区別する。
+    procedure RefreshNavigation(State: TJSONObject);
+    procedure DrawStage(Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
+    procedure LayoutNavigation;
+    procedure ChangeStage(const Stage: string; Advance: Boolean);
     procedure ReloadCharacters(Sender: TObject);
     procedure CharacterChecked(Sender: TObject; Item: TListItem);
     function ThumbnailPath(Item: TListItem): string;
@@ -47,40 +49,65 @@ type
     property Creator: TRigmMovieCreator read GetCreator;
   end;
 implementation
-uses System.SysUtils, System.IOUtils, System.Math, Vcl.Graphics, Winapi.Windows, Winapi.CommCtrl,
-  RigmJson, RigmToolbarIcons, RigmCharacterCatalog, PsdJson, RigmScriptPlacementModel, RigmScriptTypes;
+uses System.SysUtils, System.IOUtils, System.Math, Vcl.Graphics, Vcl.Themes, Winapi.Windows, Winapi.Messages, Winapi.CommCtrl,
+  RigmJson, RigmCharacterCatalog, PsdJson, RigmScriptPlacementModel, RigmScriptTypes, RigmScriptNavigationModel;
 {$R *.dfm}
+type
+  TRigmStageListBox = class(TListBox)
+  private
+    FWheelDelta: Integer;
+  protected
+    procedure WndProc(var Message: TMessage); override;
+    procedure CreateParams(var Params: TCreateParams); override;
+  end;
+procedure TRigmStageListBox.CreateParams(var Params: TCreateParams);
+begin
+  inherited;
+  // 工程一覧はバーを表示しない。高さ不足時もホイール・キーで移動できる。
+  Params.Style := Params.Style and not (WS_HSCROLL or WS_VSCROLL or LBS_DISABLENOSCROLL);
+end;
+procedure TRigmStageListBox.WndProc(var Message: TMessage);
+begin
+  if Message.Msg=WM_MOUSEWHEEL then begin
+    Inc(FWheelDelta,SmallInt(HiWord(Message.WParam)));
+    var Steps := FWheelDelta div WHEEL_DELTA; FWheelDelta := FWheelDelta mod WHEEL_DELTA;
+    var Lines: Cardinal := 3; SystemParametersInfo(SPI_GETWHEELSCROLLLINES,0,@Lines,0);
+    if Lines=WHEEL_PAGESCROLL then Lines := Max(1,ClientHeight div Max(1,ItemHeight));
+    if Steps<>0 then TopIndex := EnsureRange(TopIndex-Steps*Integer(Lines),0,Max(0,Items.Count-1));
+    Message.Result := 1; Exit;
+  end;
+  inherited;
+end;
 constructor TRigmScriptCreatorFrame.CreateForWorkspace(AOwner: TComponent; Workspace: TRigmWizardWorkspace; const Root: string);
 begin
   inherited Create(AOwner); Align := alClient; FWorkspace := Workspace; FRoot := Root; DoubleBuffered := True;
   // 一覧・ツールバーがHWNDを要求する前に表示先を接続する。シェルは構築後にホストへ移す。
   if AOwner is TWinControl then Parent := TWinControl(AOwner);
-  FToolbar := TRigmIconToolbar.Create(Self); FToolbar.Parent := Self; FToolbar.Align := alTop; FToolbar.Name := 'ScriptTitleToolbar';
-  FToolbar.AddIcon('ScriptReturn','保存して台本管理へ戻る',riLayer,0,ReturnToLibrary);
-  FToolbar.AddSeparator;
-  FSave := FToolbar.AddIcon('ScriptSave','下書きを保存する',riSave,0,SaveWork);
-  FToolbar.AddSeparator;
-  FTitleStage := FToolbar.AddIcon('ScriptTitleStage','第1段階：題名へ戻る',riEditPreview,0,SelectStage,True);
-  FCharactersStage := FToolbar.AddIcon('ScriptCharactersStage','第2段階：キャラ選択',riGroup,0,SelectStage,True);
-  FLayoutStage := FToolbar.AddIcon('ScriptLayoutStage','第3段階：レイアウト選択',riLayer,0,SelectStage,True);
-  FPlacementStage := FToolbar.AddIcon('ScriptPlacementStage','第4段階：キャラ配置',riEditPreview,0,SelectStage,True);
-  FTextStage := FToolbar.AddIcon('ScriptTextStage','第5段階：台本入力',riEditPreview,0,SelectStage,True);
-  FReviewStage := FToolbar.AddIcon('ScriptReviewStage','第6段階：校正',riEditPreview,0,SelectStage,True);
-  FCastingStage := FToolbar.AddIcon('ScriptCastingStage','第7段階：配役',riGroup,0,SelectStage,True);
-  FSubtitleStage := FToolbar.AddIcon('ScriptSubtitleStage','第8段階：字幕折返し・編集',riEditPreview,0,SelectStage,True);
-  FVoiceStage := FToolbar.AddIcon('ScriptVoiceStage','第9段階：読み・音声調整',riEditPreview,0,SelectStage,True);
-  FEffectsStage := FToolbar.AddIcon('ScriptVoiceEffectsStage','第10段階：音声エフェクト',riMesh,0,SelectStage,True);
-  FSceneAssignmentStage := FToolbar.AddIcon('ScriptSceneAssignmentStage','第11段階：セリフのシーン割当',riLayer,0,SelectStage,True);
-  FScenesStage := FToolbar.AddIcon('ScriptScenesStage','第12段階：シーン画像・説明文',riPreview,0,SelectStage,True);
-  FSummaryStage := FToolbar.AddIcon('ScriptSummaryStage','総評の有無',riGroup,0,SelectStage,True);
-  FClosingStage := FToolbar.AddIcon('ScriptClosingStage','締め',riPreview,0,SelectStage,True);
-  FNext := FToolbar.AddIcon('ScriptNext','Next：保存して次の工程へ進む',riComplete,0,NextWork);
-  FToolbar.AddIcon('ScriptCharactersRefresh','登録キャラを更新',riRefresh,0,ReloadCharacters);
+  FHeader := TRigmBufferedPanel.Create(Self); FHeader.Parent := Self; FHeader.Align := alTop;
+  FHeader.Height := ScaleValue(52); FHeader.BevelOuter := bvNone; FHeader.ShowCaption := False;
+  FHeader.Name := 'ScriptHeader';
+  FReturn := TButton.Create(Self); FReturn.Parent := FHeader; FReturn.Caption := '保存して台本管理へ';
+  FReturn.Name := 'ScriptReturn'; FReturn.OnClick := ReturnToLibrary;
+  FSave := TButton.Create(Self); FSave.Parent := FHeader; FSave.Caption := '保存';
+  FSave.Name := 'ScriptSave'; FSave.OnClick := SaveWork;
+  FStageLabel := TLabel.Create(Self); FStageLabel.Parent := FHeader; FStageLabel.AutoSize := False;
+  FStageLabel.Layout := tlCenter; FStageLabel.Font.Size := 13; FStageLabel.Name := 'ScriptCurrentStage';
+  FSidebar := TRigmBufferedPanel.Create(Self); FSidebar.Parent := Self; FSidebar.Align := alLeft;
+  FSidebar.Width := ScaleValue(240); FSidebar.BevelOuter := bvNone; FSidebar.ShowCaption := False;
+  FSidebar.Padding.SetBounds(ScaleValue(8),ScaleValue(8),ScaleValue(8),ScaleValue(8));
+  FSidebar.Name := 'ScriptStageSidebar';
+  FStages := TRigmStageListBox.Create(Self); FStages.Parent := FSidebar; FStages.Align := alClient;
+  FStages.Name := 'ScriptStages'; FStages.Style := lbOwnerDrawFixed; FStages.BorderStyle := bsNone;
+  FStages.ItemHeight := ScaleValue(30); FStages.OnDrawItem := DrawStage; FStages.OnClick := SelectStage;
+  FStages.Hint := '工程を選ぶと入力を保存して切り替えます。条件が整うと次の工程が表示されます。';
+  FStages.ShowHint := True; FStages.ScrollWidth := 0;
+  FBody := TRigmBufferedPanel.Create(Self); FBody.Parent := Self; FBody.Align := alClient;
+  FBody.BevelOuter := bvNone; FBody.ShowCaption := False; FBody.Name := 'ScriptPageBody';
   FStatus := TRigmScriptLabel.Create(Self); FStatus.Parent := Self; FStatus.Align := alBottom; FStatus.Height := ScaleValue(38);
-  FSummaryBody := TRigmBufferedPanel.Create(Self); FSummaryBody.Parent := Self; FSummaryBody.Align := alClient; FSummaryBody.Caption := ''; FSummaryBody.BevelOuter := bvNone; FSummaryBody.Visible := False;
+  FSummaryBody := TRigmBufferedPanel.Create(Self); FSummaryBody.Parent := FBody; FSummaryBody.Align := alClient; FSummaryBody.Caption := ''; FSummaryBody.BevelOuter := bvNone; FSummaryBody.Visible := False;
   FSummaryChoice := TRadioGroup.Create(Self); FSummaryChoice.Parent := FSummaryBody; FSummaryChoice.Align := alTop; FSummaryChoice.Height := ScaleValue(180); FSummaryChoice.Caption := '総評を入れますか'; FSummaryChoice.Items.Add('総評なし'); FSummaryChoice.Items.Add('総評あり'); FSummaryChoice.ItemIndex := -1; FSummaryChoice.OnClick := SummaryChoiceChanged; FSummaryChoice.Name := 'ScriptSummaryChoice';
   FStatus.AutoSize := False; FStatus.WordWrap := True; FStatus.Name := 'ScriptTitleStatus';
-  FTitleBody := TScrollBox.Create(Self); FTitleBody.Parent := Self; FTitleBody.Align := alClient;
+  FTitleBody := TScrollBox.Create(Self); FTitleBody.Parent := FBody; FTitleBody.Align := alClient;
   FTitleBody.BorderStyle := bsNone; FTitleBody.HorzScrollBar.Visible := False; FTitleBody.VertScrollBar.Tracking := True;
   FTitleBody.Name := 'ScriptTitleScroll';
   FTitleBody.OnResize := LayoutTitlePage;
@@ -101,9 +128,9 @@ begin
   var Guide := TRigmScriptLabel.Create(Self); Guide.Parent := Body; Guide.Align := alTop; Guide.Top := FScriptType.Top+FScriptType.Height;
   Guide.AutoSize := False; Guide.Height := ScaleValue(94); Guide.WordWrap := True;
   Guide.Name := 'ScriptTitleGuide';
-  Guide.Caption := '台本の種類を選べます。題名を入力し、Nextのチェックアイコンでキャラ選択へ進んでください。'+#13#10+
-    '戻る・ホーム・終了でも途中の題名を保存し、台本管理から続けられます。'+#13#10+
-    'Nextは内容と移動先を一緒に保存します。再開時は最後にNextで到達した画面を開きます。';
+  Guide.Caption := '台本の種類と題名を入力し、左の工程リストでキャラ選択を選んでください。'+#13#10+
+    '上部の保存ボタンで途中の内容を保存し、台本管理から続けられます。'+#13#10+
+    '次の工程を選ぶと内容と移動先を一緒に保存します。再開時は最後に進んだ工程を開きます。';
   FProgress := TRigmScriptLabel.Create(Self); FProgress.Parent := Body; FProgress.Align := alTop; FProgress.Top := Guide.Top+Guide.Height;
   FProgress.AutoSize := False; FProgress.Height := ScaleValue(40); FProgress.Name := 'ScriptTitleProgress';
   // 見出し→題名→種類→案内→進捗の順に配置し、DPI変更時は既存のスクロールを使う。
@@ -113,9 +140,12 @@ begin
     TypeHeading.Top := FTitle.Top+FTitle.Height; FScriptType.Top := TypeHeading.Top+TypeHeading.Height;
     Guide.Top := FScriptType.Top+FScriptType.Height; FProgress.Top := Guide.Top+Guide.Height;
   finally Body.EnableAlign; end;
-  FCharactersBody := TRigmBufferedPanel.Create(Self); FCharactersBody.Parent := Self; FCharactersBody.Align := alClient;
+  FCharactersBody := TRigmBufferedPanel.Create(Self); FCharactersBody.Parent := FBody; FCharactersBody.Align := alClient;
   FCharactersBody.BevelOuter := bvNone; FCharactersBody.Caption := ''; FCharactersBody.ShowCaption := False;
   FCharactersBody.Padding.SetBounds(ScaleValue(32),ScaleValue(24),ScaleValue(32),ScaleValue(24)); FCharactersBody.Visible := False;
+  FReload := TButton.Create(Self); FReload.Parent := FCharactersBody; FReload.Align := alTop;
+  FReload.Height := ScaleValue(36); FReload.Caption := '登録キャラを更新';
+  FReload.Name := 'ScriptCharactersRefresh'; FReload.OnClick := ReloadCharacters;
   FCharactersGuide := TRigmScriptLabel.Create(Self); FCharactersGuide.Parent := FCharactersBody; FCharactersGuide.Align := alTop;
   FCharactersGuide.AutoSize := False; FCharactersGuide.Height := ScaleValue(74); FCharactersGuide.WordWrap := True;
   FCharactersGuide.Name := 'ScriptCharactersProgress';
@@ -128,11 +158,68 @@ begin
   FCharacters.OnItemChecked := CharacterChecked;
   FLoader := TRigmThumbnailList.CreateForList(Self,FWorkspace.Thumbnails,FCharacters,FImages);
   FLoader.OnPath := ThumbnailPath; FLoader.OnApplied := ThumbnailApplied;
-  FStageHost := TScrollBox.Create(Self); FStageHost.Parent := Self; FStageHost.Align := alClient;
+  FStageHost := TScrollBox.Create(Self); FStageHost.Parent := FBody; FStageHost.Align := alClient;
   FStageHost.BorderStyle := bsNone; FStageHost.VertScrollBar.Tracking := True; FStageHost.HorzScrollBar.Tracking := True;
   FStageHost.Name := 'ScriptStageScroll'; FStageHost.Visible := False;
   FStageHost.OnResize := StageHostResized;
   FWorkspace.OnScriptChanged := RefreshScript;
+  LayoutNavigation;
+end;
+procedure TRigmScriptCreatorFrame.LayoutNavigation;
+begin
+  if (FHeader=nil) or (FStageLabel=nil) then Exit;
+  FReturn.SetBounds(ScaleValue(8),ScaleValue(8),ScaleValue(190),ScaleValue(36));
+  FSave.SetBounds(FReturn.Left+FReturn.Width+ScaleValue(8),ScaleValue(8),ScaleValue(76),ScaleValue(36));
+  var X := FSave.Left+FSave.Width+ScaleValue(20);
+  FStageLabel.SetBounds(X,0,Max(0,FHeader.ClientWidth-X-ScaleValue(8)),FHeader.Height);
+  FStages.ItemHeight := ScaleValue(30);
+  FStages.Canvas.Font.Assign(FStages.Font);
+  var TextWidth := 0;
+  // 未到達の工程も測り、段階を進めた時に編集領域の幅が変わらないようにする。
+  for var Stage in ScriptStages do TextWidth := Max(TextWidth,FStages.Canvas.TextWidth(ScriptStageCaption(Stage)));
+  var SidebarWidth := TextWidth+ScaleValue(20)+FSidebar.Padding.Left+FSidebar.Padding.Right;
+  if FSidebar.Width<>SidebarWidth then FSidebar.Width := SidebarWidth;
+end;
+procedure TRigmScriptCreatorFrame.RefreshNavigation(State: TJSONObject);
+begin
+  var Ids := ScriptVisibleStages(State); var Same := Length(Ids)=Length(FStageIds);
+  if Same then for var I := 0 to High(Ids) do if Ids[I]<>FStageIds[I] then begin Same := False; Break; end;
+  var OldTop := FStages.TopIndex; var Current := '';
+  if JB(State,'hasProject') then Current := JS(JO(State,'wizard'),'stage');
+  var OldSelection := '';
+  if (FStages.ItemIndex>=0) and (FStages.ItemIndex<Length(FStageIds)) then OldSelection := FStageIds[FStages.ItemIndex];
+  FStages.Items.BeginUpdate;
+  try
+    if not Same then begin
+      FStages.Clear; FStageIds := Ids;
+      for var Stage in Ids do FStages.Items.Add(ScriptStageCaption(Stage));
+    end;
+    SetLength(FStageEnabled,Length(Ids));
+    for var I := 0 to High(Ids) do begin
+      FStageEnabled[I] := ScriptStageAvailable(State,Ids[I]);
+      if Ids[I]=Current then FStages.ItemIndex := I;
+    end;
+    if (OldSelection=Current) and (Length(Ids)>0) then FStages.TopIndex := Min(OldTop,Length(Ids)-1);
+  finally FStages.Items.EndUpdate; end;
+  if Current='' then FStageLabel.Caption := ''
+  else FStageLabel.Caption := ScriptStageCaption(Current);
+  FStages.Invalidate;
+end;
+procedure TRigmScriptCreatorFrame.DrawStage(Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
+begin
+  if (Index<0) or (Index>=Length(FStageIds)) then Exit;
+  var Canvas := FStages.Canvas;
+  Canvas.Font.Assign(FStages.Font);
+  Canvas.Brush.Color := StyleServices.GetSystemColor(clWindow);
+  Canvas.Font.Color := StyleServices.GetSystemColor(clWindowText);
+  if FStageIds[Index]=FShownStage then begin
+    Canvas.Brush.Color := RGB(38,76,112);
+    Canvas.Font.Color := clWhite;
+  end
+  else if not FStageEnabled[Index] then Canvas.Font.Color := StyleServices.GetSystemColor(clGrayText);
+  Canvas.FillRect(Rect); InflateRect(Rect,-ScaleValue(10),-ScaleValue(4));
+  var Text := ScriptStageCaption(FStageIds[Index]);
+  DrawText(Canvas.Handle,PChar(Text),-1,Rect,DT_SINGLELINE or DT_VCENTER or DT_END_ELLIPSIS or DT_NOPREFIX);
 end;
 procedure TRigmScriptCreatorFrame.LayoutTitlePage(Sender: TObject);
 begin
@@ -164,7 +251,7 @@ end;
 procedure TRigmScriptCreatorFrame.StageHostResized(Sender: TObject);
 begin LayoutStagePages; end;
 procedure TRigmScriptCreatorFrame.Resize;
-begin inherited; LayoutTitlePage(Self); LayoutStagePages; end;
+begin inherited; LayoutNavigation; LayoutTitlePage(Self); LayoutStagePages; end;
 procedure TRigmScriptCreatorFrame.ChangeScale(M,D: Integer; isDpiChange: Boolean);
 begin
   inherited;
@@ -176,6 +263,7 @@ begin
     end;
     ListView_SetIconSpacing(FCharacters.Handle,MulDiv(220,M,96),MulDiv(255,M,96));
   end;
+  LayoutNavigation;
   LayoutStagePages;
   LayoutTitlePage(Self);
 end;
@@ -202,11 +290,11 @@ begin
       FScriptType.ItemIndex := ScriptTypeIndex(TypeId);
       if (TypeId<>'') and (FScriptType.ItemIndex<0) then
         FScriptType.ItemIndex := FScriptType.Items.Add(ScriptTypeName(TypeId));
-      if not JB(State,'hasProject') then Exit;
+      if not JB(State,'hasProject') then begin RefreshNavigation(State); FSave.Enabled := False; Exit; end;
       var Wizard := JO(State,'wizard'); var IsScenes := JS(Wizard,'stage')='scenes'; var IsSummary := JS(Wizard,'stage')='summary'; var IsSummaryEdit := JS(Wizard,'stage')='summary-edit'; var IsClosing := JS(Wizard,'stage')='closing'; var IsVoice := JS(Wizard,'stage')='voice'; var IsCharacters := JS(Wizard,'stage')='characters'; var IsLayout := JS(Wizard,'stage')='layout';
       var IsEffects := JS(Wizard,'stage')='voice-effects';
       var IsSceneAssignment := JS(Wizard,'stage')='scene-assignment';
-      var IsPlacement := JS(Wizard,'stage')='placement'; var IsText := JS(Wizard,'stage')='text'; var IsReview := JS(Wizard,'stage')='review'; var IsCasting := JS(Wizard,'stage')='casting'; var IsSubtitles := JS(Wizard,'stage')='subtitles'; var StageIndex := ScriptStageIndex(JS(Wizard,'stage'));
+      var IsPlacement := JS(Wizard,'stage')='placement'; var IsText := JS(Wizard,'stage')='text'; var IsReview := JS(Wizard,'stage')='review'; var IsCasting := JS(Wizard,'stage')='casting'; var IsSubtitles := JS(Wizard,'stage')='subtitles';
       if IsLayout and (FLayout=nil) then begin
         FLayout := TRigmScriptLayoutFrame.CreateForWorkspace(Self,FWorkspace); FLayout.Parent := Self;
       end;
@@ -241,42 +329,7 @@ begin
       if FScenes<>nil then begin FScenes.Visible := IsScenes; FScenes.SetActive(FActive and IsScenes); if IsScenes then FScenes.RefreshState; end;
       if FEffects<>nil then begin FEffects.Visible := IsEffects; FEffects.SetActive(FActive and IsEffects); if IsEffects then FEffects.RefreshState; end;
       LayoutStagePages;
-      FTitleStage.Down := StageIndex=0; FCharactersStage.Down := IsCharacters; FLayoutStage.Down := IsLayout; FPlacementStage.Down := IsPlacement;
-      FCharactersStage.Enabled := StageIndex>=1; FLayoutStage.Enabled := StageIndex>=2; FPlacementStage.Enabled := StageIndex>=3;
-      FTextStage.Down := IsText; FTextStage.Enabled := StageIndex>=4;
-      FReviewStage.Down := IsReview; FReviewStage.Enabled := StageIndex>=5;
-      FCastingStage.Down := IsCasting; FCastingStage.Enabled := StageIndex>=6;
-      FSubtitleStage.Down := IsSubtitles; FSubtitleStage.Enabled := StageIndex>=7;
-      var Reached := Max(StageIndex,ScriptStageIndex(JS(Wizard,'furthestStage',JS(State,'resumeStage'))));
-      FVoiceStage.Down := IsVoice; FVoiceStage.Enabled := Reached>=ScriptStageIndex('voice');
-      FEffectsStage.Down := IsEffects; FEffectsStage.Enabled := Reached>=ScriptStageIndex('voice-effects');
-      FSceneAssignmentStage.Down := IsSceneAssignment; FSceneAssignmentStage.Enabled := Reached>=ScriptStageIndex('scene-assignment');
-      FScenesStage.Down := IsScenes; FScenesStage.Enabled := (Reached>=ScriptStageIndex('scenes')) and (JS(FWorkspace.ScriptDraft.ScriptWizard,'scene-assignmentStatus')='complete'); FSummaryStage.Down := IsSummary or IsSummaryEdit; FSummaryStage.Enabled := Reached>=ScriptStageIndex('summary'); FClosingStage.Down := IsClosing; FClosingStage.Enabled := Reached>=ScriptStageIndex('closing'); FNext.Visible := True; FNext.Enabled := JB(State,'canAdvance') or (IsVoice and JB(State,'canConfirmVoice')) or (IsSubtitles and JB(State,'canConfirmSubtitles'));
-      if (Wizard.GetValue('scenes')<>nil) and not JB(JO(Wizard,'scenes'),'allApproved') then begin FSummaryStage.Enabled := False; FClosingStage.Enabled := False; end;
-    if not JB(State,'castingReady') then begin
-        FSubtitleStage.Enabled := False; FVoiceStage.Enabled := False; FEffectsStage.Enabled := False; FScenesStage.Enabled := False; FSummaryStage.Enabled := False; FClosingStage.Enabled := False;
-      end;
-      if IsSubtitles and not JB(State,'canAdvance') then begin
-        FVoiceStage.Enabled := False; FEffectsStage.Enabled := False; FScenesStage.Enabled := False; FSummaryStage.Enabled := False; FClosingStage.Enabled := False;
-      end;
-      if IsClosing then FNext.Hint := 'Next：締め設定を確認し、保存して動画編集へ'
-      else if IsSummaryEdit then FNext.Hint := 'Next：総評・評価を確認し、保存して総評の音声へ'
-      else if IsSummary then FNext.Hint := 'Next：総評の選択と移動先を保存する'
-      else if IsScenes then FNext.Hint := 'Next：全シーンの確定チェックを確認し、保存して動画編集へ'
-      else if IsSceneAssignment then FNext.Hint := 'Next：セリフのシーン割当を保存して、画像・説明文の設定へ'
-      else if IsEffects and (JS(Wizard,'voiceReturnStage')='closing') then FNext.Hint := 'Next：保存して締めへ'
-      else if IsEffects then FNext.Hint := 'Next：保存してセリフのシーン割当へ'
-      else if IsVoice then FNext.Hint := 'Next：全セリフの再生を確認し、保存して音声エフェクトへ'
-      else if IsSubtitles then FNext.Hint := 'Next：字幕入力を確認し、保存して読み・音声調整へ'
-      else if IsCharacters then FNext.Hint := 'Next：キャラ選択と移動先を保存してレイアウトへ'
-      else if IsLayout then FNext.Hint := 'Next：レイアウトと移動先を保存してキャラ配置へ'
-      else if IsCasting then FNext.Hint := 'Next：配役と使用キャラの声を確認し保存して字幕へ'
-      else if IsReview then FNext.Hint := 'Next：校正を確認し保存して配役へ'
-      else if IsText then FNext.Hint := 'Next：台本と移動先を保存して校正へ'
-      else if IsPlacement then FNext.Hint := 'Next：配置と移動先を保存して台本入力へ'
-      else FNext.Hint := 'Next：題名と移動先を保存してキャラ選択へ';
-      FNext.Caption := FNext.Hint; // ネイティブのボタン名も現在の移動先へ揃える。
-      if not FNext.Enabled and (IsSubtitles or IsCasting or IsVoice or IsSceneAssignment or IsScenes) and (JS(State,'advanceBlockedReason')<>'') then FNext.Hint := FNext.Hint+#13#10+JS(State,'advanceBlockedReason');
+      RefreshNavigation(State);
       var Reload := (FCatalog=nil) or (FCatalogProject<>JS(State,'projectId'));
       if IsCharacters and not Reload then for var V in JA(Wizard,'selectedCharacters') do begin
         var Found := False;
@@ -290,19 +343,19 @@ begin
           if SameText(JS(TJSONObject(V),'path'),JS(Entry,'path')) then begin Selected := True; Break; end;
         Item.Checked := Selected;
       end;
-      FSave.Enabled := JB(State,'modified'); FSave.Hint := '下書きを保存する（Nextでも保存されます）';
+      FSave.Enabled := JB(State,'modified'); FSave.Hint := '途中の内容を保存する（工程を切り替えるときにも保存します）';
       if IsCharacters then begin
         var Progress := '選択中'; if JS(Wizard,'charactersStatus')='complete' then Progress := '確認済み';
         FCharactersGuide.Caption := 'キャラ選択：'+Progress+'（第2段階）  '+JA(Wizard,'selectedCharacters').Count.ToString+'人'+#13#10+
-          '完成済みキャラを1人以上チェックし、Nextで保存してレイアウト選択へ進んでください。未完成・読込不可は選べません。'+#13#10+
+          '完成済みキャラを1人以上チェックし、左の工程リストでレイアウト選択へ進んでください。未完成・読込不可は選べません。'+#13#10+
           '声の割り当てはこの工程では行いません。';
       end;
     finally FSync := False; end;
     if not JB(State,'hasProject') then FProgress.Caption := '台本管理から新規作成してください。'
     else if JS(JO(State,'wizard'),'titleStatus')='complete' then FProgress.Caption := '題名：確認済み（第1段階）'
-    else FProgress.Caption := '題名：入力中（第1段階）';
-    if JB(State,'modified') then FStatus.Caption := '入力中です。戻る・終了時に途中状態を保存します。'
-    else FStatus.Caption := '保存済み。再開先は最後にNextで到達した画面です（'+ScriptStageName(JS(State,'resumeStage'))+'）。';
+    else FProgress.Caption := '題名：未確認（第1段階）';
+    if JB(State,'modified') then FStatus.Caption := '変更があります。保存ボタン・台本管理へ戻る時・終了時に保存します。'
+    else FStatus.Caption := '保存済み。再開先は最後に進んだ工程です（'+ScriptStageName(JS(State,'resumeStage'))+'）。';
     FStatus.Hint := JS(State,'path'); FStatus.ShowHint := True;
     LayoutTitlePage(Self);
   finally State.Free; end;
@@ -321,27 +374,31 @@ begin
 end;
 procedure TRigmScriptCreatorFrame.SaveWork(Sender: TObject);
 begin
-  if (FSubtitles<>nil) and (FWorkspace.CurrentScriptStage='subtitles') and not FSubtitles.RequestFinish then Exit;
-  if (FWorkspace.CurrentScriptStage='closing') and (FClosingEdit<>nil) and not FClosingEdit.RequestFinish then Exit;
-  if (FWorkspace.CurrentScriptStage='summary-edit') and (FSummaryEdit<>nil) and not FSummaryEdit.RequestFinish then Exit;
-  if (FWorkspace.CurrentScriptStage='scenes') and (FScenes<>nil) and not FScenes.RequestFinish then Exit;
-  if (FWorkspace.CurrentScriptStage='casting') and (FCasting<>nil) and not FCasting.RequestFinish then Exit;
-  if (FWorkspace.CurrentScriptStage='voice') and (FVoice<>nil) and not FVoice.RequestFinish then Exit;
-  if (FWorkspace.CurrentScriptStage='voice-effects') and (FEffects<>nil) and not FEffects.RequestFinish then Exit;
-  try
-    FWorkspace.SaveScriptDraft(False);
-    if FNext.Enabled then FStatus.Caption := '下書きを保存しました。Nextで入力を確認し、次の工程へ進めます。'
-    else FStatus.Caption := '下書きを保存しました。次へ進む条件を確認してください。';
-  except on E: Exception do FStatus.Caption := E.Message; end;
+  if RequestFinish then FStatus.Caption := '下書きを保存しました。条件が整うと左の工程リストに次の工程が表示されます。';
 end;
 procedure TRigmScriptCreatorFrame.SelectStage(Sender: TObject);
-begin ChangeStage(Sender,False); end;
-procedure TRigmScriptCreatorFrame.NextWork(Sender: TObject);
-begin ChangeStage(Sender,True); end;
-procedure TRigmScriptCreatorFrame.ChangeStage(Sender: TObject; Advance: Boolean);
+begin
+  if FSync or (FStages.ItemIndex<0) or (FStages.ItemIndex>=Length(FStageIds)) then Exit;
+  var Stage := FStageIds[FStages.ItemIndex]; var State := FWorkspace.ScriptStatus;
+  try
+    if not ScriptStageAvailable(State,Stage) then begin
+      RefreshNavigation(State);
+      FStatus.Caption := 'この工程にはまだ移動できません。'+JS(State,'advanceBlockedReason'); Exit;
+    end;
+    if Stage=FWorkspace.CurrentScriptStage then Exit;
+    ChangeStage(Stage,Stage=ScriptNextStage(FWorkspace.CurrentScriptStage,JO(State,'wizard')));
+  finally State.Free; end;
+end;
+procedure TRigmScriptCreatorFrame.ChangeStage(const Stage: string; Advance: Boolean);
 begin
   var Before := FWorkspace.CurrentScriptStage;
+  if (FWorkspace.ScriptDraft<>nil) and (FTitle.Text<>JS(FWorkspace.ScriptDraft.ScriptWizard,'titleInput')) then begin
+    var State := FWorkspace.ScriptStatus;
+    try RefreshNavigation(State); finally State.Free; end;
+    FStatus.Caption := '題名を確認してください。入力を保持してこの画面に留まります。'; Exit;
+  end;
   try
+    if (FReview<>nil) and (Before='review') and not FReview.RequestFinish then raise Exception.Create('作品タイトルを確認してください。');
     if (FSubtitles<>nil) and (Before='subtitles') and not FSubtitles.RequestFinish then
       raise Exception.Create('字幕入力を確定できません。'+FSubtitles.InputError);
     if (FClosingEdit<>nil) and (Before='closing') and not FClosingEdit.RequestFinish then raise Exception.Create('締めの入力を確定できません。編集欄の理由を確認してください。');
@@ -357,8 +414,6 @@ begin
       if (Before='subtitles') and (FWorkspace.CurrentScriptStage<>'voice') then raise Exception.Create('字幕を保存しましたが、音声工程へ切り替わりませんでした。');
     end
     else begin
-      var Stage := 'characters'; if Sender=FTitleStage then Stage := 'title'
-      else if Sender=FLayoutStage then Stage := 'layout' else if Sender=FPlacementStage then Stage := 'placement' else if Sender=FTextStage then Stage := 'text' else if Sender=FReviewStage then Stage := 'review' else if Sender=FCastingStage then Stage := 'casting' else if Sender=FSubtitleStage then Stage := 'subtitles' else if Sender=FVoiceStage then Stage := 'voice' else if Sender=FEffectsStage then Stage := 'voice-effects' else if Sender=FSceneAssignmentStage then Stage := 'scene-assignment' else if Sender=FScenesStage then Stage := 'scenes' else if Sender=FSummaryStage then Stage := 'summary' else if Sender=FClosingStage then Stage := 'closing';
       FWorkspace.SetScriptStage(Stage);
     end;
   except on E: Exception do begin
@@ -409,6 +464,10 @@ begin
   var LabelText := CharacterFormatLabel(JS(Entry,'path'));
   if JS(Entry,'productionState')<>'' then LabelText := LabelText+' / '+JS(Entry,'productionState');
   Item.Caption := '['+LabelText+'] '+JS(Entry,'name');
+  if not FSync and (FWorkspace.CurrentScriptStage='characters') then begin
+    var State := FWorkspace.ScriptStatus;
+    try RefreshNavigation(State); finally State.Free; end;
+  end;
 end;
 procedure TRigmScriptCreatorFrame.CharacterChecked(Sender: TObject; Item: TListItem);
 begin
@@ -443,6 +502,7 @@ end;
 function TRigmScriptCreatorFrame.RequestFinish: Boolean;
 begin
   Result := False;
+  if (FReview<>nil) and (FWorkspace.CurrentScriptStage='review') and not FReview.RequestFinish then Exit;
   if (FSubtitles<>nil) and (FWorkspace.CurrentScriptStage='subtitles') and not FSubtitles.RequestFinish then Exit;
   if (FClosingEdit<>nil) and (FWorkspace.CurrentScriptStage='closing') and not FClosingEdit.RequestFinish then Exit;
   if (FSummaryEdit<>nil) and (FWorkspace.CurrentScriptStage='summary-edit') and not FSummaryEdit.RequestFinish then Exit;

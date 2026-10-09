@@ -113,6 +113,8 @@
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
         <DCCReference Include="Source\Shell\RigmWizardMainForm.pas"/>
+        <DCCReference Include="Source\Studio\Model\RigmScriptResearchModel.pas"/>
+        <DCCReference Include="Source\Psd\Validation\RigmScriptNavigationProbe.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

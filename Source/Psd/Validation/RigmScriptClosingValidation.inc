@@ -24,7 +24,7 @@ begin
   try
     var W := Main.Workspace; var Path := Trim(TFile.ReadAllText(TPath.Combine(Main.DataRoot,'fixture-project.txt'),TEncoding.UTF8)); W.OpenWork(W.Pipe.Workspace.Resolve(Path));
     if W.ScriptDraft<>nil then begin
-      var Creator := Main.PageInstance(apScriptCreate); var Tools := TToolBar(Creator.FindComponent('ScriptTitleToolbar')); var Next := TToolButton(Tools.FindComponent('ScriptNext'));
+      var Creator := Main.PageInstance(apScriptCreate); var Tools := TComponent(Creator); var Next := TRigmScriptStageProbe.CreateForFrame(Tools,W);
       var Frame: TRigmScriptClosingFrame := nil; for var I := 0 to Creator.ComponentCount-1 do if Creator.Components[I] is TRigmScriptClosingFrame then Frame := TRigmScriptClosingFrame(Creator.Components[I]);
       Check((Frame<>nil) and Frame.Showing and (W.CurrentScriptStage='closing'),'lazy closing frame shows saved destination in one main form',Results);
       var Before := Core(W.ScriptDraft); var BeforePlacements := JA(W.ScriptDraft.ScriptWizard,'placements').ToJSON; var SceneData := W.ScriptDraft.Scenes[0].Json; var Summary := JO(W.ScriptDraft.ScriptWizard,'summaryData').ToJSON;
@@ -32,8 +32,8 @@ begin
         var ClosingTools := TToolBar(Frame.FindComponent('ScriptClosingToolbar'));
         if not Reopen then begin
           Check((W.ScriptDraft.EndCards.Count=0) and (JS(JO(JO(W.ScriptDraft.ScriptWizard,'closingData'),'draft'),'endChoice')=''),'missing images have no fabricated adoption/completion',Results);
-          TEdit(Frame.FindComponent('ScriptClosingEndSeconds')).Text := '-'; Check(W.ScriptTextEditing,'human ending edit locks common pipe',Results); CaptureUiWindow(Main,ResultPath,'.editing');
-          TToolButton(ClosingTools.FindComponent('ScriptClosingDone')).Click; TToolButton(Tools.FindComponent('ScriptSave')).Click;
+          TEdit(Frame.FindComponent('ScriptClosingEndSeconds')).Text := '-'; Check(not W.ScriptTextEditing,'human ending edit does not lock communication',Results); CaptureUiWindow(Main,ResultPath,'.editing');
+          TToolButton(ClosingTools.FindComponent('ScriptClosingDone')).Click; TButton(Tools.FindComponent('ScriptSave')).Click;
           var Rejected := False; try W.CompleteScriptClosing; except on E: Exception do Rejected := True; end; Check(Rejected and not Next.Enabled,'unselected images cannot confirm or advance',Results);
           var J := W.ScriptDraft.Json; try var Saved := TJSONObject.Create; Saved.AddPair('project',J.ToJSON); Saved.AddPair('core',Before); TFile.WriteAllText(ResultPath+'.resume.json',Saved.ToJSON,TEncoding.UTF8); Saved.Free; finally J.Free; end;
         end else begin

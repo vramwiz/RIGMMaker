@@ -46,7 +46,7 @@ end;
 procedure TRigmWizardWorkspace.CancelVoice;
 begin
   StopVoice; if FVoiceJob<>nil then FVoiceJob.Cancel;
-  // 音声欄だけでなく上段Nextにも、停止後の再生・生成状態を通知する。
+  // 音声欄だけでなく左の工程リストにも、停止後の再生・生成状態を通知する。
   ScriptChanged;
 end;
 procedure TRigmWizardWorkspace.PollScriptVoice;
@@ -102,7 +102,7 @@ end;
 procedure TRigmWizardWorkspace.EnsureSelectedVoice;
 begin
   if not FVoiceAutoGenerationActive or (FScriptDraft=nil) or (CurrentScriptStage<>'voice') or
-    FScriptTextEditing or VoiceBusy or VoicePlaying or VoiceContinuous or not VoiceCatalogReady then Exit;
+    ScriptTextEditing or VoiceBusy or VoicePlaying or VoiceContinuous or not VoiceCatalogReady then Exit;
   var C := FScriptDraft.Cue(JS(JO(FScriptDraft.ScriptWizard,'voice'),'selectedCue'));
   if (C=nil) or FScriptDraft.AudioReady(C) or (C.SpokenText='') then Exit;
   var Key := FScriptDraft.Id+'|'+C.Id+'|'+FScriptDraft.AudioFingerprint(C);
