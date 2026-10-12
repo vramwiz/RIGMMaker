@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "data": {
+    "count": 14,
+    "backgroundReady": false,
+    "allApproved": false,
+    "ready": 0,
+    "pendingRequests": 0,
+    "selectedScene": "{15110FE5-0453-4C73-87EF-EA88E7B0F2F2}",
+    "state": "in-progress",
+    "projectId": "{C36C2A85-DD8A-4DDE-8A7D-D5072CF41A98}",
+    "revision": 1482,
+    "background": {
+      "id": "common-background",
+      "title": "共通背景画像",
+      "image": "",
+      "description": "",
+      "imagePrompt": "マンガの紹介用の背景、異世界から来た女騎士が男性に日本料理を勧められて美味しそうに食べる",
+      "padding": 0,
+      "imageFeedback": "",
+      "imageApproved": false,
+      "imageApprovalKey": "",
+      "imageEditEpoch": 0,
+      "displayMode": "image",
+      "animation": {},
+      "target": "common-background",
+      "optional": true,
+      "ready": false,
+      "imagePath": "",
+      "width": 1920,
+      "height": 1080,
+      "sourceCues": []
+    },
+    "rows": [
+      {
+        "id": "{53F34DC2-5B71-424D-84BD-7128CF598934}",
+        "title": "管理人の娘さん",
+        "image": "",
+        "description": "",
+        "imagePrompt": "管理人の娘さん",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 2,
+        "displayMode": "image",
+        "animation": {},
+        "sceneNumber": 12,
+        "start": 68.6053333333333,
+        "duration": 5.82800000000001,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{17D11259-6B41-49EF-9CC4-700CBB91A18F}",
+            "sourceText": "管理人の娘さん"
+          },
+          {
+            "cueId": "{630D9B0C-4C83-43AD-8642-DBC1E80B5EC1}",
+            "sourceText": "異世界から敵はやってこないのか？"
+          },
+          {
+            "cueId": "{8E47A28E-66D2-4C4C-82B0-B287770C715F}",
+            "sourceText": "そういう心配はないみたい"
+          }
+        ],
+        "cueCount": 3,
+        "hasMoreCues": false
+      }
+    ],
+    "nextOffset": 12,
+    "hasMore": true,
+    "preview": {
+      "current": false,
+      "error": ""
+    },
+    "pipes": {
+      "format": "RIGMMaker.WorkspaceConnection",
+      "schemaVersion": 1,
+      "apiVersion": 2,
+      "pid": 13364,
+      "commandPipe": "RIGMMaker.Workspace.13364.{398A9234-BF79-455C-9A11-D0E50739806F}",
+      "controlPipe": "RIGMMaker.Workspace.13364.{398A9234-BF79-455C-9A11-D0E50739806F}",
+      "dataRoot": "C:\\Users\\zan12\\Documents\\RIGMMaker",
+      "connectionFile": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Exchange\\workspace-13364.json",
+      "routing": "common-command"
+    }
+  },
+  "requestId": "ac567593-98ca-4d38-a211-d307c487a792"
+}

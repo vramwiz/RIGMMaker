@@ -1,0 +1,9 @@
+Use case: illustration-story
+Asset type: character introduction illustration for a Japanese manga video, 16:9 landscape, target 1920x1080.
+Primary request: 管理人のおじさん。
+Reference image 1: use ONLY for the warm apartment setting, golden evening light and polished full-color manga/anime style. The subject is a DIFFERENT character.
+Subject: a cheerful ordinary Japanese apartment landlord in his fifties, bald on top with a little short graying hair at the sides, kind smiling eyes, round friendly face and a slightly stocky build. Comfortable light shirt and muted brown cardigan with simple trousers, modest practical clothes.
+Scene: he stands near the entrance of the same modern Japanese apartment building, warmly greeting a tenant with one open relaxed hand; wood trim, a small potted plant and corridor in the background. Enthusiastic, friendly everyday character.
+Composition: medium waist-up environmental portrait, natural expression and hands, only one character in frame.
+Style: consistent clean precise manga/anime linework, soft cel shading, warm soft lighting, original narrative illustration.
+Constraints: no silver-haired girl, no fantasy costume or armor, no extra characters, no written signs, text, captions, logos, speech bubbles or watermark.

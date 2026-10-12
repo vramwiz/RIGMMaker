@@ -1,0 +1,143 @@
+{
+  "count": 11,
+  "backgroundReady": true,
+  "thumbnailReady": false,
+  "thumbnailSourcesReady": false,
+  "allApproved": false,
+  "ready": 0,
+  "pendingRequests": 6,
+  "selectedScene": "thumbnail",
+  "state": "in-progress",
+  "projectId": "{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}",
+  "revision": 1213,
+  "background": {
+    "id": "common-background",
+    "title": "共通背景画像",
+    "image": "",
+    "description": "",
+    "imagePrompt": "",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 0,
+    "displayMode": "none",
+    "animation": {},
+    "target": "common-background",
+    "optional": true,
+    "ready": true,
+    "imagePath": "",
+    "width": 1920,
+    "height": 1080,
+    "sourceCues": []
+  },
+  "thumbnail": {
+    "id": "thumbnail",
+    "title": "サムネイル",
+    "image": "",
+    "description": "",
+    "imagePrompt": "これまでに作ったシーン画像を組み合わせた、動画の最後に表示するサムネイルを作成。\r\n使用中のキャラクターも必ず使い、見た目を参照素材に合わせる。\r\n「漫画」＋マンガの名前を大きく読みやすいロゴとして配置する。",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 0,
+    "displayMode": "image",
+    "animation": {},
+    "target": "thumbnail",
+    "required": true,
+    "ready": false,
+    "sourcesReady": false,
+    "duration": 10,
+    "imagePath": "",
+    "logoText": "漫画　異世界「嘘」ガイド"
+  },
+  "rows": [
+    {
+      "id": "{01133690-F6C2-45CA-8809-850BBACD6433}",
+      "title": "シーン 5",
+      "image": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}\\Images\\84d16a350d460b43fa176b840534320af076c04638ef32a38a5db58bdee9024a.png",
+      "description": "",
+      "imagePrompt": "動画の漫画紹介に使う、横長16:9、1920x1080を目標とした高品質なカラー漫画イラストを1枚。細く明瞭な線、簡潔なセル塗り、自然な柔らかい光、親しみやすい異世界ラブコメの雰囲気。単一の完成した情景で、文字・吹き出し・字幕・ロゴ・透かし・枠・分割コマを入れない。キャラクターは公式参照画像の外見を維持する。ナナ：白銀の長い髪、中央の長い前髪と外へ跳ねる毛束、赤い半目がちな瞳、色白で細身、黒いチョーカー、小さな襟飾りのクリーム色の上衣、ゆったりした黒～濃いチャコール色の上着と金色の袖ボタン。髪の横の跳ねは毛束であり獣耳や角にしない。露出を強調しない普段着。ながれ：短く自然に乱れた黒髪、黒い瞳、色白で普通の体格の日本人青年、素朴で少し戸惑った表情。公式では服装の色を確認できないため本セットでは無地のくすんだ青い長袖上衣・濃い灰色のズボンで統一する。登場時の顔立ち・髪型・服の色・体格を全画像で維持。参照にある印刷文字や漫画コマそのものを複製せず、下記の新しい場面を描く。\r\n今回の場面：森でながれを助けたナナが、異世界の作法を教えようと案内している。直前と同じ森の小道・服装・昼の木漏れ日。ナナは一歩先で振り返りながら指を1本立てて説明、ながれは真面目に聞いている。ナナの親切そうな顔にかすかな企みを感じる、軽やかな会話の情景。",
+      "padding": 0,
+      "imageFeedback": "",
+      "imageApproved": false,
+      "imageApprovalKey": "",
+      "imageEditEpoch": 2,
+      "displayMode": "image",
+      "animation": {},
+      "sceneNumber": 4,
+      "start": 29.7666666666667,
+      "duration": 14.1426666666667,
+      "ready": false,
+      "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}\\Images\\84d16a350d460b43fa176b840534320af076c04638ef32a38a5db58bdee9024a.png",
+      "sourceCues": [
+        {
+          "cueId": "{1E8E66EF-5F97-4688-B597-8FB5398B58FF}",
+          "sourceText": "下人族の女の子のナナ"
+        },
+        {
+          "cueId": "{B8C97B2D-7959-4631-A84C-E9F886D6EDEE}",
+          "sourceText": "森に迷い込んだ主人公を助けたナナは"
+        },
+        {
+          "cueId": "{900F91E4-05BA-4E90-8CE2-1394F2EC5035}",
+          "sourceText": "異世界での様々な作法を教えるために"
+        },
+        {
+          "cueId": "{60048B3E-0CAB-400C-B26F-CFDF67E58D35}",
+          "sourceText": "青年と旅をしながら教えていく"
+        },
+        {
+          "cueId": "{DA2C64E8-5CEB-4950-A552-3D7BB128CEE2}",
+          "sourceText": "そんなお話です"
+        },
+        {
+          "cueId": "{3B9AB615-7DD4-4301-AD9E-CA3F15156EF9}",
+          "sourceText": "やっぱりよくある話でしたか？"
+        },
+        {
+          "cueId": "{0510829B-EDF0-4DF6-87CF-5121FDF56EAB}",
+          "sourceText": "ですがこれウソなんですよね"
+        }
+      ],
+      "cueCount": 7,
+      "hasMoreCues": false,
+      "imageRequest": {
+        "requestId": "{D43F4988-919F-43B2-BBE1-81540676BC1F}",
+        "sceneId": "{01133690-F6C2-45CA-8809-850BBACD6433}",
+        "sceneNumber": 4,
+        "fingerprint": "2ea5a14fe403c748b69e8d5a03dcf360b121d8d5db8c2aa1f81c88def71063a0",
+        "prompt": "動画の漫画紹介に使う、横長16:9、1920x1080を目標とした高品質なカラー漫画イラストを1枚。細く明瞭な線、簡潔なセル塗り、自然な柔らかい光、親しみやすい異世界ラブコメの雰囲気。単一の完成した情景で、文字・吹き出し・字幕・ロゴ・透かし・枠・分割コマを入れない。キャラクターは公式参照画像の外見を維持する。ナナ：白銀の長い髪、中央の長い前髪と外へ跳ねる毛束、赤い半目がちな瞳、色白で細身、黒いチョーカー、小さな襟飾りのクリーム色の上衣、ゆったりした黒～濃いチャコール色の上着と金色の袖ボタン。髪の横の跳ねは毛束であり獣耳や角にしない。露出を強調しない普段着。ながれ：短く自然に乱れた黒髪、黒い瞳、色白で普通の体格の日本人青年、素朴で少し戸惑った表情。公式では服装の色を確認できないため本セットでは無地のくすんだ青い長袖上衣・濃い灰色のズボンで統一する。登場時の顔立ち・髪型・服の色・体格を全画像で維持。参照にある印刷文字や漫画コマそのものを複製せず、下記の新しい場面を描く。\r\n今回の場面：森でながれを助けたナナが、異世界の作法を教えようと案内している。直前と同じ森の小道・服装・昼の木漏れ日。ナナは一歩先で振り返りながら指を1本立てて説明、ながれは真面目に聞いている。ナナの親切そうな顔にかすかな企みを感じる、軽やかな会話の情景。",
+        "feedback": "",
+        "provider": "external-codex",
+        "width": 1920,
+        "height": 1080,
+        "aspectRatio": "1920:1080",
+        "target": "scene",
+        "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+        "state": "adopted",
+        "adoptedFingerprint": "17bbf9be3b7a1b7205726abab285659c825f5d9a016730a31bc7696f6c851118",
+        "imageProvenance": "external-generated",
+        "current": true
+      }
+    }
+  ],
+  "nextOffset": 4,
+  "hasMore": true,
+  "preview": {
+    "current": false,
+    "error": ""
+  },
+  "pipes": {
+    "format": "RIGMMaker.WorkspaceConnection",
+    "schemaVersion": 1,
+    "apiVersion": 2,
+    "pid": 24128,
+    "commandPipe": "RIGMMaker.Workspace.24128.{46CD3D5F-8F91-4BE6-AE52-5D28BABA7B15}",
+    "controlPipe": "RIGMMaker.Workspace.24128.{46CD3D5F-8F91-4BE6-AE52-5D28BABA7B15}",
+    "dataRoot": "C:\\Users\\zan12\\Documents\\RIGMMaker",
+    "connectionFile": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Exchange\\workspace-24128.json",
+    "routing": "common-command"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "pageId": "script-research",
+  "stage": "review",
+  "scriptType": "manga-introduction",
+  "scriptTypeName": "漫画紹介",
+  "incompleteReason": "台本の種類に応じた既定要素は未定義です。Codex側で要素一覧を設定してください。",
+  "researchReady": false,
+  "advanceBlockedReason": "",
+  "canAdvance": true,
+  "initialized": true,
+  "researchId": "{5641B45C-F589-4632-A87B-1FC5DC75DDF6}",
+  "title": "異世界「嘘」ガイド",
+  "selectedCandidateId": "nico-84566",
+  "expandedElementId": "",
+  "humanConfirmed": true,
+  "definitionsReady": false,
+  "phase": "deepen",
+  "candidateCount": 1,
+  "defaultCount": 0,
+  "extraCount": 0,
+  "confirmedCount": 0,
+  "selectedCandidateName": "異世界「嘘」ガイド",
+  "revision": 1189,
+  "projectId": "{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}",
+  "isCurrentPage": false,
+  "currentPage": "create",
+  "currentStage": "scenes",
+  "section": "candidates",
+  "rows": [
+    {
+      "id": "nico-84566",
+      "name": "異世界「嘘」ガイド",
+      "overview": "異世界へ転移した日本人のながれは、下人族の少女ナナに助けられる。ナナは案内役となり、この世界の作法を教えてくれるが、その説明には彼女自身に都合のよい嘘が混じっている。ナナの狙いは、異世界の事情を知らないながれを自分の伴侶にすること。他の少女たちも加わり、異世界の常識と嘘をめぐる恋愛騒動が描かれるラブコメ漫画。"
+    }
+  ],
+  "total": 1,
+  "nextOffset": 1,
+  "hasMore": false,
+  "pipes": {
+    "format": "RIGMMaker.WorkspaceConnection",
+    "schemaVersion": 1,
+    "apiVersion": 2,
+    "pid": 24128,
+    "commandPipe": "RIGMMaker.Workspace.24128.{46CD3D5F-8F91-4BE6-AE52-5D28BABA7B15}",
+    "controlPipe": "RIGMMaker.Workspace.24128.{46CD3D5F-8F91-4BE6-AE52-5D28BABA7B15}",
+    "dataRoot": "C:\\Users\\zan12\\Documents\\RIGMMaker",
+    "connectionFile": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Exchange\\workspace-24128.json",
+    "routing": "common-command"
+  }
+}

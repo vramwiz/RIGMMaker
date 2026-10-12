@@ -1,0 +1,112 @@
+{
+  "count": 11,
+  "backgroundReady": true,
+  "thumbnailReady": false,
+  "thumbnailSourcesReady": false,
+  "allApproved": false,
+  "ready": 0,
+  "pendingRequests": 0,
+  "selectedScene": "thumbnail",
+  "state": "in-progress",
+  "projectId": "{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}",
+  "revision": 1189,
+  "background": {
+    "id": "common-background",
+    "title": "共通背景画像",
+    "image": "",
+    "description": "",
+    "imagePrompt": "",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 0,
+    "displayMode": "none",
+    "animation": {},
+    "target": "common-background",
+    "optional": true,
+    "ready": true,
+    "imagePath": "",
+    "width": 1920,
+    "height": 1080,
+    "sourceCues": []
+  },
+  "thumbnail": {
+    "id": "thumbnail",
+    "title": "サムネイル",
+    "image": "",
+    "description": "",
+    "imagePrompt": "これまでに作ったシーン画像を組み合わせた、動画の最後に表示するサムネイルを作成。\r\n使用中のキャラクターも必ず使い、見た目を参照素材に合わせる。\r\n「漫画」＋マンガの名前を大きく読みやすいロゴとして配置する。",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 0,
+    "displayMode": "image",
+    "animation": {},
+    "target": "thumbnail",
+    "required": true,
+    "ready": false,
+    "sourcesReady": false,
+    "duration": 10,
+    "imagePath": "",
+    "logoText": "漫画　異世界「嘘」ガイド"
+  },
+  "rows": [
+    {
+      "id": "{4BFBCDAC-7AF0-4CFD-A02A-C65F04E8D1AB}",
+      "title": "closing 1",
+      "image": "",
+      "description": "",
+      "imagePrompt": "",
+      "padding": 0,
+      "imageFeedback": "",
+      "imageApproved": false,
+      "imageApprovalKey": "",
+      "imageEditEpoch": 0,
+      "animation": {},
+      "sceneNumber": 11,
+      "start": 94.4213333333333,
+      "duration": 8.97599999999999,
+      "ready": false,
+      "imagePath": "",
+      "sourceCues": [
+        {
+          "cueId": "{C8F011CA-FDE2-4020-98D8-2A0B1771E1C7}",
+          "sourceText": "いかがでしたか？"
+        },
+        {
+          "cueId": "{491E1FE3-C7D5-4EE8-8A85-BC4D767A446A}",
+          "sourceText": "こんな感じで1日1作品紹介出来たらいいなと思ってます"
+        },
+        {
+          "cueId": "{59B1328E-4272-4338-B2B6-566CE5B94E74}",
+          "sourceText": "今後もマンガを紹介していきますので"
+        },
+        {
+          "cueId": "{ED872686-F223-496B-8FFF-E2444B30B3D4}",
+          "sourceText": "よろしくお願いします"
+        }
+      ],
+      "cueCount": 4,
+      "hasMoreCues": false
+    }
+  ],
+  "nextOffset": 11,
+  "hasMore": false,
+  "preview": {
+    "current": false,
+    "error": ""
+  },
+  "pipes": {
+    "format": "RIGMMaker.WorkspaceConnection",
+    "schemaVersion": 1,
+    "apiVersion": 2,
+    "pid": 24128,
+    "commandPipe": "RIGMMaker.Workspace.24128.{46CD3D5F-8F91-4BE6-AE52-5D28BABA7B15}",
+    "controlPipe": "RIGMMaker.Workspace.24128.{46CD3D5F-8F91-4BE6-AE52-5D28BABA7B15}",
+    "dataRoot": "C:\\Users\\zan12\\Documents\\RIGMMaker",
+    "connectionFile": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Exchange\\workspace-24128.json",
+    "routing": "common-command"
+  }
+}

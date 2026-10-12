@@ -10,7 +10,7 @@ const MovieChartKinds: array[0..2] of string = ('none','radar','bar');
 
 implementation
 uses Winapi.Windows, System.SysUtils, System.Math, System.StrUtils, System.Generics.Collections, RigmModel,
-  RigmJson, GraphRadarGeometry;
+  RigmJson, GraphRadarGeometry, RigmMovieText;
 
 function MovieChartEnabled(Chart: TJSONObject): Boolean;
 begin Result := (Chart<>nil) and not SameText(JS(Chart,'kind','none'),'none'); end;
@@ -50,7 +50,7 @@ var Scale: Double; Accent: TColor;
     Canvas.Font.Height := -Px(Size); Canvas.Font.Color := $F4F0E9;
     var Box := R; var Flags := DT_NOPREFIX or DT_VCENTER or DT_SINGLELINE or DT_END_ELLIPSIS;
     if Center then Flags := Flags or DT_CENTER else Flags := Flags or DT_LEFT;
-    DrawText(Canvas.Handle,PChar(Value),Length(Value),Box,Flags);
+    DrawMovieText(Canvas,Value,Box,Flags);
   end;
 begin
   if not MovieChartEnabled(Chart) then Exit;

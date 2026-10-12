@@ -1,0 +1,17 @@
+{
+  "revision": 1276,
+  "stage": "editor",
+  "closingTitle": "異世界「嘘」ガイド",
+  "currentCueCount": 44,
+  "changedCueFieldsSinceRepairVerification": [
+    "effectWaveFile",
+    "labFile",
+    "waveFile"
+  ],
+  "sceneDataUnchangedSinceRepairVerification": false,
+  "thumbnailUnchangedSinceRepairVerification": false,
+  "backgroundUnchangedSinceRepairVerification": false,
+  "endCardsUnchangedSinceRepairVerification": false,
+  "note": "修復直後の全データ保持はlive-verification.jsonで確認済み。後続の別操作後の状態は独立して記録する。",
+  "savedProjectSHA256": "bab87824b54ccd7cb387b8ed7aeb1c3318d848df2161a85b9b05d2f3180ade34"
+}

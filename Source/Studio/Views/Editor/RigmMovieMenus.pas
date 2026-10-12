@@ -33,7 +33,7 @@ begin
   AddMovieMenuItem(Menu,MakeMenu,'現在工程の結果を作る',31,Handler); AddMovieMenuItem(Menu,MakeMenu,'次の工程へ',27,Handler); AddMovieMenuItem(Menu,MakeMenu,'前の工程へ',32,Handler);
   var Tools := CreateMovieMenuGroup(Menu,'MovieToolsMenu','詳細(&D)');
   AddMovieMenuItem(Menu,Tools,'VOICEVOX話者を更新',7,Handler); AddMovieMenuItem(Menu,Tools,'キャラクター素材を更新',23,Handler); AddMovieMenuItem(Menu,Tools,'波形を更新',24,Handler);
-  AddMovieMenuItem(Menu,Tools,'FFmpegを選択...',22,Handler); AddMovieMenuItem(Menu,Tools,'不一致を診断',28,Handler); AddMovieMenuItem(Menu,Tools,'使える演技へ戻す',29,Handler);
+  AddMovieMenuItem(Menu,Tools,'外部FFmpegを選択（任意）...',22,Handler); AddMovieMenuItem(Menu,Tools,'不一致を診断',28,Handler); AddMovieMenuItem(Menu,Tools,'使える演技へ戻す',29,Handler);
   AddMovieMenuItem(Menu,Tools,'ジョブを中止',9,Handler); AddMovieMenuItem(Menu,Tools,'ジョブを再試行',10,Handler);
 end;
 end.

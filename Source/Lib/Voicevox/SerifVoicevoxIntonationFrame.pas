@@ -48,6 +48,7 @@ type
     // audio_queryを表示する。KeepDisplayでは空の更新待ち中だけ既存スライダーを操作不可で保持する。
     function ShowQuery(const QueryJson: string;
       const KeepDisplay: Boolean = False): string;
+    procedure UpdateAccentQuery(const QueryJson: string); // モーラ値が不変なアクセント位置編集だけを反映する。
     // スライダー操作でpitchを反映したaudio_queryを通知する。
     property OnChange: TSerifVoicevoxAccentQueryEvent
       read FOnChange write FOnChange;
@@ -234,6 +235,8 @@ begin
   if Assigned(FOnPreview) then FOnPreview(Self);
 end;
 
+procedure TFrameSerifVoicevoxIntonation.UpdateAccentQuery(const QueryJson: string);
+begin FQueryJson := QueryJson; end;
 function TFrameSerifVoicevoxIntonation.ShowQuery(
   const QueryJson: string; const KeepDisplay: Boolean): string;
 var

@@ -1,0 +1,126 @@
+[
+  {
+    "sceneNumber": 1,
+    "tool": "image_gen.imagegen",
+    "mode": "built-in",
+    "prompt": "Use case: illustration-story. Create ONE finished wide 16:9 full-color Japanese anime illustration for the opening of a manga introduction video. Requested output 1920×1080. Winter evening in a cozy small Japanese coffee shop. Foreground by the window: a rich walnut table, an open manga book showing only subtle indistinct monochrome panel textures, no legible words, and a simple white porcelain coffee cup with a saucer and gentle steam. Snow falls outside blue-grey windows. Background behind the counter: a reserved Japanese high-school boy with short black hair, navy school cardigan over white shirt, and a Japanese high-school girl with long chestnut-brown hair and deep green eyes wearing a modest dark navy cafe dress and white apron; they work quietly together, small in the composition, fully clothed. Warm amber pendants, walnut counter, shelves of white cups, brass and glass coffee equipment. Fine clean anime linework, beautiful restrained watercolor-like color shading, romantic slice-of-life mood. Establish this cafe and these two consistent character designs for a series of scenes. Foreground coffee and manga are primary; people remain secondary but faces readable. No labels, no captions, no dialogue balloons, no signs, no logos, no watermark, no collage or border. This is a newly imagined illustrative scene based on a script, not a scan of a published manga.",
+    "referenceSceneNumbers": [],
+    "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a12a3b-12c0-7a32-948c-00d9ff0dde3f\\exec-8ab33f69-095f-406b-a5cb-f624fadc52b5.png",
+    "finalWorkspacePath": "D:/DelphiProg/RIGMMaker/制作支援/学習記録/RIGM/20261011-soreyuki-scenes/images/scene-01.png"
+  },
+  {
+    "sceneNumber": 2,
+    "tool": "image_gen.imagegen",
+    "mode": "built-in",
+    "prompt": "Use case: illustration-story. Produce ONE wide landscape 16:9 anime title illustration at requested 1920×1080 for scene 2 of the manga-introduction video. Image 1 is a STYLE, CHARACTER IDENTITY and LOCATION reference, not an edit target. Keep the exact same warm walnut Japanese coffee shop, amber pendant lighting, white porcelain cups, winter snow outside, and the same reserved short-black-haired boy and long-chestnut-haired green-eyed girl. New composition: the modestly dressed teenage boy and girl stand together at the counter on the right half, with a quiet hesitant romantic distance, and the snowy window, steaming coffee and book fill the left and lower foreground. Elegant, clean, restrained anime illustration consistent with reference. Add one large highly legible Japanese title across the upper-left and center, with subtle pale cream lettering edged in dark brown: exact text 『それは、降り積もる雪のような。』. Arrange on 2 or 3 graceful lines, preserve all punctuation. Do not put Japanese quote marks in the rendered title. No other text. No logos, watermarks, speech balloons or comic panels. Everything must read as one coherent illustration; avoid a poster collage.",
+    "referenceSceneNumbers": [
+      1
+    ],
+    "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a12a3b-12c0-7a32-948c-00d9ff0dde3f\\exec-421c9ebb-b529-4257-84ae-45a244b69641.png",
+    "finalWorkspacePath": "D:/DelphiProg/RIGMMaker/制作支援/学習記録/RIGM/20261011-soreyuki-scenes/images/scene-02.png"
+  },
+  {
+    "sceneNumber": 3,
+    "tool": "image_gen.imagegen",
+    "mode": "built-in",
+    "prompt": "Use case: illustration-story. ONE NEW landscape 16:9 anime scene, requested 1920x1080, scene 3. Image 1 is reference for the SAME boy, girl, cafe and color/line style. DO NOT repeat its camera view: move to a medium-wide view from inside behind the cafe counter. The reserved short black-haired Japanese high-school boy in a navy cardigan over white shirt is learning to prepare white porcelain coffee cups neatly, with a shy but diligent expression. A kind middle-aged Japanese uncle in a plain dark wool jacket, fully clothed, stands on the customer side of the counter giving a welcoming small smile and gesturing toward a narrow wooden staircase leading upstairs, implying this cafe also gives the boy a place to live. The long chestnut-haired green-eyed teenage girl in modest dark navy cafe dress and white apron is farther back near the shelves, watching quietly. Same amber pendants, walnut wood, brass kettles, glass drip equipment, cup shelves and blue snowy evening windows. Narrative warmth, quiet youth romance, fine anime linework and nuanced warm shading. No readable text, no title, no logo, no watermark, no comic panels. Keep exactly one boy, one teenage girl and one uncle; anatomically coherent hands, natural poses. This is a script-inspired original illustrative scene.",
+    "referenceSceneNumbers": [
+      1
+    ],
+    "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a12a3b-12c0-7a32-948c-00d9ff0dde3f\\exec-5e11719f-ba4f-4a40-abba-b5757cad8d9b.png",
+    "finalWorkspacePath": "D:/DelphiProg/RIGMMaker/制作支援/学習記録/RIGM/20261011-soreyuki-scenes/images/scene-03.png"
+  },
+  {
+    "sceneNumber": 4,
+    "tool": "image_gen.imagegen",
+    "mode": "built-in",
+    "prompt": "Use case: illustration-story. ONE new landscape 16:9 anime narrative illustration, requested 1920×1080, scene 4. Image 1 is the exact continuity reference for cafe, boy, girl, dress, lighting, cup shelves and fine warm anime shading. New medium shot at the SAME walnut cafe counter, with the long chestnut-haired green-eyed girl now as the young cafe manager, modest navy long-sleeved maid dress, white collar and full white apron. She thoughtfully reviews an open ledger on the counter, its marks indistinct and not readable. Beside her the same short-black-haired boy in navy cardigan helps by gently indicating an entry, both sincere and slightly shy. Convey taking responsibility for an inherited beloved coffee shop. Use a humble framed old cafe photo in the background without readable text or a clearly featured deceased person. Walnut stairs, brass coffee kettle, neatly arranged white cups, amber pendant lighting, snowy blue evening window. NO uncle or any other people in this image. Do not copy the reference pose. Do not show a ghost, funeral, death scene, speech balloon, labels, title, watermark, comic panels or added signage. Keep familiar room architecture and character identities.",
+    "referenceSceneNumbers": [
+      3
+    ],
+    "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a12a3b-12c0-7a32-948c-00d9ff0dde3f\\exec-b82f16ee-bedc-4487-adac-602d77d5a4de.png",
+    "finalWorkspacePath": "D:/DelphiProg/RIGMMaker/制作支援/学習記録/RIGM/20261011-soreyuki-scenes/images/scene-04.png"
+  },
+  {
+    "sceneNumber": 5,
+    "tool": "image_gen.imagegen",
+    "mode": "built-in",
+    "prompt": "Use case: illustration-story. Create ONE new 16:9 landscape anime scene, requested 1920×1080, scene 5. Use image 1 only as exact continuity reference for the same cafe interior, teenage boy and girl, their clothes and beautiful amber/winter anime color style. Recompose to a closer eye-level medium shot centered on making coffee. The black-haired boy in navy cardigan carefully pours hot water from a small brass gooseneck kettle into a paper-filter ceramic dripper resting on a glass server; the server clearly contains dark brewed coffee, and a white cup sits beside it. Give the kettle and his hands plausible natural anatomy. The long chestnut-haired green-eyed girl in the same modest dark navy maid dress and white apron watches closely holding one small cup with both hands, a restrained uncertain expression about coffee's bitter taste, not exaggerated comedy. They work as partners to preserve the previous owner's coffee flavor. Warm steam, walnut counter, softly blurred familiar shelves and snowy blue window. Only these two people. No ledger, uncle, ghost, text, title, speech balloons, watermark, panels or collage. Original script-inspired illustration, same character identity.",
+    "referenceSceneNumbers": [
+      4
+    ],
+    "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a12a3b-12c0-7a32-948c-00d9ff0dde3f\\exec-8935d0c2-ded9-4330-932b-441ad29d973c.png",
+    "finalWorkspacePath": "D:/DelphiProg/RIGMMaker/制作支援/学習記録/RIGM/20261011-soreyuki-scenes/images/scene-05.png"
+  },
+  {
+    "sceneNumber": 6,
+    "tool": "image_gen.imagegen",
+    "mode": "built-in",
+    "prompt": "Use case: illustration-story. ONE landscape 16:9 anime illustration, requested 1920×1080, scene 6. Input image is a continuity reference for boy and girl faces, hair, warm detailed anime rendering and the walnut-house aesthetic; create a NEW room and scene, no coffee pouring. The small comfortable family dining room upstairs from the Japanese cafe, winter evening with a blue snowy window, wooden table set for THREE, warm amber household lamp. The same short-black-haired teenage boy in navy cardigan sets out ceramic dinner bowls and chopsticks. The same long-chestnut-haired green-eyed teenage girl now wears a modest cream sweater and dark skirt, not a maid apron, helping put a steaming dish on the table. Her mother, clearly an adult Japanese woman around forty with shoulder-length chestnut hair, gentle mature face and warm greenish eyes, wearing a modest soft beige cardigan and simple kitchen apron, stands beside them serving dinner with a welcoming smile. Show a safe family household: the boy and girl do not live alone. Exactly three people, no uncle. Natural non-romantic domestic poses, calm friendly expressions, restrained intimate slice-of-life composition. Preserve character faces and proportions from reference but change clothing as specified. No readable writing, no title, no logos, no speech bubbles, no collage.",
+    "referenceSceneNumbers": [
+      5
+    ],
+    "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a12a3b-12c0-7a32-948c-00d9ff0dde3f\\exec-99569e70-6c4f-432e-be8e-f310afaac034.png",
+    "finalWorkspacePath": "D:/DelphiProg/RIGMMaker/制作支援/学習記録/RIGM/20261011-soreyuki-scenes/images/scene-06.png"
+  },
+  {
+    "sceneNumber": 7,
+    "tool": "image_gen.imagegen",
+    "mode": "built-in",
+    "prompt": "Use case: illustration-story. ONE landscape 16:9 anime illustration, requested 1920×1080, scene 7. Input image is a CHARACTER IDENTITY and drawing-style reference ONLY: preserve the long chestnut-haired teenage girl with dark hair ribbon and green eyes (left in reference) and short black-haired teenage boy (right in reference). Do not include the adult mother from center. Entirely NEW LOCATION: a realistic Japanese high-school classroom on a cold clear winter afternoon, rows of student desks, clean blackboard without writing, large cool daylight windows, school building outdoors, a dusting of snow visible. Girl wears a modest navy school blazer, white shirt, navy ribbon and knee-length pleated school skirt, fully clothed. She is chatting with two friendly teenage female classmates near a desk on the left; one friend turns with mild protective curiosity toward the boy, subtle and not hostile. Boy in same navy cardigan and white shirt sits quietly near a window on the right holding a schoolbook; he and the girl exchange a brief shy glance across the classroom, suggesting a shared secret about living together. Show social distance and romantic uncertainty without melodrama. Exactly five teenagers. Medium-wide cinematic composition, natural proportions and coherent hands, delicate anime linework, restrained colors linking visually with the previous scenes while cool classroom daylight replaces cafe amber. No cafe furniture, no aprons, no maid costume, no mother, no text, no speech balloons, no relationship diagram, no panels, no logos or watermark.",
+    "referenceSceneNumbers": [
+      6
+    ],
+    "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a12a3b-12c0-7a32-948c-00d9ff0dde3f\\exec-c0d2e137-d2a1-447a-a8d2-f1b9dab5f7c7.png",
+    "finalWorkspacePath": "D:/DelphiProg/RIGMMaker/制作支援/学習記録/RIGM/20261011-soreyuki-scenes/images/scene-07.png"
+  },
+  {
+    "sceneNumber": 8,
+    "tool": "image_gen.imagegen",
+    "mode": "built-in",
+    "prompt": "Use case: illustration-story. ONE landscape 16:9 anime illustration, requested 1920x1080, scene 8: the heroine serving coffee in her cafe maid uniform. Image 1 is cafe/maid-outfit and identity reference; Image 2 is continuity reference for the same heroine face and long chestnut hair from the most recent classroom scene, not its clothing/location. Depict ONLY the teenage girl, in a modest navy long-sleeved maid dress with white collar, tasteful ruffle shoulders and full white apron, knee-below skirt, black hair ribbon, deep green eyes. A natural welcoming small smile, calm professional service, holding a wooden tray with two white porcelain coffee cups and saucers in front of her at waist height. Show her from head to below knees with adequate room around the tray, NO sexualization, no revealing outfit, no exaggerated body proportions. New composition from the cafe customer seating area; familiar walnut counter and shelves recede diagonally behind, amber pendants above, softly snowy window on the side. Beautiful clean fine anime illustration, warm restrained shading, detailed realistic cafe props, consistency with all previous scenes. No other people, no text, no title, no logos or watermarks, no speech balloons or panels.",
+    "referenceSceneNumbers": [
+      5,
+      7
+    ],
+    "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a12a3b-12c0-7a32-948c-00d9ff0dde3f\\exec-8c84d155-2098-448a-939a-8d4ef3a43c20.png",
+    "finalWorkspacePath": "D:/DelphiProg/RIGMMaker/制作支援/学習記録/RIGM/20261011-soreyuki-scenes/images/scene-08.png"
+  },
+  {
+    "sceneNumber": 9,
+    "tool": "image_gen.imagegen",
+    "mode": "built-in",
+    "prompt": "Use case: illustration-story. ONE landscape 16:9 anime scene, requested 1920×1080, scene 9. Input image 1 supplies the EXACT adult mother identity: the woman with shoulder-length chestnut hair standing in the center of that family dinner scene, mature gentle face about forty and warm greenish eyes. Input image 2 supplies the same cafe location and modest navy/white maid uniform style, not the teenage daughter's face. Depict ONLY the ADULT MOTHER now working in the same cafe. She wears an elegant modest long-sleeved dark navy maid dress, white collar and full white apron, long skirt. She calmly places a white porcelain coffee cup and saucer on the walnut counter with one hand and holds a neatly folded cloth with the other, a warm confident experienced smile. Waist-up to three-quarter composition; she is visibly mature, not a duplicated teenage girl. Same familiar snowy blue windows, amber pendant lights, rich wooden furniture and shelves of cups and coffee equipment, delicate restrained anime shading and linework. No daughter, boy, uncle or customers. No writing, title, signage, speech balloons, panels, watermarks or logos. Wholesome cafe service, natural hands and grounded pose.",
+    "referenceSceneNumbers": [
+      6,
+      8
+    ],
+    "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a12a3b-12c0-7a32-948c-00d9ff0dde3f\\exec-c00b7278-9050-4e72-9c51-351616b14921.png",
+    "finalWorkspacePath": "D:/DelphiProg/RIGMMaker/制作支援/学習記録/RIGM/20261011-soreyuki-scenes/images/scene-09.png"
+  },
+  {
+    "sceneNumber": 10,
+    "tool": "image_gen.imagegen",
+    "mode": "built-in",
+    "prompt": "Use case: illustration-story. ONE new landscape 16:9 anime illustration, requested 1920x1080, scene 10: a beloved coffee shop where a mother and daughter work together. The input references give exact continuity: image 1 is the youthful long-chestnut-haired green-eyed daughter, image 2 is her mature shoulder-length chestnut-haired mother, image 3 is the black-haired boy and the established shop. Wide inviting view from the customer tables, same walnut coffee shop with warm amber pendants and snowy blue windows. Daughter and adult mother stand together near the center, both in modest matching navy long-sleeved maid dresses and white aprons, daughter carrying a wooden tray of white coffee cups while mother places a cup gently on a table. Natural service poses, clearly different ages and hair lengths, recognizable faces from references. In the background behind the counter, the same black-haired boy in navy cardigan quietly prepares coffee. EXACTLY these three people, no duplicate figures or customers. Rich but uncluttered shop depth, welcoming atmosphere, everyday comfort, beautiful delicate anime linework and warm shading matching previous images. Avoid repeating the previous solo portraits: show the whole cafe scene with people at medium scale. No writing, no signs, no title, no dialogue balloons, no watermark, no panels, no logo.",
+    "referenceSceneNumbers": [
+      8,
+      9,
+      5
+    ],
+    "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a12a3b-12c0-7a32-948c-00d9ff0dde3f\\exec-ca5cfca9-529c-4d1f-82cc-e0140a089110.png",
+    "finalWorkspacePath": "D:/DelphiProg/RIGMMaker/制作支援/学習記録/RIGM/20261011-soreyuki-scenes/images/scene-10.png"
+  },
+  {
+    "sceneNumber": 11,
+    "tool": "image_gen.imagegen",
+    "mode": "built-in",
+    "prompt": "Use case: illustration-story. ONE landscape 16:9 anime closing illustration, requested 1920×1080, scene 11. Image 1 is the opening cafe table composition reference. Image 2 supplies consistent identities and outfits of the boy, daughter and mother. Return to the same cozy snowy winter cafe, same walnut window table and amber light, but now the manga book in the foreground is CLOSED with a simple muted blank cover, no lettering or picture, and the white porcelain coffee cup is nearly empty on its saucer with a small used spoon and a subtle coffee stain inside. This is a peaceful end-of-reading moment. Foreground book and cup dominant, blue-grey snow softly falling outside the window. In the distance, the same black-haired boy in navy cardigan tidies the counter and the long chestnut-haired daughter and shoulder-length chestnut-haired adult mother in modest navy maid dresses and white aprons calmly put away cups together; people small and subordinate to the tabletop still life. Beautiful restrained fine anime linework, detailed warm wood, soft depth of field, gentle emotional afterglow. NOT an empty black end screen and NOT a thumbnail or title card. No readable text anywhere, no other manga titles or characters, no logos, watermarks, speech balloons, panels or collage.",
+    "referenceSceneNumbers": [
+      1,
+      10
+    ],
+    "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a12a3b-12c0-7a32-948c-00d9ff0dde3f\\exec-9cbc767e-b362-4262-a9f3-89d87acb4237.png",
+    "finalWorkspacePath": "D:/DelphiProg/RIGMMaker/制作支援/学習記録/RIGM/20261011-soreyuki-scenes/images/scene-11.png"
+  }
+]

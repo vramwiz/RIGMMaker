@@ -24,6 +24,10 @@ begin
     if not((Kind='end') or (Kind='thumbnail')) or (Previous='thumbnail') or (Kind=Previous) then raise ERigm.Create('末尾カードは終了画像→サムネイルの順です。'); Previous := Kind;
     if not(O.GetValue('image') is TJSONString) or (JS(O,'image')='') or (Length(JS(O,'image'))>32760) or not(O.GetValue('duration') is TJSONNumber) or not Finite(JN(O,'duration')) or (JN(O,'duration')<0.5) or (JN(O,'duration')>30) then raise ERigm.Create('末尾カードには既存画像と0.5～30秒の長さが必要です。');
     if not(O.GetValue('rect') is TJSONObject) then raise ERigm.Create('画像配置がありません。'); ValidateCardRect(JO(O,'rect'));
+    if O.GetValue('transitionSeconds')<>nil then
+      if (Kind<>'thumbnail') or not (O.GetValue('transitionSeconds') is TJSONNumber) or
+        not Finite(JN(O,'transitionSeconds')) or (JN(O,'transitionSeconds')<0) or
+        (JN(O,'transitionSeconds')>JN(O,'duration')) then raise ERigm.Create('サムネイルの切替時間が不正です。');
     if Kind='end' then begin
       if not(O.GetValue('reserved') is TJSONArray) or (JA(O,'reserved').Count<1) or (JA(O,'reserved').Count>6) then raise ERigm.Create('YouTubeテンプレートの回避領域を1～6個指定してください。');
       var Image := JO(O,'rect'); for var R in JA(O,'reserved') do begin if not(R is TJSONObject) then raise ERigm.Create('回避領域の形式が不正です。'); var Region := TJSONObject(R); ValidateCardRect(Region);

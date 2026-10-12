@@ -701,10 +701,9 @@ end;
 procedure TVoicevoxToolbarButtons.UseAdjustmentOnly;
 begin
   for var Button in FButtons do begin
-    Button.Visible := (Button.FKind in [vbkPreview,vbkContinuous]) or ((Button.FKind=vbkPage) and (Button.FPage in [vtpAccent,vtpAudioSettings]));
-    if (Button.FKind=vbkPage) and (Button.FPage=vtpAccent) then Button.Hint := 'アクセント・音高・音素長';
+    Button.Visible := Button.FKind in [vbkPreview,vbkContinuous];
   end;
-  if not (FActivePage in [vtpAccent,vtpAudioSettings]) then Activate(vtpAccent);
+  Activate(vtpAccent,False);
   LayoutButtons;
 end;
 

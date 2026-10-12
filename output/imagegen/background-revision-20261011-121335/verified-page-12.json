@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "data": {
+    "count": 14,
+    "backgroundReady": false,
+    "allApproved": false,
+    "ready": 14,
+    "pendingRequests": 0,
+    "selectedScene": "common-background",
+    "state": "in-progress",
+    "projectId": "{C36C2A85-DD8A-4DDE-8A7D-D5072CF41A98}",
+    "revision": 1535,
+    "background": {
+      "id": "common-background",
+      "title": "共通背景画像",
+      "image": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{C36C2A85-DD8A-4DDE-8A7D-D5072CF41A98}\\Images\\f0790399e053fe8bad10a43c4a75cfa5e97173a6fa93a1e003543f38cb2a92d6.png",
+      "description": "",
+      "imagePrompt": "マンガの紹介用の背景、異世界から来た女騎士が男性に日本料理を勧められて美味しそうに食べる",
+      "padding": 0,
+      "imageFeedback": "",
+      "imageApproved": false,
+      "imageApprovalKey": "",
+      "imageEditEpoch": 2,
+      "displayMode": "image",
+      "animation": {},
+      "target": "common-background",
+      "optional": true,
+      "ready": false,
+      "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{C36C2A85-DD8A-4DDE-8A7D-D5072CF41A98}\\Images\\f0790399e053fe8bad10a43c4a75cfa5e97173a6fa93a1e003543f38cb2a92d6.png",
+      "width": 1920,
+      "height": 1080,
+      "sourceCues": [],
+      "imageRequest": {
+        "requestId": "{94F57082-5471-4B26-B842-7B4FDF9067AE}",
+        "sceneId": "common-background",
+        "sceneNumber": 0,
+        "fingerprint": "1408a3817dbe3e2f78425b9cc00182eb2ff2c44cf36c6515e3bd2d9f65e44eeb",
+        "prompt": "マンガの紹介用の背景、異世界から来た女騎士が男性に日本料理を勧められて美味しそうに食べる",
+        "feedback": "",
+        "provider": "external-codex",
+        "width": 1920,
+        "height": 1080,
+        "aspectRatio": "1920:1080",
+        "target": "common-background",
+        "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+        "state": "adopted",
+        "adoptedFingerprint": "04050c6baec53280ddba3faa082dcfa4d6c0ab9c52c954dbf1f7cec58d3cc631",
+        "imageProvenance": "external-generated",
+        "current": true
+      }
+    },
+    "rows": [
+      {
+        "id": "{BBA35690-930A-4406-BFAD-8F51C5E4E6FE}",
+        "title": "異世界の戦闘を観戦しながら",
+        "image": "project.assets\\4d1d868ee0c6a52f081c2aade4a7d2fcf2bf9d3e29df8feaecb25bdc4e61a299.png",
+        "description": "",
+        "imagePrompt": "異世界の戦闘を観戦しながら一杯飲む ",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": true,
+        "imageApprovalKey": "aea2fec7ebbe80c4c5ecd0e0dd90ff587299c87656d1034daea6a1763a659823",
+        "imageEditEpoch": 2,
+        "displayMode": "image",
+        "animation": {},
+        "sceneNumber": 13,
+        "start": 74.4333333333333,
+        "duration": 6.39333333333333,
+        "ready": true,
+        "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{C36C2A85-DD8A-4DDE-8A7D-D5072CF41A98}\\project.assets\\4d1d868ee0c6a52f081c2aade4a7d2fcf2bf9d3e29df8feaecb25bdc4e61a299.png",
+        "sourceCues": [
+          {
+            "cueId": "{BE379CB6-F4E4-4CDA-91AA-B5CF7E9AA161}",
+            "sourceText": "戦闘を観戦しながら一杯飲む"
+          },
+          {
+            "cueId": "{4CE1B146-63AA-43A4-B95D-B6BFF6F61412}",
+            "sourceText": "そんな日常的なマンガ"
+          },
+          {
+            "cueId": "{A077C484-A80E-4073-B459-5C5186C228BC}",
+            "sourceText": "今ならアプリからだと全話読めます"
+          }
+        ],
+        "cueCount": 3,
+        "hasMoreCues": false,
+        "imageRequest": {
+          "requestId": "{4EC6D53F-35BB-49F9-A8E9-A045F315F865}",
+          "sceneId": "{BBA35690-930A-4406-BFAD-8F51C5E4E6FE}",
+          "sceneNumber": 13,
+          "fingerprint": "f40a7f09bf12057a7e98649e0a8ea67281b7581f1b236e73a0f8fd4bcce13091",
+          "prompt": "異世界の戦闘を観戦しながら一杯飲む ",
+          "feedback": "",
+          "provider": "external-codex",
+          "width": 1920,
+          "height": 1080,
+          "aspectRatio": "1920:1080",
+          "target": "scene",
+          "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+          "adoptedFingerprint": "722fc06721687c5d5f739c72dac266cef32c1ee3f285f727c09914f98cfbceae",
+          "imageProvenance": "external-generated",
+          "state": "cancelled",
+          "current": false
+        }
+      }
+    ],
+    "nextOffset": 13,
+    "hasMore": true,
+    "preview": {
+      "current": false,
+      "error": ""
+    },
+    "pipes": {
+      "format": "RIGMMaker.WorkspaceConnection",
+      "schemaVersion": 1,
+      "apiVersion": 2,
+      "pid": 13364,
+      "commandPipe": "RIGMMaker.Workspace.13364.{398A9234-BF79-455C-9A11-D0E50739806F}",
+      "controlPipe": "RIGMMaker.Workspace.13364.{398A9234-BF79-455C-9A11-D0E50739806F}",
+      "dataRoot": "C:\\Users\\zan12\\Documents\\RIGMMaker",
+      "connectionFile": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Exchange\\workspace-13364.json",
+      "routing": "common-command"
+    }
+  },
+  "requestId": "3e07961f-f439-4179-9116-a8e82157ccf5"
+}

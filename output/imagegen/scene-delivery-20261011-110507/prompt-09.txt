@@ -1,0 +1,9 @@
+Use case: illustration-story
+Asset type: character introduction illustration for Japanese manga video, 16:9 landscape, target 1920x1080.
+Primary request: 女吸血鬼。
+Reference image 1: use ONLY as a reference for the established cozy modern apartment, warm evening lighting, polished full-color manga/anime linework and soft cel shading. The new subject is a DIFFERENT character, not the blonde knight.
+Subject: Haijia, an ancient female vampire with a youthful childlike appearance, long silver-white hair, striking golden eyes, pale complexion and a tiny visible fang in a proud, playfully haughty smile. She wears a fully covering modest black Victorian-inspired dress with long sleeves, high neckline, white lace cuffs and collar, and a small black ribbon in her hair. Natural nonsexual character portrait.
+Scene: she stands in the same warm modern Japanese apartment, with shelves and a softly glowing lamp in the background, hands calmly folded in front. No drinks or dining activity.
+Composition: eye-level medium portrait, clear face and distinct silver hair/gold eyes, cozy friendly daily-life fantasy mood, only one character.
+Style: polished full-color manga/anime illustration, same clean linework and warm interior palette as the reference.
+Constraints: no armor, no blonde hair, no adult body styling, no revealing clothes, no alcohol, no text, captions, speech bubbles, logos, watermark, horror or blood.

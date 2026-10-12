@@ -1233,3 +1233,504 @@ dprojの検索パスでWin64 Debug／Releaseともビルド成功、エラー0�
 dprojと同じ検索パスでWin64 Debug／Releaseともビルド成功。エラー0、新規警告0、既存警告13件は各構成に残る。通常アプリが終了していることを確認し、元EXEをRIGMMaker-before-input-policy.exeへ保持して通常RIGMMaker.exeを最終Releaseへ更新した。SHA256は7BB08B78CAA87BC483CE6236F3419EBCF261B4CFC03162034A57719CA6AE62D0。実作品・設定・元素材への試験命令や強制終了・再起動は行わず、コミット・プッシュなし。git diff --check成功。
 
 証跡：Win64/Validation/InputPolicy-20261009-dda05dca。ResearchFinal/run/result.json・pipe-done.json、Navigation3/run/result.json・描画画像、Debug／Release/build.log、verification.json、再実行用Build-Project.ps1／Run-Navigation.ps1。Research2に初回nil参照、Navigationに初回ホイール失敗の結果を保持する。note.mdには保留した右側のスクロール課題だけを追加し、現在の通信・一覧仕様はSCRIPT-NAVIGATION-20261009.mdへ記録した。
+
+## 2026-10-09 第6段階の掘り下げを任意化
+
+ユーザー指定により、第6段階へ到達した時点で左の工程リストへ第7段階（配役）を表示して選択可能にした。作品の未承認、既定要素の未定義、既定・追加項目の未確認／確認中を進行条件から外し、第7段階以降を再度止めていた共通の掘り下げ判定も除去した。追加の操作UIは設けず、既存のリスト選択と保存処理で進む。配役・字幕・音声・画像等の工程条件と入力値・保存失敗の検査は維持する。
+
+調査完了の判定はResearchIncompleteReasonへ改名し、researchReady／incompleteReasonとして工程移動の可否から分離した。未確認の候補・項目を自動承認せず、途中の内容と人間の確認状態を保存する。researchIntegrationへは人間が承認した作品と、その作品の情報あり確定項目だけを渡す。他に未完了項目があっても確定分は渡し、作品が未承認の場合はelementsの空配列だけを保存する。原稿は書き換えない。既存の案内文に、不要なら左リストから第7段階へ進める旨を反映した。
+
+検証は専用データによるGUI／モデル138項目、実Named Pipe31件、工程リスト回帰115項目がすべて成功（計284）。到達直後・未承認候補・既定要素の一部確定・未確認追加項目・調査無効化後・種類変更後に、実リストで第7段階へ進み、保存再開と第6段階への復帰、途中情報・承認状態・原稿の保持を確認した。保存失敗時の第6段階と外部ファイルの保持、配役等の既存条件が必要なこと、外部作品承認・古いrevision／作品IDの拒否も確認。隔離VCL描画identify-96.pngを読み、第6段階選択中の第7段階表示と案内文を確認した。実ユーザー作品と通常アプリ画面を操作した検証ではない。
+
+初回の調査検証は、追加した第7段階への移動によって保存後の再開先が配役となり、非表示の調査タイトルへフォーカスを設定して失敗した。検証側を実リストで第6段階へ戻してから操作するよう修正し、ResearchFinalで全項目を再実行して成功した。初回結果はResearchに保持する。
+
+dprojの検索パス・構成設定を保持した隔離コピーでWin64 Debug／Releaseともビルド成功、エラー0、新規警告0、既存警告13件は各構成に残る。作業中は通常RIGMMaker.exeが起動していたため独立出力で検証し、最終段階で通常アプリが終了していることと開始時のEXEハッシュを再確認した。旧EXEを同検証フォルダのRIGMMaker-before-optional-research.exeへ保持し、検証済みReleaseを原子的に反映した。新EXEのSHA256は5FC940F186DEB63651AC872A21593370C6B7AFC4BE042383257F4757660C4209。RES・dproj・VoicevoxEngine.iniのSHA256は開始時の値を保持した。通常アプリの強制終了・再起動、実作品への試験命令、コミット・プッシュなし。UTF-8 BOM／CRLFとgit diff --checkを確認した。
+
+証跡：Win64/Validation/ResearchOptional-20261009-6f2a14d9。ResearchFinal/run/result.json・pipe-done.json、Navigation/run/result.json、Debug／Release/build.logとbin/RIGMMaker.exe、verification.json、Build-Product.ps1、Run-Navigation.ps1。現行仕様はSCRIPT-RESEARCH-20261009.md、SCRIPT-NAVIGATION-20261009.md、note-basics.mdへ反映した。
+
+## 2026-10-09 第7段階のキャプションと待機表示
+
+ユーザーのスクリーンショットで人物・感情の左ラベルが隠れる問題を確認した。AutoSizeが有効なまま幅を設定すると、空のCaptionに合わせて幅が縮むため、先にAutoSizeを解除して220px基準の幅を確保した。長い人物名でも「声（人物）」を先頭に残し、末尾省略と全文ヒントを付けた。
+
+配役の選択欄を処理状況の表示へ切り替え、設定確認・EXE選択・エンジン起動・起動待ち・人物と感情の一覧取得・選択反映の作業内容を表示する。既存の非同期ジョブへ起動／一覧取得のphaseを付け、待機中の経過秒数と不定進捗バーを更新する。成功・失敗・取消後は選択欄へ戻し、必要な手動再接続の入口と理由を表示する。音声生成の取消を接続取消として誤判定しないようにした。
+
+台本管理から作品を開く際も、一覧を作品名付きの読込表示へ切り替え、既存の同期読込を始める前に描画する。二重オープンを防ぎ、失敗時を含め一覧とカーソルを復元する。作品読込自体の非同期化は行っていない。先行描画はRedrawWindowで行い、ProcessMessagesによる入力・パイプ更新の再入は避ける。
+
+専用データと遅延するローカルHTTP fixtureによる表示・操作38項目、工程リスト回帰115項目の計153項目が成功。96／144／192 DPIのラベルと選択欄、遅い一覧応答中のUIタイマーと経過表示、人物・感情の反映、取消・HTTPエラー・再接続、作品オープン時の実描画と保存工程の復帰、失敗時の一覧・カーソル・元ファイルの保持を確認した。ready-96／192.png、loading-speakers.png、work-loading.pngを読み、文字と配置も確認。ユーザーの実作品・設定・実エンジンを使った試験ではなく、実VOICEVOXのコールドスタートや物理モニター間のDPI移動は未確認。
+
+初回コンパイルでTLabel.ShowingとTProgressBar.MarqueeEnabledの非公開／未定義参照を修正した。先行描画の初回検証は検証EXEを非表示起動していたため、VCLのShowingがtrueでもネイティブウィンドウの可視性がfalseとなり失敗。専用検証フォームだけを明示表示し、WM_PAINT・可視性・描画待ち領域を確認してから画面遷移を許す検証で解消した。処理パネルに内部Nameが表示される問題はShowCaption=Falseで修正。最終結果はFeedbackVerifiedに保持する。
+
+dprojと同じ検索パス・構成設定を使いWin64 Debug／Releaseともビルド成功、エラー0、新規警告0、既存警告13件は各構成に残る。通常アプリが停止中で開始時のEXEハッシュと一致することを再確認し、旧EXEをRIGMMaker-before-casting-feedback.exeへ保持して検証済みReleaseを原子的に反映した。新EXEのSHA256はE8BF7F3CD3D6422361FC2EB0FE8E8C8EB073F0B682A024BCF681FD9957010320。RES・dprojと、開始時にユーザーが変更済みだったVoicevoxEngine.iniのSHA256を保持した。通常アプリの強制終了・再起動、コミット・プッシュなし。
+
+証跡：Win64/Validation/CastingFeedback-20261009-9e60b2ad。FeedbackVerified/run/result.jsonと描画PNG、Navigation/run/result.json、Debug／Release/build.logとbin/RIGMMaker.exe、verification.json、Build-Product.ps1、Run-Navigation.ps1。再実行用のCastingFeedbackCheck.dpr、Run-CastingFeedbackCheck.ps1、VoiceCatalogFixture.ps1をSource/Psd/Validationへ追加。現行仕様はSCRIPT-CASTING-20261009.mdへ記録し、note.mdからリンクした。UTF-8 BOM／CRLF、PowerShell構文、git diff --checkを確認した。
+
+## 2026-10-09 動画編集画面の文字の二重DPI拡大
+
+ユーザーのスクリーンショットで、動画編集画面のセリフ・字幕・ボタン・台本入力の文字だけが大きくなる問題を確認した。実200%表示で新シェルから画面を遅延生成すると、セリフ欄のFont.Height=-54を再現した。96 DPIで部品を作る間のフォントDPIが不明確なため、ParentFont継承時にシステムDPIへ換算され、親への配置でも拡大されていた。
+
+RigmMovieEditorFrameと同じビルダーを使うRigmMovieFormで、部品生成前のFont.PixelsPerInch=96／IsDPIRelated=Trueを明示した。フレームのParentFont=Falseも明示し、フォント名と10ポイントの設定をその後に行う。修正後のセリフ欄は96／144／192 DPIで高さ13／20／26ピクセルとなる。RigmWizardMainFormのヘッダーはShowCaption=Falseとし、内部名WizardHeaderが出ないようにした。配置・描画・作品操作の責務は変更していない。
+
+専用の空作品・設定を使い、実モニターの200%表示、新シェルの96／144／192 DPI相当での遅延生成と倍率往復、共通ビルダーを使う独立フォームの3尺度、入力欄の重なり・幅・ボタン高、未適用入力・ページ切替・作品JSON・画面インスタンスの保持を547項目検証し成功した。physical-monitor.png、lazy-96.png、lazy-192.pngを読み、文字の大きさと配置も確認した。96／144 DPIは単一物理モニターでVCL ScaleForPPIを使った模擬検証で、検証フォームだけScaled=Falseとして実モニターDPIへの参照を抑える。実ユーザー作品の再表示と、物理モニター間の移動は未確認。仕様と制約は[MOVIE-DPI-20261009.md](Source/Studio/Views/Editor/MOVIE-DPI-20261009.md)に記録した。
+
+初回の検証用CONSOLE EXEではApplication.Handleが0となり、未配置フレームのウィンドウ生成が失敗した。製品と同じGUI EXEにして解消し、製品の親子生成処理は変更していない。またCurrentPPIが実ウィンドウの192 DPIを返す点を考慮して尺度の模擬方法を修正し、検証側の話者欄名の誤りも修正した。Before／Baseline系に途中の結果、After5に459項目、Verifiedに最終547項目と描画を保持する。
+
+dprojと同じ検索パス・構成設定の隔離コピーでWin64 Debug／Releaseともビルド成功。エラー0、新規警告0、既存警告は各13件。作業開始時は通常アプリが実行中だったため独立出力で検証した。完了時に通常アプリが終了済みで、EXEのSHA256が開始時の値と一致することを再確認し、旧EXEをRIGMMaker-before-movie-dpi.exeへ保持して検証済みReleaseを原子的に反映した。新EXEのSHA256はA71D32D2CA281D3B325A2226E91909578974BDCAE1BAB7FA7EC6EF1FE4CABBCD。RES・dproj・ユーザー変更済みVoicevoxEngine.iniの開始時ハッシュを保持する。通常アプリの強制終了・再起動、実作品への試験命令、コミット・プッシュなし。
+
+証跡：Win64/Validation/MovieDpi-20261009-70de415b。Verified/run/result.jsonとPNG、Debug／Release/build.logと製品EXE、verification.json、旧EXE、Build-Product.ps1。再実行用のMovieDpiCheck.dpr、Run-MovieDpiCheck.ps1をSource/Psd/Validationへ追加。UTF-8 BOM／CRLF、PowerShell構文、git diff --checkを確認した。
+
+## 2026-10-10 エンコーダーの場所指定が不要なMP4出力
+
+ユーザー指定のD:\DelphiProg\VM_Media_Outputを読み、FFmpeg 8.1.1 shared DLLのAPI・ABI・H.264/AAC出力を参考に実装した。必要なavutil-60、swresample-6、swscale-9、avcodec-62、avformat-62の5 DLLを参考元の配布ZIPからRuntime/FFmpegへ配置し、ライセンス・manifest・復元スクリプトを保持する。参考プロジェクトは変更していない。dprojへ検索パスとビルド後のDLL配置を追加し、Debug/Releaseの別出力先と通常の同一出力先で配置を確認した。
+
+汎用API・型・writerはSource/Lib/FFmpegへ分離した。EXE基準の絶対DLLパスとmajor検査を使い、SetDllDirectoryによるプロセス全体の設定変更は行わない。BGRA BitmapをH.264 YUV420Pへ、既存の48000Hz mono PCM16をAACへ逐次送信し、一時AVI/WAVと外部プロセスを使わない。浮動小数点例外の設定は作成スレッドで一時マスクし、成功・ロード失敗とも元へ戻す。
+
+動画編集の新旧画面からMP4時のFFmpeg選択要求を除去し、準備診断と制作工程の既定出力も同梱DLLを認識させた。空欄・存在しない旧パスは同梱へ戻り、有効な外部FFmpeg指定は互換経路として維持する。既存動画は上書きせず、ジョブ所有のpartへ出力し、codecの残り・MP4末尾・faststart・I/O close後だけ完成名へ移す。取消後はpartを回収する。DLL経路のencoderExitedはwriter解放済みを示し、encoderProcessIdは0とする。
+
+専用fixtureで出力・全フレーム復号51項目と、DLLなしの独立EXEで3項目、計54項目を確認した。3品質、日本語・空白パス、H.264/AAC/48000Hz mono、非ゼロ音声と末尾AAC端数、映像15/16フレームの全復号と上下、既存MP4・作品・WAV保持、同期・非同期取消とpart回収、場所の自動解決、DLL不足のエラー、浮動小数点設定の復元を含む。実ユーザー作品の再出力と外部EXE互換経路の再試験は行っていない。
+
+初回はBitmap.ScanLine[0]を下端と誤解しswscaleでアクセス違反となった。Delphi 37のScanLine実装を確認し、上端と実際の隣接行の差からstrideを得るよう修正した。次に末尾映像packetのduration=0で最終フレームが再生から落ちたため、時間単位変換前に1フレーム長を補って全フレーム復号を確認した。途中結果Probe1〜5と最終FinalProbeを保持する。
+
+dprojの検索パス・構成を保持した隔離ビルドでWin64 Debug/Releaseとも成功。エラー0、新規警告0、既存警告は各13件。通常アプリPID 22820が起動中のため通常EXEは保持し、検証済みReleaseをD:\DelphiProg\RIGMMaker\RIGMMaker-MP4.exeへ配置した。SHA256は74B6FC2FD02EDB8B92AF76A79FD8A957A73673214158E14E0D1D9AAC4D1DAD51。通常EXE、RES、ユーザー変更済みVoicevoxEngine.iniの開始時ハッシュを保持する。強制終了・再起動、実作品への試験命令、コミット・プッシュなし。
+
+証跡：Win64/Validation/BundledMp4-20261010-6d34f87aのFinalProbe/run/result.json、FinalProbe/MissingRuntime/result.json、実出力MP4、export-job.json、Debug/Release/build.logとEXE、deploy-only.log、deployment.json、verification.json。再実行用のBundledMp4Check.dprとRun-BundledMp4Check.ps1を追加。仕様はSource/Studio/Output/MP4-RUNTIME-20261010.mdとSource/Lib/FFmpeg/README.mdへ記録し、利用手順とnote.mdへ反映した。UTF-8 BOM/CRLF、PowerShell構文、git diff --checkを確認した。
+
+## 2026-10-10 MP4出力の進捗テキストのちらつき抑制
+
+ユーザーからMP4出力が正常にできたとの確認と、途中結果テキストが更新ごとにちらつくとの報告を受けた。出力パネルは既に親のDoubleBufferedを継承していたが、ParentBackground=Trueでテーマ背景を親へ描画要求する設定だった。Delphi 37のTCustomPanel.SetParentBackground/WMEraseBkgnd、TPanelStyleHook.AcceptMessage、TWinControl.WMEraseBkgnd/WMPaintを読み、ParentBackground=Falseにすると親背景の先行描画を避け、パネル自身のバッファで背景と文字を描けることを確認した。
+
+RigmMovieControlsの共通出力パネルだけでParentBackground=False、ParentDoubleBuffered=False、DoubleBuffered=Trueを指定した。新シェルの埋込み画面と独立フォームへ共通に適用する。進捗の200ms更新・表示内容・エンコード・取消・完了通知は変更していない。
+
+dprojと同じ検索パス・構成の隔離ビルドでWin64 Debug/Releaseとも成功。エラー0、新規警告0、既存警告は各13件。UTF-8 BOM/CRLF、git diff --check、元の通常EXE・RES・dproj・VoicevoxEngine.iniと同梱DLLのハッシュを確認した。表示だけの修正なので新しいテストは追加せず、実画面のちらつき再確認とMP4再出力は行っていない。
+
+通常アプリPID 5680が起動中のため通常RIGMMaker.exeは保持し、起動していないRIGMMaker-MP4.exeを検証済みReleaseへ原子的に更新した。旧別名EXEはRIGMMaker-MP4-before-export-text-paint.exeへ保持。新SHA256はF2CE50FE5B97A24EB00BEE3D33B16CED0158CA29DC6ABA8307259063AA2830A6。強制終了・再起動・実作品変更・コミット・プッシュなし。証跡：Win64/Validation/ExportTextPaint-20261010-3f8c9d41のDebug/Release/build.log・EXE、Build-Product.ps1、deployment.json、verification.json。詳細はSource/Studio/Output/MP4-RUNTIME-20261010.mdへ追記した。
+
+## 2026-10-10 MP4出力先を台本へフルパスで保存・再開
+
+ユーザーがちらつき修正の成功を確認し、MP4出力ファイル名をフルパスで台本へ記録して再開時に採用するよう依頼した。既存の.rigmovieルート項目outputTargetと編集画面への復元はあったが、出力時はメモリ更新だけで台本の明示保存まで記録されなかった。
+
+共通セッションのMP4出力開始処理で、出力先を作品基準のフルパスへそろえ、適用済みの台本とともに既存のSaveMovieで原子保存してからジョブを開始するよう変更した。GUI・共通export・workflow-runが同じ入口を通る。台本保存が失敗した場合は出力せず、既存動画も上書きしない。保存先が未設定の新規作品はモデルに保持して次の通常保存で記録する。選択した出力先と完成済み動画は区別し、完成判定は既存workflow.videoPath等を使う。exportの自動保存も編集リースで保護し、対応tokenなしで実行できない。
+
+SaveMovieはoutputTargetを元の作品基準のフルパスで保存し、保存後モデルへ反映する。LoadMovieは旧相対パスも読み込んだ台本のフォルダー基準でフルパス化する。別名保存しても出力ディレクトリは移動しない。新旧画面の既存出力欄・MP4保存ダイアログが復元値を採用する。既存動画があれば従来の日時付き別名候補を使う。
+
+BundledMp4Checkへ保存再開・保護の13項目を追加し、出力・全フレーム復号・取消等の64項目とDLL不足の3項目、計67項目が成功した。フルパスの実JSON保存、別名保存、旧相対パス、日本語・空白パス、適用済み編集と台本メタデータの保持、実MP4出力、新セッションの通常open、既存MP4と台本の上書き拒否、編集リース、台本をファイルロックした保存失敗で元ファイルとジョブ未開始の保持、tmp回収を確認した。初回は検証側でstatusのtitleへ別titleをAddPairし、重複キーの先頭が採用されたため失敗した。検証引数をprojectId/revisionだけの新規JSONへ修正し、Probe2とFinalProbeで成功した。製品のタイトル処理は変更していない。実ユーザー作品とネイティブ保存ダイアログの再操作は行っていない。
+
+dprojと同じ検索パス・構成の隔離ビルドでWin64 Debug/Releaseとも成功、エラー0・新規警告0・既存警告各13件。通常アプリPID 10604が起動中のため通常EXEは保持し、検証済みReleaseを別名のD:\DelphiProg\RIGMMaker\RIGMMaker-MP4.exeへ原子的に反映した。旧別名EXEをRIGMMaker-MP4-before-export-path-resume.exeへ保持。新SHA256はBBBCBB25F479CBA0D625AE82955C077DC27EA256D75E520F85CC1653F39A5D1D。通常EXE・RES・dproj・ユーザー変更済みVoicevoxEngine.iniと同梱DLLは保持した。強制終了・再起動・実作品変更・コミット・プッシュなし。
+
+証跡：Win64/Validation/ExportPathResume-20261010-87ca4d20のFinalProbe/run/result.json・台本JSON・MP4、FinalProbe/MissingRuntime/result.json、Debug/Release/build.logとEXE、Build-Product.ps1、deployment.json、verification.json。UTF-8 BOM/CRLF、PowerShell構文、git diff --checkを確認した。MP4-RUNTIME-20261010.mdと制作支援/動画制作/README.mdへ保存・再開の仕様を反映した。
+
+## 2026-10-10 動画編集から台本編集へ戻る導線
+
+動画編集へ進むと台本編集へ戻れないとの依頼に対応した。新シェルの動画編集ヘッダー右上へ「台本編集へ戻る」を追加し、台本ウィザード由来の作品に表示する。セリフ・字幕だけの自動反映待ちは先に確定し、他の未適用入力、処理中、編集リースでは入力を保持して遷移を止める。現在の作品を同じUIDフォルダへ原子保存してから、第5段階の台本入力と左の到達済み工程リストへ戻す。題名を台本メタデータへ反映し、MP4フルパス、字幕、音声・画像の参照、設定を保持する。動画で変更したセリフは保持し、配役指紋が一致しない場合だけ配役を未確認へ戻す。
+
+Workspaceの終了通知で借用ビューを先に解放してから、対象動画セッションを閉じる。別作品のセッションは保持する。台本から動画へ進み直すと新しい正本とビューを生成し、既存セッションによる重複拒否と古い作品状態への復帰を防ぐ。所有・保存・遷移はRigmScriptEditorWorkspace.incへ分離した。公開パイプコマンドと作品形式は変更していない。
+
+実ボタンによる検証で、埋込み動画ビュー構築中の座標計算が論理Parentを必要とすることを確認した。Parentを先に接続し、96 DPIで部品を構築してから表示先のDPIへ合わせる。従来dcc64でもWorkspaceを検証できるよう、1023文字を超えていたコマンド配列行を改行した。コマンドの内容は変えていない。
+
+ScriptEditorReturnCheckの33項目が成功。同じUID・保存先・題名・MP4フルパス・字幕・音声を保持する実ボタンと工程リストの複数往復、別作品の保持、新Workspaceでの再開、未適用入力・編集リース・ファイルロックによる保存失敗、セリフ変更後の保存再開、96/144/192 DPIでのボタン幅・文字の収まりを確認した。既存MovieDpiCheckも単独実行で547項目成功し、埋込み・独立画面、DPI切替、未適用入力の保持などを確認した。計580項目。描画試験の同時実行時は制限時間を超えたため専用DPI検証プロセスだけを停止し、単独実行で確認し直した。VerifiedProbeは制限時間を120秒として正常終了した。144 DPIのヘッダー描画も目視した。物理モニター間の移動と実作品での手動往復、MP4の再出力は行っていない。
+
+dprojと同じ検索パス・構成の隔離ビルドでWin64 Debug/Releaseとも成功。エラー0、新規警告0、既存警告は各13件。作業開始時の通常アプリPID 10604は配置時点で終了しており、通常・別名EXEが開始時ハッシュのままで起動していないことを再確認して両方へReleaseを原子的に配置した。新SHA256は4E913E25491B6EA5F6699821EA6C9C260017CDB337F96F0528069EA33F328796。各旧EXEは専用検証フォルダに保持した。通常アプリの強制終了・再起動、実作品の変更、コミット・プッシュなし。RES・dproj・ユーザー変更済みVoicevoxEngine.iniと同梱Runtimeの保全を確認した。
+
+証跡：Win64/Validation/ScriptEditorReturn-20261010-42c76c18のVerifiedProbe/run/result.json・movie-header-*.png、DpiVerified/run/result.json、DpiProbe/build.log、Debug/Release/build.log・EXE、Build-Product.ps1、deployment.json、verification.json。再実行入口はSource/Psd/Validation/Run-ScriptEditorReturnCheck.ps1。仕様はSCRIPT-NAVIGATION-20261009.md、現在の起動先はnote-basics.mdへ反映した。UTF-8 BOM/CRLF、PowerShell構文、git diff --checkを確認した。
+
+## 2026-10-10 総評の有無から先へ移動した際のclosingData例外
+
+ユーザーのエラー画像「オブジェクトが必要です: closingData」を確認した。動画編集へ直行した台本を台本入力へ戻すと、左の到達済みリストに未訪問の総評・締めも現れる。通常の次工程処理は下書きを準備するが、SetScriptStageによる締めへの直接移動には準備がなく、ScriptStatusでclosingDataを参照して例外になった。専用台本で総評の有無を開き、未選択のまま締めを選ぶ経路を試し、修正前に同じ例外を再現した。
+
+SetScriptStageへ、未作成の総評入力・締め設定を表示前に準備する処理を追加した。既存のモデル準備処理を使い、データが存在するときは再初期化しない。保存と画面切替の順序、工程の確認条件、作品形式は変更しない。
+
+ScriptEditorReturnCheckへ完成済みの専用キャラと任意工程の検証を追加し、FinalProbeで46項目すべて成功。実リストから未訪問の締めを表示、総評なし→締め、総評あり→総評入力、未完了のままの保存、入力済み締め・総評の保持、選択変更後の元シーン・セリフ保持、新Workspaceでの保存再開を確認した。従来の動画・台本往復、MP4フルパス・字幕・音声保持、保存失敗・編集リース・未適用入力の保護も成功。初回の検証拡張ではprivateなRefreshScriptを呼んでコンパイル失敗したため、公開SetActiveで更新する検証へ修正した。製品の公開範囲は変えていない。総評選択と締め初回表示の専用描画を確認した。実作品・実行中の通常アプリは操作していない。
+
+dprojと同じ検索パス・構成でWin64 Debug/Releaseの隔離ビルドに成功。エラー0、新規警告0、既存警告各13件。通常アプリPID 17168が起動中のため通常EXEを保持し、別名RIGMMaker-MP4.exeへReleaseを原子的に反映した。SHA256は3D7F7C89CD80AF82F340231A9A1CBF9471967589FACF75AF939A323280648993。旧別名EXEを専用検証フォルダへ保存。通常EXE・RES・dproj・ユーザー変更済みVoicevoxEngine.iniのハッシュと同梱Runtimeの9ファイル一致を確認した。強制終了・再起動・実作品変更・コミット・プッシュなし。
+
+証跡：Win64/Validation/SummaryNavigation-20261010-1fa1a295のBeforeFix/run/result.json、FinalProbe/run/result.json・summary-choice.png・closing-first-visit.png・summary-first-visit.png、Debug/Release/build.logとEXE、build-verification.json、deployment.json、verification.json。SCRIPT-NAVIGATION-20261009.mdとnote-basics.mdへ動作・現在の修正版の起動先を記録した。
+
+## 2026-10-10 総評入力・工程順・台本確認
+
+総評入力が読み取り専用になる状態を解消し、左側にセリフ・独立字幕・読み、右側にチャートの設定・評価値・プレビューを配置した。段階1～6は維持し、7総評の有無→8総評入力（ありの場合）→9締め設定→10台本確認→11配役→12字幕→13音声調整→14音声エフェクト→15セリフのシーン割当→16シーン画像・説明→動画編集へ変更した。
+
+台本確認で前段・本題・総評・〆を別々に編集・保存できる。締め設定の〆も編集可能。総評・締めの確定時には配役や生成音声を要求せず、配役前の締めプレビューは描画コピーだけに一時的な場面を用意する。配役へ進む時に全区分の原稿指紋を保存し、原稿や総評の有無が変わると古い確認を失効させる。
+
+総評のセリフは締めの前に置き、通常の配役・字幕・音声工程で扱う。独立チャートの1セリフとして保持し、シーン割当のGUIと通信の行・件数・ページ送りから除外する。総評の前後を固定して本題の分割・結合に巻き込まれないようにした。外部画像はチャートに要求しない。締め画像は最終的な配役後のシーンへ反映する。工程IDは維持し、旧台本の到達位置を既存データから復元する。原稿が同じ旧総評を取り込む際もID・音声・独立字幕を保持する。
+
+専用台本の通し検証63項目、工程リスト120項目、動画から台本への復帰46項目、任意の掘り下げ138項目、Named Pipe31項目、計398項目が成功。入力・確認・保存再開・総評あり/なし・動画編集への往復・MP4フルパス保持・旧総評と音声の保全・総評の読み変更後の再生成条件を確認した。今回のレイアウト崩れに対する96/144/192 DPIの確認と描画画像の目視も実施。実作品や通常アプリは操作していない。2026-10-10の追加指示「DPIチェックは今後良いです、レイアウトが崩れたときのみ」に従い、以降の通常修正ではDPI検証を繰り返さない。基本事項にも記録した。
+
+Win64 Debug/Releaseはdprojと同じ検索パスの隔離ビルドで成功。既存の警告13件に対する追加警告0、コンパイルエラー0。検証途中の失敗は専用出力へ残し、総評なしで任意区分が存在しない場合の表示、再確認後の総評の読み反映、配役前の締めプレビューを修正して最終検証を通した。git diff --checkと新runnerのPowerShell構文を確認。
+
+作業開始時は通常EXEが起動していたため隔離ビルドを使用。配置直前には終了済みであり、通常EXEと別名EXEが開始時ハッシュと一致することを確認した。通常のD:\DelphiProg\RIGMMaker\RIGMMaker.exeとRIGMMaker-MP4.exeへReleaseを原子的に配置し、置換前の各EXEを専用出力へ保管。同梱FFmpegの9ファイルはビルド出力と一致し変更不要。通常RES・dproj・VOICEVOX設定は開始時と同一。ユーザーアプリの強制終了・実作品の変更・gitのstage/commit/pushは行っていない。
+
+最終Release SHA256: C455EBE88E5EF0EF8E3915E673DA34A72D09D46B9FCC7B1167ADD2A561490FB5。Debug SHA256: B9402E5DBF00D7DD88CDF6209BCA06B0DA43F6215C6072C1ECB2F0F322074A2D。
+
+記録: Win64/Validation/ScriptOrder-20261010-74b7d5ad/verification.json、deployment.json。ソース責務はSource/README.md、現在の工程順・保存互換・通信はSource/Shell/Pages/SCRIPT-NAVIGATION-20261009.mdへ記録した。
+
+## 2026-10-10 第10段階の総評編集・配役から字幕への移動
+
+起動中のアプリから状態だけを取得し、第10段階で総評なしのため総評欄が無効になっていることと、配役19行はキャラ・声の未設定が0でも3行が未確認で進行を止めていることを確認した。実作品の編集・確定・保存は行っていない。
+
+台本確認の総評欄を常に編集可能にした。総評なしでも文字を入力すると総評ありへ切り替え、共有原稿を更新し、確認指紋を失効させる。空欄のままでは総評を追加しない。左の総評入力・チャートへ戻れるようにし、未入力の評価値は人間が設定する。以前の総評を同じ文で再び有効にした場合も原稿・配役を再確認する。
+
+配役では全行のキャラと声が有効ならcanConfirmCastingを公開し、行ごとの未確認が残っていても左に字幕を表示する。GUIで字幕を選ぶ操作で現在の全配役を確認し、保存して移動する。状態の参照だけでは確認済みにせず、外部のapp-script-nextは未確認行を拒否する。原稿不一致、未割当、声未設定、現在の一覧にない人物・感情、音声処理中の制限は維持。次へボタンは追加していない。
+
+専用台本のScriptOrderCheckは65項目が成功。総評なしからネイティブMemo入力、共有原稿更新、保存再開、3行未確認の再現、人物コンボ選択による左リストの即時更新、実リスト選択による全行確認と移動先保存、外部移動拒否を確認した。既存の音声・総評独立シーン・動画編集までの通し移動も成功。最初の検証ではテストが状態JSONのcasting階層を誤参照したため、wizard配下の参照へ修正してFlow2を成功させた。DPIチェックは行わず、runnerはレイアウト崩れの調査時だけ-CheckDpiで追加する方式にした。
+
+dprojと同じ検索パスでWin64 Debug/Releaseの隔離ビルドに成功。コンパイルエラー0、既存警告各13件、前回に対する追加警告0。PowerShell構文、UTF-8 BOM/CRLF、git diff --checkを確認した。通常アプリPID5632は起動中のため保持し、別名RIGMMaker-MP4.exeへReleaseを原子的に配置。旧別名EXEは専用出力へ退避した。通常EXE・RES・dproj・VOICEVOX設定は開始時ハッシュと同一。同梱Runtime9ファイルも製品ビルド出力と一致し、配置変更は不要だった。アプリ強制終了・実作品変更・gitのstage/commit/pushなし。
+
+Release SHA256: 9075A461C182503F7F4C572FB2FCB093ADD8C16A3A2B4370E86FFB297D46A2C4。Debug SHA256: 50C6F70ED765C2064561AC3DC3DF3484513FB567C9D3FEA2EA8D80CBE0043BC2。
+
+証跡はWin64/Validation/ScriptInputNavigation-20261010-6a4a8aa9のbaseline.json、live-status.json・live-summary.json、Flow2/run/result.json、Debug/Release/build.log、deployment.json、verification.json。動作と起動先はSCRIPT-NAVIGATION-20261009.md、SCRIPT-CASTING-20261009.md、note-basics.mdへ記録した。
+
+## 2026-10-10 タイムライン・上書き・工程前提条件
+
+タイムラインが1段しか見えない報告に対応し、時間目盛り・4トラック・スクロール・フレーム操作欄から最小高さを算出して下部へ確保した。プレビューの最小高さは別に管理し、境界ドラッグの範囲も両者の値から算出する。埋込み・独立編集画面の両方へ反映。左のセリフ選択・選択済み行の再クリックで最初の動画フレームへ移動し、拡大したタイムラインも該当位置へ追従する。タイムライン自身をクリックした時刻は保持し、未適用入力がある場合は行選択とシークを一緒に拒否する。
+
+MP4保存ダイアログで上書き確認を有効にし、記録済みのファイル名を日時付きの別名へ変更しない。許諾された保存先とoverwrite=trueを出力へ渡す。既存ファイルを先に削除せず、作業ファイルへのエンコード完了後に原子的に置換する。取消・失敗・使用中ファイルの置換失敗は元動画を保持。再試行は許諾を保持し、自動プレビューで失わない。未指定の外部出力は既定で既存ファイルを拒否する。台本へのMP4フルパス保存は維持した。
+
+台本のリスト表示・選択可否・Workspaceの直接移動・次工程でScriptStageBlockReasonを共用する。字幕・音声・割当・シーンの準備状態を現在工程によらず算出し、後工程へ進む場合は前提条件をすべて検査する。音声未生成・変更後・未再生・ファイル消失では、エフェクトを越えて割当や画像へ進むことも拒否する。条件が戻ればリストを再表示し、不足を直すための前工程への移動は許す。現在より後の未許可工程は、過去に到達済みでも一時的に非表示とし、進めない理由を画面下へ表示する。GUIの配役・字幕・音声確認、台本確認・割当の確定保存と、外部の単なる工程指定を区別して確認を省略しない。新しい次へUIは追加していない。
+
+MovieEditingCheck108項目、ScriptOrderCheck93項目、同梱MP4の出力・復号・保存・上書き76項目とDLL不足3項目、計280項目が成功。今回は報告されたレイアウト崩れに対してのみ96/144/192 DPI相当を確認した。タイムライン4段の可視領域、論理高さ900/720、進捗表示の有無、ドラッグ範囲、一覧とタイムラインの両方向の操作、未適用入力・作品JSON保持、音声未完成での全後工程拒否・復旧、原稿・配役・字幕・割当・画像の前提条件、上書き後の全フレーム復号、取消・ロック失敗時の元動画全量保持、再試行を検証した。台本工程のDPI検証は行っていない。144 DPIの専用描画も目視。実作品・実行中の通常アプリ・ユーザーの保存ダイアログは操作せず、上書き確認オプションはDelphi37のVCL実装と照合した。
+
+検証途中に、直接工程移動で台本確認や割当確定を省略できる経路を検出し、共通判定の確認許可を修正して最終検証を通した。新しい検証DPRの初回はBOMなしによる文字化け・暗黙文字列変換警告があったため、UTF-8 BOM/CRLFに直してEditor2とEditorVerifiedで日本語入力を再確認した。途中結果は消さず専用出力へ保持した。
+
+Win64 Debug/Releaseはdprojと同じ検索パスの隔離ビルドで成功。コンパイルエラー0・追加警告0、既存警告各13件。通常アプリPID9176が起動中のため通常EXEを保持し、RIGMMaker-MP4.exeへReleaseを原子的に配置した。旧別名EXEを専用出力へ退避。同梱Runtime9ファイルは製品ビルドと一致し配置変更なし。通常EXE・RES・dproj・VOICEVOX設定の開始時ハッシュ一致、PowerShell構文、UTF-8 BOM/CRLF、git diff --checkを確認した。アプリ強制終了・実作品変更・gitのstage/commit/pushなし。
+
+Release SHA256: 8F80CF9FE7F899DA363E1EA0C53FB63F44AC4959FB40844D6A4B7AE8ECC43004。Debug SHA256: 80382C445DD0CDF49A8B9943994C711F4F5C30E402A4A56994F5E4FCE57EEB4B。
+
+証跡はWin64/Validation/EditorProgress-20261010-bf05cb6bのEditorVerified/run/result.json・PNG、FlowVerified/run/result.json、Mp4Final/run/result.json・MissingRuntime/result.json・MP4、Debug/Release/build.log、baseline.json、deployment.json、verification.json。再実行入口はRun-MovieEditingCheck.ps1、Run-ScriptOrderCheck.ps1、Run-BundledMp4Check.ps1。動作と起動先はSCRIPT-NAVIGATION-20261009.md、MOVIE-DPI-20261009.md、MP4-RUNTIME-20261010.md、note-basics.mdへ反映した。
+
+## 2026-10-10 プレビュー再生の負荷改善
+
+再生時計の更新・200 msごとの表示用状態取得で、作品全体の工程診断・素材指紋・JSON生成を行っていた。GUI用のSeekTo／TransportStatusへ分け、外部status／seekの応答は維持した。自動描画の指紋はrevision変更時と1秒ごとに再照合する。診断表示の待機時確認も1秒間隔とした。位置履歴は既存値が同じなら素材指紋を再計算せず、別の保存や画面が変更した履歴は読み直して反映する。実際に位置を書き換える場合の保存済み作品の照合は維持した。
+
+合成時に使用しないキャラファイルを毎フレーム追加読込していた処理を除き、既存のCompositorキャラキャッシュを使用する。場面画像は復号済みPNGとして16件・概算64 MiBまで保持し、ワーカーごとに複製する。サイズ・更新日時の変更で無効化する。表示用描画は表示寸法へ縮小し、通常1280×720以内とする。出力寸法は例外時も復元し、MP4／AVIと明示的なPNGプレビューは元寸法を使用する。表示受取用Bitmapも再利用する。
+
+表示用の口パクは現在のセリフだけのエフェクト適用済みPCMを保持し、開始サンプルと末尾25 msの無音で時刻を対応させる。BGMを口パクへ混入させず、長い動画が全体PCMキャッシュの上限を超えた場合もフレームごとの全音声混合を避ける。音声ファイル・エフェクト変更を照合する。BGMのフェード処理では、動画の長さを各サンプルで再計算していた箇所を一度の計算へ変更した。
+
+専用64セリフ・8場面・2048×1536 PNG・保存RIGM・48 kHz PCMで修正前後を計測した。時刻更新100回は2485.9→93.9 ms、表示状態取得100回は3277.5→94.6 ms、連続プレビュー24枚は7087.8→1493.3 ms（約78.9%減）。描画は表示用960×540、元出力1920×1080を維持する。専用素材での経過時間であり、実作品のCPU使用率や全素材で同じ倍率を確認したものではない。51.2秒作品のBGMフェード混合は421.9 msで終端ゲインを照合した。
+
+プレビュー・音声・画像更新・長尺・例外時復元・Full HD PNG・履歴・埋込み／独立GUIの待機・無音PCM再生・停止・シーク48項目、修正前DCUの描画器とのPNG／JPEG／透明PNG／フェード／JPEG再利用の5枚の全画素一致、同梱MP4の出力・復号・保存・上書き76項目、DLL不足3項目の計132項目が成功。DPI変更・実作品・通常アプリの操作は行っていない。検証途中の前方宣言・fixtureの上限と値復元、非同期診断完了前の待機測定を修正し、履歴テストも「作品を開く際は先頭から」の既存方針に合わせた。途中結果は専用出力に保持した。
+
+Win64 Debug／Releaseはdprojと同じ検索パスの隔離ビルドで成功。エラー0・追加警告0、既存警告各13件。通常アプリPID15476が起動中のため通常EXEを保持し、RIGMMaker-MP4.exeへ最新Releaseを原子的に配置した。作業前と途中の別名EXEを専用出力に保存。同梱Runtime9ファイルは製品ビルドと一致し、DLLの配置変更なし。通常EXE・RES・dproj・VOICEVOX設定は開始時ハッシュと一致。PowerShell構文、UTF-8 BOM／CRLF、git diff --checkを確認。実アプリ強制終了・実作品変更・git stage／commit／pushなし。
+
+Release SHA256: 2029974B3684AFF7D09A321737024BE8FB6BA62E7FA9B0B27AC816CBEB618AB3。Debug SHA256: 87BBCDA9958D8CCE889C77706CBFDBB051F9D05A7B2AD66AE55EF60A9540DA34。
+
+証跡はWin64/Validation/PreviewPerf-20261010-d2638ff4のBefore/run/result.json、VerifiedHistory/run/result.json、OriginalRenderer、render-compare-final.json、Mp4Final/run/result.json・MissingRuntime/result.json、Debug／Release/build.log、baseline.json、test-summary.json、deployment.json、verification.json。再実行入口はRun-MoviePreviewBenchmark.ps1、Run-BundledMp4Check.ps1。仕様・確認範囲はMOVIE-PREVIEW-20261010.md、起動先はnote-basics.mdに記録した。
+
+## 2026-10-10 動画編集画面の表示時のちらつき
+
+ユーザーがプレビュー負荷の改善を確認した後、動画編集画面を開くと子部品が配置される途中が見える報告に対応した。MainFormの動画ページ遷移では親FHostの描画を停止し、ページ生成・ヘッダー変更・初期反映を終えてからまとめて再描画する。MovieWorkspaceFrame.SetActiveでも生成・既存セッションの切替・再表示の間は親の描画を停止する。VCLのLockDrawing／UnlockDrawingをfinallyで対にし、例外時の復帰、外側の描画ロック、論理Visibleと通常の配置条件を維持した。
+
+専用MovieRevealCheckでウィンドウメッセージを観測した。修正前後で初回の配置・一覧等の更新は848回。表示中の更新は847→0回、未完成ビューが見える状態の表示通知は54→0回。初回表示、直接更新、再表示、別動画、既存動画への復帰、初回タイムライン4段、未適用入力・作品JSON保持、不正な専用cueによる同期例外後の描画復帰、描画ロックの入れ子、非表示維持の42項目が成功。ScriptOrderCheckの93項目も成功し、計135項目。表示倍率の変更・複数DPIの検証・実作品や通常アプリの操作は行っていない。
+
+検証途中に、ネイティブメッセージの番号をDelphiの集合で比較して範囲外になる検証コードを明示比較へ直した。また検証ウィンドウを物理1440×900で指定すると現在192 PPIの最小編集領域より小さくなるため、現在の倍率に合わせた論理1440×900へ変更した。製品のレイアウト計算は変更せず、初回表示でタイムラインが表示領域に収まることを確認した。途中結果と、修正前が露出の検査に失敗するBeforeFinalを専用出力に保持した。
+
+Win64 Debug／Releaseはdprojと同じ検索パスの隔離ビルドで成功。エラー0・追加警告0、既存警告各13件。作業中は通常アプリPID13112を保持し、RIGMMaker-MP4.exeへ最新Releaseを原子的に配置した。最終確認時に通常アプリの終了を確認できたため、通常EXEが開始時ハッシュと同じことを再確認し、こちらにも同じReleaseを原子的に配置した。旧通常・別名EXEは専用出力へ退避。同梱Runtime9ファイルは製品ビルドと一致し配置変更なし。RES・dproj・VOICEVOX設定は開始時ハッシュと一致。PowerShell構文、UTF-8 BOM／CRLF、git diff --checkを確認。強制終了・実作品変更・git stage／commit／pushなし。
+
+Release SHA256: 3980CDA3FE49AA0A94542C1D6C9064BBC18C7766CC8E0FD5019BDD38E0B536D1。Debug SHA256: 3BA5BC1C875D14AC4EDCCF22BBCD5226D081440261EDA520A981769EF8A4E373。
+
+証跡はWin64/Validation/MovieReveal-20261010-30bab883のbaseline.json、BeforeFinal/run/result.json、RevealVerified/run/result.json、Workflow/run/result.json、Final/Debug・Release/build.log、build-verification.json、deployment.json、verification.json。再実行入口はRun-MovieRevealCheck.ps1とRun-ScriptOrderCheck.ps1。動作・確認範囲はMOVIE-PREVIEW-20261010.md、起動先はnote-basics.mdへ記録した。
+
+## 2026-10-10 第16段階の共通背景画像
+
+第16段階の最上段に任意の「共通背景」専用行を追加した。通常の画像要望・要求・採用・人間の確定を利用し、背景の要望・確定状態はcommonBackground、画像参照は既存themeBackgroundへ保存する。実際のScenes配列へ追加せず、シーン番号・セリフ割当・動画時間は維持した。背景未使用なら確定操作なしで次へ進める。採用済み画像または要望がある場合は有効な画像と人間の確定を必要とする。総評チャートを含む通常行の表示設定も入力反映時に保持する。
+
+生成要求に動画のwidth／height／aspectRatio／sizeInstructionを追加。共通背景は固定ID common-backgroundで通常の要求・画像受渡しを利用し、app-script-scenesではページごとのrowsと別のbackgroundへ返す。通常シーンの件数・番号・ページ送りに含めない。動画解像度が変わった後の古い要求は拒否する。採用した画像ファイルは変換せず管理コピーし、同じ出力寸法なら等倍、異なる寸法なら描画時に縦横比を保って対象エリアを覆うサイズへ調整する。中央で切り取り、描画先の外へは出さない。中央型は全面、L字型は通常のシーン画像が表示されない区間の画像エリアだけに使う。チャート・締め代表画像・末尾カードは維持した。未使用のL字背景は必須素材にしない。
+
+検証でPNG分割転送の既存処理が閉じたストリームを参照する読み取り違反を再現した。ハッシュ照合後にステージファイルを読取用に開き直し、画像ヘッダー・復号を確認してから公開する修正を加えた。初回失敗のBackgroundFlowを保持し、BackgroundFlow2と追加条件を含むBackgroundFlow3で成功を確認した。
+
+ScriptOrderCheck -CheckBackgroundの146項目（既存工程93項目と背景53項目）、MovieRevealCheck42項目、同梱MP476項目とDLL不足3項目、計267項目が成功。専用の画像・作品・隠し検証プロセスで、先頭行・任意背景・入力反映・生成寸法・古い要求拒否・直接採用とPNG分割転送・画像原本のSHA一致・確定保護・保存と再開・素材移動後の要求保持・取消・通常ページ送り・時間保持を確認した。320×180の等倍画像と横長／縦長画像の全領域配置、正方形マーカーの縦横比、左右のL字領域の切り取り・既存画像優先・未使用背景の素材判定・隠れたcue画像・表示用縮小と元寸法の復元・背景入りMP4の全2フレーム復号を確認した。第16段階の専用PNGも目視確認。複数DPI検証・実作品の操作・実画像生成は行っていない。
+
+Win64 Debug／Releaseはdprojと同じ検索パスの隔離ビルドで成功。エラー0・追加警告0、既存警告各13件が前回と一致。アプリ終了と通常／別名EXEの開始時ハッシュ一致を確認し、両方へReleaseを原子的に配置した。旧EXEは専用出力へ退避。同梱Runtime9ファイルは製品ビルドと一致し配置変更なし。RES・dproj・VOICEVOX設定は開始時ハッシュと一致。UTF-8 BOM／CRLF、PowerShell構文、git diff --checkを確認。強制終了・実作品変更・git stage／commit／pushなし。
+
+Release SHA256: 1EF2C39055477C52D410CF6EA5BAD58A36587C570F73708752421E724F67AE06。Debug SHA256: 00D5943E88674C1AACA41E65E4BB5D3C5DF86F1F8ED94CDFAA0D01801DBF5765。
+
+証跡はWin64/Validation/CommonBackground-20261010-ac7f49c5のbaseline.json、BackgroundFlow3/run/result.json・common-background-stage16.png・Background/common.mp4、MovieReveal/run/result.json、BundledMp4/run/result.json・MissingRuntime/result.json、Final/Debug・Release/build.log、warnings.json、pre-deploy.json、deployment.json、verification.json。再実行入口はRun-ScriptOrderCheck.ps1 -CheckBackground、Run-MovieRevealCheck.ps1、Run-BundledMp4Check.ps1。仕様とパイプはIMAGE-WORKFLOW-20261007.md、基本方針・起動先はnote-basics.mdへ記録した。
+
+## 2026-10-10 シーン名・動画文字の縁取り・画面外のキャラ配置
+
+第16段階の通常シーンに名前入力欄を追加し、既存のscene.titleを初期値として保存・再開・動画左上表示に使う。300 UTF-16以内の1行で、空欄なら非表示。共通背景には名前入力を置かない。画像確定後も名前だけを変更でき、要求指紋・確定キー・進行中の分割転送を維持する。パイプのapp-script-edit-sceneにもtitleを追加し、画像項目を含む複合編集はクローン上で検証後にまとめて適用する。変更のない画像項目を一緒に送っても名前だけの変更を妨げない。
+
+動画のシーン名・字幕・補足文・締めカード題名・総評チャート文字を共通のRigmMovieText.DrawMovieTextへ揃えた。GDIの文字輪郭に黒い線を描いて通常文字を重ね、明るい背景にも表示する。画面用の縮小と動画出力、従来の単体描画で同じ処理を使う。新ユニットはdprojへ登録した。第16段階の入力欄は行の実際の高さへ揃え、スタイル付き確定チェックの描画高さを確保した。
+
+第4段階のドラッグ・保存検証・L字領域制限・動画側リンク配置の画面内制限を外し、画面外の配置を保存再開やレイアウト再準備でも保持する。「初期座標・サイズに戻す」を一覧の上に追加。画面外のキャラを一覧から選んで現在のレイアウトの初期位置と寸法へ戻せる。初期配置の計算を新規作成と復帰で共有し、対象キャラの座標・幅・高さだけを変更する。反転・他キャラは保持する。パイプのapp-script-set-placementにもresetを追加。最小20px、有限数値、動画モデル既存上限の画面4倍は維持した。
+
+ScriptOrderCheck -CheckBackgroundの最終Flow6は199項目（従来の工程・背景146項目と今回の53項目）、MoviePreviewBenchmark48項目、同梱MP4出力・復号・保存・確認付き上書き76項目とDLL不足3項目、計326項目が成功。ネイティブの画面外ドラッグ、L字での値保持、リンクした動画モデル、保存再開とGUI復帰、確定後の名前入力・保存再開・空欄・不正値・複合編集の原子性・名前変更後のPNG分割転送を確認した。文字は白背景と灰色背景、Full HD・縮小プレビュー・従来描画・チャートで白文字と黒い輪郭を検査し、500回描画後のGDIオブジェクト保持数も照合した。専用の第4・16段階画面と文字画像を目視確認した。複数DPIの検証・実作品の操作は行っていない。
+
+プレビュー24フレームは今回の専用fixtureで1139.1ms、seek100回56.6ms、状態取得100回60.8ms。以前の測定との環境差があるため倍率の改善値とは扱わない。連続再生・口パク・素材変更・出力解像度保持等の既存検査も成功した。途中のFlow1・Flow2は検証コードの負座標のメッセージ詰め込みと、保存によるモデル置換後の古い参照により失敗した。検証コードを修正し失敗出力も保持した。Flow3以降は成功し、最終のレイアウト調整をFlow6で確認した。
+
+Win64 Debug／Releaseはdprojと同じ検索パスと独立DCUの隔離ビルドで成功。エラー0・追加警告0、既存警告各13件は前回と一致。通常アプリの終了と通常／別名EXEの開始時ハッシュ一致を確認し、両方へ最終Releaseを原子的に配置した。旧EXEは専用出力へ退避。同梱Runtime9ファイルは最終ビルドと一致し変更なし。設定・実作品・ユーザー操作中のプロセスを変更していない。UTF-8 BOM／CRLF、PowerShell構文、git diff --checkも確認。git stage／commit／pushなし。
+
+Release SHA256: 8F44B4DB74CA0DE346E6ED6AF29A78E84EEAC5E328B2D357B6884621D63661E0。Debug SHA256: 434756CD7C7246808134682EF07C53A2AFD7BCD7E2953A119894D8F065A46CCE。
+
+証跡はWin64/Validation/SceneNamesPlacement-20261010-c26ccafeのbaseline.json、Flow6/run/result.json・placement-reset.png・scene-names-stage16.png・outlined-*.png、Preview/run/result.json、BundledMp4/run/result.json・MissingRuntime/result.json、Final/Debug・Release/build.log、warnings.json、source-hashes.json、pre-deploy.json、deployment.json、verification.json。再実行入口はRun-ScriptOrderCheck.ps1 -CheckBackground、Run-MoviePreviewBenchmark.ps1、Run-BundledMp4Check.ps1。仕様はSCRIPT-PLACEMENT-20261010.mdとIMAGE-WORKFLOW-20261007.mdへ記録した。
+
+## 2026-10-10 第11段階の映像表情と個別差分
+
+配役のVOICEVOX感情とは別に「表情（映像のキャラ）」を追加した。初期値の自動では、セリフ本文の半角・全角の疑問符から疑問、感嘆符から驚き、両方から困惑を判定する。⁇・‼・⁈・⁉にも対応。手動は通常を含む10種類を選べ、句読点より優先する。「細かい表情を設定」で配役キャラの実素材にある目・眉・口・記号等のグループと差分を右に表示する。部位ごとに基本表情へ戻せ、全差分の解除も可能。実素材IDは変更前に検証し、RIGMの入れ子矛盾も適用前に拒否する。
+
+セリフのemotion・新しいfaceAutomatic・既存acting.variantsへ保存する。VOICEVOXのstyleとは独立し、表情だけの変更では音声指紋・再生確認・配役の確認や工程条件を変更しない。保存再開、分割、動画制作へ保持し、キャラを変更した際は旧キャラの差分だけを解除する。既存の手動感情や旧4種類の表情は読込時に保持し、未設定の通常セリフは自動判定にする。動画の表情再解析も手動指定を保持する。パイプscript-set-expressionとscript-castingのincludeExpressionAssetsを追加した。
+
+RIGMとPSDの描画で有効表情を共有し、個別差分は同じグループだけを上書きする。PSDで1部位の上書きが他の基本表情を失わせていた処理も修正。RIGMの素材プリセットは描画元キャッシュ作成時、PSDの表情一覧は読込キャッシュ作成時に取得し、毎フレームの素材再読込を避ける。専用差分のないRIGMは既存の首・目・体の変形で補う。選択肢用の素材キャッシュはファイル署名で更新を判定し、画面は所有する複製を使う。
+
+最終Flow6は工程・背景・配置等199項目と表情32項目の計231項目、プレビュー48項目、同梱MP4出力・復号・上書き76項目とDLL不足3項目、合計358項目が成功。半角・全角・複合記号、手動通常の保存、旧データ、音声・進行条件維持、分割、ネイティブ選択欄、実差分・不正ID拒否、保存再開、RIGMの上書きと素材発見、PSDの複数グループ上書きを確認。第11段階の専用画面も目視確認した。複数DPI検証と実作品操作は行っていない。途中のFlow1は追加した検証素材のメッシュ不足、Flow2は新規includeのBOM未付与、Flow3は保存によるモデル置換後の古い検証参照で失敗し、検証コードを修正した。失敗出力も保持する。
+
+Win64 Debug／Releaseは正規dprojと同じ検索パス・個別DCUで成功。エラー0、既存W警告各13件は前回と一致し追加警告0。UTF-8 BOM／CRLF、PowerShell構文、git diff --checkを確認した。通常RIGMMaker.exeは起動中のため保持し、別名RIGMMaker-MP4.exeへReleaseを原子的に配置した。通常版の開始時ハッシュと稼働プロセスを保持し、旧別名EXEは専用出力へ退避。同梱Runtime9ファイルは開始時・最終製品と一致。ユーザーのプロセス強制終了、設定・実作品変更、git stage／commit／pushは行っていない。
+
+Release SHA256: 5F5969BBF3D475246BCD554AAD0ACE43EB4FA883091B5556210C600D4DB54005。Debug SHA256: 5BEA3D03BBFD0031C2FB365B7237034BB2C0A40A8A693F47EF50C2BB2FF79F9A。
+
+証跡はWin64/Validation/CastingExpression-20261010-e1332a55のbaseline.json、Flow6/run/result.json・casting-face-details.png、Preview/run/result.json、BundledMp4/run/result.json・MissingRuntime/result.json、Final/Debug・Release/build.log、warnings.json、source-hashes.json、pre-deploy.json、deployment.json、verification.json。仕様はSCRIPT-CASTING-20261009.mdを参照。再実行入口はRun-ScriptOrderCheck.ps1 -CheckBackground、Run-MoviePreviewBenchmark.ps1、Run-BundledMp4Check.ps1。
+
+## 2026-10-10 表情の立ち絵反映を修正
+
+「感情は設定できるが立ち絵へ反映されない」との指摘を受け、保存済み実作品と使用RIGMを読み取り、メモリ上で動きを止めて基本表情の描画を比較した。設定値は保存されていたが、記号・顔色を持たないキャラでは悲しみ・疑問・喜びが眉だけの小さな差分となり、驚きにはプリセットが見つからなかった。実素材にある笑顔閉じ・やや閉じ・半開き・やさしい目、喜・怒・哀・楽・困る・片眉上げを基本表情に組み合わせるようにした。専用の目・眉・口があればそれを優先する。個別差分と登録済みプリセットの優先関係は維持した。対応プリセットがない場合や非発話キャラでも、キャッシュされた通常プリセットを使い、素材保存時の眉などへ戻ってしまう処理を修正した。毎フレームの素材解析は追加していない。
+
+実作品のFull HD描画では、通常との差分が悲しみ208→5923画素、疑問220→5786画素、喜び205→5578画素となり、目の切替を目視確認した。驚きは片眉上げを取得できるようになった。専用の驚き目を持たない素材のため、目は通常のままとする。ユーザーの台本・キャラ・設定のSHA256は読み取り前後で一致し、実作品の保存や音声の生成は行っていない。
+
+最終Flow3は256項目（従来231項目＋今回の描画25項目）、プレビュー48項目、同梱MP4出力・復号・上書き76項目とDLL不足3項目、合計383項目が成功。専用RIGMは実キャラと同じ目・眉の名前を持ち、記号・顔色なし、素材保存時の眉は通常以外とした。頭・体の動きを止めて全10表情の出力用画像と縮小プレビューを比較した。喜び・悲しみ・疑問・驚きは解析結果とは独立した部位IDによる描画と一致し、目だけ個別指定したときも眉の表情が残ることを確認。通常へのフォールバックと自動判定の最終画素も検査した。複数DPIの検証は行っていない。Flow1・Flow2も成功し、追加の独立した部位照合をFlow3に含めた。
+
+Win64 Debug／Releaseは正規dprojと同じ検索パス・独立DCUでビルド成功。エラー0、追加警告0、既存W警告各13件は前回と一致。アプリ終了と開始時ハッシュ一致を確認し、通常RIGMMaker.exe・別名RIGMMaker-MP4.exeの両方へ最終Releaseを原子的に配置した。旧EXEは専用出力へ退避。同梱Runtime9ファイル、dproj、VOICEVOX設定を保持。UTF-8 BOM／CRLFとgit diff --checkを確認。プロセス強制終了・git stage／commit／pushなし。
+
+Release SHA256: D8AF82027694A233AFB84F9C88AAF2DBB7B62E9F735A4AA7380E3D15ADD833C5。Debug SHA256: 764686BD4BAFF8F8827CD3493100496594ACC6295339A22A79E986A93B3B8DBD。
+
+証跡はWin64/Validation/FaceRendering-20261010-4db13291のbaseline.json、user-read-baseline.json、ProbeBefore・ProbeAfter/result.jsonと表情別PNG、Flow3/run/result.json・FaceOnlyの表情別PNG、Preview/run/result.json、BundledMp4/run/result.json・MissingRuntime/result.json、Final/Debug・Release/build.log、warnings.json、source-hashes.json、pre-deploy.json、deployment.json、verification.json。再実行入口はRun-ScriptOrderCheck.ps1 -CheckBackground、Run-MoviePreviewBenchmark.ps1、Run-BundledMp4Check.ps1。仕様はSCRIPT-CASTING-20261009.mdを参照。
+
+## 2026-10-11 第9段階の表示整理・不要な表の削除
+
+ユーザーの締め設定画面で、画像説明が欠け、未選択の選択欄が空白になることを確認した。固定幅ラベルのAutoSizeを配置前に解除し、締めの題名、代表画像・終了画像・最後のサムネイルの説明、採用／省略の案内、画像選択の文字ボタン、締めのセリフを配置した。上部のアイコン群を「入力を反映」「締めの設定を確認完了」に変更。内部の画像ファイル名は通常表示せず、選択状態とプレビューを表示する。
+
+指定された「終了／最後 秒」、画像と回避領域の座標表、回避領域の追加・削除とプレビューの点線は第9段階から外した。表示対象以外の下書き項目をクローンで保持し、既存作品の秒数・画像配置・回避領域を上書きしない。選んでいない別画像はプレビュー用コピーだけで省略し、現在の画像を確認できるようにした。プレビューによる作品・画像選択・セリフの変更はない。
+
+最終のScriptOrderCheck -CheckDpiは199項目、ScriptEditorReturnCheckは46項目、計245項目が成功。表示崩れへの対応として96／144／192 DPIで説明文字の実寸、欄の重なり、ボタンとセリフ欄を確認し、専用作品の画面を目視確認した。画像採用と状態表示、プレビューで正本を変更しないこと、隠した秒数・配置の保持、確認・後工程・保存再開を含む。実作品へ試験命令は送っていない。初回のFlow1は検証コードで文字列プロパティへ直接ヘルパーを呼んだ構文エラーを修正した。既存の復帰fixtureは新しい台本・字幕の確認条件が不足しており、確認データを補った。また総評の未選択状態で先へ進む旧経路を、台本入力から到達済みの締めへ再訪する経路へ修正した。途中の失敗出力も保持する。
+
+Win64 Debug／Releaseは正規dprojと同じ検索パス・独立DCUで成功。エラー0、追加警告0、既存W警告各13件は直前の記録と一致。作業開始時の通常アプリは保持し、配置時にアプリ終了と通常／別名EXEの開始時ハッシュ一致を確認して、両方へ最終Releaseを原子的に配置した。旧EXEは専用出力へ退避。同梱Runtime9ファイルは製品ビルドと一致し変更なし。RES・dproj・VOICEVOX設定を保持し、UTF-8 BOM／CRLF、PowerShell構文、git diff --checkを確認。ユーザープロセスの強制終了、実作品の変更、git stage／commit／pushなし。
+
+Release SHA256: C7D5F50531D02DA46A1F603A471E905B5B1D1CA200AA4C7059130E2232388442。Debug SHA256: 869BE8C700FE68620B994CD6BB2AF20A80061CE0FF7ED335FAFC64406DA42B1C。
+
+証跡はWin64/Validation/ClosingUi-20261011-43b11959のbaseline.json、Flow1・Flow2・FinalFlow、EditorReturn・EditorReturn2・EditorReturn3、Debug・Release/build.log、warnings.json、deployment.json、verification.json。最終画面はFinalFlow/run/closing-unselected-96・144・192.pngとclosing-selected-0・1・2.png。再実行入口はRun-ScriptOrderCheck.ps1 -CheckDpiとRun-ScriptEditorReturnCheck.ps1。表示仕様はSCRIPT-NAVIGATION-20261009.md、起動先はnote-basics.mdへ記録した。
+## 2026-10-11 第10段階で総評なしがありへ変わる問題
+
+作業中のアプリをパイプで読み取り、第10段階revision825では本文・総評文・締めが保存済みで、総評あり・評価項目3行空欄により「を数値で入力してください。」で停止していた。ユーザーから「評価なしで保存したのにありへ変わった」との説明があり、総評欄の編集でsummaryChoiceをyesへ変更する処理を原因として確認した。後の読み取りでは、ユーザー操作でnoneへ戻り第11段階へ進んでいた。
+
+総評の文章編集による有無の自動変更を廃止した。なしでも入力文を下書き・共有原稿に保持し、明示的にありを選ぶまで配役・チャートへ採用しない。第10段階では下書きの扱いを見出し・案内へ表示する。ありを選んだ場合の入力不足は、第8段階・行番号・項目名／点数を具体的に表示し、上部の文字ボタンで総評入力へ戻せるようにした。原稿・下書きの自動補完や削除はない。
+
+ScriptOrderCheckの最終Flow2は185項目が成功。なしの保存選択をネイティブMemo入力・保存再開後も保持して配役へ進めること、明示的なあり選択、未入力時の進行拒否、修正ボタンによる原稿・下書きの保全、非数値入力の対象表示、完成したチャートの保存再開と配役を確認した。専用作品の画面を目視確認し、複数DPIの検証は実施していない。Flow1では175項目後、再読込先が到達済みの配役だったため第10段階を前提とした検査が失敗した。fixtureで第10段階への再訪を明示し、ユーザー説明に合わせ有無の期待値を修正した。途中の出力も保持する。
+
+Win64 Debug／Releaseは正規dprojと同じ検索パス・独立DCUで成功。エラー0、追加警告0、既存W警告各13件は直前のビルドと一致。通常アプリPID16716を保持し、未起動の別名RIGMMaker-MP4.exeへ開始時ハッシュ照合・旧EXE退避付きで最終Releaseを原子的に配置した。同梱Runtime9ファイルは製品ビルドと一致する。通常EXE、dproj、ユーザー作品への書き込みは行っていない。パイプ操作は状態・入力の読み取りのみ。git stage／commit／push・プロセス強制終了なし。
+
+Release SHA256: AE31A0D79A759AA7814031AC5401828F5A9531181B1E318A8839579A69236467。Debug SHA256: 9E03CD18A11C83B27AD21319B350AF3AB7B40C6A70AAFBFB758E4EA0BC32CA8A。
+
+証跡はWin64/Validation/ScriptConfirm-20261011-a622a184のbaseline.json、status-before.json、app-script-summary-before.json、text-*-before.json、Flow・Flow2、FinalBuild/Debug・Release/build.log、warnings.json、build-source-hashes.json、deployment.json、verification.json。再実行入口はRun-ScriptOrderCheck.ps1。動作と起動先はSCRIPT-NAVIGATION-20261009.md・note-basics.mdを参照。
+
+## 2026-10-11 VOICEVOX共通設定・アクセント操作の負荷と表示位置
+
+ユーザーの指定に合わせ、6つの基本設定を作品共通にし、設定変更で全セリフの生成音声・再生確認を失効させる。個別アクセント編集は保持することをユーザーが明示した。設定はアクセント画面へ統合し、ページの切替を取り除いた。queryの保存は即時、全画面通知は150msの編集停止後にまとめる。モーラの矩形を保持し、マウス移動の境界判定で重複する文字幅計測をなくした。同じ内容のグラフ消去・再配置と、保存案内文の途中状態による高さ変動を抑え、接続済み話者一覧の再取得も省いた。
+
+専用台本による238項目と96／144／192 DPIの表示・位置・スクロール保持が成功した。一次修正時に約19秒かかっていた100モーラ・30回のドラッグは、最終検証で32ms。編集30回のrevision更新、ドラッグ中の全画面通知0回、停止後1回を確認した。共通設定の全行適用・音声と再生確認の全行失効、旧音声と個別queryの保持、保存再開、数値の不正入力拒否、新しいセリフへの継承、前回の総評なし・工程移動も検証した。dprojと同じ検索パスによるDebug／Releaseビルドは成功し、既存警告13件に対する追加警告0件。実VOICEVOXの聴取比較は未実施。
+
+初期の検証コードには保存による正本入替後の古いセリフ参照と、管理素材へ取り込まれたWAVの相対参照を考慮しない比較があり、専用probeが例外・比較失敗になった。保存後にIDで取り直し、作品の素材パスを解決して検査するよう修正した。途中でDドライブの空き不足によりDCU生成が失敗したため、今回作成した中間物をCドライブの専用一時領域へ移し、以後のビルドと検証をそこで実施した。過去の成果物やユーザー素材は削除していない。
+
+実アプリは作業開始時のPID 16716が終了し、接続ファイルも消えたため、以後の実作品操作は行っていない。検証終了時もアプリの終了と通常・別名EXEの開始時ハッシュ一致を確認し、両方へ最終Releaseを配置した。SHA-256は`81EEF3327D035C923BFFD9E11711A28B81EB35F8CFB48E1A4B3440B21C8077E6`。元EXEは専用検証出力のdeployment-backupへ保存した。dproj・RES・VoicevoxEngine.iniのハッシュは開始時から不変。ユーザーの台本・音声・設定へ検証用の書込みをしていない。
+
+詳細は[台本制作・VOICEVOX調整](Source/Shell/Pages/SCRIPT-NAVIGATION-20261009.md)。証跡は`Win64/Validation/VoiceAccent-20261011-8f0a1ed2`の`FinalFlow/run/result.json`、`accent-editing-metrics.json`、各PNG、`FinalBuild/Debug・Release/build.log`、`verification.json`、`deployment.json`。再実行入口は`Run-ScriptOrderCheck.ps1 -OutDir <新しい専用出力> -CheckDpi`。C側の完全な隔離出力は`C:/Users/zan12/AppData/Local/Temp/RigmVoiceAccent-20261011-8f0a1ed2`、移動した初期DCUは末尾`-DCU`の専用領域に保持した。
+
+## 2026-10-11 音声設定の最下部配置・待機案内による座標変動
+
+ユーザーから、共通設定は最下部に置くこと、パラメータの横幅を狭めること、「お待ちください」の表示で他のUIが動くことの追加指摘があった。詳細案内欄を空欄時に非表示にしていた処理と、最下部の保存案内の自動測定による高さ変化を確認した。共通設定を3つの個別グラフの下へ移し、6項目を全幅420論理px以内に収めた。詳細案内48・接続案内32・保存案内64論理pxの領域を維持し、停止ボタンも表示したまま有効状態を変える。
+
+専用ScriptOrderCheckの254項目が成功。待機・長いエラー・空欄への切替で各編集欄の実画面座標とスクロールが不変であること、設定が最下部にありコンパクトな幅に収まること、縦スクロールで全項目が見えることを96／144／192 DPIで検証し、PNGも確認した。既存のアクセント即時保存・共通設定の全行適用・個別queryと旧音声保持・総評なし保持・工程移動も成功。100モーラ・30回の実ドラッグ78ms、通知は操作中0・停止後1回。dprojと同じ検索パス・独立DCUによるWin64 Debug／Release成功、エラー0・追加警告0・既存警告各13件。実VOICEVOXでの聴取比較は今回も未実施。
+
+パイプの読み取りでは実作品は第13段階voice、revision976、変更あり。実作品への書込みや工程切替を行わず、PID23160の通常アプリを保持した。通常EXEの開始時SHA-256はF35D7E6108BFC3877FA08125AF0739E7DD4EA3EA853287A18A4CF2A0D7B9F181で終了時も一致。未起動の別名EXEだけを元ハッシュ照合・退避付きで原子的に置換した。Release SHA-256は3070651F8F8684A2F17CB675D1CBC83630CFA2FDCF28BD6671505C1E86603B29、Debugは661C427150D17F34C1FA35213403FC268E2A86E5F030324488C61496D7E238B2。同梱Runtime9ファイルが一致し、dproj・RES・VoicevoxEngine.iniは開始時と不変。git stage／commit／push・実アプリの停止なし。
+
+証跡は`Win64/Validation/VoiceLayout-20261011-35d8c4a1`のbaseline・live-before・live-after・build-source-hashes・warnings・invariants・verification・deploymentの各JSON、`Flow/run`の結果・PNG・操作計測、Debug／Releaseのビルドログ。元の別名EXEはdeployment-backupに保存した。完全な隔離出力は`C:/Users/zan12/AppData/Local/Temp/RigmVoiceLayout-20261011-35d8c4a1`。再実行は`Run-ScriptOrderCheck.ps1 -OutDir <新しい専用出力> -CheckDpi`。
+
+## 2026-10-11 音声再利用・再生時生成・工程移動保存・シーンチェックの負荷
+
+ユーザーから、原稿の小変更でほぼ全音声が使えなくなること、モーラ・設定変更ですぐ待機して編集できないこと、シーン割当から進んだ後に終了すると割当が残らないこと、チェック操作が重いことの指摘があった。旧実装は変更した区分のセリフを全て作り直し、音声画面の表示・変更後に自動生成と解析を行っていた。工程の選び直しは移動前の工程を保存し、画面だけを切り替えていた。シーン境界変更は全シーンと退避配列を再構築し、全画面更新を同期的に呼んでいた。
+
+一致する原稿範囲から既存セリフを復元し、未変更の音声・確認・個別編集を保持した。変更行だけ読み・query・音声採用・再生確認を失効させ、旧音声は残す。個別に分割・結合した行、重複文、行追加・削除、サロゲート文字、割当済みシーン内の挿入を検証した。自動生成と初期自動解析を台本音声画面で無効化し、句の読み変更も再生まで保留する。再生ジョブから編集用queryを受け取り、入力指紋が一致する結果だけを採用する。旧WAVだけの行も再生時にその行のqueryを得られる。
+
+全ての工程選択で入力と移動先を同時保存する。シーン割当チェックは左右のシーンだけ更新・退避し、一覧の検索を辞書に変更、全画面通知を150msに集約した。総評の固定境界・画像メタデータ・余白と音声を保持する。
+
+専用ScriptOrderCheckは311項目成功。ネイティブチェック20回16ms、303セリフ・63シーンの境界変更40回360ms。独立したモデル比較は旧234ms／新156ms。通常の台本確認→配役→字幕→音声→割当→画像→動画編集の流れ、前後の工程選択だけで保存・再開、VOICEVOXの要求が編集時に発生しないこと、明示生成時のquery・音声採用を所有HTTP fixtureで確認した。複数DPIは行っていない。実VOICEVOXでの音の聴取比較は未実施。Debug／Releaseはdprojと同じ検索パス、独立DCUで成功、エラー0・追加警告0・既存警告各13件。git diff --checkも成功。
+
+途中の検証では管理素材へ取り込まれたWAVの相対参照を考慮しない比較と、1行への追記を未変更部分と新しい行へ分ける境界扱いを修正した。PascalのJSON Clone型の明示と新規includeのUTF-8 BOMも修正し、最終検証・ビルドを再実行した。DCUや完全なビルド出力は空き容量のあるCドライブへ置き、既存成果物は削除していない。
+
+実アプリはPID13364。読み取り専用パイプで開始時voice・revision1351、途中と終了時scenes・revision1482・変更ありを確認した。実作品への試験書込み、工程移動、音声生成、アプリ停止は行っていない。起動中の通常EXEは開始時SHA-256 `59D1A99D6AECB44F875AFBE66F8B8D2E0C767CBC5D508AB83061E0ED53203F77`を保持し、未起動の別名`RIGMMaker-MP4.exe`だけをハッシュ照合・退避付きで原子的に置換した。Releaseは`F8906B076435BE63FACFB269DD57EEE0A5925D0E160DFE1A58AD150226A20534`、Debugは`8C7125EE5A1E6114F7AB00B1BEE7B0444302F31A26D6304A33CF11DE41973BDD`。設定・dproj・RESと同梱Runtime9ファイルの一致を確認した。stage／commit／pushは行っていない。
+
+詳細は[台本制作・音声・工程保存](Source/Shell/Pages/SCRIPT-NAVIGATION-20261009.md)。証跡は`Win64/Validation/VoiceReuse-20261011-5e0a9d73`のFlow、Debug／Releaseログ、API要求履歴、baseline・live-before/current/after・build-source-hashes・warnings・invariants・runtime・verification・deployment JSONとdeployment-backup。完全出力は`C:/Users/zan12/AppData/Local/Temp/RigmVoiceReuse-20261011-5e0a9d73`。再実行は`Run-ScriptOrderCheck.ps1 -OutDir <新しい専用出力>`。
+
+## 2026-10-11 チャプター名・画像補足文の半透明背景
+
+ユーザーの指定に合わせ、動画左上のチャプター名と画像下などの補足文へ、濃さ65%の黒い半透明背景を追加した。文字の折り返し後の寸法と余白に合わせて背景を描き、既存の白い文字と黒い縁取りを重ねる。短い文字で不要な全幅帯を作らず、空欄・空白だけなら背景を表示しない。補足文にあった不透明な帯も同じ半透明背景へ統一した。共通合成を使うプレビュー・動画出力と、従来形式のチャプター名に反映した。
+
+ScriptOrderCheck -CheckBackgroundの最終Flow3は491項目成功。背景色が透ける画素、文字量に合わせた背景の範囲、空欄・画面端のクリップ、連続500回のGDI解放、中央型・左右L字型×補足文5配置×FHD／640×360プレビュー、既存の文字縁取りと工程の保存再開を確認した。既存の同梱MP4出力・解像度・全フレーム復号検査も成功。実作品は読み取りとメモリ上の描画だけで使用し、チャプター表示と補足文の見本を1280×720で目視確認した。補足文の見本はメモリにだけ追加し、実作品ファイルの描画前後SHA-256一致を確認した。複数DPIは実施していない。
+
+途中のFlowではWinapi.WindowsのTBitmapとVCLクラスの名前衝突を修正した。Flow2ではL字型画像の縦横比維持による余白を考慮しない期待色が失敗し、文字を描く前の実背景画素を基準にする検査へ修正した。未成功の出力も保持する。正規dprojの検索パスと独立EXE／DCU出力によるWin64 Debug／Releaseは成功、エラー0・追加警告0・既存W警告各13件が直前のビルドと一致。git diff --checkとPascalのUTF-8 BOM／CRLFも成功した。
+
+通常アプリPID13364はパイプで動画編集画面であることを読み取り、停止・保存・工程移動・生成操作は行っていない。通常EXEの開始時SHA-256 `59D1A99D6AECB44F875AFBE66F8B8D2E0C767CBC5D508AB83061E0ED53203F77`を保持し、未起動の別名RIGMMaker-MP4.exeだけを元ハッシュ照合・退避付きで原子的に置換した。置換の初回はPowerShellのnull文字列変換で失敗し、元EXEと退避を再照合後、NullStringを明示して配置成功。同梱Runtime9ファイルが製品出力と一致し、dproj・RES・VoicevoxEngine.iniは開始時と不変。git stage／commit／pushなし。
+
+Release SHA-256: `49674648DA037694E267FBFAD1F317B9DE7BC37F5B820CDB89DCED33796C4D9D`。Debug: `63AE378CEA0BEF7807FDC771BE26E52DDD232B7A597E765ABADDDDBC8B3E13DA`。
+
+仕様は[シーン名と動画の文字](Source/Shell/Pages/IMAGE-WORKFLOW-20261007.md)。証跡は`Win64/Validation/TextBackdrop-20261011-ac86974b`のbaseline・live-before/after・build-source-hashes・warnings・invariants・runtime・verification・deployment JSON、Flow3の結果・描画PNG、Debug／Releaseログ、RealPreviewのPNGと実作品不変検査。完全なビルド出力と元EXEの退避は`C:/Users/zan12/AppData/Local/Temp/RigmTextBackdrop-20261011-ac86974b`に保持する。再検証は`Run-ScriptOrderCheck.ps1 -OutDir <新しい専用出力> -CheckBackground`。
+
+## 2026-10-11 投稿用タイトル・概要・親作品とニコニコ漫画の取得
+
+動画編集の右側先頭を、投稿用タイトル1行・概要メモ・固定親作品 `sm33517192 nc256993` と各欄のコピーボタンへ変更した。セリフ・字幕・話者・VOICEVOXの再設定欄は表示しない。既存の場面・演技・BGM・診断は保持する。タイトルは指定の接頭辞、台本名、手動連番 `#60`、台本作成日の日本語表記で初期化する。UTCの台本作成時刻をローカル日付へ変換し、編集した連番・概要・作成日を作品と一緒に保存する。
+
+第6段階へ「ニコニコ漫画から取得」とクリック可能な作品URLを追加した。公開検索・作品ページのHTTP要求はワーカーで行い、作品名・作者・紹介文を候補へ保存する。人間の承認チェックを代行せず、作品・検索条件・工程が変わった後の結果を破棄する。確認済み候補から概要へ「作品名／作者:作者名／URL」を渡し、任意の独自紹介文 `postingSummary` も追加できる。概要は手動編集可能で、作品情報の追加ボタンは既存入力を保持する。
+
+投稿文の入力では作品全体のClone・タイムライン更新・プレビュー再生成を行わず、音声・再生確認と動画描画キーを保持する。映像のUndo/Redoでも入力済み投稿文を残す。進行中のジョブは投稿文だけの変更を許容する回収先の版を別に保持し、ワーカーのsnapshotを変更しない。投稿入力中の同期的なジョブ回収を止め、通常のTickへ任せることで、完了ジョブによる入力版の失効を避ける。
+
+PostingCheckの最終CheckFinalは32項目成功。指定タイトルとJST作成日、実際に取得した「猫と手」の公開HTMLからの作品名・作者・URL解析、人間確認後だけの概要生成、任意紹介文、検索重複除去、不正URL拒否、投稿編集と音声・動画キー保持、古い版の原子的拒否、保存再開、映像Undo/Redo、独立フォームと実アプリが使う埋込フレームの入力・3つのコピー・画面更新なし、プレビュー中の入力、実HTTP検索、クリック可能URL、作品名を変更した後の遅延結果拒否を確認した。ScriptOrderCheckは311項目成功。複数DPI検証は行っていない。画面記録は専用fixtureのVCL描画であり、起動中の実作品での操作確認とは区別する。
+
+途中ではTJSONArrayの生成方法とTCaptionへの文字列ヘルパー呼出しを修正した。検索検証の台本保存先をUID規約へ合わせ、テストのメッセージ処理へCheckSynchronizeを加えた。クリップボードの一時的な競合に対して検証側の再試行を追加した。失敗した検証・ビルドの出力も保持する。正規dprojと同じ検索パス、独立DCU／EXE出力によるWin64 Debug／Releaseは成功、エラー0・追加W警告0・既存W警告各13件が直前のビルドと一致した。新規3ユニットをdprojへ登録した。git diff --check、PascalのUTF-8 BOM／CRLF、ビルド開始後のソースハッシュ不変も確認した。
+
+実アプリPID13364は読み取り専用パイプで動画編集画面であることを開始・終了時に確認した。実作品への書込み・工程移動・生成操作・停止は行っていない。通常EXEの開始時SHA-256 `59D1A99D6AECB44F875AFBE66F8B8D2E0C767CBC5D508AB83061E0ED53203F77` を保持し、未起動の別名 `RIGMMaker-MP4.exe` だけを元ハッシュ照合・退避付きで原子的に置換した。RES・VoicevoxEngine.iniは開始時と不変。同梱Runtime9ファイルは製品出力と一致し、git stage／commit／pushは行っていない。
+
+Release SHA-256: `925ABD0A16DA8F5069BF4478DDB1C1E7AC81A140552734DBF3DF67E2D0FBBF61`。Debug: `94FB4676B4CDB980E56E616252522F705A3AB6BF52B9592E9F6AF9143AF942CC`。
+
+仕様は[投稿用情報](Source/Studio/Views/Editor/MOVIE-POSTING-20261011.md)と[作品情報の取得](Source/Shell/Pages/SCRIPT-RESEARCH-20261009.md)。証跡は`Win64/Validation/Posting-20261011-7c45fe63`のbaseline・live-before/after・build-source-hashes・warnings・invariants・runtime・verification・deployment JSON、CheckFinal／Flowの結果・画面記録、Debug／Releaseビルドログ。完全なビルド出力・公開HTML記録・失敗した試行・元EXE退避は`C:/Users/zan12/AppData/Local/Temp/RigmPosting-20261011-7c45fe63`に保持する。再検証は`Run-PostingCheck.ps1 -OutDir <新しい専用出力> -HtmlDir <公開HTML記録のフォルダ>` と `Run-ScriptOrderCheck.ps1 -OutDir <新しい専用出力>`。
+
+## 2026-10-11 必須の最終サムネイル・10秒表示・クロスフェード
+
+- ユーザー指定により、第16段階の画像一覧の最後へ省略できないサムネイル行を追加。使用背景と全通常シーンの確定後に要求・採用・確定し、必ず最後に作る。第9段階と動画編集の締め設定にあったサムネイルの採用／省略・秒数操作を外した。旧選択と画像は保持し、第16段階で確認し直す。
+- 背景と同じ動画解像度の補助プロンプトを追加。既存のシーン画像・共通背景・使用中の締め画像、使用キャラと大きな「漫画＋台本の題名」ロゴを要求に含める。要求のsourcesへ画像パス／SHA256とキャラ素材署名を保存し、パイプの現在要求へキャラキャッシュ由来の透過PNG参照を公開する。旧要求ではキャラ参照を書き出さない。
+- 発話scene／cueを増やさず、endCardsの最後へ全画面10秒のthumbnailカードを付ける。直前の完成フレームから最初の1秒でsmoothstepのクロスフェードを行い、字幕・キャラを含む画面全体を滑らかに切り替える。既存の終了画像は前に保持。画像工程・セッションの出力開始・出力ワーカーで必須条件を検査する。独立した旧動画プロジェクトは従来の経路を維持する。
+- 画像・要望・編集世代・確定キーを作品JSONのthumbnailへ保存。元画像、題名、解像度、使用キャラ変更時は要求と確定を失効させる。管理資産への保存移動は画像内容ハッシュで正規化する。最初の工程試験で、StoreScriptが新しいthumbnailを保存後のメモリへ引き継がず、初期要望が消える不具合を発見した。thumbnail・共通背景の所有情報と保存済み参照を引き継ぐように修正した。旧作品を画像工程で開く際の初期化も追加した。
+- 隔離したScriptOrderCheckを拡張し525項目成功。必須行の順序・初期要望・生成順・ロゴと素材・透過PNG参照・サイズ／題名変更による旧要求拒否・採用だけでは確定しないこと・保存再開・元画像変更による失効・旧画像引継ぎ・音声／cue維持・未確定出力拒否・不正JSONの例外処理を確認。320×180・5fpsのMP4を実出力して全52フレームを復号し、0.4秒の本編＋10秒のサムネイルと黒いカットを挟まないクロスフェードを確認した。前の終了カードからの切替も画素で確認。通常の複数DPI試験は実施していない。
+- 試験コードではTJSONArray.Insert非対応と文字列プロパティへのTrim連結によるコンパイルエラーを修正。最後は試験・製品とも成功。投稿欄・Nico取得・コピー操作の既存32項目も成功した。
+- 製品dprojと同じ検索パスでWin64 Debug／Release成功。既存のW警告は各13件、前版からの追加0件。git diff --check成功、日本語PascalのUTF-8 BOM／CRLFを確認。最終製品ソース259ファイルはビルド時と一致している。
+- 作業中の通常アプリPID13364は動画編集で同じ作品を開いていることを前後の読取専用パイプで確認。実作品への画像要求・採用・確定・工程移動・保存・再起動は行っていない。通常EXE・RES・VOICEVOX設定は開始時ハッシュを保持する。
+- 別名RIGMMaker-MP4.exeが未起動であることと旧ハッシュを照合し、旧EXEをC側へ退避後、最終Releaseを原子的に置換。配置SHA256は`A33D4322A8AE53030AE6A590E7CB8B738CCB71092DC97E0D1FE54A2AA5604287`、Debugは`423F75FBC99BF923EFEF9EC5378E0D910485F879646686E5431088ADC7C2F5DB`。通常EXEは`59D1A99D6AECB44F875AFBE66F8B8D2E0C767CBC5D508AB83061E0ED53203F77`のまま。同梱FFmpegの9ファイル一致。作業を保存して通常アプリを終了後、この別名EXEで起動し、動画編集から「台本編集へ戻る」→到達済みの第16段階でサムネイルを作成・確認する。
+- 仕様は[画像工程](Source/Shell/Pages/IMAGE-WORKFLOW-20261007.md)。証跡は`Win64/Validation/Thumbnail-20261011-69564429`、重いEXE／DCU／専用データと過去版は`C:\Users\zan12\AppData\Local\Temp\RigmThumbnail-20261011-69564429`に保持する。ステージング・コミット・pushは行っていない。
+
+## 2026-10-11 実台本の共通背景・必須サムネイルと確定の確認
+
+「それは、降り積もる雪のような。」の通常11シーンは確定済みだったが、要望入力済みの共通背景と必須サムネイルの画像が未作成だった。内蔵imagegenで雪景色を生成して採用し、人間の背景確定後に、既存シーン画像・実キャラの透過PNG参照・大きな漫画と題名ロゴでサムネイルを生成して採用した。現行projectId・revision・要求ID・SHA256を照合し、原PNGを保持した。
+
+ユーザーは画像表示後にもサムネイルのチェックが付かず、「何回か押していたら付いた」と報告した。最後はユーザーによる確定と動画編集への移動を確認。保存作品で全11シーン・背景・サムネイルの確定、画像のSHA256、stage=editor、scenesStatus=complete、末尾10秒・1秒切替のサムネイルカードを検証した。起動し直しての再開は未確認。チェックの不安定な反応は原因未特定・ソフトウェア未修正としてnote-tasks.mdに残した。通常EXE・実作品のJSONへ直接書込みを行わず、ユーザーの工程移動で保存された結果を読み取った。
+
+画像・正確な生成指示・採用と保存の検証は[制作記録](制作支援/学習記録/RIGM/20261011-soreyuki-scenes/background-thumbnail/learning_record.json)を参照。
+
+## 2026-10-11 MP4文字描画のハンドル回収競合と失敗フレームの診断
+
+ユーザーのMP4出力エラー87の修正要望に対応。以前の独立再現では、半透明の文字背景のAlphaBlend中に、VCL FreeMemoryContextsが描画元1×1黒BitmapのDCを回収してWindows 6になった。描画先CanvasだけのLockでは不十分だったため、元BitmapのCanvasもHandle取得前からAlphaBlend完了までLockする。文字縁取りの生GDI呼出しも描画先を保護し、失敗時にAPI名・Windows番号・GDI数を残す。旧実装の再現記録と、修正後20,000回の文字背景描画の成功記録を保持した。元の87との同一原因は確定していない。
+
+同梱DLL・外部ffmpeg経路にbackend・処理段階・1始まりの失敗フレーム/総数・秒数・動画寸法・fps・例外型・Win32番号・GDI/プロセスハンドル数を付加する。元の例外型とEOSError.ErrorCodeは保持し、EAbortは加工しない。欠落画像によるframe6の失敗と、意図的なEOSError(87)によるframe5の番号保持・未完成出力回収を確認した。87の試験は診断の検証であり、ユーザーの実障害を再現したとは扱わない。
+
+専用のMovieRenderThreadCheckは32項目成功。20回のワーカースレッド交代後もGDI数31→31。新しいMovieRenderMp4CheckはVCL DC回収と実MP4出力を競合させ、320×180で4,710フレーム、フルHDで60フレームを全復号し、診断を含む19項目成功。既存BundledMp4Checkの古い台本fixtureが必須サムネイル条件を満たさなくなっていたため、テスト所有データだけを現行の準備・確定処理で作るよう修正。出力・取消・保存再開・確認付き上書き保護76項目、DLL不足3項目が成功した。途中の試験コンパイルではuses不足と前方宣言不足を修正し、旧fixtureの失敗も含め過去の試行を保持する。
+
+実作品「それは、降り積もる雪のような。」を読み取り、保存済み音声と元の1920×1080・30fps・balancedの設定で専用MP4へ出力した。DC回収を競合させた状態で全4,701フレームの出力・復号、作品のメモリ上のJSON一致など7項目成功。15分の試験待機上限を超えた後も専用プロセスは止めず、約17分で自然終了コード0を確認。元画像・音声等326ファイルのSHA256は一致した。作品保存・音声生成・再生・GUIの操作は行っていない。通常EXEと作品JSONは作業中に別の処理による更新を検出しており、開始時ハッシュの一致とは記録しない。
+
+正規dprojと同じ検索パスによる隔離Win64 Debug／Releaseは成功、エラー0・追加警告0・既存W警告各13件。最終ソース275ファイルの一致、日本語PascalのUTF-8 BOM／CRLF、git diff --check、同梱FFmpeg等9ファイルの一致を確認。起動中の通常アプリPID25732は保持し、未起動・旧ハッシュ一致を再確認した別名RIGMMaker-MP4.exeだけを原子的に置換した。配置時の最初の試行はPowerShellの$nullが空パスに変換されて置換前に失敗。専用ファイルでNullStringによる置換を検証し、保持済み旧EXEとステージングのSHA256を再照合して再実行した。
+
+Release SHA256は`4EF0DEC25AB41AB9064ECA50CB33570296029EF1CE1D320F445474DB8D5D40A6`。配置直前・直後の通常EXEは`70ABCEEC2CBA5559FBA8C091AA161A0498531375F4D65B5A9F95C9C8B4AC79C6`で一致。旧別名EXEは専用C側フォルダーへ保持した。作業を保存して通常アプリを終了後、別名EXEから起動する。外部ffmpeg経路とGUI保存ダイアログからの実作品再出力、元の87の再発有無は未確認。
+
+仕様は[MP4出力と診断](Source/Studio/Output/MP4-RUNTIME-20261010.md)。証跡は`Win64/Validation/Mp4RaceFix-20261011-2902b90d`のReproduction、RenderThread、Mp4RenderFinal、BundledRegression3、StoredProject2、Debug／Release、verification・deployment・warnings・runtime・invariants・encoding・build-source-hashes JSON。完全な試験・ビルド出力、実作品の検証MP4と旧EXEは`C:/Users/zan12/AppData/Local/Temp/RigmMp4RaceFix-20261011-2902b90d`に保持する。Gitへのステージング・コミット・pushは行っていない。
+
+## 2026-10-11 MP4エンコードエラー解消のユーザー確認・様子見
+
+修正版提供後、ユーザーから「エンコードエラーは出なくなった」「様子見とします」と報告を受けた。エラー解消をユーザー確認済みとして記録し、追加修正は行わず様子見とする。未完了課題一覧から外した。元のWindows 87と描画DC回収競合の同一原因は引き続き断定しない。再発時は追加済みの処理段階・失敗フレーム・Windows番号の診断を使って調査する。[修正と検証](Source/Studio/Output/MP4-RUNTIME-20261010.md)を参照する。
+
+## 2026-10-12 台本一覧のコピー作成
+
+2026-10-11の作業終了時にnote.mdへ記録した次回指示を、ユーザーの「作業再開して」で実装した。確認回答は「台本入力の本文以外のテキストをコピー」「VOICEVOXは共通設定＋キャラの話者・スタイルだけ」。説明キャラと配置も引き継ぎ、それ以外はコピーしない。コピー機能の未実装メモを完了した仕様へのリンクへ置き換えた。
+
+台本一覧の新規作成の隣へ重なった用紙のコピーアイコンを追加。元ファイルを変更せず、CreateScriptCopyが許可項目だけで新しいモデルを作る。題名・本文以外の文章区分・総評の文章と項目名・締めの題名、共通VOICEVOXの6値、現在のキャラの話者・スタイル、キャラ選択と正規化配置・反転を引き継ぐ。画像・音声・詳細query・個別アクセント・セリフ・シーン・BGM・投稿/調査情報・出力先・到達/確認状態・台本種類・その他の設定は新規の初期値。元の配役の話者設定を古いキャラ選択時の設定より優先する。
+
+GUIとapp-script-copyは同じWorkspaceの処理を使用する。保存済みの台本を読み取り、UIDフォルダー・形式・更新前後のハッシュを確認し、別UIDへ保存した後で新台本の題名工程を開く。未保存の現台本、音声ジョブ、配置操作を保護する。コピーした共通音声設定をセリフなしでも既存のvoice.commonSettingsに保存できるようにし、配役で新しいセリフへ適用する。試験中、既存NextScriptDraftがvoiceの存在だけでCues[0]へアクセスする点を発見し、セリフがある場合だけ選択を補うよう修正した。
+
+専用ScriptCopyCheckは最終57項目成功。実アイコンのClick、パイプ、新Workspaceへの保存再開、5,000文字超の共通文、コピー対象/除外項目、最新話者・スタイル、画面外の配置と反転、通常のキャラ・レイアウト工程から本文入力への進行、後の配役での設定採用、個別音声値が残らないこと、繰り返しコピー、元台本・素材の全量ハッシュ保持、新規作成維持、未保存入力と読込失敗時の現台本保持を確認した。途中ではテストのJSON配列API名・専用WorkspaceのStartPipe不足・fixtureの再生指紋長・サムネイル準備待ちを修正した。過去の失敗した試行も専用フォルダーへ保持する。
+
+既存ScriptOrderCheckは341項目成功。正規dprojの検索パスを使った隔離Win64 Debug/Releaseは成功、エラー0・新規W警告0・既存W警告各13件。最終ソース276ファイル、日本語PascalのUTF-8 BOM/CRLF、同梱FFmpeg等9ファイルを照合した。複数DPIの試験は行わず、実ユーザーの台本のコピー・書込・VOICEVOXの音声生成は行っていない。
+
+通常・別名アプリが終了していることと、各EXEの開始時ハッシュ一致を再確認。旧EXEを専用C側フォルダーへ退避し、通常RIGMMaker.exeと別名RIGMMaker-MP4.exeの両方へ最新Releaseを原子的に配置した。SHA256は`40BA958301D2345AC3799D4B3315F7DD024B9F05DB598AB2D34B22CA1A10B2E9`。RES・dproj・ユーザー変更済みVoicevoxEngine.iniは保持した。通常EXEから利用できる。Gitへのステージング・コミット・pushは行っていない。
+
+仕様は[台本コピー](Source/Shell/Pages/SCRIPT-COPY-20261012.md)。証跡は`Win64/Validation/ScriptCopy-20261012-ebe36a88`のCopyFinal、WorkflowRegression、Debug/Release、baseline・build-source-hashes・warnings・encoding・runtime・protected-before-deploy・verification・deployment JSON。完全な専用データ、途中試行、ビルド出力と元EXE退避は`C:/Users/zan12/AppData/Local/Temp/RigmScriptCopy-20261012-ebe36a88`に保持する。
+
+## 2026-10-12 第5段階の入力・工程移動時のちらつき抑制
+
+note.mdと基本事項・工程仕様を読んで再開。第5段階の入力ごとに案内文を1行→2行と二度設定して高さを変え、工程一覧もBeginUpdate/EndUpdateとInvalidateで毎回全体を再描画していた。案内は完成した文字列で一度だけ設定し、一覧の項目が変わらなければ再構築・全体再描画を行わず、選択・有効状態が変わった行だけを無効化する。工程一覧のダブルバッファと画面DCの先行消去抑制も追加した。
+
+第5段階の区分アイコンを「共通の出だし／今回の本文／共通の締め」の名前付きタブへ変更し、実処理がなくなっていた入力確認アイコンを除去。工程間の移動は全工程共通で左リストへ集約し、字幕のプレビューページ送りや配役確認など工程固有の操作は維持する。入力のたびのページ配置と、本文・レイアウト・シーン・エフェクトの重複反映を省く。
+
+工程または作品を切り替える場合だけ親の描画をロックして右側のScriptPageBodyを隠し、子画面の構築・ホスト接続・初期値反映・配置後にfinallyで親と描画を復帰する。子工程ページは非表示で構築する。同じ工程での入力中は親を隠さない。動画編集から台本制作へ戻る際にもシェル側の親描画をまとめる。
+
+ScriptOrderCheckへ入力・描画監視を追加し、最終363項目成功。ネイティブ文字入力・複数行の日本語挿入・Undo・外部変更・反復通知・前後の工程移動を確認した。入力中の工程一覧のWM_PAINT/WM_SETREDRAW、案内文の変更、親の可視切替、ページ位置変更は0。カーソル・選択範囲・スクロール・Undoを維持し、工程切替時だけ親が一往復の可視切替で復帰することを確認した。画面のPaintTo画像も目視確認。実キーボードからのIME入力と実ユーザー作品での体感確認は未実施。
+
+途中の全工程試験では、動画編集への移行で下書きがなくなる時にもwizardを参照する新規処理の例外を検出。hasProjectの確認後だけ参照するよう修正した。Debug/Releaseの並列MSBuildは共有RIGMMaker.vrcで競合したため、順次実行して両構成成功。最終は正規dprojを用いた隔離Win64 Debug/Release、各エラー0・既存W警告13件で追加警告なし。277ソースのハッシュ、変更した日本語Pascal/INCのUTF-8 BOM・CRLF、git diff --check、同梱FFmpeg等9ファイルの一致を確認した。失敗した試行の記録も保持する。
+
+通常・別名アプリが終了していることと開始時EXEハッシュの一致を再確認し、旧EXEを退避したうえで通常RIGMMaker.exe・別名RIGMMaker-MP4.exeを原子的に更新した。最新Release SHA256は`9765479D6F32EB462A0477272FB3163090D8DF2DAF8AA6AD9BC4300BBBADD350`。RIGMMaker.dproj・RES・ユーザー変更済みVoicevoxEngine.iniを保持し、実作品を開いたり変更したりしていない。通常EXEから使える。Gitへのステージング・コミット・pushは行っていない。
+
+仕様は[工程リストと描画](Source/Shell/Pages/SCRIPT-NAVIGATION-20261009.md)。証跡は`Win64/Validation/ScriptDisplay-20261012-b40b38a9`のbaseline・source-hashes・warnings・encoding・runtime・verification・deployment JSON、最終ビルドログとWorkflow2結果・画面画像。完全な専用データ、途中試行、Debug/Release出力・旧EXEは`C:/Users/zan12/AppData/Local/Temp/RigmScriptDisplay-20261012-b40b38a9`に保持する。
+
+## 2026-10-12 チャートの点数入力・固定5項目・作品名コピー・アクセント表示更新
+
+第8段階でチャートに入力できず、次へ進めない報告と画面画像を受領。TStringGridがセルへ反映済みの文字列をOnSetEditTextから再設定していたため、入力中のエディタを更新していた。重複設定を除き、点数欄は最初から編集表示・Tab移動に対応した。評価項目は指定されたストーリー、キャラクター、作画、演出・テンポ、世界観・設定の5つに固定し、項目数の追加・削除を除去。新規draftは固定5項目で作成する。旧3～8項目は表示時に対応づけ、保存時には元の全draftをpreviousChartDraftへ一度だけ退避する。既存の総評・旧値を保持し、評価点の自動補完や人間確認の代行はしない。
+
+第10段階上部へ選択可能な読取専用作品名と「作品名をコピー」を追加。第6段階の選択候補名を優先し、ない場合は検索題名・台本題名を使う。同じ文字列の再設定を省き、選択・コピーによる原稿・revision・確認状態の変更を防ぐ。案内文も完成した文字列で一度だけ設定する。
+
+VOICEVOXのアクセント位置変更は従来どおりqueryを即時保存し、操作後450msで/mora_dataを非同期実行して音高・音素長を更新する。連続操作をまとめ、ドラッグ・数値・読みの入力中は表示反映を待つ。描画ロック内でグラフの値だけをまとめて反映し、手動メタデータとスクロールを保持する。Engineが返さない保留中の読みを元の句から復元する。表示対象変更・再生開始・破棄ではHTTPを取消し、世代番号・元query・話者が一致する結果だけを採用する。失敗時も入力値を消さない。音声合成・自動再生はしない。
+
+最終ScriptOrderCheckは394項目成功。5つの点数セルへネイティブWM_CHARで4.5を連続入力し、エディタ・モデル・保存に残ること、旧8項目全体の退避、確認・保存再開・配役までの進行、作品名の正しい参照・選択保持を確認した。100モーラ30回のドラッグから遅延1要求・合成0要求で2つのグラフが更新されること、途中の手動pitch/lengthと保留中の読みの保持、通信中の表示解除による古い結果の破棄を確認した。第8・第10段階とアクセント画面画像を目視確認。実VOICEVOXの聴取比較と実IME入力、複数DPIの再確認は未実施。
+
+正規dprojを使う隔離Win64 Debug/Releaseの最終ビルドは各エラー0、既存W警告13件・追加0件。変更した日本語Pascal/INCのUTF-8 BOM・CRLF、git diff --check、開始時EXE/RESと配置直前の一致、配置前後のdproj・RES・ユーザーVoicevoxEngine.ini保持を確認した。途中の最初の製品ビルドではTThread.Terminatedのprotected参照を修正。最初の試験では最低限の仮researchデータが状態取得に不足していたため正規準備処理に変更し、その後は旧チャート名称・3行の期待値を新しい固定5項目へ更新した。すべての途中記録を保持する。
+
+アプリ終了と開始時EXEハッシュの一致を確認し、通常RIGMMaker.exe・別名RIGMMaker-MP4.exeを原子的に最新Releaseへ置換した。SHA256はA28D345DD15D967D0C95E646923BC812E5CE7F6FDAFC69F5EBABEDA301F229E5。通常EXEから起動できる。旧EXEはWin64/Validation/TitleAccent-20261012-3f537d1c/ExeBackupsへ退避。ユーザーの実作品を開いたり書き換えたりしていない。Gitへのステージング・コミット・pushは行っていない。
+
+仕様は[工程・入力・表示](Source/Shell/Pages/SCRIPT-NAVIGATION-20261009.md)。証跡はWin64/Validation/TitleAccent-20261012-3f537d1cのWorkflow結果・API履歴・画面画像、Debug/Releaseログ、source hash・encoding・deployment・保護ファイルJSON。完全な専用データ、ソース変更前、途中試行、ビルド出力はC:/Users/zan12/AppData/Local/Temp/RigmTitleAccent-20261012-3f537d1cに保持する。
+
+## 2026-10-12 総評を行ごとの音声へ反映し、1つの動画シーンへ集約
+
+総評だけ複数行を1cueへまとめていたため、1行表示の音声調整では後続の文章を個別に扱えなかった。空行を除く改行単位で配役・字幕・音声へ渡し、すべて同じ総評チャートsceneへまとめるよう修正した。総評各行の音声と間を合計して動画時間を作り、締めより前に並べる。シーン割当は総評の全行を除外し、固定境界を保つ。
+
+行別の字幕・読みを総評draftへ同期し、未変更行のID・確定配役・個別query・音声を保持する。挿入行は以前の別行の読みを借用しない。総評なしでは全cue・配役・チャートを退避し、同じ原稿で戻すと復元する。旧保存を再開すると、原稿一致を確認してスナップショット上で分割し、最初のcue ID・チャート・確定配役を維持する。旧1cueと音声参照はsummaryData.lineMigrationへ残す。分割後の音声は生成・再生確認をやり直す。区切りの異なる独立した読みを入力済みの旧総評は一続きの読みを保持する。
+
+専用fixtureの総評検証102項目と、最終の全工程検証444項目が成功した。6行のネイティブ一覧・各行の所有HTTP合成・動画の時刻対応・字幕/読みの保持・追加/空行・無効化と復元・保存再開・旧音声工程の自動移行を確認した。実台本は読み込み後にメモリ上だけで比較し、総評1cueから6cue（作品全体39から44）、通常38cueのJSON不変、チャートと先頭ID保持、元ファイルのSHA-256一致を確認した。実台本・元音声・ユーザー設定は変更していない。実VOICEVOXでの聴取比較は行っていない。
+
+途中試行では旧追加総評のID引継ぎ漏れを修正した。検証側も、工程保存後に無効になるcue/speaker借用参照の再取得、非アクティブ画面でのジョブ結果回収、字幕を字幕工程で操作する手順へ修正した。全工程の途中試行には入力フォーカス条件、アクセントのAPI要求回数で停止した回もあり、そのログを残した。最終試行はすべて成功した。
+
+公式dprojと同じパスでWin64 Debug／Release成功。エラー0・追加警告0、既存警告各13件。git diff --check成功。アプリ終了と開始時EXEハッシュ一致を確認して通常RIGMMaker.exe・別名RIGMMaker-MP4.exeへ同じReleaseを原子的に配置し、元EXEを退避した。配置後SHA-256は4665F27A3165C3C73CDC34A0D9865BB063DE2A3D0FDC722CEB43C7FB7F118619。dproj・RES・VoicevoxEngine.iniは開始時ハッシュと一致した。
+
+仕様は[工程・音声の詳細](Source/Shell/Pages/SCRIPT-NAVIGATION-20261009.md)。証跡はWin64/Validation/SummaryLines-20261012-8f4ffe86のfocused-result.json、workflow-result.json、real-readonly-result.json、summary-six-lines-voice.png、Debug・Release/build.log、verification.json、deployment.json。完全な隔離出力・途中試行・開始前退避はC:/Users/zan12/AppData/Local/Temp/RigmSummaryLines-20261012-8f4ffe86。通常EXEから起動して保存済み台本を再開できる。
+## 2026-10-12 きりたんの制作ルールとコピー後に残る締め題名を修正
+
+ユーザーが修正済みサムネイルを採用した。今回の画像を保持し、今後は原画の髪・肌・衣服の色を優先し、きりたんへ場面とセリフに合う表情・視線・身振り・体の向きを付ける。参照画像の棒立ち姿勢を固定しない。画像制作ルール、基本事項、制作支援の入口、学習記録と一覧へ反映した。学習記録の画像受渡し時点の検証は保持し、後続のユーザー採用とアプリ上のサムネイル確定を分けて記録した。
+
+実台本「異世界『嘘』ガイド」の旧作品名は、scriptWizard.closingData.draft.titleとscenes[10].animation.closingCard.titleに残っていた。コピーが締め題名を保持する一方、作品名変更時に更新しないのが原因だった。締め題名の自動連動をclosingData.titleFollowsProjectへ保存し、コピー時に保持する。旧形式は空でない締め題名と入力/保存済み作品名の一致で判定する。手入力の独自見出し・表示しないための空欄は保持する。作品名をいったん空にして保存・再開しても自動連動を維持し、既存の動画用締めカードへも題名だけを反映する。新規準備時は未保存の作品名入力を優先する。
+
+実台本はPID 24128・projectId {0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}・revision 1270の最新状態を取得・退避してから既存パイプで締め設定へ移動。全draftのうち題名だけを最新作品名へ変更し、締め確認を完了して元の画像工程へ戻した。revision 1274で保存済み、voiceReady/scenesReadyともtrue。JSON全差分は締め題名2か所・revision・更新日時だけ。44セリフと音声・割当、全11シーンの画像/要望/確定、背景、サムネイル、末尾カードを保持した。現在使用する項目の旧名は0件。以前の配役を残すcastingArchivesは意図的な履歴なので書き換えていない。その後の別操作による再起動後も保存済みの締め題名を確認した。
+
+専用データのコピー回帰76項目、総評fixture102項目、全工程444項目が成功した。コピー・空欄での保存・別Workspaceからの再開・複数世代コピー・独自見出し・空欄の保持・動画カード・音声と画像設定の保持・不正入力の無変更拒否を確認。途中の検証では、別Workspaceが同じファイルへ保存した後に元Workspaceが同じUIDを再開すると、既存インスタンスを再利用して古い値へ戻る別件を観測した。今回の回帰は外部更新を混ぜず、別Workspaceによるディスク読込と入力、元Workspaceによる保存を分けて検証した。この外部更新後のキャッシュ問題は今回の修正対象外。
+
+正規dprojと同じ検索パスによる隔離Win64 Debug/Releaseは成功。エラー0・追加警告0、既存W警告各13件。git diff --check成功。検証済みReleaseを、停止中で開始時SHA一致を確認したRIGMMaker-MP4.exeへ配置し、旧別名EXEを退避した。Release SHA256はB6F229C75387B70EDA55F87A1B195F8F7B8C25E41111AAF3DBDC63D90CB34C93。
+
+配置確認中に、通常EXEが別操作で更新されPID 24128から6936へ再起動されたことを検出した。通常EXEはこの作業では変更していない。新しい通常EXEには連動設定の文字列が含まれるが、この作業の製品ビルドと同じ版とは扱わない。検証済み版はアプリ終了後に別名EXEから起動する。
+
+仕様はSource/Shell/Pages/SCRIPT-COPY-20261012.mdとIMAGE-WORKFLOW-20261007.md。証跡・開始前台本・パイプ応答・全JSON差分・各検証とビルド・旧別名EXE・配置情報はoutput/validation/20261012-copy-title。実作品の画像生成や再生成、音声生成、動画出力は行っていない。
+
+## 2026-10-12 総評の表示字幕をセリフから初期設定
+
+ユーザーから、動画の総評でセリフが字幕に表示されないと報告。実台本の総評draft.subtitleと総評6cueのsubtitleが全て空だった。総評の設定処理が通常の字幕初期値を空の任意入力で上書きし、描画側が空のC.Subtitleを正しく非表示にしていたことが原因。
+
+総評入力の表示字幕が空なら各cue.Textを表示字幕に使うよう変更し、画面も「表示字幕（空ならセリフを使用）」へ更新した。既存の独立字幕と字幕工程で編集した表示文・個別に非表示へした字幕は、原稿と総評入力が変わらない限り保持する。挿入した新しい総評行は自分のセリフを表示し、以前の別行の独立字幕を借用しない。旧1cueの総評を直接追加する互換経路も同じ初期値とした。描画側には変更を加えていない。
+
+実台本「異世界『嘘』ガイド」は通常アプリPID 6936・projectId {0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}の最新状態で取得。既存movie-saveを使って未保存内容を保持してから読み取り、総評6行が空欄であることを確認して、movie-update-subtitleを各行の最新revisionで実行し、既存movie-saveで保存した。revision 1283・modified=false。前後のJSON全項目を比較し、変更は6行のsubtitleとrevisionだけ。全44行の原稿・読み・音声・割当、全シーン・画像・確定、背景・サムネイル・締め題名を保持した。既存MP4は上書きしていない。字幕反映には動画の再出力が必要。
+
+総評fixture116項目・全工程458項目が成功。6行の既定字幕、独立字幕と個別非表示の保持、挿入行の初期字幕、各行の字幕領域に実際の描画ピクセルがあることを確認した。実保存台本も読取専用で6フレームを描画し、修正前後の字幕領域の差と原本SHA不変を確認。先頭・末尾の実描画画像を目視確認した。動画全体の再エンコードはしていない。
+
+正規dprojと同じ検索パスでWin64 Debug/Release成功。エラー0・追加警告0、既存W警告各13件。git diff --check成功。起動中の通常EXEは保持し、停止中・開始時SHA一致を確認した別名RIGMMaker-MP4.exeへ検証済みReleaseを配置し、以前の別名EXEを退避した。Release SHA256は9AEEEE1C593F6CA3B8CB0B108AC15018BAFD6CBD5DAA25FD2ADFE3E14EE9871B。現在の台本の字幕は起動中のアプリへ反映済み。今後の自動初期値を使うには終了後に別名EXEから起動する。
+
+実作品のmovie-projectとmovie-timelineは、少ないcue件数でも全体メタデータを含めるため共通パイプの60KB応答上限で拒否された。上限は変更せず、アプリ内の明示保存を通じて現在の正本を退避・検証した。補助の読取専用描画プログラムはusesの不足と退避JSONの相対素材パスを修正した後に成功。製品コードの追加変更は不要だった。
+
+仕様はSource/Shell/Pages/SCRIPT-NAVIGATION-20261009.md。開始前の保存ファイル・未保存入力を保存した前後のJSON・パイプ応答・全差分確認・116/458項目・実描画6枚と結果・Debug/Releaseログ・旧別名EXE・配置記録はoutput/validation/20261012-summary-subtitles。
+
+## 2026-10-12 第12段階の字幕・メモを直接編集可能に修正
+
+ユーザーから「字幕編集なのに字幕が編集できない」と報告。RigmScriptSubtitleFrameが字幕欄・メモ欄を読み取り専用で開き、編集アイコンかEnterの操作だけで解除するため、行選択・入力完了・保存後に再び入力できなくなっていた。実アプリはPID 6936で制作を継続しており、読み取り時点では同じ「男子校のくらげ先生」の音声生成中だった。実作品の工程・入力・生成処理は変更していない。
+
+現在の配役と字幕の前提が有効なら、選択直後から字幕・メモを直接編集できるよう変更。キー・マウス・貼り付けによる変更を共通モデルへ反映し、入力完了・保存後も編集可能にする。編集アイコンとEnterは入力欄へのフォーカス移動として維持し、一覧のダブルクリックも同じ処理へ接続した。旧い配役では理由を表示して欄を読み取り専用にする。正規化した文が同じならMemo.Textを設定し直さず、選択範囲・カーソル・Undoを保持する。原稿・音声・シーンのモデルと保存形式は変更していない。
+
+所有fixtureの実VCL画面へネイティブWM_CHAR・複数行の日本語貼り付けを送り、修正前に「第12段階を開いた直後から字幕とメモへ入力できる」の項目が失敗することを確認した。修正後の全工程477項目は成功。今回追加した19項目で、直接入力・貼り付け・Undo、10回の同一状態通知での選択保持、メモ、別行の編集、完了後の再編集と確認解除、保存前の入力検証、無効なメモの保持、古い配役での編集禁止と復帰、前工程からの再表示、原稿・音声指紋・シーンの保持を確認。所有fixtureの字幕画面も画像で目視確認した。物理キーボードの実IME操作は未実施。
+
+正規dprojと同じ検索パスを使う隔離Win64 Debug/Releaseは成功。各エラー0・既存W警告13・Hヒント55、字幕画面の追加警告0。検証済みReleaseのSHA256は8EEF5373A690366051102842391EAD944763050CDCA3798697EAB9135AFD9C9A。停止中・開始時SHA一致を確認したRIGMMaker-MP4.exeへ配置し、旧別名EXEを退避した。PID 6936が使用する通常EXEは保持し、SHA256 ABC31BCF16204FE7D54D917E6C0EE6359B6B30AE3669F48CD1D53F6485861F9Eのまま。修正版を使うには制作を保存して通常アプリを終了し、別名EXEから起動する。
+
+仕様はSource/Shell/Pages/SCRIPT-NAVIGATION-20261009.md。修正前ソース、再現結果、477項目と画面、Debug/Releaseログ・EXE、旧別名EXE、配置記録はoutput/validation/20261012-subtitle-editing。実作品や音声・画像の生成、動画出力は行っていない。

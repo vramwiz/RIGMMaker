@@ -27,7 +27,8 @@ type
     FFrameLength: TFrameSerifVoicevoxLength;
     FFrameVoice: TFrameSerifVoicevoxAudioSettings;
     FPanelShortcuts: TPanel;
-    FAdjustments: TScrollBox; // 3つの調整部品を順に並べ、狭い画面では縦スクロールする。
+    FAdjustments: TScrollBox; // 共通設定と3つの調整を同じ画面に固定する。
+    FCommonTitle: TLabel;
     FLayouting: Boolean;
     FColumnSync: Boolean; FWheelRemainder: Integer;
     FScrollEvents: TApplicationEvents;
@@ -45,6 +46,16 @@ type
     FSaveTimer: TTimer;
     FSettings: TSerifVoicevoxAudioSettings;
     FUpdatingQuery: Boolean;
+    FMoraTimer: TTimer;
+    FMoraThread: TThread;
+    FMoraNotifyHandle: HWND;
+    FMoraVersion: Cardinal;
+    procedure CancelMoraRefresh;
+    procedure ScheduleMoraRefresh;
+    procedure MoraTimerTimer(Sender: TObject);
+    procedure MoraComplete(var Msg: TMessage);
+    function MoraRefreshPending: Boolean;
+    function MoraInputBusy: Boolean;
     function GetHasQuery: Boolean;
     procedure AccentChange(Sender: TObject; const QueryJson: string);
     procedure AccentError(Sender: TObject; const ErrorMessage: string);
@@ -71,7 +82,7 @@ type
     function RowValues: TSerifVoicevoxAudioValues;
     function RequestFinish: Boolean;
     procedure SetEditingEnabled(Value: Boolean);
-    procedure UseAdjustmentOnly; // 調整3段を同じページに並べ、基本設定だけ別ページにする。
+    procedure UseAdjustmentOnly; // 共通設定・アクセント・音高・音素長を同じページに並べる。
     procedure ShowNotice(const Text: string);
     property HasQuery: Boolean read GetHasQuery;
     property OnQueryReady: TNotifyEvent read FOnQueryReady write FOnQueryReady;
@@ -114,9 +125,44 @@ type
 implementation
 
 uses
-  System.SysUtils, System.Math, System.Types, AviUtl2StyleColors, VerticalSliderControl, HorizontalScrollBarControl;
+  System.SysUtils, System.Math, System.Types, AviUtl2StyleColors, VerticalSliderControl, HorizontalScrollBarControl,
+  RigmVoicevoxUiWorker, SerifVoicevoxApi;
 
 {$R *.dfm}
+const MORA_COMPLETE_MESSAGE = WM_APP + $5724;
+  MORA_REFRESH_DELAY_MS = 450;
+type
+  TSerifVoicevoxMoraThread = class(TRigmVoicevoxUiWorker)
+  private
+    FNotifyHandle: HWND;
+    FVersion: Cardinal;
+    FSpeakerId: Integer;
+    FSourceQuery, FQueryJson, FError: string;
+    FSuccess: Boolean;
+  protected
+    procedure Execute; override;
+  public
+    constructor Create(NotifyHandle: HWND; Version: Cardinal; SpeakerId: Integer;
+      const SourceQuery, BaseUrl: string);
+  end;
+constructor TSerifVoicevoxMoraThread.Create(NotifyHandle: HWND; Version: Cardinal;
+  SpeakerId: Integer; const SourceQuery, BaseUrl: string);
+begin
+  inherited Create(True);
+  FNotifyHandle := NotifyHandle; FVersion := Version; FSpeakerId := SpeakerId;
+  FSourceQuery := SourceQuery; EngineUrl := BaseUrl;
+end;
+procedure TSerifVoicevoxMoraThread.Execute;
+begin
+  try
+    PrepareApi;
+    try
+      if not Terminated then FSuccess := TSerifVoicevoxApi.RecalculateMoraData(
+        FSourceQuery,FSpeakerId,FQueryJson,FError);
+    finally FinishApi; end;
+  except on E: Exception do FError := E.Message; end;
+  PostMessage(FNotifyHandle,MORA_COMPLETE_MESSAGE,FVersion,0);
+end;
 
 constructor TFrameSerifVoicevoxSettings.Create(AOwner: TComponent);
 begin
@@ -133,6 +179,9 @@ begin
   FDisplayedStyleId := -1;
   FSettings := TSerifVoicevoxAudioSettings.Create;
 
+  FMoraNotifyHandle := AllocateHWnd(MoraComplete);
+  FMoraTimer := TTimer.Create(Self); FMoraTimer.Enabled := False;
+  FMoraTimer.Interval := MORA_REFRESH_DELAY_MS; FMoraTimer.OnTimer := MoraTimerTimer;
   FSaveTimer := TTimer.Create(Self);
   FSaveTimer.Enabled := False;
   FSaveTimer.Interval := 300;
@@ -196,9 +245,14 @@ end;
 function TFrameSerifVoicevoxSettings.GetHasQuery: Boolean;
 begin Result := FQueryJson<>''; end;
 procedure TFrameSerifVoicevoxSettings.ShowNotice(const Text: string);
-begin if FNotice.Caption<>Text then FNotice.Caption := Text; FNotice.Visible := Text<>''; end;
+begin
+  if FNotice.Caption<>Text then FNotice.Caption := Text;
+  FNotice.Hint := Text; FNotice.ShowHint := True;
+  FNotice.Visible := (FAdjustments<>nil) or (Text<>'');
+end;
 procedure TFrameSerifVoicevoxSettings.UseAdjustmentOnly;
 begin
+  FFrameAccent.AutoAnalyze := False;
   if FAdjustments=nil then begin
     DisableAlign;
     try
@@ -210,19 +264,28 @@ begin
       FAdjustments.DisableAlign;
       try
         var I := 0;
-        for var Panel in [PanelAccent,PanelIntonation,PanelLength] do begin
-          Panel.Parent := FAdjustments; Panel.Align := alTop; Panel.Top := I*154; Panel.Visible := True;
+        for var Panel in [PanelAccent,PanelIntonation,PanelLength,PanelVoice] do begin
+          Panel.Parent := FAdjustments; Panel.Align := alTop; Panel.Top := MulDiv(I*194,CurrentPPI,96); Panel.Visible := True;
           var Title := TLabel.Create(Self); Title.Parent := Panel; Title.Align := alTop;
           Title.AutoSize := False; Title.Height := MulDiv(24,CurrentPPI,96); Title.Font.Color := A2SCPanelText;
-          case I of 0: Title.Caption := 'アクセント'; 1: Title.Caption := '音高'; 2: Title.Caption := '音素長'; end;
+          case I of
+            3: begin
+              FCommonTitle := Title; Title.Name := 'VoicevoxCommonSettings'; Title.WordWrap := True;
+              Title.Height := MulDiv(64,CurrentPPI,96);
+              Title.Caption := '共通設定（全セリフ）'+sLineBreak+
+                '変更すると全セリフの音声と再生確認をやり直します。個別のアクセント編集は保持します。';
+            end;
+            0: Title.Caption := 'アクセント'; 1: Title.Caption := '音高'; 2: Title.Caption := '音素長';
+          end;
           Inc(I);
         end;
       finally FAdjustments.EnableAlign; end;
       FAdjustments.OnResize := LayoutAdjustments;
+      FFrameVoice.Align := alNone;
       FScrollEvents := TApplicationEvents.Create(Self); FScrollEvents.OnMessage := AdjustmentMessage;
     finally EnableAlign; end;
   end;
-  FToolbar.UseAdjustmentOnly; FNotice.Height := MulDiv(32,CurrentPPI,96); ShowNotice('');
+  FToolbar.UseAdjustmentOnly; FNotice.Height := MulDiv(48,CurrentPPI,96); ShowNotice('');
   ToolbarPageSelected(Self,FToolbar.ActivePage); LayoutAdjustments(Self);
 end;
 procedure TFrameSerifVoicevoxSettings.LayoutAdjustments(Sender: TObject);
@@ -235,6 +298,9 @@ begin
     FAdjustments.DisableAlign;
     try
       for var Panel in [PanelAccent,PanelIntonation,PanelLength] do Panel.Height := PartHeight;
+      FCommonTitle.Height := MulDiv(64,CurrentPPI,96);
+      PanelVoice.Height := MulDiv(194,CurrentPPI,96);
+      FFrameVoice.SetBounds(0,FCommonTitle.Height,Min(FAdjustments.ClientWidth,MulDiv(420,CurrentPPI,96)),MulDiv(130,CurrentPPI,96));
     finally FAdjustments.EnableAlign; end;
   finally FLayouting := False; end;
 end;
@@ -278,7 +344,7 @@ end;
 procedure TFrameSerifVoicevoxSettings.ShowRow(const Text, SpeakerUUID: string;
   StyleId: Integer; const Values: TSerifVoicevoxAudioValues; const QueryJson, EngineUrl: string);
 begin
-  FRowMode := True; FSaveTimer.Enabled := False;
+  CancelMoraRefresh; FRowMode := True; FSaveTimer.Enabled := False;
   FCurrentText := Text; FCurrentSpeakerUUID := SpeakerUUID; FCurrentStyleId := StyleId;
   FDisplayedStyleId := StyleId; FFrameVoice.SetValues(Values); FFrameAccent.EngineUrl := EngineUrl;
   FUpdatingQuery := True;
@@ -295,12 +361,18 @@ function TFrameSerifVoicevoxSettings.RequestFinish: Boolean;
 begin
   Result := FFrameVoice.RequestFinish and FFrameIntonation.RequestFinish and FFrameLength.RequestFinish;
   if Result then Result := FFrameAccent.RequestFinish;
+  if Result then CancelMoraRefresh;
 end;
 procedure TFrameSerifVoicevoxSettings.SetEditingEnabled(Value: Boolean);
-begin FFrameAccent.Enabled := Value; FFrameIntonation.Enabled := Value; FFrameLength.Enabled := Value; FFrameVoice.Enabled := Value; end;
+begin
+  if not Value then CancelMoraRefresh;
+  FFrameAccent.Enabled := Value; FFrameIntonation.Enabled := Value;
+  FFrameLength.Enabled := Value; FFrameVoice.Enabled := Value;
+end;
 
 procedure TFrameSerifVoicevoxSettings.ApplyDpi;
 begin
+  if FAdjustments<>nil then FNotice.Height := MulDiv(48,CurrentPPI,96);
   if Assigned(FToolbar) then FToolbar.ApplyDpi;
   if Assigned(FFrameAccent) then FFrameAccent.ApplyDpi;
   if Assigned(FFrameIntonation) then FFrameIntonation.ApplyDpi;
@@ -309,12 +381,78 @@ begin
   SyncColumns;
 end;
 
+procedure TFrameSerifVoicevoxSettings.CancelMoraRefresh;
+begin
+  if FMoraTimer<>nil then FMoraTimer.Enabled := False;
+  Inc(FMoraVersion); if FMoraVersion=0 then Inc(FMoraVersion);
+  if FMoraThread<>nil then TRigmVoicevoxUiWorker(FMoraThread).Cancel;
+end;
+function TFrameSerifVoicevoxSettings.MoraRefreshPending: Boolean;
+begin
+  Result := FMoraTimer.Enabled or ((FMoraThread<>nil) and not TSerifVoicevoxMoraThread(FMoraThread).Terminated);
+end;
+procedure TFrameSerifVoicevoxSettings.ScheduleMoraRefresh;
+begin
+  CancelMoraRefresh;
+  FMoraTimer.Enabled := (FQueryJson<>'') and (FCurrentStyleId>=0) and FFrameAccent.Enabled;
+end;
+function TFrameSerifVoicevoxSettings.MoraInputBusy: Boolean;
+begin
+  Result := (GetKeyState(VK_LBUTTON)<0) or
+    ((FindControl(GetFocus) is TCustomEdit) and IsChild(Handle,GetFocus));
+end;
+procedure TFrameSerifVoicevoxSettings.MoraTimerTimer(Sender: TObject);
+begin
+  // マウスを押したまま止めている間も、操作途中のグラフを差し替えない。
+  if MoraInputBusy or (FMoraThread<>nil) then Exit;
+  FMoraTimer.Enabled := False;
+  if (FQueryJson='') or (FCurrentStyleId<0) or not FFrameAccent.Enabled then Exit;
+  FMoraThread := TSerifVoicevoxMoraThread.Create(FMoraNotifyHandle,FMoraVersion,
+    FCurrentStyleId,FQueryJson,FFrameAccent.EngineUrl);
+  FMoraThread.Start;
+end;
+procedure TFrameSerifVoicevoxSettings.MoraComplete(var Msg: TMessage);
+begin
+  if Msg.Msg<>MORA_COMPLETE_MESSAGE then begin Msg.Result := DefWindowProc(FMoraNotifyHandle,Msg.Msg,Msg.WParam,Msg.LParam); Exit; end;
+  Msg.Result := 0;
+  if (FMoraThread=nil) or (Cardinal(Msg.WParam)<>TSerifVoicevoxMoraThread(FMoraThread).FVersion) then Exit;
+  var Worker := TSerifVoicevoxMoraThread(FMoraThread);
+  Worker.WaitFor;
+  var Current := (Worker.FVersion=FMoraVersion) and not Worker.Terminated and
+    (Worker.FSourceQuery=FQueryJson) and (Worker.FSpeakerId=FCurrentStyleId);
+  var Query := Worker.FQueryJson; var Error := Worker.FError; var Success := Worker.FSuccess;
+  FMoraThread := nil; Worker.Free;
+  if not Current then Exit;
+  if MoraInputBusy then begin ScheduleMoraRefresh; Exit; end;
+  if not Success then begin
+    // 再計算失敗では入力済みqueryとグラフを維持し、通常の再生で再試行できる。
+    if Assigned(FOnError) then FOnError(Self,'音高・音素長の表示更新に失敗しました：'+Error);
+    Exit;
+  end;
+  FUpdatingQuery := True; LockDrawing;
+  try
+    Query := FFrameIntonation.ShowQuery(Query);
+    Query := FFrameLength.ShowQuery(Query);
+    FFrameAccent.ShowText(FCurrentText,FCurrentStyleId,Query);
+    FQueryJson := Query; SyncColumns;
+  finally UnlockDrawing; FUpdatingQuery := False; end;
+  if Assigned(FOnAccentChange) then FOnAccentChange(Self,Query);
+  if Assigned(FOnQueryReady) then FOnQueryReady(Self);
+end;
+
 procedure TFrameSerifVoicevoxSettings.AccentChange(Sender: TObject;
   const QueryJson: string);
 var
   SharedQuery: string;
 begin
   if FUpdatingQuery then Exit;
+  if FFrameAccent.AccentPositionUpdate then begin
+    FQueryJson := QueryJson;
+    FFrameIntonation.UpdateAccentQuery(QueryJson); FFrameLength.UpdateAccentQuery(QueryJson);
+    ScheduleMoraRefresh;
+    if Assigned(FOnAccentChange) then FOnAccentChange(Self,QueryJson);
+    Exit;
+  end;
   FUpdatingQuery := True;
   try
     SharedQuery := FFrameIntonation.ShowQuery(QueryJson);
@@ -327,7 +465,10 @@ begin
   FQueryJson := SharedQuery;
   SyncColumns;
   if FFrameAccent.AnalysisUpdate then begin if Assigned(FOnQueryReady) then FOnQueryReady(Self); end
-  else if Assigned(FOnAccentChange) then FOnAccentChange(Self,SharedQuery);
+  else begin
+    ScheduleMoraRefresh;
+    if Assigned(FOnAccentChange) then FOnAccentChange(Self,SharedQuery);
+  end;
 end;
 
 procedure TFrameSerifVoicevoxSettings.IntonationChange(Sender: TObject;
@@ -336,6 +477,7 @@ var
   SharedQuery: string;
 begin
   if FUpdatingQuery then Exit;
+  var PendingRefresh := MoraRefreshPending;
   FUpdatingQuery := True;
   try
     SharedQuery := FFrameLength.ShowQuery(QueryJson);
@@ -345,6 +487,7 @@ begin
   end;
   FQueryJson := SharedQuery;
   SyncColumns;
+  if PendingRefresh then ScheduleMoraRefresh;
   if Assigned(FOnAccentChange) then FOnAccentChange(Self, SharedQuery);
 end;
 
@@ -354,6 +497,7 @@ var
   SharedQuery: string;
 begin
   if FUpdatingQuery then Exit;
+  var PendingRefresh := MoraRefreshPending;
   FUpdatingQuery := True;
   try
     SharedQuery := FFrameIntonation.ShowQuery(QueryJson);
@@ -363,6 +507,7 @@ begin
   end;
   FQueryJson := SharedQuery;
   SyncColumns;
+  if PendingRefresh then ScheduleMoraRefresh;
   if Assigned(FOnAccentChange) then FOnAccentChange(Self, SharedQuery);
 end;
 
@@ -370,7 +515,7 @@ procedure TFrameSerifVoicevoxSettings.AccentError(Sender: TObject;
   const ErrorMessage: string);
 begin
   // 更新失敗時は、操作不可で保持していた旧イントネーションを残さない。
-  FQueryJson := ''; FFrameIntonation.ShowQuery(''); FFrameLength.ShowQuery('');
+  CancelMoraRefresh; FQueryJson := ''; FFrameIntonation.ShowQuery(''); FFrameLength.ShowQuery('');
   SyncColumns;
   if Assigned(FOnError) then FOnError(Self, ErrorMessage);
 end;
@@ -432,6 +577,9 @@ end;
 
 destructor TFrameSerifVoicevoxSettings.Destroy;
 begin
+  CancelMoraRefresh;
+  if FMoraThread<>nil then begin FMoraThread.WaitFor; FreeAndNil(FMoraThread); end;
+  if FMoraNotifyHandle<>0 then DeallocateHWnd(FMoraNotifyHandle);
   FSaveTimer.Enabled := False;
   FSettings.Save;
   FSettings.Free;
@@ -474,11 +622,12 @@ var
   KeepIntonation: Boolean;
   SharedQuery: string;
 begin
+  CancelMoraRefresh;
   KeepIntonation := (Trim(Text) = Trim(FCurrentText)) and
     (FDisplayedStyleId >= 0) and (StyleId >= 0) and
     (FDisplayedStyleId <> StyleId) and (Trim(QueryJson) = '');
   FCurrentText := Text;
-  FDisplayedStyleId := StyleId;
+  FDisplayedStyleId := StyleId; FCurrentStyleId := StyleId;
   FUpdatingQuery := True;
   try
     SharedQuery := FFrameIntonation.ShowQuery(QueryJson, KeepIntonation);
@@ -487,6 +636,7 @@ begin
   finally
     FUpdatingQuery := False;
   end;
+  FQueryJson := SharedQuery;
   if (SharedQuery <> QueryJson) and Assigned(FOnAccentChange) then
     FOnAccentChange(Self, SharedQuery);
 end;
@@ -509,8 +659,7 @@ begin
   DisableAlign;
   try
     if FAdjustments<>nil then begin
-      FAdjustments.Visible := Page<>vtpAudioSettings;
-      FPanelShortcuts.Visible := False; PanelVoice.Visible := Page=vtpAudioSettings;
+      FAdjustments.Visible := True; FPanelShortcuts.Visible := False; PanelVoice.Visible := True;
       LayoutAdjustments(Self); Exit;
     end;
     PanelAccent.Visible := Page = vtpAccent;

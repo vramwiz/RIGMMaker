@@ -1,0 +1,116 @@
+PASS stable IDs expose the requested stage order
+PASS dragging allows negative coordinates without shrinking the character
+PASS resizing can exceed the canvas while retaining the aspect ratio
+PASS native placement preview begins a captured drag
+PASS native mouse drag commits the off-screen character
+PASS shared pipe command accepts a wholly off-screen placement
+PASS L-shaped layout preserves an existing off-screen placement
+PASS movie model accepts the same linked off-screen placement
+PASS save and reopen preserve the off-screen position and size
+PASS reset stays available through the character list even when its sprite is outside the preview
+PASS reset restores initial x
+PASS reset restores initial y
+PASS reset restores initial width
+PASS reset restores initial height
+PASS reset retains the selected character and mirror setting
+PASS stage six proceeds to summary before casting creates dialogue
+PASS closing page removes seconds and coordinate table controls
+PASS closing defers mandatory thumbnail to the final image item
+PASS unselected closing image has an explicit prompt 0
+PASS unselected closing image has an explicit prompt 1
+PASS closing image heading, choice, button and path stay readable at 96 DPI, row 0
+PASS closing image heading, choice, button and path stay readable at 96 DPI, row 1
+PASS closing speech and labeled confirmation remain usable at 96 DPI
+PASS editing visible closing fields preserves existing hidden seconds and geometry
+PASS adopting an existing closing image refreshes its visible selection representative
+PASS adopting an existing closing image refreshes its visible selection endImage
+PASS closing previews leave choices, source text and saved geometry unchanged
+PASS closing confirms image choices without casting or generated audio
+PASS summary-none confirmation still accepts summary speech input
+PASS summary-none casting creates no extra dialogue or chart scene
+PASS summary-none casting contains ordinary speech only
+PASS summary-none casting contains ordinary speech only
+PASS summary-none casting contains ordinary speech only
+PASS summary-none casting contains ordinary speech only
+PASS native memo input preserves the saved summary-none choice
+PASS native summary input updates the shared script section
+PASS summary-none input keeps the optional chart hidden and permits casting
+PASS confirmation marks the unused summary draft without asking for chart scores
+PASS saving and reopening retains both the summary-none choice and typed draft
+PASS summary-none with a stored draft advances to casting without a chart
+PASS only an explicit choice enables the stored summary draft
+PASS explicit summary-yes still requires human chart values before casting
+PASS missing summary chart identifies its input stage, first row and required fields
+PASS confirmation page shows the blocking reason beside its repair action
+PASS summary speech remains editable after save and reopen
+PASS missing chart offers a labeled action to return to its input page
+PASS missing chart still blocks casting without inventing evaluation values
+PASS repair action preserves all script sections and chart draft
+PASS chart input fixes the five labels and identifies the missing score
+PASS invalid score identifies the row and item without changing the draft
+PASS valid chart clears the blocking reason and repair action
+PASS completed chart saves, reopens and advances to casting with the entered summary
+PASS six summary source lines create six casting and voice cues
+PASS each summary line points to its source range and the same chart scene 総評の一行目。
+PASS summary line cannot split its chart scene 総評の一行目。
+PASS each summary line points to its source range and the same chart scene 総評の二行目。
+PASS summary line cannot split its chart scene 総評の二行目。
+PASS each summary line points to its source range and the same chart scene 総評の三行目。
+PASS summary line cannot split its chart scene 総評の三行目。
+PASS each summary line points to its source range and the same chart scene 総評の四行目。
+PASS summary line cannot split its chart scene 総評の四行目。
+PASS each summary line points to its source range and the same chart scene 総評の五行目。
+PASS summary line cannot split its chart scene 総評の五行目。
+PASS each summary line points to its source range and the same chart scene 総評の六行目。
+PASS summary line cannot split its chart scene 総評の六行目。
+PASS all six summary lines precede closing in one enabled chart scene
+PASS assignment excludes every summary line
+PASS blank summary subtitle input defaults to its individual source line 総評の一行目。
+PASS blank summary subtitle input defaults to its individual source line 総評の二行目。
+PASS blank summary subtitle input defaults to its individual source line 総評の三行目。
+PASS blank summary subtitle input defaults to its individual source line 総評の四行目。
+PASS blank summary subtitle input defaults to its individual source line 総評の五行目。
+PASS blank summary subtitle input defaults to its individual source line 総評の六行目。
+PASS voice list includes every ordinary and summary cue
+PASS voice list displays the full individual summary line 総評の一行目。
+PASS summary line synthesizes and stores its own audio 総評の一行目。
+PASS voice list displays the full individual summary line 総評の二行目。
+PASS summary line synthesizes and stores its own audio 総評の二行目。
+PASS voice list displays the full individual summary line 総評の三行目。
+PASS summary line synthesizes and stores its own audio 総評の三行目。
+PASS voice list displays the full individual summary line 総評の四行目。
+PASS summary line synthesizes and stores its own audio 総評の四行目。
+PASS voice list displays the full individual summary line 総評の五行目。
+PASS summary line synthesizes and stores its own audio 総評の五行目。
+PASS voice list displays the full individual summary line 総評の六行目。
+PASS summary line synthesizes and stores its own audio 総評の六行目。
+PASS summary pipe returns all six cues and aggregate audio readiness
+PASS movie timeline plays each summary cue within its shared chart scene 総評の一行目。
+PASS movie timeline plays each summary cue within its shared chart scene 総評の二行目。
+PASS movie timeline plays each summary cue within its shared chart scene 総評の三行目。
+PASS movie timeline plays each summary cue within its shared chart scene 総評の四行目。
+PASS movie timeline plays each summary cue within its shared chart scene 総評の五行目。
+PASS movie timeline plays each summary cue within its shared chart scene 総評の六行目。
+PASS summary chart duration covers all six audio cues
+PASS summary dialogue renders visible subtitle pixels for line 1
+PASS summary dialogue renders visible subtitle pixels for line 2
+PASS summary dialogue renders visible subtitle pixels for line 3
+PASS summary dialogue renders visible subtitle pixels for line 4
+PASS summary dialogue renders visible subtitle pixels for line 5
+PASS summary dialogue renders visible subtitle pixels for line 6
+PASS editing one summary reading retains the other source readings in the shared draft
+PASS casting preparation preserves individual summary reading and subtitle
+PASS individual hidden subtitle and custom display text survive summary reconfiguration
+PASS summary-none archives and removes all six cues and the chart scene
+PASS reenabling the same summary restores all cue IDs, edits, audio and chart
+PASS editing one summary source line preserves unchanged summary IDs, audio and chart assignment
+PASS summary text edits keep exactly one shared chart scene
+PASS inserting a summary line keeps existing readings and uses source speech for the new line
+PASS new summary line displays its own speech instead of an inherited subtitle or blank
+PASS blank lines in summary source do not create empty audio cues or extra scenes
+PASS six summary cues and their individual readings survive save and reload
+PASS opening a saved legacy voice-stage project automatically splits all six summary lines
+PASS legacy migration preserves ordinary cues and the first summary ID and chart
+PASS legacy migration archives the original whole-summary cue and audio references
+PASS migrated lines retain confirmed roles and require their own regenerated audio
+PASS legacy summary migration runs only once

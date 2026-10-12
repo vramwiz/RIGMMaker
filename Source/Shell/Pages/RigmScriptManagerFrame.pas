@@ -1,14 +1,18 @@
 ﻿unit RigmScriptManagerFrame;
+// 台本一覧と保存済み作品の再開。読込中は一覧を処理状況へ切り替えて先に描画する。
 interface
-uses System.Classes, RigmScriptPageFrame, Vcl.Forms, Vcl.ComCtrls, Vcl.StdCtrls, RigmWizardWorkspace, RigmPageNavigation;
+uses System.Classes, RigmScriptPageFrame, Vcl.Forms, Vcl.ComCtrls, Vcl.StdCtrls, Vcl.ExtCtrls, RigmWizardWorkspace, RigmPageNavigation;
 function ScriptUpdatedAtLocal(const Value: string): string;
 type
   TRigmScriptManagerFrame = class(TRigmScriptPageFrame)
   private
     FWorkspace: TRigmWizardWorkspace; FRoot: string; FList: TListView; FStatus: TLabel; FOnNavigate: TRigmNavigateEvent;
-    FCreating: Boolean;
+    FCreating,FOpening: Boolean;
+    FLoading: TPanel; FLoadingText: TLabel; FLoadingProgress: TProgressBar;
+    procedure OpenPath(const Path,Title: string);
     procedure OpenWork(Sender: TObject);
     procedure NewWork(Sender: TObject);
+    procedure CopyWork(Sender: TObject);
     procedure ChooseWork(Sender: TObject);
     procedure RefreshClick(Sender: TObject);
   public
@@ -17,7 +21,7 @@ type
     property OnNavigate: TRigmNavigateEvent read FOnNavigate write FOnNavigate;
   end;
 implementation
-uses System.SysUtils, System.JSON, System.DateUtils, Vcl.Controls, Vcl.Dialogs, RigmJson, RigmIconToolbar, RigmToolbarIcons;
+uses System.SysUtils, System.JSON, System.DateUtils, Vcl.Controls, Vcl.Dialogs, Winapi.Windows, RigmJson, RigmIconToolbar, RigmToolbarIcons;
 {$R *.dfm}
 function ScriptUpdatedAtLocal(const Value: string): string;
 begin
@@ -31,6 +35,7 @@ begin
   inherited Create(AOwner); Align := alClient; FWorkspace := Workspace; FRoot := Root;
   var Toolbar := TRigmIconToolbar.Create(Self); Toolbar.Parent := Self; Toolbar.Align := alTop; Toolbar.Name := 'ScriptLibraryToolbar';
   Toolbar.AddIcon('ScriptNew','台本を新規作成',riNew,0,NewWork);
+  Toolbar.AddIcon('ScriptCopy','選択した台本をコピーして作成（本文・音声なし）',riCopy,0,CopyWork);
   Toolbar.AddIcon('ScriptResume','選択した台本・従来作品を再開',riOpen,0,OpenWork);
   Toolbar.AddSeparator; Toolbar.AddIcon('ScriptOpenLegacy','従来の作品ファイルを開く',riReference,0,ChooseWork);
   Toolbar.AddIcon('ScriptRefresh','一覧を更新',riRefresh,0,RefreshClick);
@@ -44,6 +49,14 @@ begin
   if TTimeZone.Local.GetUtcOffset(Now).TotalMinutes=540 then FList.Columns[2].Caption := '更新日時（日本時間）';
   FList.Columns[2].Width := ScaleValue(220);
   FList.Columns.Add.Caption := '識別'; FList.Columns[3].Width := ScaleValue(100); FList.OnDblClick := OpenWork;
+  FLoading := TPanel.Create(Self); FLoading.Parent := Self; FLoading.Align := alClient;
+  FLoading.Caption := ''; FLoading.ShowCaption := False; FLoading.BevelOuter := bvNone; FLoading.Name := 'ScriptLibraryLoading'; FLoading.Visible := False;
+  FLoading.Padding.SetBounds(ScaleValue(20),ScaleValue(20),ScaleValue(20),ScaleValue(20));
+  FLoadingText := TRigmScriptLabel.Create(Self); FLoadingText.Parent := FLoading; FLoadingText.AutoSize := False;
+  FLoadingText.Align := alClient; FLoadingText.Alignment := taCenter; FLoadingText.Layout := tlCenter; FLoadingText.WordWrap := True;
+  FLoadingText.Name := 'ScriptLibraryLoadingText';
+  FLoadingProgress := TProgressBar.Create(Self); FLoadingProgress.Parent := FLoading; FLoadingProgress.Align := alBottom;
+  FLoadingProgress.Height := ScaleValue(12); FLoadingProgress.Style := pbstMarquee; FLoadingProgress.Name := 'ScriptLibraryLoadingProgress';
   RefreshLibrary;
 end;
 procedure TRigmScriptManagerFrame.RefreshLibrary;
@@ -82,7 +95,7 @@ begin
       finally Listing.Free; end;
     until Offset>=Total;
     if (FList.Selected=nil) and (FList.Items.Count>0) then FList.Items[0].Selected := True;
-    FStatus.Caption := '新規作成は左端のアイコン。台本はダブルクリックで続けられます。従来作品は動画編集で開きます。';
+    FStatus.Caption := '新規作成は左端、コピーは左から2番目のアイコン。コピーは本文・音声を除き、共通文・音声設定・説明キャラと配置を引き継ぎます。台本はダブルクリックで続けられます。';
   except on E: Exception do FStatus.Caption := E.Message;
   end;
   FList.Items.EndUpdate;
@@ -91,17 +104,32 @@ procedure TRigmScriptManagerFrame.RefreshClick(Sender: TObject);
 begin RefreshLibrary; end;
 procedure TRigmScriptManagerFrame.OpenWork(Sender: TObject);
 begin
-  if FList.Selected=nil then Exit;
+  if FOpening or (FList.Selected=nil) then Exit;
+  if FList.Selected.SubItems[4]='unreadable' then begin FStatus.Caption := '読込不可のファイルは変更せず保持しています。'; Exit; end;
+  OpenPath(FList.Selected.SubItems[3],FList.Selected.Caption);
+end;
+procedure TRigmScriptManagerFrame.OpenPath(const Path,Title: string);
+begin
+  if FOpening then Exit; FOpening := True;
+  var OldCursor := Screen.Cursor;
   try
-    if FList.Selected.SubItems[4]='wizard' then begin
-      FWorkspace.OpenWork(FList.Selected.SubItems[3]);
-    end else if FList.Selected.SubItems[4]='legacy' then FWorkspace.OpenWork(FList.Selected.SubItems[3])
-    else FStatus.Caption := '読込不可のファイルは変更せず保持しています。';
-  except on E: Exception do FStatus.Caption := E.Message; end;
+    FLoadingText.Caption := '「'+Title+'」を開いています。'+#13#10+'保存データを読み込み、編集画面を準備しています。';
+    FList.Visible := False; FLoading.Visible := True; FLoading.BringToFront; Screen.Cursor := crHourGlass;
+    // 入力や通信を再入させず、読み込みを始める前に作業内容を画面へ出す。
+    if Showing then begin
+      RedrawWindow(Handle,nil,0,RDW_INVALIDATE or RDW_UPDATENOW or RDW_ALLCHILDREN);
+      InvalidateRect(FLoading.Handle,nil,False);
+      RedrawWindow(FLoading.Handle,nil,0,RDW_UPDATENOW or RDW_ALLCHILDREN);
+    end;
+    try FWorkspace.OpenWork(Path);
+    except on E: Exception do FStatus.Caption := E.Message; end;
+  finally
+    FLoading.Visible := False; FList.Visible := True; Screen.Cursor := OldCursor; FOpening := False;
+  end;
 end;
 procedure TRigmScriptManagerFrame.NewWork(Sender: TObject);
 begin
-  if FCreating then Exit; FCreating := True;
+  if FCreating or FOpening then Exit; FCreating := True;
   try
     try FWorkspace.NewScriptDraft; if Assigned(FOnNavigate) then FOnNavigate(Self,apScriptCreate,'');
     except on E: Exception do FStatus.Caption := E.Message; end;
@@ -109,9 +137,23 @@ begin
 end;
 procedure TRigmScriptManagerFrame.ChooseWork(Sender: TObject);
 begin
+  if FOpening then Exit;
   var Dialog := TOpenDialog.Create(Self);
   try Dialog.Filter := '従来の台本・動画作品|*.rigmovie'; Dialog.InitialDir := FRoot;
-    if Dialog.Execute then try FWorkspace.OpenWork(Dialog.FileName); except on E: Exception do FStatus.Caption := E.Message; end;
+    if Dialog.Execute then OpenPath(Dialog.FileName,ExtractFileName(Dialog.FileName));
   finally Dialog.Free; end;
+end;
+procedure TRigmScriptManagerFrame.CopyWork(Sender: TObject);
+begin
+  if FCreating or FOpening then Exit;
+  if FList.Selected=nil then begin FStatus.Caption := 'コピーする台本を一覧から選んでください。'; Exit; end;
+  if FList.Selected.SubItems[4]<>'wizard' then begin FStatus.Caption := 'コピーは台本制作の保存済み台本に対応しています。従来作品・読込不可のファイルは変更しません。'; Exit; end;
+  FCreating := True;
+  try
+    try
+      FWorkspace.CopyScriptDraft(FList.Selected.SubItems[3]);
+      if Assigned(FOnNavigate) then FOnNavigate(Self,apScriptCreate,'');
+    except on E: Exception do FStatus.Caption := E.Message; end;
+  finally FCreating := False; end;
 end;
 end.

@@ -1,0 +1,14 @@
+{
+  "projectId": "{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}",
+  "revision": 1243,
+  "sceneId": "common-background",
+  "requestId": "{48682951-746D-45DB-8E50-5A11BE794F69}",
+  "prompt": "降り積もる雪のような　をイメージする雪景色",
+  "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a12a3b-12c0-7a32-948c-00d9ff0dde3f\\exec-9adfcf9a-ee91-4be8-855b-625b4c785ea6.png",
+  "workspacePath": "D:\\DelphiProg\\RIGMMaker\\制作支援\\学習記録\\RIGM\\20261011-soreyuki-scenes\\background-thumbnail\\images\\common-background.png",
+  "exchangePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Exchange\\CodexImages\\20261011-missing-images-2659575d\\common-background.png",
+  "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\ba1e5cf87cd369b70fd27be04b4f496b430bc6698894be35b7e4cfdc2e99036f.png",
+  "sha256": "ba1e5cf87cd369b70fd27be04b4f496b430bc6698894be35b7e4cfdc2e99036f",
+  "imageApproved": false,
+  "provider": "built-in imagegen"
+}

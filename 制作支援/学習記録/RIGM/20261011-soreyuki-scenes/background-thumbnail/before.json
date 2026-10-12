@@ -1,0 +1,135 @@
+{
+  "count": 11,
+  "backgroundReady": false,
+  "thumbnailReady": false,
+  "thumbnailSourcesReady": false,
+  "allApproved": false,
+  "ready": 11,
+  "pendingRequests": 0,
+  "selectedScene": "thumbnail",
+  "state": "in-progress",
+  "projectId": "{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}",
+  "revision": 1241,
+  "background": {
+    "id": "common-background",
+    "title": "共通背景画像",
+    "image": "",
+    "description": "",
+    "imagePrompt": "降り積もる雪のような　をイメージする雪景色",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 0,
+    "displayMode": "image",
+    "animation": {},
+    "target": "common-background",
+    "optional": true,
+    "ready": false,
+    "imagePath": "",
+    "width": 1920,
+    "height": 1080,
+    "sourceCues": []
+  },
+  "thumbnail": {
+    "id": "thumbnail",
+    "title": "サムネイル",
+    "image": "",
+    "description": "",
+    "imagePrompt": "これまでに作ったシーン画像を組み合わせた、動画の最後に表示するサムネイルを作成。\r\n使用中のキャラクターも必ず使い、見た目を参照素材に合わせる。\r\n「漫画」＋マンガの名前を大きく読みやすいロゴとして配置する。",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 0,
+    "displayMode": "image",
+    "animation": {},
+    "target": "thumbnail",
+    "required": true,
+    "ready": false,
+    "sourcesReady": false,
+    "duration": 10,
+    "imagePath": "",
+    "logoText": "漫画　それは、降り積もる雪のような。"
+  },
+  "rows": [
+    {
+      "id": "{DCA3DDB7-2257-41ED-9BB8-4393804EACBB}",
+      "title": "opening 1",
+      "image": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\ae88e1c997fff5bb1a6d694eac21e5098520330f03ef7fbf83eed7ed256395a0.png",
+      "description": "",
+      "imagePrompt": "",
+      "padding": 0,
+      "imageFeedback": "",
+      "imageApproved": true,
+      "imageApprovalKey": "3466d233030ed443b935501b3ac824b9a4a5238b5ebd2ce04dd1a2cb36d6c37d",
+      "imageEditEpoch": 4,
+      "displayMode": "none",
+      "animation": {},
+      "sceneNumber": 1,
+      "start": 0,
+      "duration": 13.8626666666667,
+      "ready": true,
+      "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\ae88e1c997fff5bb1a6d694eac21e5098520330f03ef7fbf83eed7ed256395a0.png",
+      "sourceCues": [
+        {
+          "cueId": "{389D1F0A-0119-4CF8-8D63-D667991FB116}",
+          "sourceText": "東北きりたんです"
+        },
+        {
+          "cueId": "{6FA58262-E981-4A3D-B2C6-39908C0F0537}",
+          "sourceText": "今回もニコニコ漫画から"
+        },
+        {
+          "cueId": "{E98D7DCD-4841-4B56-9B67-2A36CD74A16B}",
+          "sourceText": "無料で最新話まで読める作品を紹介します"
+        },
+        {
+          "cueId": "{2309E52D-1151-4D96-9926-CBE7EEAB30F9}",
+          "sourceText": "今回は事前に確認したので大丈夫だと思います"
+        },
+        {
+          "cueId": "{9D5157D6-EB58-4A1F-8B58-B78533734FBA}",
+          "sourceText": "今回紹介する作品は"
+        }
+      ],
+      "cueCount": 5,
+      "hasMoreCues": false,
+      "imageRequest": {
+        "requestId": "{28961ECE-1A65-4968-9282-04C6265C288F}",
+        "sceneId": "{DCA3DDB7-2257-41ED-9BB8-4393804EACBB}",
+        "sceneNumber": 1,
+        "fingerprint": "8a3061d4ccb08eba4b0b1b0f375daf469373b42c0eabd8293ecb113f98c0b177",
+        "prompt": "漫画紹介動画の導入。冬の夕方、暖かな喫茶店の窓際の木のテーブルに、開いた漫画、白いコーヒーカップ。カウンターの奥に高校生の男女が穏やかに働く姿を小さく入れる。文字は入れない。\r\n1920×1080、16:9の横長。青春恋愛漫画に合うフルカラーのアニメ調イラスト、繊細で清潔な線、落ち着いた冬の色、木の茶色と琥珀色の暖色照明。現代日本の小さな喫茶店。登場人物は一連の画像で同じ外見を維持する。男子は短い黒髪で紺の制服、女子は長い栗色の髪と深緑の目、母親は栗色の肩までの髪。これらの外見と内装は台本を補う今回の創作上の設定。不要な看板・ロゴ・透かし・漫画のコマ枠は入れない。",
+        "feedback": "",
+        "provider": "external-codex",
+        "width": 1920,
+        "height": 1080,
+        "aspectRatio": "1920:1080",
+        "target": "scene",
+        "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+        "adoptedFingerprint": "c44cf8502f96489a57b4961bdeb0098de0d144a1b4093bf53fdf14d2b8dc60f7",
+        "imageProvenance": "external-generated",
+        "state": "cancelled",
+        "current": false
+      }
+    }
+  ],
+  "nextOffset": 1,
+  "hasMore": true,
+  "preview": {
+    "current": false,
+    "error": ""
+  },
+  "pipes": {
+    "format": "RIGMMaker.WorkspaceConnection",
+    "schemaVersion": 1,
+    "apiVersion": 2,
+    "pid": 7268,
+    "commandPipe": "RIGMMaker.Workspace.7268.{F9CB08BB-2FBB-4F5F-BBEC-532A918F0302}",
+    "controlPipe": "RIGMMaker.Workspace.7268.{F9CB08BB-2FBB-4F5F-BBEC-532A918F0302}",
+    "dataRoot": "C:\\Users\\zan12\\Documents\\RIGMMaker",
+    "connectionFile": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Exchange\\workspace-7268.json",
+    "routing": "common-command"
+  }
+}

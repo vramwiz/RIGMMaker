@@ -1,0 +1,30 @@
+{
+  "method": "built-in image_gen",
+  "prompts": [
+    {
+      "sceneNumber": 1,
+      "prompt": "Use case: illustration-story. Create ONE full-frame wide 16:9 illustration for scene 1 of a five-scene Japanese talk video about starting a new activity instead of endlessly preparing. The dialogue asks whether you have ever felt satisfied with preparing and never actually started. Show a person at a simple home desk, looking thoughtfully at a completely blank open notebook while neatly arranged study materials and pens stand ready. The feeling is relatable, lightly humorous and gentle, not sad. Soft modern anime illustration, clean readable silhouettes and expressive hands, coherent natural room and soft daylight. The person, room and desk will continue in the next four images. Concentrate the visual story within the image, readable when displayed small. No text, lettering, captions, speech balloons, logos or watermarks. Fully opaque background. This is fictional supplementary artwork, not a depiction of any established anime.",
+      "reference": null
+    },
+    {
+      "sceneNumber": 2,
+      "prompt": "Use case: illustration-story. Create ONE new full-frame wide 16:9 image for scene 2 of the same five-scene Japanese talk video. The attached image is a visual continuity reference, not an image to reproduce. Keep exactly the same young adult woman with brown hair tied in a loose bun and cream hoodie, the same warm home desk, notebooks, stationery, window and soft modern anime rendering. The dialogue now says: 'I research what I need, gather the tools, and check how to use them. Up to this point everything goes very smoothly.' Show her actively preparing with focused, satisfied energy: consulting a laptop or an open reference book and neatly sorting pens and learning materials on the desk. A visibly blank practice notebook is still waiting. Change the pose and composition so this is a clear next scene, not the same image. Medium-wide three-quarter desk view, uncluttered narrative emphasis, warm daylight. No readable text, captions, dialogue balloons, logos, watermark or UI symbols. Fully opaque background.",
+      "reference": "scene-001.png"
+    },
+    {
+      "sceneNumber": 3,
+      "prompt": "Use case: illustration-story. Generate ONE new wide 16:9 full-frame illustration for scene 3 of the same video, using the provided previous scene only as a continuity reference. Preserve the same brown-haired young adult woman, loose bun, cream hoodie, warm bedroom-study, wood desk, pastel stationery, notebooks, cat mug and soft anime rendering. The dialogue says: 'But just as I am about to begin, I think: I don't have time today, I'll start tomorrow.' Make the visual meaning instantly clear: she has paused with her pen suspended above the untouched open notebook, looking up toward a simple analog wall clock with a slightly sheepish, hesitant expression; all the carefully prepared tools remain unused. Slightly later soft afternoon light. A fresh side three-quarter composition that includes both the notebook and the clock. Gentle relatable humor, no anxiety or dramatic darkness. No readable text, captions, speech balloons, calendar numbers, logos, watermark, corner marks or UI symbols. Opaque background.",
+      "reference": "scene-002.png"
+    },
+    {
+      "sceneNumber": 4,
+      "prompt": "Use case: illustration-story. Create ONE new full-frame wide 16:9 image for scene 4 of the same five-scene talk video. The provided previous image is a visual continuity reference. Keep the same woman with brown hair in a loose bun, cream hoodie, familiar warm home room, wooden desk and stationery, with exactly the same soft anime art direction. The narrative turning point: 'Recently I try doing it for just five minutes. Five minutes is not so difficult.' She is now leaning forward and making the very first small marks in the notebook with a pen, a modest determined smile replacing hesitation. Beside the notebook is a small simple analog countdown timer with a short highlighted sector suggesting five minutes, no text or digits required. Main focus is the hand starting, the mostly blank page and small timer. A medium-close slightly overhead three-quarter composition so the action is visible, with enough of her face and room to recognize the continuity. Calm approachable daylight, low pressure and small action. No captions, readable words, speech balloons, logos, watermark or UI symbols. Fully opaque background.",
+      "reference": "scene-003.png"
+    },
+    {
+      "sceneNumber": 5,
+      "prompt": "Use case: illustration-story. Generate ONE final wide 16:9 full-frame illustration for scene 5 of the five-scene Japanese talk video. Use the supplied scene 4 as a continuity reference: preserve the same woman with brown hair in a loose bun, cream hoodie, warm home bedroom-study, wooden desk, notebook, cat mug, pastel pens, small analog timer and soft anime art style. The closing dialogue says: 'Once you start, you often find you can keep going. Rather than preparing perfectly, just make a little move. That may be just right.' Show her comfortably absorbed in continuing the activity with a small relaxed smile. The previously blank notebook now contains a handful of modest pencil practice sketches, simple circles and small studies, visibly more progress but not a finished masterpiece. Her pen continues moving naturally; timer rests off to the side, no pressure. A slightly wider three-quarter view showing both her relaxed posture and the notebook's incremental progress. Warm coherent afternoon light, gentle grounded satisfaction, not a triumphant pose. No readable text, captions, speech balloons, logos, watermarks, corner marks or UI symbols. Fully opaque background.",
+      "reference": "scene-004.png"
+    }
+  ]
+}

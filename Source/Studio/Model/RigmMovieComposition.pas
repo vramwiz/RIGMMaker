@@ -118,8 +118,7 @@ end;
 procedure TRigmMovieCharacter.Validate;
 begin
   if FPlacement<>nil then begin
-    if (X<0) or (Y<0) or (Width<20) or (Height<20) or (X+Width>1920.01) or (Y+Height>1080.01) then
-      raise ERigm.Create('Linked placement must stay within the FullHD canvas');
+    if (Width<20) or (Height<20) then raise ERigm.Create('Linked placement must be at least 20px');
   end;
   if (Id='') or (Length(Id)>128) or (Length(Name)>300) or (Length(FileName)>32760) then raise ERigm.Create('Invalid character identity');
   if not MatchText(RenderFormat,['rigm','psd']) or ((RenderFormat='psd')<>SameText(ExtractFileExt(FileName),'.psdchar')) then

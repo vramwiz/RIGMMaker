@@ -1,0 +1,129 @@
+{
+  "id": "thumbnail",
+  "title": "サムネイル",
+  "image": "",
+  "description": "",
+  "imagePrompt": "これまでに作ったシーン画像を組み合わせた、動画の最後に表示するサムネイルを作成。\r\n使用中のキャラクターも必ず使い、見た目を参照素材に合わせる。\r\n「漫画」＋マンガの名前を大きく読みやすいロゴとして配置する。",
+  "padding": 0,
+  "imageFeedback": "",
+  "imageApproved": false,
+  "imageApprovalKey": "",
+  "imageEditEpoch": 0,
+  "displayMode": "image",
+  "animation": {},
+  "target": "thumbnail",
+  "required": true,
+  "ready": false,
+  "sourcesReady": true,
+  "duration": 10,
+  "imagePath": "",
+  "logoText": "漫画　それは、降り積もる雪のような。",
+  "imageRequest": {
+    "requestId": "{B758E136-275D-42F9-8089-1D302919FC98}",
+    "sceneId": "thumbnail",
+    "sceneNumber": 12,
+    "fingerprint": "0c226501feefb7fcc5b4ccdae7461cdde53d52beb00ae73ea60bccdfba11c636",
+    "prompt": "これまでに作ったシーン画像を組み合わせた、動画の最後に表示するサムネイルを作成。\r\n使用中のキャラクターも必ず使い、見た目を参照素材に合わせる。\r\n「漫画」＋マンガの名前を大きく読みやすいロゴとして配置する。",
+    "feedback": "",
+    "state": "pending",
+    "provider": "external-codex",
+    "width": 1920,
+    "height": 1080,
+    "aspectRatio": "1920:1080",
+    "sources": {
+      "logo": "漫画　それは、降り積もる雪のような。",
+      "width": 1920,
+      "height": 1080,
+      "images": [
+        {
+          "kind": "background",
+          "sceneId": "common-background",
+          "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\ba1e5cf87cd369b70fd27be04b4f496b430bc6698894be35b7e4cfdc2e99036f.png",
+          "sha256": "ba1e5cf87cd369b70fd27be04b4f496b430bc6698894be35b7e4cfdc2e99036f"
+        },
+        {
+          "kind": "scene",
+          "sceneId": "{DCA3DDB7-2257-41ED-9BB8-4393804EACBB}",
+          "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\ae88e1c997fff5bb1a6d694eac21e5098520330f03ef7fbf83eed7ed256395a0.png",
+          "sha256": "ae88e1c997fff5bb1a6d694eac21e5098520330f03ef7fbf83eed7ed256395a0"
+        },
+        {
+          "kind": "scene",
+          "sceneId": "{6037132E-2E81-4056-9518-7F794206949A}",
+          "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\563c7c842e410b7193d3d0516a31c89146cecb095e1bdbbb582074bbe1b62acd.png",
+          "sha256": "563c7c842e410b7193d3d0516a31c89146cecb095e1bdbbb582074bbe1b62acd"
+        },
+        {
+          "kind": "scene",
+          "sceneId": "{94A51E0E-BD82-429E-929A-1B36246EF19C}",
+          "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\a278dc5e99a9a31732b67facbbc7fb25115b8b493bba84104f561eeeac09c3d4.png",
+          "sha256": "a278dc5e99a9a31732b67facbbc7fb25115b8b493bba84104f561eeeac09c3d4"
+        },
+        {
+          "kind": "scene",
+          "sceneId": "{C84D377B-1E68-425B-A70D-30E5B112DDF2}",
+          "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\4a2fc67179e025a28014067751206b93e5a0106d4341923c258ae3e016bb956d.png",
+          "sha256": "4a2fc67179e025a28014067751206b93e5a0106d4341923c258ae3e016bb956d"
+        },
+        {
+          "kind": "scene",
+          "sceneId": "{73D35C39-2FE4-491D-8169-68B23361BBCF}",
+          "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\766a9624ebc4c024b1e179a7e4882e722b5af9a7df3ed6b50ccd1facb3681551.png",
+          "sha256": "766a9624ebc4c024b1e179a7e4882e722b5af9a7df3ed6b50ccd1facb3681551"
+        },
+        {
+          "kind": "scene",
+          "sceneId": "{6C78A905-E9FA-4AA4-86E4-F97A68DE51B2}",
+          "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\3751264e736d2a38767328b8c1641a84c61c8d86c7a308a3ca61b3da5c488872.png",
+          "sha256": "3751264e736d2a38767328b8c1641a84c61c8d86c7a308a3ca61b3da5c488872"
+        },
+        {
+          "kind": "scene",
+          "sceneId": "{F55EB441-D7D4-4A1D-8D9A-E2CED88553C4}",
+          "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\25a3143b972d2997bd3f7f9b6df595ed103de2601e874acdd748b97419f2baa6.png",
+          "sha256": "25a3143b972d2997bd3f7f9b6df595ed103de2601e874acdd748b97419f2baa6"
+        },
+        {
+          "kind": "scene",
+          "sceneId": "{AF727F12-24B5-4A97-96DA-F45EB05EC6F3}",
+          "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\ea313ed84951e81d1bd0b043c3d9f08da477765bbc7d9ea4623e8beb5a9ee3e5.png",
+          "sha256": "ea313ed84951e81d1bd0b043c3d9f08da477765bbc7d9ea4623e8beb5a9ee3e5"
+        },
+        {
+          "kind": "scene",
+          "sceneId": "{25B3245F-C731-43B8-80AC-0EEC8D5F420A}",
+          "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\000c19ea31866e6611daccc1dd8ddef30101d333f5752faeac77064a167ae17e.png",
+          "sha256": "000c19ea31866e6611daccc1dd8ddef30101d333f5752faeac77064a167ae17e"
+        },
+        {
+          "kind": "scene",
+          "sceneId": "{6917CC1F-0624-4455-814C-6B72CA62D15B}",
+          "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\e2fca503dbfc8a115a053d8d882c78aae713137a6c88c83aa6aa9a6a011fa3f0.png",
+          "sha256": "e2fca503dbfc8a115a053d8d882c78aae713137a6c88c83aa6aa9a6a011fa3f0"
+        },
+        {
+          "kind": "scene",
+          "sceneId": "{A3114F51-B0C2-4290-A61A-1FD51B81BD34}",
+          "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\7afd8a45589216144105bebfbded874581713f93b37bfc3fb977769a5d73dd0a.png",
+          "sha256": "7afd8a45589216144105bebfbded874581713f93b37bfc3fb977769a5d73dd0a"
+        }
+      ],
+      "characters": [
+        {
+          "name": "新しいキャラクター",
+          "renderFormat": "rigm",
+          "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\RIGM\\character-904B63CF-20D7-4FB4-B8C0-11CB570949B5.rigm",
+          "sourceSignature": "12C50A27:02C1000000004696:00000000007D1DFC:01DD531395522571:01DD53139586B2E2",
+          "previewReady": true,
+          "previewPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Cache\\ScriptThumbnailRefs\\6948f4ecf5f5e75d8edb96c8a2b37b0b23d81a2a9a05bbc482204ec02e674c9a.png"
+        }
+      ]
+    },
+    "logoText": "漫画　それは、降り積もる雪のような。",
+    "duration": 10,
+    "generationInstruction": "これまでに作ったシーン画像を組み合わせた、動画の最後に表示するサムネイルを作成。\r\n使用中のキャラクターも必ず使い、見た目を参照素材に合わせる。\r\n「漫画」＋マンガの名前を大きく読みやすいロゴとして配置する。\r\n1920 × 1080 ピクセル、縦横比 1920:1080。参照のシーン画像を合わせ、使用キャラを含め、「漫画　それは、降り積もる雪のような。」を大きなロゴにしてください。",
+    "target": "thumbnail",
+    "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+    "current": true
+  }
+}

@@ -35,9 +35,11 @@ type
     FWorkspace: TRigmWizardWorkspace; FSync: Boolean; FSelectionKey: string;
     FList: TListView; FImages: TImageList; FLoader: TRigmThumbnailList;
     FFlip,FAspect,FSnap: TCheckBox; FBounds,FGuide: TLabel;
+    FReset: TButton;
     FPreview: TRigmPlacementPreview;
     procedure Selected(Sender: TObject; Item: TListItem; Selected: Boolean);
     procedure Flip(Sender: TObject);
+    procedure Reset(Sender: TObject);
     procedure Options(Sender: TObject);
     function ThumbnailPath(Item: TListItem): string;
     procedure ThumbnailApplied(Sender: TObject; Item: TListItem; Metadata: TJSONObject);
@@ -177,13 +179,15 @@ constructor TRigmScriptPlacementFrame.CreateForWorkspace(AOwner: TComponent; Wor
 begin
   inherited Create(AOwner); Align := alClient; FWorkspace := Workspace;
   FGuide := TRigmScriptLabel.Create(Self); FGuide.Parent := Self; FGuide.Align := alTop; FGuide.Height := ScaleValue(58); FGuide.AutoSize := False; FGuide.WordWrap := True;
-  FGuide.Caption := '第4段階：キャラ配置　枠内で移動、8点で拡縮。L字型ではキャラ側の領域へ収めます。'+#13#10+
-    '左右反転は元画像の鏡像です。左の工程リストで配置を保存し台本入力へ進みます。最終編集でも同じ配置を調整できます。';
+  FGuide.Caption := '第4段階：キャラ配置　枠内で移動、8点で拡縮。画面・ガイドからはみ出しても構いません。'+#13#10+
+    '操作できなくなったら左の一覧でキャラを選び「初期座標・サイズに戻す」。左の工程リストで保存して進みます。';
   var Side := TPanel.Create(Self); Side.Parent := Self; Side.Align := alLeft; Side.Width := ScaleValue(248); Side.Caption := ''; Side.BevelOuter := bvNone;
   FAspect := TCheckBox.Create(Self); FAspect.Parent := Side; FAspect.Align := alTop; FAspect.Height := ScaleValue(28); FAspect.Caption := '縦横比を保持'; FAspect.Checked := True; FAspect.OnClick := Options;
   FSnap := TCheckBox.Create(Self); FSnap.Parent := Side; FSnap.Align := alTop; FSnap.Top := ScaleValue(28); FSnap.Height := ScaleValue(28); FSnap.Caption := '10pxスナップ（FullHD基準）'; FSnap.Checked := True; FSnap.OnClick := Options;
   FFlip := TCheckBox.Create(Self); FFlip.Parent := Side; FFlip.Align := alTop; FFlip.Top := ScaleValue(56); FFlip.Height := ScaleValue(28); FFlip.Caption := '左右反転'; FFlip.Name := 'ScriptPlacementFlip'; FFlip.OnClick := Flip;
   FBounds := TRigmScriptLabel.Create(Self); FBounds.Name := 'ScriptPlacementBounds'; FBounds.Parent := Side; FBounds.Align := alTop; FBounds.Top := ScaleValue(84); FBounds.Height := ScaleValue(64); FBounds.AutoSize := False; FBounds.WordWrap := True;
+  FReset := TButton.Create(Self); FReset.Parent := Side; FReset.Align := alTop; FReset.Top := ScaleValue(148);
+  FReset.Height := ScaleValue(36); FReset.Name := 'ScriptPlacementReset'; FReset.Caption := '初期座標・サイズに戻す'; FReset.OnClick := Reset;
   FImages := TImageList.Create(Self); FImages.ColorDepth := cd32Bit; FImages.Width := ScaleValue(56); FImages.Height := ScaleValue(72);
   FList := TListView.Create(Self); FList.Parent := Side; FList.Align := alClient; FList.Name := 'ScriptPlacementCharacters';
   FList.ViewStyle := vsReport; FList.ReadOnly := True; FList.RowSelect := True; FList.HideSelection := False; FList.SmallImages := FImages;
@@ -222,6 +226,15 @@ begin
     try FWorkspace.SetScriptPlacement(O); except on E: Exception do begin RefreshState; FBounds.Caption := E.Message; end; end;
   finally O.Free; end;
 end;
+procedure TRigmScriptPlacementFrame.Reset(Sender: TObject);
+begin
+  FPreview.CancelDrag; var O := TJSONObject.Create;
+  try
+    O.AddPair('path',JS(FWorkspace.ScriptDraft.ScriptWizard,'placementSelected')); O.AddPair('reset',TJSONBool.Create(True));
+    try FWorkspace.SetScriptPlacement(O); RefreshState;
+    except on E: Exception do FBounds.Caption := E.Message; end;
+  finally O.Free; end;
+end;
 procedure TRigmScriptPlacementFrame.RefreshState;
 begin
   var P := FWorkspace.ScriptDraft; if P=nil then Exit; FSync := True;
@@ -235,7 +248,7 @@ begin
     end;
     var Path := JS(P.ScriptWizard,'placementSelected');
     for var Item in FList.Items do Item.Selected := SameText(Item.SubItems[0],Path);
-    var O := Placement(P,Path); FFlip.Enabled := O<>nil;
+    var O := Placement(P,Path); FFlip.Enabled := O<>nil; FReset.Enabled := O<>nil;
     if O<>nil then begin
       FFlip.Checked := JB(O,'flipX'); var B := PlacementRect(O);
       FBounds.Caption := Format('FullHD座標  X: %.0f  Y: %.0f'+#13#10+'幅: %.0f  高さ: %.0f',[B.Left,B.Top,B.Width,B.Height]);

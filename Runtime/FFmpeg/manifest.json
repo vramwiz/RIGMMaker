@@ -1,0 +1,44 @@
+﻿{
+  "version": "8.1.1-full_build-www.gyan.dev",
+  "architecture": "Win64",
+  "source": "https://github.com/FFmpeg/FFmpeg/commit/239f2c733d",
+  "reference": "VM_Media_Output/Setup/VW_Media_Output.zip",
+  "archiveSha256": "10335CAC682926A2D2B43E4AA281AAB74DB9C8FCD81702D73FFB6E81AEB88B4E",
+  "files": [
+    {
+      "name": "avutil-60.dll",
+      "bytes": 3139072,
+      "sha256": "A98D20DF601B48D85D701C8A92B83C67E088CEAC34EBE434673DEFD15448CA9D"
+    },
+    {
+      "name": "swresample-6.dll",
+      "bytes": 484864,
+      "sha256": "6C5DD36848986C9ABE4F3ED215329DCCAFA4481D9E485655B900076B3E40BDC0"
+    },
+    {
+      "name": "swscale-9.dll",
+      "bytes": 12651520,
+      "sha256": "BD1DB88D009D89F212723B99C20FAF53F0055E7ECB14B9580B3CB28F47453968"
+    },
+    {
+      "name": "avcodec-62.dll",
+      "bytes": 97333248,
+      "sha256": "86818846A9A74420F5F65FD8EBE0897BC9141E84E9C91F0F8B7607EE193A26D7"
+    },
+    {
+      "name": "avformat-62.dll",
+      "bytes": 19865600,
+      "sha256": "4D0A70445D5139B713596A677A9DCAC64DC8F7C27053E9DBD0998E2CBDBEF611"
+    },
+    {
+      "name": "FFmpeg-LICENSE.txt",
+      "bytes": 35821,
+      "sha256": "0B383D5A63DA644F628D99C33976EA6487ED89AAA59F0B3257992DEAC1171E6B"
+    },
+    {
+      "name": "FFmpeg-README.txt",
+      "bytes": 46154,
+      "sha256": "6921CE559313271EAD2077A4C8C3D7E37929E1FE2CADF6EEA37A67BAA2B53865"
+    }
+  ]
+}

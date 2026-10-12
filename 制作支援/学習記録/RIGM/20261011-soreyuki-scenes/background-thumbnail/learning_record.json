@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "recordType": "rigm_scene_image_creation_learning",
+  "date": "2026-10-11",
+  "purpose": "画像確定後に次の工程へ進めない状態を調査し、不足していた共通背景と必須サムネイルを作成・採用する。",
+  "projectId": "{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}",
+  "title": "それは、降り積もる雪のような。",
+  "authorization": {
+    "request": "うまくいったが　チェックを付けても　チェックが付かない　次の段階へ進めない",
+    "clarification": "サムネイル　の方につかない　共通背景の方は付いた"
+  },
+  "initialState": {
+    "revision": 1241,
+    "normalScenesReady": 11,
+    "normalSceneCount": 11,
+    "backgroundImageMissing": true,
+    "backgroundPrompt": "降り積もる雪のような　をイメージする雪景色",
+    "thumbnailImageMissing": true
+  },
+  "method": "内蔵imagegenで共通背景を生成して現行要求へ採用。ユーザーによる背景確定を読み戻してから、既存シーン画像・雪景色・使用キャラの現在の透過PNG参照と大きな題名ロゴでサムネイルを生成。原PNGを無変換でworkspaceとExchangeへ保存し、現行要求ID・revision・SHA256を照合して採用。",
+  "provider": "built-in imagegen",
+  "requestedImageSize": {
+    "width": 1920,
+    "height": 1080
+  },
+  "actualImageSize": {
+    "width": 1672,
+    "height": 941
+  },
+  "artifacts": {
+    "images": [
+      "images/common-background.png",
+      "images/thumbnail.png"
+    ],
+    "prompts": [
+      "background-prompt.json",
+      "thumbnail-prompt.json"
+    ],
+    "receipts": [
+      "background-receipt.json",
+      "thumbnail-receipt.json"
+    ],
+    "verification": "verification.json",
+    "request": "thumbnail-request.json"
+  },
+  "verification": {
+    "imageHashes": "生成原本・workspace・Exchange・管理ImagesのSHA256を照合。保存後の11シーンとサムネイルも照合。",
+    "visualInspection": "背景は文字・人物なしの雪景色。サムネイルは漫画の表記と正確な題名、太いロゴ、既存喫茶店画像、実キャラ参照に対応する紫髪のちびキャラを確認。",
+    "humanApproval": "ユーザーが共通背景とサムネイルを確定。保存作品で全11シーン・背景・サムネイルの確定を確認。",
+    "workflow": "保存作品scriptWizard.stage=editor、scenesStatus=complete。ライブ読取パイプもeditorProjectIdが同作品であることを確認。",
+    "endCard": "保存作品の末尾thumbnailカードは10秒、transitionSeconds=1。",
+    "voice": "採用後49行生成済み・49行聴取済みの状態を維持。",
+    "saveAndReload": "工程移動での保存済み資産参照と確定状態を読取検証。アプリ終了後の再開は未確認。"
+  },
+  "userFeedback": [
+    {
+      "text": "画像は表示されたがチェックは付かない",
+      "evaluation": "画像採用後も確定チェックの反応が不安定との報告"
+    },
+    {
+      "text": "何回か押していたら付いた",
+      "evaluation": "繰り返し操作で確定され、動画編集へ進んだ"
+    }
+  ],
+  "remainingIssue": "サムネイル画像表示後、確定が一度で反映されなかった症状は未修正。再現条件・画面エラーを取得できず、note-tasks.mdへ未解決として記録。",
+  "reusableRules": [
+    "通常シーンの全件確定と背景・必須サムネイルの確定を分けて状態取得する。",
+    "背景の要望が入力済みなら背景画像と人間の確定が必要。",
+    "背景・通常シーンの確定後にだけサムネイル要求を作る。",
+    "使用キャラは現在の要求が公開する透過PNG参照を使う。",
+    "画像表示後の確定失敗は、画像未作成とは別の症状として記録する。"
+  ]
+}

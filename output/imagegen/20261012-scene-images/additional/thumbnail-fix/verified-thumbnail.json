@@ -1,0 +1,267 @@
+{
+  "count": 11,
+  "backgroundReady": true,
+  "thumbnailReady": false,
+  "thumbnailSourcesReady": true,
+  "allApproved": false,
+  "ready": 11,
+  "pendingRequests": 0,
+  "selectedScene": "common-background",
+  "state": "in-progress",
+  "projectId": "{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}",
+  "revision": 1253,
+  "background": {
+    "id": "common-background",
+    "title": "共通背景画像",
+    "image": "project.assets\\b637b895be7804d693dfe8f6a20ad6232f0c4b6ead50da382307b95db824e221.png",
+    "description": "",
+    "imagePrompt": "単純な背景、人物は書かない、異世界のイラスト",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": true,
+    "imageApprovalKey": "d0d7ab5581d276420b485046c41a79a70f2c193ba9eb790d17ba635f881c7f8a",
+    "imageEditEpoch": 1,
+    "displayMode": "image",
+    "animation": {},
+    "target": "common-background",
+    "optional": true,
+    "ready": true,
+    "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}\\project.assets\\b637b895be7804d693dfe8f6a20ad6232f0c4b6ead50da382307b95db824e221.png",
+    "width": 1920,
+    "height": 1080,
+    "sourceCues": [],
+    "imageRequest": {
+      "requestId": "{FE7B41A8-6657-4355-BFDD-9D3C43167857}",
+      "sceneId": "common-background",
+      "sceneNumber": 0,
+      "fingerprint": "d1d30084d7e08a7d628ceeebca49f4b1907b6f0313201fdc167b6d2ecb3b5ddd",
+      "prompt": "単純な背景、人物は書かない、異世界のイラスト",
+      "feedback": "",
+      "provider": "external-codex",
+      "width": 1920,
+      "height": 1080,
+      "aspectRatio": "1920:1080",
+      "target": "common-background",
+      "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+      "adoptedFingerprint": "d1875c7fb10aa9c7623606587935aa711213994794da289733357bbf7d8eadc2",
+      "imageProvenance": "external-generated",
+      "state": "cancelled",
+      "current": false
+    }
+  },
+  "thumbnail": {
+    "id": "thumbnail",
+    "title": "サムネイル",
+    "image": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}\\Images\\f3a4f2a9392a402b60d4508b599173e62dc2ea13bffd04840b2eee836cce9fa6.png",
+    "description": "",
+    "imagePrompt": "これまでに作ったシーン画像を組み合わせた、動画の最後に表示するサムネイルを作成。\r\n使用中のキャラクターも必ず使い、見た目を参照素材に合わせる。\r\n「漫画」＋マンガの名前を大きく読みやすいロゴとして配置する。\r\nユーザー修正：サムネイル左下の東北きりたんを、指定画像 D:/Manga/基本テンプレート/東北きりたん/東北きりたん_草履あり.png の中央の正面姿に差し替える。髪は暗い赤茶色、肌は自然な肌色、白い着物・赤い帯・緑の帯揚げ・濃紺のスカート・白い足袋・草履の色と形を参照に忠実にし、青い肌や紫の髪を使わない。ロゴの後ろに不透明な濃いえんじから焦げ茶色の角丸パネルと細い明るい縁を加え、背景よりロゴを目立たせる。作品名の文字とナナ・少年・全体構図は維持する。",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 0,
+    "displayMode": "image",
+    "animation": {},
+    "target": "thumbnail",
+    "required": true,
+    "ready": false,
+    "sourcesReady": true,
+    "duration": 10,
+    "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}\\Images\\f3a4f2a9392a402b60d4508b599173e62dc2ea13bffd04840b2eee836cce9fa6.png",
+    "logoText": "漫画　異世界「嘘」ガイド",
+    "imageRequest": {
+      "requestId": "{70425CC0-A80E-46EE-AD8B-7E79326E68CC}",
+      "sceneId": "thumbnail",
+      "sceneNumber": 12,
+      "fingerprint": "948d7dd2199486c7c65d742738aa447c715019ccf58000c6c6794a48edcac87f",
+      "prompt": "これまでに作ったシーン画像を組み合わせた、動画の最後に表示するサムネイルを作成。\r\n使用中のキャラクターも必ず使い、見た目を参照素材に合わせる。\r\n「漫画」＋マンガの名前を大きく読みやすいロゴとして配置する。\r\nユーザー修正：サムネイル左下の東北きりたんを、指定画像 D:/Manga/基本テンプレート/東北きりたん/東北きりたん_草履あり.png の中央の正面姿に差し替える。髪は暗い赤茶色、肌は自然な肌色、白い着物・赤い帯・緑の帯揚げ・濃紺のスカート・白い足袋・草履の色と形を参照に忠実にし、青い肌や紫の髪を使わない。ロゴの後ろに不透明な濃いえんじから焦げ茶色の角丸パネルと細い明るい縁を加え、背景よりロゴを目立たせる。作品名の文字とナナ・少年・全体構図は維持する。",
+      "feedback": "",
+      "provider": "external-codex",
+      "width": 1920,
+      "height": 1080,
+      "aspectRatio": "1920:1080",
+      "sources": {
+        "logo": "漫画　異世界「嘘」ガイド",
+        "width": 1920,
+        "height": 1080,
+        "images": [
+          {
+            "kind": "background",
+            "sceneId": "common-background",
+            "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}\\project.assets\\b637b895be7804d693dfe8f6a20ad6232f0c4b6ead50da382307b95db824e221.png",
+            "sha256": "b637b895be7804d693dfe8f6a20ad6232f0c4b6ead50da382307b95db824e221"
+          },
+          {
+            "kind": "scene",
+            "sceneId": "{C164AE0D-0D45-44C7-A5E8-65783E01D0F2}",
+            "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}\\project.assets\\5ea393bd7b0df2dd3289a08a83a1e7cda4b4aa978ade0ea132466e9dbb34b933.png",
+            "sha256": "5ea393bd7b0df2dd3289a08a83a1e7cda4b4aa978ade0ea132466e9dbb34b933"
+          },
+          {
+            "kind": "scene",
+            "sceneId": "{9B46C80C-96D0-4A15-B278-57FE14AFD193}",
+            "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}\\project.assets\\771fda81627341c735dd6ebf0477a4afd23c34aa9d6d871db19647960ff96739.png",
+            "sha256": "771fda81627341c735dd6ebf0477a4afd23c34aa9d6d871db19647960ff96739"
+          },
+          {
+            "kind": "scene",
+            "sceneId": "{BFC55C30-29A1-40A5-B9AF-3F2EA0458134}",
+            "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}\\project.assets\\cf01f475bb72b5019f25e1a996a861d644b8e498c4c8b1be4f144d9349018416.png",
+            "sha256": "cf01f475bb72b5019f25e1a996a861d644b8e498c4c8b1be4f144d9349018416"
+          },
+          {
+            "kind": "scene",
+            "sceneId": "{01133690-F6C2-45CA-8809-850BBACD6433}",
+            "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}\\project.assets\\84d16a350d460b43fa176b840534320af076c04638ef32a38a5db58bdee9024a.png",
+            "sha256": "84d16a350d460b43fa176b840534320af076c04638ef32a38a5db58bdee9024a"
+          },
+          {
+            "kind": "scene",
+            "sceneId": "{8E988242-D20B-486D-A31E-DBEFF465CA5D}",
+            "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}\\project.assets\\0c25e8026025bf47e0bf5baa8a2338ca3f3eca1351ff442da4882d30fddfa5da.png",
+            "sha256": "0c25e8026025bf47e0bf5baa8a2338ca3f3eca1351ff442da4882d30fddfa5da"
+          },
+          {
+            "kind": "scene",
+            "sceneId": "{AD8102DC-38D6-4AD9-A52A-306D10A339CA}",
+            "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}\\project.assets\\f8c9f107b0bb594ad47f9aad0481a1afd0621df8dcd3090ec3588ae3fedd8d90.png",
+            "sha256": "f8c9f107b0bb594ad47f9aad0481a1afd0621df8dcd3090ec3588ae3fedd8d90"
+          },
+          {
+            "kind": "scene",
+            "sceneId": "{0722CC9E-CA37-4CC6-8074-658AB3E91992}",
+            "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}\\project.assets\\783c24a5052bc97f1c6996e56a4b6b53f0e1cb33863431b77bc1edaf981d4628.png",
+            "sha256": "783c24a5052bc97f1c6996e56a4b6b53f0e1cb33863431b77bc1edaf981d4628"
+          },
+          {
+            "kind": "scene",
+            "sceneId": "{2781DBF7-6D04-448E-98BB-9CF729D2F70B}",
+            "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}\\project.assets\\a783aa5da3900463864aea091fd65f681016a9dec1a03e391f8b1cb3952f4cc5.png",
+            "sha256": "a783aa5da3900463864aea091fd65f681016a9dec1a03e391f8b1cb3952f4cc5"
+          },
+          {
+            "kind": "scene",
+            "sceneId": "{36F66DF3-FEC8-4818-9D30-D5402DF9DFC8}",
+            "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}\\project.assets\\5c9c77cc3110bb4e0ed9a013444910a4ef253720919ae0c20c440a6e1fd4f05c.png",
+            "sha256": "5c9c77cc3110bb4e0ed9a013444910a4ef253720919ae0c20c440a6e1fd4f05c"
+          },
+          {
+            "kind": "scene",
+            "sceneId": "{2708DD7B-E59B-49EA-A3AC-06456B4B3BF8}",
+            "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}\\project.assets\\20f9dfb419b2c6b243b8ce059242c32b311fea6eb36e01aa4271d92ddfa6f737.png",
+            "sha256": "20f9dfb419b2c6b243b8ce059242c32b311fea6eb36e01aa4271d92ddfa6f737"
+          },
+          {
+            "kind": "scene",
+            "sceneId": "{4BFBCDAC-7AF0-4CFD-A02A-C65F04E8D1AB}",
+            "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}\\project.assets\\67331e552ed3525856a12ae6ffe290e6d0a321af0e19927a46e9ec6371010cef.png",
+            "sha256": "67331e552ed3525856a12ae6ffe290e6d0a321af0e19927a46e9ec6371010cef"
+          }
+        ],
+        "characters": [
+          {
+            "name": "新しいキャラクター",
+            "renderFormat": "rigm",
+            "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\RIGM\\character-904B63CF-20D7-4FB4-B8C0-11CB570949B5.rigm",
+            "sourceSignature": "12C50A27:02C1000000004696:00000000007D1DFC:01DD531395522571:01DD53139586B2E2",
+            "previewReady": true,
+            "previewPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Cache\\ScriptThumbnailRefs\\6948f4ecf5f5e75d8edb96c8a2b37b0b23d81a2a9a05bbc482204ec02e674c9a.png"
+          }
+        ]
+      },
+      "logoText": "漫画　異世界「嘘」ガイド",
+      "duration": 10,
+      "generationInstruction": "これまでに作ったシーン画像を組み合わせた、動画の最後に表示するサムネイルを作成。\r\n使用中のキャラクターも必ず使い、見た目を参照素材に合わせる。\r\n「漫画」＋マンガの名前を大きく読みやすいロゴとして配置する。\r\nユーザー修正：サムネイル左下の東北きりたんを、指定画像 D:/Manga/基本テンプレート/東北きりたん/東北きりたん_草履あり.png の中央の正面姿に差し替える。髪は暗い赤茶色、肌は自然な肌色、白い着物・赤い帯・緑の帯揚げ・濃紺のスカート・白い足袋・草履の色と形を参照に忠実にし、青い肌や紫の髪を使わない。ロゴの後ろに不透明な濃いえんじから焦げ茶色の角丸パネルと細い明るい縁を加え、背景よりロゴを目立たせる。作品名の文字とナナ・少年・全体構図は維持する。\r\n1920 × 1080 ピクセル、縦横比 1920:1080。参照のシーン画像を合わせ、使用キャラを含め、「漫画　異世界「嘘」ガイド」を大きなロゴにしてください。",
+      "target": "thumbnail",
+      "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+      "state": "adopted",
+      "adoptedFingerprint": "7f020274510c4ce7e85edcaffe4a19d0da358bf35e9ead5d8f2932d1e7d44128",
+      "imageProvenance": "external-generated",
+      "current": true
+    }
+  },
+  "rows": [
+    {
+      "id": "{C164AE0D-0D45-44C7-A5E8-65783E01D0F2}",
+      "title": "オープニング",
+      "image": "project.assets\\5ea393bd7b0df2dd3289a08a83a1e7cda4b4aa978ade0ea132466e9dbb34b933.png",
+      "description": "",
+      "imagePrompt": "",
+      "padding": 0,
+      "imageFeedback": "",
+      "imageApproved": true,
+      "imageApprovalKey": "ff7439975cf2cb7bca7e837bfdc8337c94fb55d3b143a3d501c3f9919aaaf27b",
+      "imageEditEpoch": 1,
+      "displayMode": "none",
+      "animation": {},
+      "sceneNumber": 1,
+      "start": 0,
+      "duration": 10.8346666666667,
+      "ready": true,
+      "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}\\project.assets\\5ea393bd7b0df2dd3289a08a83a1e7cda4b4aa978ade0ea132466e9dbb34b933.png",
+      "sourceCues": [
+        {
+          "cueId": "{BAD54216-9F51-4A8B-A1ED-F4D6E81E4BD8}",
+          "sourceText": "東北きりたんです"
+        },
+        {
+          "cueId": "{19AB773D-1564-42C9-A501-4A10651BAFD4}",
+          "sourceText": "今回もニコニコ漫画から"
+        },
+        {
+          "cueId": "{C1009FF4-C044-48C8-A84A-EDA361CF6B20}",
+          "sourceText": "無料で最新話まで読める作品を紹介します"
+        },
+        {
+          "cueId": "{3C78A2B1-BCE0-49BC-9E87-CB7B65589EAF}",
+          "sourceText": "今回紹介する作品は"
+        },
+        {
+          "cueId": "{3913C936-6A07-4EC1-9549-39BFD45A3EBD}",
+          "sourceText": "異世界「嘘」ガイド"
+        },
+        {
+          "cueId": "{4494C3E7-F217-4E75-99EC-D85435B17A04}",
+          "sourceText": "という作品です"
+        }
+      ],
+      "cueCount": 6,
+      "hasMoreCues": false,
+      "imageRequest": {
+        "requestId": "{97CB2454-9572-421F-84DD-E53F57CF30EE}",
+        "sceneId": "{C164AE0D-0D45-44C7-A5E8-65783E01D0F2}",
+        "sceneNumber": 1,
+        "fingerprint": "0df3c392eaa06aa3f21d05ca2844abddb7eb3d2dd054d497fd22f2fa3b998cde",
+        "prompt": "動画の漫画紹介に使う、横長16:9、1920x1080を目標とした高品質なカラー漫画イラストを1枚。細く明瞭な線、簡潔なセル塗り、自然な柔らかい光、親しみやすい異世界ラブコメの雰囲気。単一の完成した情景で、文字・吹き出し・字幕・ロゴ・透かし・枠・分割コマを入れない。キャラクターは公式参照画像の外見を維持する。ナナ：白銀の長い髪、中央の長い前髪と外へ跳ねる毛束、赤い半目がちな瞳、色白で細身、黒いチョーカー、小さな襟飾りのクリーム色の上衣、ゆったりした黒～濃いチャコール色の上着と金色の袖ボタン。髪の横の跳ねは毛束であり獣耳や角にしない。露出を強調しない普段着。ながれ：短く自然に乱れた黒髪、黒い瞳、色白で普通の体格の日本人青年、素朴で少し戸惑った表情。公式では服装の色を確認できないため本セットでは無地のくすんだ青い長袖上衣・濃い灰色のズボンで統一する。登場時の顔立ち・髪型・服の色・体格を全画像で維持。参照にある印刷文字や漫画コマそのものを複製せず、下記の新しい場面を描く。\r\n今回の場面：作品紹介の導入。ナナが森林の小道の入口でこちらを向き、案内を申し出るように片手を軽く差し出している。背景に木々の間から遠くの異世界の小さな町と丘が見える。人懐こい笑顔に少しだけいたずらっぽさを含む。明るい期待感。人物と場所を見やすく大きく配置。",
+        "feedback": "",
+        "provider": "external-codex",
+        "width": 1920,
+        "height": 1080,
+        "aspectRatio": "1920:1080",
+        "target": "scene",
+        "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+        "adoptedFingerprint": "116442d3bc209be5709efe0549ecc951a193297f444f202aa2b802ef6e98eed4",
+        "imageProvenance": "external-generated",
+        "state": "cancelled",
+        "current": false
+      }
+    }
+  ],
+  "nextOffset": 1,
+  "hasMore": true,
+  "preview": {
+    "current": false,
+    "error": ""
+  },
+  "pipes": {
+    "format": "RIGMMaker.WorkspaceConnection",
+    "schemaVersion": 1,
+    "apiVersion": 2,
+    "pid": 24128,
+    "commandPipe": "RIGMMaker.Workspace.24128.{46CD3D5F-8F91-4BE6-AE52-5D28BABA7B15}",
+    "controlPipe": "RIGMMaker.Workspace.24128.{46CD3D5F-8F91-4BE6-AE52-5D28BABA7B15}",
+    "dataRoot": "C:\\Users\\zan12\\Documents\\RIGMMaker",
+    "connectionFile": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Exchange\\workspace-24128.json",
+    "routing": "common-command"
+  }
+}

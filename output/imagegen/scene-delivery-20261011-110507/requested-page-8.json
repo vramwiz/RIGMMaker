@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "data": {
+    "count": 14,
+    "backgroundReady": false,
+    "allApproved": false,
+    "ready": 0,
+    "pendingRequests": 13,
+    "selectedScene": "{15110FE5-0453-4C73-87EF-EA88E7B0F2F2}",
+    "state": "in-progress",
+    "projectId": "{C36C2A85-DD8A-4DDE-8A7D-D5072CF41A98}",
+    "revision": 1483,
+    "background": {
+      "id": "common-background",
+      "title": "共通背景画像",
+      "image": "",
+      "description": "",
+      "imagePrompt": "マンガの紹介用の背景、異世界から来た女騎士が男性に日本料理を勧められて美味しそうに食べる",
+      "padding": 0,
+      "imageFeedback": "",
+      "imageApproved": false,
+      "imageApprovalKey": "",
+      "imageEditEpoch": 0,
+      "displayMode": "image",
+      "animation": {},
+      "target": "common-background",
+      "optional": true,
+      "ready": false,
+      "imagePath": "",
+      "width": 1920,
+      "height": 1080,
+      "sourceCues": [],
+      "imageRequest": {
+        "requestId": "{DDAAF6EE-160C-4249-B869-9B4037E49109}",
+        "sceneId": "common-background",
+        "sceneNumber": 0,
+        "fingerprint": "ab7e80dd54a096445be60619aa2e7c30d6120d60d26a1babfc9a437b2156972d",
+        "prompt": "マンガの紹介用の背景、異世界から来た女騎士が男性に日本料理を勧められて美味しそうに食べる",
+        "feedback": "",
+        "state": "pending",
+        "provider": "external-codex",
+        "width": 1920,
+        "height": 1080,
+        "aspectRatio": "1920:1080",
+        "target": "common-background",
+        "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+        "current": true
+      }
+    },
+    "rows": [
+      {
+        "id": "{BBB0A883-BB98-46BA-A4BA-4F6250B3DC3B}",
+        "title": "女騎士",
+        "image": "",
+        "description": "",
+        "imagePrompt": "女騎士",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 2,
+        "displayMode": "image",
+        "animation": {},
+        "sceneNumber": 9,
+        "start": 64.9,
+        "duration": 0.972,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{CC5150EB-1D13-4506-937F-F0F83BB5177C}",
+            "sourceText": "女騎士"
+          }
+        ],
+        "cueCount": 1,
+        "hasMoreCues": false,
+        "imageRequest": {
+          "requestId": "{3F52ACBC-6878-4069-B875-AF2996381CEC}",
+          "sceneId": "{BBB0A883-BB98-46BA-A4BA-4F6250B3DC3B}",
+          "sceneNumber": 9,
+          "fingerprint": "9942d52f993ddafe76fb077496060b93e116b3a13baa413877b077e987dd66a3",
+          "prompt": "女騎士",
+          "feedback": "",
+          "state": "pending",
+          "provider": "external-codex",
+          "width": 1920,
+          "height": 1080,
+          "aspectRatio": "1920:1080",
+          "target": "scene",
+          "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+          "current": true
+        }
+      }
+    ],
+    "nextOffset": 9,
+    "hasMore": true,
+    "preview": {
+      "current": false,
+      "error": ""
+    },
+    "pipes": {
+      "format": "RIGMMaker.WorkspaceConnection",
+      "schemaVersion": 1,
+      "apiVersion": 2,
+      "pid": 13364,
+      "commandPipe": "RIGMMaker.Workspace.13364.{398A9234-BF79-455C-9A11-D0E50739806F}",
+      "controlPipe": "RIGMMaker.Workspace.13364.{398A9234-BF79-455C-9A11-D0E50739806F}",
+      "dataRoot": "C:\\Users\\zan12\\Documents\\RIGMMaker",
+      "connectionFile": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Exchange\\workspace-13364.json",
+      "routing": "common-command"
+    }
+  },
+  "requestId": "4f536fae-b8dd-4d4c-9792-abf18202b06a"
+}

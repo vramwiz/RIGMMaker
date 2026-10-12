@@ -56,8 +56,9 @@
         <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Winapi;$(DCC_Namespace)</DCC_Namespace>
         <DCC_DcuOutput>Win64\$(Config)</DCC_DcuOutput>
         <DCC_ExeOutput>.</DCC_ExeOutput>
+        <RigmFFmpegRuntimeSource Condition="'$(RigmFFmpegRuntimeSource)'==''">$(MSBuildProjectDirectory)\Runtime\FFmpeg</RigmFFmpegRuntimeSource>
         <DCC_UsePackage>vcl;rtl;vclx;$(DCC_UsePackage)</DCC_UsePackage>
-        <DCC_UnitSearchPath>Source\Psd\Core;Source\Psd\Persistence;Source\Psd\Editor;Source\Psd\Rendering;Source\Psd\Integrations;Source\Psd\Shell;Source\Psd\Reference;Source\Studio;Source\Studio\Assets;Source\Studio\Audio;Source\Studio\Model;Source\Studio\Output;Source\Studio\Rendering;Source\Studio\Session;Source\Studio\Views\Creation;Source\Studio\Views\Editor;Source\Studio\Views\Preview;Source\Studio\Views\Timeline;Source\Studio\Workflow;Source\Shell\CharacterEditor;Source\Shell\Pages;Source\Lib\Charts;Source\Lib\Voicevox;Source\Shell;Source\Lib\UI\IconToolbar;Source\Lib\GameControllers;Source\Core;Source\Editor;Source\Rendering;Source\Persistence;Source\Integrations;Source\Reference\AIArtToPSD\Core;Source\Reference\AIArtToPSD\Shell;Source\Reference\AIArtToPSD\Persistence\PNG;Source\Reference\AIArtToPSD\Persistence\PSD;Source\Reference\AIArtToPSD\Integrations\Pipe;Source\Reference\AIArtToPSD\Lib\UI\VerticalScrollBar;Source\Reference\AIArtToPSD\Lib\UI\HorizontalTrackBar;Source\Reference\AIArtToPSD\Lib\Pipe;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>Source\Psd\Core;Source\Psd\Persistence;Source\Psd\Editor;Source\Psd\Rendering;Source\Psd\Integrations;Source\Psd\Shell;Source\Psd\Reference;Source\Studio;Source\Studio\Assets;Source\Studio\Audio;Source\Studio\Model;Source\Studio\Output;Source\Studio\Rendering;Source\Studio\Session;Source\Studio\Views\Creation;Source\Studio\Views\Editor;Source\Studio\Views\Preview;Source\Studio\Views\Timeline;Source\Studio\Workflow;Source\Shell\CharacterEditor;Source\Shell\Pages;Source\Lib\FFmpeg;Source\Lib\Charts;Source\Lib\Voicevox;Source\Shell;Source\Lib\UI\IconToolbar;Source\Lib\GameControllers;Source\Core;Source\Editor;Source\Rendering;Source\Persistence;Source\Integrations;Source\Reference\AIArtToPSD\Core;Source\Reference\AIArtToPSD\Shell;Source\Reference\AIArtToPSD\Persistence\PNG;Source\Reference\AIArtToPSD\Persistence\PSD;Source\Reference\AIArtToPSD\Integrations\Pipe;Source\Reference\AIArtToPSD\Lib\UI\VerticalScrollBar;Source\Reference\AIArtToPSD\Lib\UI\HorizontalTrackBar;Source\Reference\AIArtToPSD\Lib\Pipe;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <SanitizedProjectName>RIGMMaker</SanitizedProjectName>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_MajorVer>1</VerInfo_MajorVer>
@@ -114,6 +115,11 @@
         </DelphiCompile>
         <DCCReference Include="Source\Shell\RigmWizardMainForm.pas"/>
         <DCCReference Include="Source\Studio\Model\RigmScriptResearchModel.pas"/>
+        <DCCReference Include="Source\Studio\Rendering\RigmMovieText.pas"/>
+        <DCCReference Include="Source\Studio\Model\RigmMoviePosting.pas"/>
+        <DCCReference Include="Source\Studio\Model\RigmScriptThumbnailModel.pas"/>
+        <DCCReference Include="Source\Studio\Views\Editor\RigmMoviePostingFrame.pas"/>
+        <DCCReference Include="Source\Integrations\RigmNicoManga.pas"/>
         <DCCReference Include="Source\Psd\Validation\RigmScriptNavigationProbe.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
@@ -154,6 +160,14 @@
     <Import Project="$(APPDATA)\Embarcadero\BDS\$(PRODUCTVERSION)\UserTools.proj" Condition="Exists('$(APPDATA)\Embarcadero\BDS\$(PRODUCTVERSION)\UserTools.proj')"/>
     <Target Name="CreateDcuOutputDirectory" BeforeTargets="_PasCoreCompile">
         <MakeDir Directories="$(DCC_DcuOutput)" Condition="!Exists('$(DCC_DcuOutput)')"/>
+    </Target>
+    <Target Name="DeployFFmpegRuntime" AfterTargets="Build" Condition="'$(Platform)'=='Win64'">
+        <Error Condition="!Exists('$(RigmFFmpegRuntimeSource)\avcodec-62.dll') Or !Exists('$(RigmFFmpegRuntimeSource)\avformat-62.dll') Or !Exists('$(RigmFFmpegRuntimeSource)\avutil-60.dll') Or !Exists('$(RigmFFmpegRuntimeSource)\swscale-9.dll') Or !Exists('$(RigmFFmpegRuntimeSource)\swresample-6.dll')" Text="FFmpeg runtime is missing. Run Setup\Prepare-FFmpegRuntime.ps1 before building."/>
+        <ItemGroup>
+            <RigmFFmpegRuntime Include="$(RigmFFmpegRuntimeSource)\*.dll;$(RigmFFmpegRuntimeSource)\*.txt;$(RigmFFmpegRuntimeSource)\manifest.json"/>
+        </ItemGroup>
+        <MakeDir Directories="$(DCC_ExeOutput)\Runtime\FFmpeg"/>
+        <Copy SourceFiles="@(RigmFFmpegRuntime)" DestinationFolder="$(DCC_ExeOutput)\Runtime\FFmpeg" SkipUnchangedFiles="True"/>
     </Target>
     <Import Project="$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj" Condition="Exists('$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj')"/>
 </Project>

@@ -44,9 +44,6 @@ begin
     else if Handle in [4,5,6] then Result.Bottom := Result.Top+H
     else begin Result.Top := (Original.Top+Original.Bottom-H)/2; Result.Bottom := Result.Top+H; end;
   end;
-  var K := Min(1.0,Min(Area.Width/Result.Width,Area.Height/Result.Height));
-  var W := Result.Width*K; var H := Result.Height*K;
-  Result.Right := Result.Left+W; Result.Bottom := Result.Top+H;
-  Result.Offset(EnsureRange(Result.Left,Area.Left,Area.Right-W)-Result.Left,EnsureRange(Result.Top,Area.Top,Area.Bottom-H)-Result.Top);
+  // ガイドは初期配置の目安。移動・拡縮では画面外へのはみ出しも保持する。
 end;
 end.

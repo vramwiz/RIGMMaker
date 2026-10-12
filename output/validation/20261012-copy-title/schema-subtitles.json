@@ -1,0 +1,939 @@
+{
+  "workspaceCommandPrefix": "app-",
+  "movieCommandPrefix": "movie-",
+  "psdCommandPrefix": "psd-",
+  "workspace": {
+    "status": {},
+    "library": {},
+    "switch-page": {
+      "page": "home|preview|create|characters|scripts|character-edit",
+      "propertyPage": "optional"
+    },
+    "open-work": {
+      "path": ".rigmovie"
+    },
+    "edit-character": {
+      "path": ".psdchar|.psd|.rigm"
+    },
+    "register-character": {
+      "path": "file within dataRoot",
+      "name": "optional"
+    },
+    "script-status": {},
+    "script-list": {
+      "offset": 0,
+      "limit": 50
+    },
+    "script-new": {},
+    "script-open": {
+      "path": "Projects/<UID>/project.rigmovie"
+    },
+    "script-set-title": {
+      "projectId": "from script-status",
+      "revision": "from script-status",
+      "title": "<=128 characters"
+    },
+    "script-save": {
+      "projectId": "from script-status",
+      "revision": "from script-status"
+    },
+    "script-character-library": {},
+    "script-copy": {
+      "path": "Projects/<UID>/project.rigmovie; saved wizard script only"
+    },
+    "script-set-type": {
+      "projectId": "from script-status",
+      "revision": "from script-status",
+      "scriptType": "ID from scriptTypes; empty clears classification"
+    },
+    "scriptTypes": [
+      {
+        "id": "anime-review",
+        "name": "アニメ批評"
+      },
+      {
+        "id": "manga-introduction",
+        "name": "漫画紹介"
+      }
+    ],
+    "script-set-stage": {
+      "projectId": "from script-status",
+      "revision": "from script-status",
+      "stage": "title|characters|layout|placement|text|review|casting|subtitles (backward only)"
+    },
+    "script-subtitles": {
+      "projectId": "required",
+      "revision": "required",
+      "offset": 0,
+      "limit": 1
+    },
+    "script-select-subtitle": {
+      "projectId": "required",
+      "revision": "required",
+      "cueId": "from subtitles"
+    },
+    "script-edit-subtitle": {
+      "projectId": "required",
+      "revision": "required",
+      "cueId": "required",
+      "subtitle": "<=3000 UTF16",
+      "note": "optional <=2048"
+    },
+    "script-set-subtitle-break": {
+      "projectId": "required",
+      "revision": "required",
+      "cueId": "required",
+      "offset": "UTF16 offset after removing first CRLF; remaining CRLF preserved"
+    },
+    "script-voice": {
+      "projectId": "required",
+      "revision": "required",
+      "offset": 0,
+      "limit": 1
+    },
+    "script-scenes": {
+      "projectId": "required",
+      "revision": "required",
+      "offset": 0,
+      "limit": 1,
+      "sourceCuesLimit": 10,
+      "unapprovedOnly": "optional true"
+    },
+    "script-scene-assignment": {
+      "projectId": "required",
+      "revision": "required",
+      "offset": 0,
+      "limit": 50
+    },
+    "script-set-scene-start": {
+      "projectId": "required",
+      "revision": "required",
+      "cueId": "from scene-assignment; first row fixed",
+      "startsScene": "required boolean"
+    },
+    "script-select-scene": {
+      "projectId": "required",
+      "revision": "required",
+      "sceneId": "background.id, thumbnail.id or rows[].id from script-scenes"
+    },
+    "script-request-scene-image": {
+      "projectId": "required",
+      "revision": "required",
+      "sceneId": "background.id, thumbnail.id or rows[].id from script-scenes"
+    },
+    "script-cancel-scene-image": {
+      "projectId": "required",
+      "revision": "required",
+      "sceneId": "background.id, thumbnail.id or rows[].id from script-scenes"
+    },
+    "script-edit-scene": {
+      "projectId": "required",
+      "revision": "required",
+      "sceneId": "background.id, thumbnail.id or rows[].id from script-scenes",
+      "title": "optional scene name <=300 UTF16, single line; editable after image approval",
+      "description": "optional <=3000 UTF16",
+      "prompt": "image instructions including corrections <=16004 UTF16",
+      "displayMode": "optional both/image/text/none; omitted infers from prompt/description",
+      "descriptionPosition": "below-image/image-top/image-center/image-bottom/screen-top",
+      "feedback": "legacy corrections <=8000 UTF16; combined with prompt for requests"
+    },
+    "script-adopt-scene-image": {
+      "projectId": "required",
+      "revision": "required",
+      "sceneId": "background.id, thumbnail.id or rows[].id from script-scenes",
+      "path": "local PNG/JPEG/BMP inside data root (no bytes)",
+      "requestId": "current pending request required",
+      "sha256": "required 64 hex",
+      "provenance": "external-generated/existing-material/test-fixture"
+    },
+    "script-complete-scenes": {
+      "projectId": "required",
+      "revision": "required"
+    },
+    "script-preview-scene": {
+      "projectId": "required",
+      "revision": "required"
+    },
+    "script-request-unapproved-images": {
+      "projectId": "required",
+      "revision": "required"
+    },
+    "script-set-summary-choice": {
+      "projectId": "required",
+      "revision": "required",
+      "choice": "none/yes; no chart values invented"
+    },
+    "script-summary": {
+      "projectId": "required",
+      "revision": "required"
+    },
+    "script-set-summary": {
+      "projectId": "required",
+      "revision": "required",
+      "draft": {
+        "text": "human <=2000",
+        "subtitle": "independent, blank hides",
+        "reading": "independent, blank uses text",
+        "role": "active 1..9; draft may be 0",
+        "kind": "radar/bar",
+        "title": "<=120",
+        "minimum": "numeric text",
+        "maximum": "numeric text",
+        "items": "3..8 objects label/value as text, incomplete strings retained"
+      }
+    },
+    "script-complete-summary": {
+      "projectId": "required",
+      "revision": "required"
+    },
+    "script-closing": {
+      "projectId": "required",
+      "revision": "required"
+    },
+    "script-set-closing": {
+      "projectId": "required",
+      "revision": "required",
+      "draft": "complete human draft from script-closing; numeric text retained"
+    },
+    "script-adopt-closing-image": {
+      "projectId": "required",
+      "revision": "required",
+      "kind": "representative|endImage|thumbnailImage",
+      "path": "existing workspace image"
+    },
+    "script-complete-closing": {
+      "projectId": "required",
+      "revision": "required"
+    },
+    "script-image-transfer-begin": {
+      "sceneId": "existing scene, common-background or thumbnail",
+      "byteCount": "1..33554432",
+      "sha256": "64 hex characters",
+      "mimeType": "image/png",
+      "requestId": "from current external image request",
+      "provenance": "external-generated/existing-material/test-fixture"
+    },
+    "script-image-transfer-chunk": {
+      "transferId": "returned ID",
+      "offset": "next accepted byte offset",
+      "data": "canonical base64; at most 16384 decoded bytes"
+    },
+    "script-image-transfer-finish": {
+      "transferId": "ID; starts asynchronous hash/decode/publication"
+    },
+    "script-image-transfer-status": {
+      "transferId": "ID; state, acceptedBytes, receivedBytes, nextOffset, path"
+    },
+    "script-image-transfer-cancel": {
+      "transferId": "ID; asynchronous cancellation; completed valid assets retained"
+    },
+    "script-image-transfer-adopt": {
+      "transferId": "ready ID; latest projectId/revision required; no project autosave",
+      "requestId": "from original transfer contract"
+    },
+    "script-voice-catalog": {
+      "projectId": "required",
+      "revision": "required",
+      "offset": 0,
+      "pageSize": 20
+    },
+    "script-set-voice-engine": {
+      "projectId": "required",
+      "revision": "required",
+      "engineUrl": "local engine URL"
+    },
+    "script-refresh-voice": {
+      "projectId": "required",
+      "revision": "required"
+    },
+    "script-bind-voice": {
+      "projectId": "required",
+      "revision": "required",
+      "role": 1,
+      "styleId": "from live catalog",
+      "uuid": "from live catalog"
+    },
+    "script-bind-voice-person": {
+      "projectId": "required",
+      "revision": "required",
+      "role": 1,
+      "uuid": "from live catalog"
+    },
+    "script-set-expression": {
+      "projectId": "required",
+      "revision": "required",
+      "cueId": "required",
+      "expression": "auto|neutral|happy|sad|serious|angry|gentle|surprised|doubt|joy|confused",
+      "variants": "optional [{groupId,partId}]; actual assets from script-casting includeExpressionAssets:true"
+    },
+    "script-set-voice-state": {
+      "projectId": "required",
+      "revision": "required",
+      "cueId": "required",
+      "styleId": "from selected person"
+    },
+    "script-save-character-voice": {
+      "projectId": "required",
+      "revision": "required",
+      "role": 1
+    },
+    "script-voice-effects": {
+      "projectId": "required",
+      "revision": "required",
+      "offset": 0
+    },
+    "script-select-voice-effects": {
+      "projectId": "required",
+      "revision": "required",
+      "cueId": "stable cue ID"
+    },
+    "script-edit-voice-effects": {
+      "projectId": "required",
+      "revision": "required",
+      "cueId": "stable cue ID",
+      "settings": "object: sparse numeric Aul2 controller keys; {} clears all effects"
+    },
+    "script-select-voice": {
+      "projectId": "required",
+      "revision": "required",
+      "cueId": "from voice"
+    },
+    "script-edit-voice": {
+      "projectId": "required",
+      "revision": "required",
+      "cueId": "from voice",
+      "reading": "<=2000 UTF16; empty restores original",
+      "settings": {
+        "speedScale": 1,
+        "pitchScale": 0,
+        "intonationScale": 1,
+        "volumeScale": 1,
+        "prePhonemeLength": 0.1,
+        "postPhonemeLength": 0.1
+      }
+    },
+    "script-generate-voice": {
+      "projectId": "required",
+      "revision": "required",
+      "cueId": "selected only",
+      "play": false
+    },
+    "script-cancel-voice": {
+      "projectId": "required",
+      "revision": "required"
+    },
+    "script-casting": {
+      "projectId": "required",
+      "revision": "required",
+      "offset": 0,
+      "limit": 1
+    },
+    "script-request-casting": {
+      "projectId": "required",
+      "revision": "required"
+    },
+    "script-submit-casting": {
+      "projectId": "required",
+      "revision": "required",
+      "requestId": "from casting",
+      "fingerprint": "from casting",
+      "items": [
+        {
+          "cueId": "from casting",
+          "role": 1,
+          "reason": "<=2048"
+        }
+      ],
+      "complete": true
+    },
+    "script-select-casting": {
+      "projectId": "required",
+      "revision": "required",
+      "cueId": "from casting"
+    },
+    "script-split-casting": {
+      "projectId": "required",
+      "revision": "required",
+      "cueId": "from casting",
+      "offset": "UTF16 offset inside this cue"
+    },
+    "script-merge-casting": {
+      "projectId": "required",
+      "revision": "required",
+      "cueId": "merge with next within same scene and section"
+    },
+    "script-research": {
+      "projectId": "required",
+      "revision": "required",
+      "section": "summary/candidates/candidate/elements/element/integration",
+      "id": "optional",
+      "offset": 0,
+      "limit": 20
+    },
+    "script-research-title": {
+      "projectId": "required",
+      "revision": "required",
+      "researchId": "from script-research",
+      "workId": "selectedCandidateId for element updates"
+    },
+    "script-research-candidates": {
+      "projectId": "required",
+      "revision": "required",
+      "researchId": "from script-research",
+      "workId": "selectedCandidateId for element updates"
+    },
+    "script-research-select": {
+      "projectId": "required",
+      "revision": "required",
+      "researchId": "from script-research",
+      "workId": "selectedCandidateId for element updates"
+    },
+    "script-research-definitions": {
+      "projectId": "required",
+      "revision": "required",
+      "researchId": "from script-research",
+      "workId": "selectedCandidateId for element updates"
+    },
+    "script-research-add": {
+      "projectId": "required",
+      "revision": "required",
+      "researchId": "from script-research",
+      "workId": "selectedCandidateId for element updates"
+    },
+    "script-research-element": {
+      "projectId": "required",
+      "revision": "required",
+      "researchId": "from script-research",
+      "workId": "selectedCandidateId for element updates"
+    },
+    "script-research-expand": {
+      "projectId": "required",
+      "revision": "required",
+      "researchId": "from script-research",
+      "workId": "selectedCandidateId for element updates"
+    },
+    "researchContract": {
+      "title": "title <=256",
+      "candidates": "candidates array of id/name/overview/identity/details/sources; resets human approval",
+      "select": "id",
+      "definitions": "scriptType + elements array of id/label; replaces definitions, archives old results",
+      "add": "id/label after all elements confirmed",
+      "element": "id/workId + name/summary/details/sources/state",
+      "expand": "id or empty to collapse",
+      "states": [
+        "unconfirmed",
+        "checking",
+        "confirmed-info",
+        "confirmed-none"
+      ],
+      "humanWorkApproval": "GUI only; no auto approval",
+      "integration": "confirmed-info only; full details via section=element"
+    },
+    "script-review": {
+      "projectId": "required",
+      "revision": "required",
+      "offset": 0,
+      "limit": 1
+    },
+    "script-request-review": {
+      "projectId": "required",
+      "revision": "required"
+    },
+    "script-submit-review": {
+      "projectId": "required",
+      "revision": "required",
+      "requestId": "from review",
+      "fingerprint": "from review",
+      "items": [
+        {
+          "id": "unique <=64",
+          "section": "body",
+          "offset": 0,
+          "original": "<=4096 UTF16",
+          "proposed": "<=4096 UTF16",
+          "reason": "<=2048"
+        }
+      ],
+      "complete": true
+    },
+    "script-text": {
+      "section": "opening|body|closing",
+      "offset": 0,
+      "limit": 4096,
+      "projectId": "optional consistent read",
+      "revision": "optional consistent read"
+    },
+    "script-set-text": {
+      "projectId": "from script-status",
+      "revision": "from script-status",
+      "section": "opening|body|closing",
+      "text": "<=4096 chars",
+      "offset": "optional zero-based UTF16 patch position",
+      "removeCount": "optional patch length"
+    },
+    "script-select-section": {
+      "projectId": "from script-status",
+      "revision": "from script-status",
+      "section": "opening|body|closing"
+    },
+    "script-set-layout": {
+      "projectId": "from script-status",
+      "revision": "from script-status",
+      "choice": "theme|l-left|l-right",
+      "backgroundTone": "optional: dark|light|blue"
+    },
+    "script-next": {
+      "projectId": "from script-status",
+      "revision": "from script-status"
+    },
+    "script-set-placement": {
+      "projectId": "from script-status",
+      "revision": "from script-status",
+      "path": "selected character path",
+      "x": 0.1,
+      "y": 0.2,
+      "width": 0.15,
+      "height": 0.5,
+      "flipX": false,
+      "coordinateSpace": "ratio",
+      "reset": "optional true restores initial position and size; coordinates may extend outside the screen"
+    },
+    "script-select-placement": {
+      "projectId": "from script-status",
+      "revision": "from script-status",
+      "path": "selected character path"
+    },
+    "script-set-characters": {
+      "projectId": "from script-status",
+      "revision": "from script-status",
+      "paths": [
+        "path from script-character-library"
+      ]
+    }
+  },
+  "movie": {
+    "format": "RIGM-MOVIE",
+    "formatVersion": 1,
+    "textSyntax": "# scene title / speaker: text / plain text uses narrator",
+    "cueFields": {
+      "id": "stable string",
+      "scene": "string",
+      "speaker": "speaker id",
+      "text": "spoken text <=2000 characters",
+      "subtitle": "display text",
+      "pause": "seconds 0..60 after audio",
+      "expression": "neutral|smile|serious|sad",
+      "emotion": "neutral|happy|sad|serious|angry|gentle|surprised|doubt|joy|confused; visual face, independent of voiceStyleId",
+      "faceAutomatic": "boolean; ?=doubt, !=surprised, both=confused",
+      "motion": "idle|still|nod|emphasis",
+      "background": "local image file",
+      "parameters": "RIGM parameter id -> number",
+      "acting": "partial actingFields object"
+    },
+    "actingFields": {
+      "mouthMode": "auto|assets|deform",
+      "blinkMode": "auto|assets|deform",
+      "mouthGain": "0..2",
+      "lipLead": "-0.3..0.3 seconds; positive samples later audio",
+      "blinkStrength": "0..1",
+      "blinkInterval": "0.3..30 seconds",
+      "blinkDuration": "0.04..1 seconds, <= interval",
+      "blinkPhase": "0..30 seconds",
+      "headGain": "0..3",
+      "bodyGain": "0..3",
+      "imageAttention": "auto|off|head; image-direction head tilt only; no pupil gaze; auto uses scene.animation.explainImage or explicit image-explanation text",
+      "onset": "0..600 cue-local seconds",
+      "duration": "-1=cue end or 0..660 seconds",
+      "fadeIn": "0..60 seconds",
+      "fadeOut": "0..60 seconds",
+      "variants": "array of actual groupId/partId; direct children only; runtime visibility; no source edits"
+    },
+    "speakerFields": {
+      "id": "string",
+      "name": "display name",
+      "styleId": "from engine speakers catalog; -1 unselected",
+      "speed": "0.5..2",
+      "pitch": "-0.15..0.15",
+      "intonation": "0..2",
+      "volume": "0..2"
+    },
+    "audioPolicy": "fingerprint invalidation; no synthetic fallback speech",
+    "video": "MJPEG + PCM16 mono AVI or H264/AAC MP4 via bundled FFmpeg DLLs; optional external ffmpeg.exe override; every spoken cue must be ready",
+    "coordinates": "character centered in frame; subtitles below; time in seconds",
+    "outputPresets": {
+      "draft": {
+        "width": 640,
+        "height": 360,
+        "fps": 15
+      },
+      "hd": {
+        "width": 1280,
+        "height": 720,
+        "fps": 30
+      },
+      "fullhd": {
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "custom": "explicit dimensions and fps",
+      "encoding": {
+        "fast": "veryfast / CRF23 / JPEG80; smaller CPU budget",
+        "balanced": "medium / CRF20 / JPEG90",
+        "quality": "slow / CRF18 / JPEG95; larger staging and CPU time"
+      },
+      "threads": 4,
+      "limit": "MP4 streams raw frames to FFmpeg; AVI alone retains its legacy 2GB limit"
+    },
+    "bgmFields": {
+      "file": "managed PCM16 mono/stereo WAV; local path input copied and validated",
+      "volume": "independent gain 0..2",
+      "fadeOut": "0..3600 requested seconds, clamped to video duration; shorter BGM repeats"
+    },
+    "imageAnimationFields": {
+      "enter": "none|fade",
+      "exit": "none|fade",
+      "enterSeconds": "0..60, default 0.5",
+      "exitSeconds": "0..60, default 0.5",
+      "shortScenePolicy": "proportionally shorten to avoid overlap"
+    },
+    "pipeEnvelope": "schemaVersion=1, requestId, command, args",
+    "editing": "mutations require status.projectId + revision; snapshot job; generated audio is undoable; no RIGM edits",
+    "examples": [
+      {
+        "id": "fictional-short",
+        "title": "架空の短い紹介例",
+        "kind": "fictional_example",
+        "text": "# 架空の紹介例\r\nnarrator:これは架空の小さな喫茶店の紹介例です。\r\nnarrator:木の椅子と、静かな音楽のあるお店です。"
+      },
+      {
+        "id": "intro-three-minute",
+        "title": "3分紹介用の構成テンプレート",
+        "kind": "structure_template",
+        "suggestedSeconds": 180,
+        "durationGuaranteed": false,
+        "text": "# 0:00–0:15 導入\r\nnarrator:【紹介する対象と、この動画で伝えたいこと】\r\n# 0:15–0:45 概要\r\nnarrator:【対象の概要を、自分の言葉で説明】\r\n# 0:45–1:30 特徴\r\nnarrator:【特徴を二つか三つ、具体例とともに紹介】\r\n# 1:30–2:15 使い方・体験\r\nnarrator:【使い方や体験を、順序に沿って紹介】\r\n# 2:15–2:45 補足\r\nnarrator:【注意点や向いている場面】\r\n# 2:45–3:00 まとめ\r\nnarrator:【伝えたいことと、次にしてほしいこと】"
+      }
+    ],
+    "commands": {
+      "status": {},
+      "update-posting": {
+        "title": "posting title; manual episode number",
+        "description": "posting description"
+      },
+      "project": {
+        "offset": 0,
+        "limit": 20
+      },
+      "import-script": {
+        "text": "text or JSON",
+        "path": "optional local file",
+        "format": "text|json"
+      },
+      "update-project": {
+        "title": "string",
+        "character": "local .rigm or @sample",
+        "engineUrl": "loopback URL",
+        "width": 1920,
+        "height": 1080,
+        "fps": 30,
+        "outputPreset": "draft|hd|fullhd|custom",
+        "encodeProfile": "fast|balanced|quality",
+        "backgroundColor": 3156000,
+        "ffmpeg": "optional existing local ffmpeg.exe override; empty uses bundled DLLs",
+        "outputTarget": "new .mp4 or .avi",
+        "bgm": {
+          "file": "local PCM16 .wav, copied before adoption; empty to clear",
+          "volume": 0.25,
+          "fadeOut": 2
+        }
+      },
+      "update-cue": {
+        "id": "cue id",
+        "text": "string",
+        "subtitle": "string",
+        "pause": 0.3,
+        "expression": "neutral|smile|serious|sad",
+        "motion": "idle|still|nod|emphasis",
+        "background": "local image",
+        "parameters": {},
+        "acting": {},
+        "audioEffects": {
+          "Out: Use": 1,
+          "Out: Gain(dB)": -3
+        }
+      },
+      "add-cue": {
+        "cue": {},
+        "index": 0
+      },
+      "delete-cue": {
+        "id": "cue id"
+      },
+      "move-cue": {
+        "id": "cue id",
+        "index": 0
+      },
+      "update-speaker": {
+        "id": "speaker id",
+        "styleId": 3,
+        "speed": 1,
+        "pitch": 0,
+        "intonation": 1,
+        "volume": 1
+      },
+      "speakers-refresh": {},
+      "speaker-list": {},
+      "audio-generate": {
+        "directory": "optional generated asset directory"
+      },
+      "job-status": {
+        "scope": "main (default)|diagnostics"
+      },
+      "job-cancel": {
+        "scope": "all (default)|main|diagnostics"
+      },
+      "job-retry": {},
+      "timeline": {},
+      "seek": {
+        "time": 0
+      },
+      "preview": {
+        "time": 0,
+        "path": "optional new PNG"
+      },
+      "export": {
+        "path": "new .avi or .mp4; relative to project; MP4 target and applied project are saved before encoding"
+      },
+      "save": {
+        "path": ".rigmovie"
+      },
+      "open": {
+        "path": ".rigmovie"
+      },
+      "undo": {},
+      "redo": {},
+      "play": {},
+      "pause": {},
+      "playback-audio": {
+        "time": 0,
+        "path": "optional new WAV"
+      },
+      "open-ui": {},
+      "assets-refresh": {},
+      "assets": {
+        "offset": 0,
+        "limit": 20
+      },
+      "waveform-refresh": {},
+      "waveform": {},
+      "preparation": {
+        "outputPath": "optional target override; read only"
+      },
+      "diagnostics-refresh": {},
+      "produce": {
+        "requestKey": "unique stable key",
+        "script": "optional text or JSON object; existing script retained when omitted",
+        "scriptPath": "optional local file",
+        "settings": {},
+        "voices": {
+          "speakerId": "styleId or voice settings"
+        },
+        "acting": {},
+        "outputPath": "optional new output; default derived from configured location",
+        "deliver": "video (default)|preview",
+        "previewPath": "optional new PNG",
+        "previewTime": 0.2
+      },
+      "production-status": {
+        "requestKey": "optional; defaults to latest"
+      },
+      "production-resume": {
+        "requestKey": "blocked/failed/cancelled key",
+        "settings": {},
+        "voices": {},
+        "outputPath": "optional corrected path"
+      },
+      "production-cancel": {
+        "requestKey": "optional; defaults to latest"
+      },
+      "workflow-status": {},
+      "workflow-next": {},
+      "workflow-back": {
+        "stage": "optional earlier script|setup|audio|preview|export"
+      },
+      "workflow-run": {
+        "text": "script stage only",
+        "path": "optional new preview/export path",
+        "time": "optional preview seconds",
+        "directory": "optional audio directory"
+      },
+      "composition-enable": {},
+      "add-character": {
+        "character": {
+          "file": ".rigm",
+          "speaker": "speaker id",
+          "x": 1370,
+          "y": 130,
+          "width": 520,
+          "height": 900
+        }
+      },
+      "update-character": {
+        "id": "character id",
+        "x": 0,
+        "y": 0,
+        "width": 520,
+        "height": 900,
+        "flipX": false,
+        "visible": true,
+        "rigSafe": true
+      },
+      "delete-character": {
+        "id": "character id"
+      },
+      "add-scene": {
+        "scene": {
+          "title": "string"
+        },
+        "text": "initial spoken line",
+        "subtitle": "display text",
+        "index": 0
+      },
+      "update-scene": {
+        "id": "scene id",
+        "image": "local image",
+        "description": "persistent scene text",
+        "imagePrompt": "generation prompt",
+        "chart": {
+          "kind": "none|radar|bar",
+          "title": "summary title",
+          "maximum": 5,
+          "color": "#5AB8E8",
+          "items": [
+            {
+              "label": "criterion",
+              "value": 4
+            }
+          ]
+        },
+        "animation": {
+          "enter": "none|fade",
+          "exit": "none|fade",
+          "enterSeconds": 0.5,
+          "exitSeconds": 0.5,
+          "explainImage": "optional boolean; enables image-direction head support, not pupil gaze"
+        }
+      },
+      "delete-scene": {
+        "id": "scene id"
+      },
+      "move-scene": {
+        "id": "scene id",
+        "index": 0
+      },
+      "resize-scene": {
+        "id": "scene id",
+        "duration": "seconds, cannot trim existing speech"
+      },
+      "register-expression": {
+        "id": "character id",
+        "emotion": "neutral|happy|sad|serious|angry|gentle|surprised|doubt|joy|confused",
+        "preset": {
+          "variants": [],
+          "blinkAnimate": true,
+          "mouthAnimate": true,
+          "rigSafe": true
+        }
+      },
+      "register-motion": {
+        "id": "character id",
+        "name": "motion name",
+        "motion": {
+          "loop": true,
+          "frames": [
+            {
+              "image": "local frame image",
+              "duration": 0.1
+            }
+          ]
+        }
+      },
+      "select-motion": {
+        "id": "character id",
+        "name": "registered motion name",
+        "start": "timeline seconds; default current seek",
+        "duration": "-1 until stopped or nonnegative seconds"
+      },
+      "stop-motion": {
+        "id": "character id"
+      },
+      "analyze-script": {
+        "id": "optional cue id; deterministic suggestion, explicit generation only"
+      },
+      "update-subtitle": {
+        "id": "cue id",
+        "subtitle": "display text; never changes speech"
+      },
+      "update-dialogue": {
+        "id": "cue id",
+        "text": "spoken text; no auto synthesis"
+      },
+      "composition-requests": {},
+      "edit-begin": {
+        "leaseSeconds": 60
+      },
+      "edit-status": {},
+      "edit-heartbeat": {
+        "editToken": "token",
+        "leaseSeconds": 60
+      },
+      "edit-end": {
+        "editToken": "token"
+      },
+      "edit-fail": {
+        "editToken": "token"
+      },
+      "edit-release": {
+        "manual": true
+      },
+      "update-ending": {
+        "draft": "human closing draft; validates images geometry choices and preserves dialogue/audio"
+      },
+      "image-transfer-begin": {
+        "sceneId": "existing scene, common-background or thumbnail",
+        "byteCount": "1..33554432",
+        "sha256": "64 hex characters",
+        "mimeType": "image/png"
+      },
+      "image-transfer-chunk": {
+        "transferId": "returned ID",
+        "offset": "next accepted byte offset",
+        "data": "canonical base64; at most 16384 decoded bytes"
+      },
+      "image-transfer-finish": {
+        "transferId": "ID; starts asynchronous hash/decode/publication"
+      },
+      "image-transfer-status": {
+        "transferId": "ID; state, acceptedBytes, receivedBytes, nextOffset, path"
+      },
+      "image-transfer-cancel": {
+        "transferId": "ID; asynchronous cancellation; completed valid assets retained"
+      },
+      "image-transfer-adopt": {
+        "transferId": "ready ID; latest projectId/revision required; no project autosave"
+      }
+    }
+  },
+  "pipes": {
+    "format": "RIGMMaker.WorkspaceConnection",
+    "schemaVersion": 1,
+    "apiVersion": 2,
+    "pid": 6936,
+    "commandPipe": "RIGMMaker.Workspace.6936.{61877B53-4826-4DBF-BCEF-0D7B52E58842}",
+    "controlPipe": "RIGMMaker.Workspace.6936.{61877B53-4826-4DBF-BCEF-0D7B52E58842}",
+    "dataRoot": "C:\\Users\\zan12\\Documents\\RIGMMaker",
+    "connectionFile": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Exchange\\workspace-6936.json",
+    "routing": "common-command"
+  }
+}

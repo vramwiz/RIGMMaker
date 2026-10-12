@@ -1,0 +1,15 @@
+{
+  "requestState": "adopted",
+  "sceneNumber": 1,
+  "sha256": "AE88E1C997FFF5BB1A6D694EAC21E5098520330F03EF7FBF83EED7ED256395A0",
+  "imageApproved": false,
+  "workspaceImage": "D:\\DelphiProg\\RIGMMaker\\制作支援\\学習記録\\RIGM\\20261011-soreyuki-scenes\\images\\scene-01.png",
+  "requestId": "{28961ECE-1A65-4968-9282-04C6265C288F}",
+  "width": 1672,
+  "exchangeImage": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Exchange\\CodexImages\\20261011-soreyuki-20b7bda5\\scene-01.png",
+  "height": 941,
+  "verified": true,
+  "sceneId": "{DCA3DDB7-2257-41ED-9BB8-4393804EACBB}",
+  "managedImage": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\ae88e1c997fff5bb1a6d694eac21e5098520330f03ef7fbf83eed7ed256395a0.png",
+  "sourceImage": "C:\\Users\\zan12\\.codex\\generated_images\\01a12a3b-12c0-7a32-948c-00d9ff0dde3f\\exec-8ab33f69-095f-406b-a5cb-f624fadc52b5.png"
+}

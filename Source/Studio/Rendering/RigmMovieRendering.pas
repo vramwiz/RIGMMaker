@@ -8,6 +8,9 @@ procedure MoviePose(Project: TRigmMovieProject; Document: TRigmDocument; Seconds
   Audio: TRigmPcm; Pose: TRigmPose);
 function RenderMovieFrame(Project: TRigmMovieProject; Document: TRigmDocument;
   Seconds: Double; Audio: TRigmPcm = nil): Vcl.Graphics.TBitmap;
+// 画面用だけ表示寸法に合わせる。作品スナップショットの出力寸法は復元する。
+function RenderMoviePreview(Project: TRigmMovieProject; Document: TRigmDocument;
+  Seconds: Double; Audio: TRigmPcm; MaxWidth,MaxHeight: Integer): Vcl.Graphics.TBitmap;
 
 function MovieSubtitleLines(const Text: string; Canvas: TCanvas; Width: Integer): TStringList; // 呼出側所有。合成と編集で同じ折返しを使う。
 procedure MovieSubtitleStyle(Canvas: TCanvas; VideoHeight: Integer); // 既存合成の44px字幕。
@@ -19,10 +22,23 @@ function MovieSubtitlePage(const Text: string; Canvas: TCanvas; Width,Lines: Int
 implementation
 uses System.Math, Winapi.Windows, RigmRenderer, RigmJson,
   Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, RigmMoviePhonemes, RigmMovieCompositor, RigmMovieActing,
-  RigmCharacterCatalog, RigmMovieComposition, RigmMoviePsdRendering, RigmMovieLayout;
+  RigmCharacterCatalog, RigmMovieComposition, RigmMoviePsdRendering, RigmMovieLayout, RigmMovieText;
 
 procedure MovieSubtitleStyle(Canvas: TCanvas; VideoHeight: Integer);
 begin Canvas.Font.Name := 'Yu Gothic UI'; Canvas.Font.Height := -Max(16,Round(44*VideoHeight/1080)); Canvas.Font.Style := []; end;
+function RenderMoviePreview(Project: TRigmMovieProject; Document: TRigmDocument;
+  Seconds: Double; Audio: TRigmPcm; MaxWidth,MaxHeight: Integer): Vcl.Graphics.TBitmap;
+begin
+  var W := Project.Width; var H := Project.Height;
+  // Bounded to 720p during interactive playback, with no upscaling of small
+  // output projects. Export and explicit PNG preview retain full resolution.
+  var K := Min(1.0,Min(EnsureRange(MaxWidth,160,1280)/W,EnsureRange(MaxHeight,120,720)/H));
+  K := Max(K,Max(160.0/W,120.0/H)); // preserve valid project dimensions for legacy PSD conversion
+  try
+    Project.Width := Max(160,Round(W*K) div 2*2); Project.Height := Max(120,Round(H*K) div 2*2);
+    Result := RenderMovieFrame(Project,Document,Seconds,Audio);
+  finally Project.Width := W; Project.Height := H; end;
+end;
 function MovieSubtitleContentRect(Project: TRigmMovieProject): TRect;
 begin
   Result := ScaleLayoutRect(MovieLayoutRegions(Project.Layout,Project.LDirection).Subtitle,Project.Width,Project.Height);
@@ -78,6 +94,16 @@ begin
   if C.Expression='smile' then begin Eyes := 0.75; Head := Head+2; end;
   if C.Expression='serious' then Head := Head-1;
   if C.Expression='sad' then begin Eyes := 0.7; Head := Head-3; Body := Body-2; end;
+  if C.Expression='neutral' then begin
+    var Face := C.VisualEmotion;
+    if (Face='happy') or (Face='joy') then begin Eyes := 0.75; Head := Head+2; end
+    else if Face='gentle' then begin Eyes := 0.85; Head := Head+1; end
+    else if Face='sad' then begin Eyes := 0.7; Head := Head-3; Body := Body-2; end
+    else if (Face='serious') or (Face='angry') then Head := Head-1
+    else if Face='doubt' then Head := Head+6
+    else if Face='confused' then Head := Head-6
+    else if Face='surprised' then begin Head := Head-3; Body := Body+3; end;
+  end;
   Gain := C.Acting.Gain(Local,Project.CueDuration(C));
   Head := Head*C.Acting.HeadGain*Gain; Body := Body*C.Acting.BodyGain*Gain;
   BlinkOpen := MovieBlinkOpen(Seconds,C.Acting.BlinkInterval,C.Acting.BlinkDuration,
@@ -177,13 +203,13 @@ begin
       var Subtitle := MovieSubtitlePage(C.Subtitle,CaptionCanvas,R.Width,Lines,
         Local/Max(0.001,Project.CueDuration(C)),PageCount);
       SetTextColor(DC,RGB(255,255,255)); SetBkMode(DC,TRANSPARENT);
-      if (Subtitle<>'') and (DrawText(DC,PChar(Subtitle),Length(Subtitle),R,DT_CENTER or DT_NOPREFIX)=0) then
+      if (Subtitle<>'') and (DrawMovieText(CaptionCanvas,Subtitle,R,DT_CENTER)=0) then
         raise ERigm.CreateFmt('字幕描画に失敗しました (Windows %d)。',[GetLastError]);
       CaptionCanvas.Brush.Style := bsClear; CaptionCanvas.Font.Height := -Max(14,Project.Height div 32);
       CaptionCanvas.TextHeight('あ');
       R := Rect(Project.Width div 30,Project.Height div 30,Project.Width*29 div 30,Project.Height div 7);
       SetTextColor(DC,RGB(255,255,255)); SetBkMode(DC,TRANSPARENT);
-      if (C.Scene<>'') and (DrawText(DC,PChar(C.Scene),Length(C.Scene),R,DT_LEFT or DT_WORDBREAK or DT_NOPREFIX)=0) then
+      if (C.Scene<>'') and (DrawMovieLabel(CaptionCanvas,C.Scene,R,DT_LEFT or DT_WORDBREAK)=0) then
         raise ERigm.CreateFmt('シーン名描画に失敗しました (Windows %d)。',[GetLastError]);
         GdiFlush;
         for Y := 0 to Project.Height-1 do Move(PByte(Bits)[Y*Project.Width*4],Result.ScanLine[Y]^,Project.Width*4);

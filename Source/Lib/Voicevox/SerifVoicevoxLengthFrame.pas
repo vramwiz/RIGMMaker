@@ -57,6 +57,7 @@ type
     property ScrollPosition: Integer read GetScrollPosition write SetScrollPosition;
     // audio_queryを表示する。音素列と一致しない古い手動長さ情報は除去して返す。
     function ShowQuery(const QueryJson: string): string;
+    procedure UpdateAccentQuery(const QueryJson: string); // 音素値が不変なアクセント位置編集では再配置しない。
     // スライダー操作で音素長を反映したaudio_queryを通知する。
     property OnChange: TSerifVoicevoxAccentQueryEvent
       read FOnChange write FOnChange;
@@ -256,6 +257,8 @@ begin
   if Assigned(FOnPreview) then FOnPreview(Self);
 end;
 
+procedure TFrameSerifVoicevoxLength.UpdateAccentQuery(const QueryJson: string);
+begin FQueryJson := QueryJson; end;
 function TFrameSerifVoicevoxLength.ShowQuery(const QueryJson: string): string;
 var
   AccentPhrases: TJSONArray;

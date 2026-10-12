@@ -1,0 +1,9 @@
+Use case: illustration-story
+Asset type: shared background illustration for a Japanese manga introduction video.
+Primary request: マンガの紹介用の背景、異世界から来た女騎士が男性に日本料理を勧められて美味しそうに食べる。
+Scene: a cozy modern Japanese bachelor apartment, wooden dining table, warm evening lamplight, modest kitchen and shelves in the background.
+Subjects: Kotaro, a Japanese bachelor in his thirties with short slightly tousled black hair and a relaxed casual shirt, warmly offering home-cooked Japanese food; Maribel, an adult female knight in her early twenties with blonde hair and blue eyes, practical blue-and-silver plate armor, enjoying a delicious bite with delighted expression. Keep both adults clearly recognizable, naturally proportioned and friendly.
+Food: an appetizing plate of rice balls and rolled omelet, a small bowl of miso soup, chopsticks held naturally.
+Style: polished full-color Japanese manga/anime narrative illustration, precise clean linework, soft cel shading, expressive faces, appetizing food detail, warm domestic fantasy mood. Original illustration, not a reproduced book cover or panel.
+Composition: one coherent widescreen scene, medium-wide dining view, characters and food unobstructed, readable as a video background. 16:9 landscape, target 1920 by 1080.
+Constraints: no text, no captions, no speech bubbles, no logos, no watermark, no extra characters.

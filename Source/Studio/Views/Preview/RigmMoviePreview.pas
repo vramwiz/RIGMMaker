@@ -60,6 +60,7 @@ type
     function CharacterBounds(const Id: string): TRect;
     // 枠の操作点を返す。Index=0は左上、1..7は上辺から時計回りの辺・角。
     function HandleRect(const Id: string; Index: Integer): TRect;
+    function RenderSize: TSize; // 表示倍率を含む要求寸法。出力側で720p以下へ制限する。
   end;
 implementation
 uses System.Math, System.JSON, RigmModel, RigmJson, RigmPlacementGeometry, RigmMovieLayout;
@@ -77,10 +78,15 @@ procedure TRigmMoviePreview.SetFrame(Bitmap: Vcl.Graphics.TBitmap);
 begin
   Inc(FFrameCount);
   // Do not share a bitmap's cached GDI DC with an exited render thread.
-  FFrame.Free; FFrame := Vcl.Graphics.TBitmap.Create; FFrame.PixelFormat := pf32bit;
+  FFrame.PixelFormat := pf32bit;
   FFrame.SetSize(Bitmap.Width,Bitmap.Height); FFrame.AlphaFormat := afIgnored;
   for var Y := 0 to Bitmap.Height-1 do Move(Bitmap.ScanLine[Y]^,FFrame.ScanLine[Y]^,Bitmap.Width*4);
   ClampViewport; FViewDirty := True; Invalidate;
+end;
+
+function TRigmMoviePreview.RenderSize: TSize;
+begin
+  var R := VideoRect; Result := TSize.Create(Max(1,R.Width),Max(1,R.Height));
 end;
 
 procedure TRigmMoviePreview.SetSelectedCharacter(const Value: string);

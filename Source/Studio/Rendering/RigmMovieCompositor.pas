@@ -14,16 +14,62 @@ procedure ValidateCompositionMaterials(Project: TRigmMovieProject);
 implementation
 uses System.Classes, System.Types, System.Math, System.IOUtils, System.StrUtils,
   System.Generics.Collections, Winapi.Windows, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg,
-  ArtDocument, RigmJson, RigmStorage, RigmSample, RigmRenderer, RigmMovieRendering, RigmMovieActing, RigmMovieChart, RigmMoviePsdRendering, RigmMovieLayout, RigmMovieEndCards, RigmMovieTransitions;
+  ArtDocument, RigmJson, RigmStorage, RigmSample, RigmRenderer, RigmMovieRendering, RigmMovieActing, RigmMovieChart, RigmMoviePsdRendering, RigmMovieLayout, RigmMovieEndCards, RigmMovieTransitions, RigmMovieText;
 type
   TActorEntry = class
     Stamp: string;
     Document: TRigmDocument;
+    Expressions: TJSONObject;
+    destructor Destroy; override;
+  end;
+  TImageEntry = class
+    Stamp: string;
+    Picture: TPicture;
+    Bytes: Int64;
     destructor Destroy; override;
   end;
 var ActorCache: TObjectDictionary<string,TActorEntry>; CacheLock: TObject;
+    ImageCache: TObjectDictionary<string,TImageEntry>; ImageCacheBytes: Int64;
 destructor TActorEntry.Destroy;
-begin Document.Free; inherited; end;
+begin Expressions.Free; Document.Free; inherited; end;
+destructor TImageEntry.Destroy;
+begin Picture.Free; inherited; end;
+// Caller holds CacheLock. Cache decoded PNG pixels, then give each render
+// thread its own graphic/DC. Native PNG alpha and palette transparency survive.
+function CompositionImage(Project: TRigmMovieProject; const FileName: string): TPicture;
+const Limit = 64*1024*1024;
+var Entry: TImageEntry;
+begin
+  var Path := ResolveMoviePath(Project.FileName,FileName);
+  var Stamp := TFile.GetSize(Path).ToString+'|'+FloatToStr(TFile.GetLastWriteTimeUtc(Path),TFormatSettings.Invariant);
+  if ImageCache.TryGetValue(Path,Entry) and (Entry.Stamp=Stamp) then begin
+    Result := TPicture.Create;
+    try Result.Assign(Entry.Picture); except Result.Free; raise; end;
+    Exit;
+  end;
+  Result := TPicture.Create;
+  try
+    Result.LoadFromFile(Path);
+    if (Result.Width<1) or (Result.Height<1) then raise ERigm.Create('Empty image: '+Path);
+    var Bytes := Int64(Result.Width)*Result.Height*8; // decoded pixels, alpha and graphic overhead
+    if Bytes>Limit then Exit; // large images are used once without entering the cache
+    if ImageCache.TryGetValue(Path,Entry) then begin
+      Dec(ImageCacheBytes,Entry.Bytes); ImageCache.Remove(Path);
+    end;
+    if (ImageCache.Count>=16) or (ImageCacheBytes+Bytes>Limit) then begin ImageCache.Clear; ImageCacheBytes := 0; end;
+    Entry := TImageEntry.Create;
+    try
+      Entry.Stamp := Stamp; Entry.Bytes := Bytes; Entry.Picture := TPicture.Create;
+      if Result.Graphic is TPngImage then Entry.Picture.Assign(Result)
+      else begin
+        var Bitmap := Vcl.Graphics.TBitmap.Create; var Png := TPngImage.Create;
+        try Bitmap.Assign(Result.Graphic); Png.Assign(Bitmap); Entry.Picture.Assign(Png);
+        finally Png.Free; Bitmap.Free; end;
+      end;
+      ImageCache.Add(Path,Entry); Inc(ImageCacheBytes,Bytes);
+    except Entry.Free; raise; end;
+  except Result.Free; raise; end;
+end;
 function Actor(Project: TRigmMovieProject; const FileName: string): TRigmDocument;
 var Entry: TActorEntry;
 begin
@@ -40,7 +86,8 @@ begin
     Entry.Stamp := Stamp;
     if FileName='@sample' then begin Entry.Document := TRigmDocument.Create; PopulateRigmSample(Entry.Document); end
     else Entry.Document := LoadRigm(Path);
-    Entry.Document.ValidateStructure; ActorCache.AddOrSetValue(Path,Entry); Result := Entry.Document;
+    Entry.Document.ValidateStructure; Entry.Expressions := ExistingExpressions(Entry.Document);
+    ActorCache.AddOrSetValue(Path,Entry); Result := Entry.Document;
   except Entry.Free; raise; end;
 end;
 function LegacyExpressions(Document: TRigmDocument): TJSONObject;
@@ -109,7 +156,9 @@ begin
         else if Emotion='joy' then Difference := Named(G,['楽','楽しさ','joy'])
         else if Emotion='angry' then Difference := Named(G,['怒','怒り','angry'])
         else if Emotion='sad' then Difference := Named(G,['哀','哀しみ','悲しみ','sad'])
-        else if MatchText(Emotion,['doubt','confused']) then Difference := Named(G,['困る','困惑','doubt'])
+        else if Emotion='surprised' then Difference := Named(G,['驚','驚き','驚く','上げ','両上げ','画面左上げ','画面右上げ','surprised'])
+        else if Emotion='doubt' then Difference := Named(G,['疑問','画面左上げ','画面右上げ','困る','困惑','doubt'])
+        else if Emotion='confused' then Difference := Named(G,['困る','困惑','confused','doubt'])
         else if Emotion='gentle' then Difference := Named(G,['楽','穏やか','gentle']);
       end else if Role='symbol' then begin
         if MatchText(Emotion,['happy','joy']) then Difference := Named(G,['喜び（キラキラ）','音符'])
@@ -125,7 +174,22 @@ begin
         else if MatchText(Emotion,['doubt','confused']) then Difference := Named(G,['汗'])
         else if Emotion='gentle' then Difference := Named(G,['照れ']);
       end else if Role='eye' then begin
-        if Emotion='gentle' then Difference := Named(G,['やさしい目','穏やか','gentle']);
+        // Face-only actors often have no symbol/color layers. Use their eye
+        // differences as well as brows so the basic face actually reads.
+        if MatchText(Emotion,['happy','joy']) then Difference := Named(G,['笑顔','笑顔閉じ','笑い','smile','happy','joy'])
+        else if Emotion='sad' then Difference := Named(G,['悲しい','悲しみ','哀','やや閉じ','半開き','sad'])
+        else if Emotion='serious' then Difference := Named(G,['真剣','半開き','serious'])
+        else if Emotion='angry' then Difference := Named(G,['怒り','怒','つり目','睨み','半開き','angry'])
+        else if Emotion='surprised' then Difference := Named(G,['驚き','驚','見開き','surprised'])
+        else if Emotion='doubt' then Difference := Named(G,['疑問','半開き','doubt'])
+        else if Emotion='confused' then Difference := Named(G,['困惑','やや閉じ','半開き','confused'])
+        else if Emotion='gentle' then Difference := Named(G,['やさしい目','穏やか','gentle']);
+      end else if Role='mouth' then begin
+        if MatchText(Emotion,['happy','joy']) then Difference := Named(G,['笑顔','笑い','smile','happy','joy'])
+        else if Emotion='sad' then Difference := Named(G,['悲しい','悲しみ','哀','sad'])
+        else if Emotion='angry' then Difference := Named(G,['怒り','怒','angry'])
+        else if Emotion='surprised' then Difference := Named(G,['驚き','驚','surprised'])
+        else if Emotion='gentle' then Difference := Named(G,['穏やか','gentle']);
       end else if Role='body' then begin
         if Emotion='serious' then Difference := Named(G,['腕組み','serious']);
       end;
@@ -189,9 +253,14 @@ begin
     var Eyes := MovieBlinkOpen(Seconds,4.0,0.16,0.73,1,1,Project.Fps);
     Pose.Values.AddOrSetValue('eyeOpen',Eyes);
   end;
-  var Preset: TJSONObject := nil;
-  if (C<>nil) and (C.SpeakerId=Character.SpeakerId) then Preset := Character.Expressions.GetValue(C.Emotion) as TJSONObject;
+  var Preset: TJSONObject := nil; var Discovered: TJSONObject := nil;
+  for var Entry in ActorCache.Values do if Entry.Document=Document then begin Discovered := Entry.Expressions; Break; end;
+  if (C<>nil) and (C.SpeakerId=Character.SpeakerId) then begin
+    Preset := Character.Expressions.GetValue(C.VisualEmotion) as TJSONObject;
+    if (Preset=nil) and (Discovered<>nil) then Preset := Discovered.GetValue(C.VisualEmotion) as TJSONObject;
+  end;
   if Preset=nil then Preset := Character.Expressions.GetValue('neutral') as TJSONObject;
+  if (Preset=nil) and (Discovered<>nil) then Preset := Discovered.GetValue('neutral') as TJSONObject;
   var Acting := TRigmMovieActing.Create;
   try
     if (C<>nil) and (C.SpeakerId=Character.SpeakerId) then begin
@@ -234,6 +303,15 @@ begin
     else ApplyImageHeadAttention(Project,Character,C,Acting,Seconds,Local,Pose);
   finally Acting.Free; end;
 end;
+function CommonBackgroundVisible(Project: TRigmMovieProject; Scene: TRigmMovieScene; Cue: TRigmMovieCue): Boolean;
+begin
+  Result := Project.ThemeBackground<>'';
+  if not Result or (Project.Layout='theme') then Exit;
+  if Scene=nil then Exit(True);
+  if Scene.Animation.GetValue('closingCard') is TJSONObject then Exit(False);
+  if not MatchText(Scene.DisplayMode,['image','both']) then Exit(True);
+  Result := not MovieChartEnabled(Scene.Chart) and (Scene.Image='') and ((Cue=nil) or (Cue.Background=''));
+end;
 procedure ValidateCompositionMaterials(Project: TRigmMovieProject);
 begin
   TMonitor.Enter(CacheLock);
@@ -265,41 +343,54 @@ begin
       raise ERigm.Create('Scene image is missing: '+S.Image);
     for var V in Project.EndCards do if not FileExists(ResolveMoviePath(Project.FileName,JS(TJSONObject(V),'image'))) then raise ERigm.Create('終了画像・サムネイルが見つかりません。');
     for var S in Project.Scenes do if S.Animation.GetValue('closingCard') is TJSONObject then begin var Card := JO(S.Animation,'closingCard'); if (JS(Card,'representativeChoice')='use') and not FileExists(ResolveMoviePath(Project.FileName,JS(Card,'image'))) then raise ERigm.Create('締め代表画像が見つかりません。'); end;
-    if (Project.Layout='theme') and (Project.ThemeBackground<>'') and not FileExists(ResolveMoviePath(Project.FileName,Project.ThemeBackground)) then
+    var NeedsBackground := (Project.Layout='theme') or (Project.Scenes.Count=0);
+    if not NeedsBackground then begin
+      for var C in Project.Cues do if CommonBackgroundVisible(Project,Project.Scene(C.Scene),C) then begin NeedsBackground := True; Break; end;
+      if not NeedsBackground then for var S in Project.Scenes do
+        if (S.Padding>0) and CommonBackgroundVisible(Project,S,nil) then begin NeedsBackground := True; Break; end;
+    end;
+    if NeedsBackground and (Project.ThemeBackground<>'') and not FileExists(ResolveMoviePath(Project.FileName,Project.ThemeBackground)) then
       raise ERigm.Create('Theme image is missing: '+Project.ThemeBackground);
   finally TMonitor.Exit(CacheLock); end;
 end;
-function RenderComposition(Project: TRigmMovieProject; Seconds: Double; Audio: TRigmPcm): Vcl.Graphics.TBitmap;
+function RenderCompositionFrame(Project: TRigmMovieProject; Seconds: Double; Audio: TRigmPcm): Vcl.Graphics.TBitmap;
 var Info: TBitmapInfo; DC: HDC; Dib,Previous: HGDIOBJ; Bits: Pointer; Canvas: TCanvas;
   procedure Image(const Path: string; R: TRect; Cover: Boolean; Flip: Boolean = False; Opacity: Double = 1);
   begin
     if (Path='') or (Opacity<=0) then Exit;
-    var Picture := TPicture.Create;
+    var Picture := CompositionImage(Project,Path);
     try
-      Picture.LoadFromFile(ResolveMoviePath(Project.FileName,Path));
       if (Picture.Width<1) or (Picture.Height<1) then raise ERigm.Create('Empty image: '+Path);
       var K := Min(R.Width/Picture.Width,R.Height/Picture.Height);
       if Cover then K := Max(R.Width/Picture.Width,R.Height/Picture.Height);
       var W := Round(Picture.Width*K); var H := Round(Picture.Height*K);
       var Target := Rect(R.Left+(R.Width-W) div 2,R.Top+(R.Height-H) div 2,R.Left+(R.Width+W) div 2,R.Top+(R.Height+H) div 2);
-      var Clip := Rect(Max(0,Target.Left),Max(0,Target.Top),Min(Project.Width,Target.Right),Min(Project.Height,Target.Bottom));
+      var Clip := Rect(Max(0,Max(R.Left,Target.Left)),Max(0,Max(R.Top,Target.Top)),
+        Min(Project.Width,Min(R.Right,Target.Right)),Min(Project.Height,Min(R.Bottom,Target.Bottom)));
       var Before: TBytes;
       if (Opacity<1) and (Clip.Width>0) and (Clip.Height>0) then begin
         GdiFlush; SetLength(Before,Clip.Width*Clip.Height*4);
         for var Y := 0 to Clip.Height-1 do Move(PByte(Bits)[((Y+Clip.Top)*Project.Width+Clip.Left)*4],Before[Y*Clip.Width*4],Clip.Width*4);
       end;
-      if not Flip then Canvas.StretchDraw(Target,Picture.Graphic)
-      else begin
-        var B := Vcl.Graphics.TBitmap.Create;
-        try
-          B.Assign(Picture.Graphic); B.PixelFormat := pf32bit;
-          for var Y := 0 to B.Height-1 do begin
-            var Row := PCardinal(B.ScanLine[Y]);
-            for var X := 0 to B.Width div 2-1 do begin var Pixel := Row[X]; Row[X] := Row[B.Width-1-X]; Row[B.Width-1-X] := Pixel; end;
-          end;
-          Canvas.StretchDraw(Target,B);
-        finally B.Free; end;
-      end;
+      // Coverの拡大で画像エリアからはみ出す部分だけを切り取り、縦横比を維持する。
+      var SavedDC := SaveDC(DC); if SavedDC=0 then RaiseLastOSError;
+      try
+        IntersectClipRect(DC,R.Left,R.Top,R.Right,R.Bottom);
+        if not Flip then begin
+          if (W=Picture.Width) and (H=Picture.Height) then Canvas.Draw(Target.Left,Target.Top,Picture.Graphic)
+          else Canvas.StretchDraw(Target,Picture.Graphic);
+        end else begin
+          var B := Vcl.Graphics.TBitmap.Create;
+          try
+            B.Assign(Picture.Graphic); B.PixelFormat := pf32bit;
+            for var Y := 0 to B.Height-1 do begin
+              var Row := PCardinal(B.ScanLine[Y]);
+              for var X := 0 to B.Width div 2-1 do begin var Pixel := Row[X]; Row[X] := Row[B.Width-1-X]; Row[B.Width-1-X] := Pixel; end;
+            end;
+            Canvas.StretchDraw(Target,B);
+          finally B.Free; end;
+        end;
+      finally RestoreDC(DC,SavedDC); end;
       if Length(Before)>0 then begin
         GdiFlush; var Alpha := Round(EnsureRange(Opacity,0.0,1.0)*255);
         for var Y := 0 to Clip.Height-1 do for var X := 0 to Clip.Width-1 do begin
@@ -311,14 +402,11 @@ var Info: TBitmapInfo; DC: HDC; Dib,Previous: HGDIOBJ; Bits: Pointer; Canvas: TC
   end;
   function BaseRect(L,T,R,B: Double): TRect;
   begin Result := Rect(Round(L*Project.Width/1920),Round(T*Project.Height/1080),Round(R*Project.Width/1920),Round(B*Project.Height/1080)); end;
-  procedure Text(const Value: string; R: TRect; Size: Integer; Flags: Cardinal);
+  procedure Text(const Value: string; R: TRect; Size: Integer; Flags: Cardinal; Backdrop: Boolean = False);
   begin
     Canvas.Font.Name := 'Yu Gothic UI'; Canvas.Font.Height := -Max(12,Round(Size*Project.Height/1080));
     Canvas.Font.Color := clWhite; Canvas.Brush.Style := bsClear;
-    // Select the VCL font into the DC before calling DrawText directly.
-    Canvas.TextHeight('M');
-    SetTextColor(DC,RGB(255,255,255)); SetBkMode(DC,TRANSPARENT);
-    if Value<>'' then DrawText(DC,PChar(Value),Length(Value),R,Flags or DT_NOPREFIX);
+    if Backdrop then DrawMovieLabel(Canvas,Value,R,Flags) else DrawMovieText(Canvas,Value,R,Flags);
   end;
 begin
   Result := Vcl.Graphics.TBitmap.Create; Canvas := nil; DC := 0; Dib := 0; Previous := 0;
@@ -339,6 +427,8 @@ begin
       var SceneStart,SceneLocal,Local,Start: Double; var S := Project.SceneAt(Seconds,SceneStart,SceneLocal);
       var C := Project.CueAt(Seconds,Local,Start); var ImageBounds := SceneImageBounds(Project);
       var ImageRect := BaseRect(ImageBounds.Left,ImageBounds.Top,ImageBounds.Right,ImageBounds.Bottom);
+      if (Tail=nil) and (Project.Layout='l') and CommonBackgroundVisible(Project,S,C) then
+        Image(Project.ThemeBackground,ImageRect,True);
       var DescriptionRect := ScaleLayoutRect(MovieLayoutRegions(Project.Layout,Project.LDirection).Description,Project.Width,Project.Height);
       if S<>nil then begin
         DescriptionRect := ScaleLayoutRect(MovieDescriptionRegion(Project.Layout,Project.LDirection,S.DescriptionPosition),Project.Width,Project.Height);
@@ -353,10 +443,10 @@ begin
           else Image(SceneImage,ImageRect,False,False,MovieImageOpacity(S.Animation,SceneLocal,Project.SceneDuration(S)));
         end;
         if ((S.DisplayMode='both') or (S.DisplayMode='text')) and (S.Description<>'') then begin
-          Canvas.Brush.Style := bsSolid; Canvas.Brush.Color := $302820; Canvas.FillRect(DescriptionRect); InflateRect(DescriptionRect,-12,-8);
-          Text(S.Description,DescriptionRect,32,DT_LEFT or DT_WORDBREAK);
+          InflateRect(DescriptionRect,-12,-8);
+          Text(S.Description,DescriptionRect,32,DT_LEFT or DT_WORDBREAK,True);
         end;
-        Text(S.Title,BaseRect(55,20,1850,90),36,DT_LEFT or DT_WORDBREAK);
+        Text(S.Title,BaseRect(55,20,1850,90),36,DT_LEFT or DT_WORDBREAK,True);
       end;
       GdiFlush;
       for var Character in Project.Characters do if (Tail=nil) and Character.Visible then begin
@@ -397,7 +487,7 @@ begin
           Image(MotionImage,MotionBox,False,Character.FlipX); GdiFlush; Continue;
         end;
         var Preset: TJSONObject := nil;
-        if (C<>nil) and (C.SpeakerId=Character.SpeakerId) then Preset := Character.Expressions.GetValue(C.Emotion) as TJSONObject;
+        if (C<>nil) and (C.SpeakerId=Character.SpeakerId) then Preset := Character.Expressions.GetValue(C.VisualEmotion) as TJSONObject;
         if Preset=nil then Preset := Character.Expressions.GetValue('neutral') as TJSONObject;
         if (Preset<>nil) and (JS(Preset,'image')<>'') then begin
           // A generated complete pose is a separate sprite, without reusing the original rig.
@@ -435,8 +525,34 @@ begin
     TMonitor.Exit(CacheLock);
   end;
 end;
+function RenderComposition(Project: TRigmMovieProject; Seconds: Double; Audio: TRigmPcm): Vcl.Graphics.TBitmap;
+begin
+  var Tail := MovieEndCardAt(Project.EndCards,Seconds-Project.StoryDuration);
+  var Fade := 0.0; var Start := Project.StoryDuration;
+  if (Tail<>nil) and (JS(Tail,'kind')='thumbnail') then begin
+    Fade := JN(Tail,'transitionSeconds');
+    for var V in Project.EndCards do begin if TJSONObject(V)=Tail then Break; Start := Start+JN(TJSONObject(V),'duration'); end;
+  end;
+  Result := RenderCompositionFrame(Project,Seconds,Audio);
+  if (Fade<=0) or (Seconds-Start>=Fade) then Exit;
+  try
+    // 直前に表示した完成フレームから全画面を溶かす。黒背景を挟まず、字幕・キャラも一緒に切り替える。
+    var Before := RenderCompositionFrame(Project,Max(0.0,Start-1.0/Project.Fps),Audio);
+    try
+      var T := EnsureRange((Seconds-Start)/Fade,0.0,1.0); var Alpha := Round(T*T*(3-2*T)*255);
+      for var Y := 0 to Result.Height-1 do begin
+        var Dst := PByte(Result.ScanLine[Y]); var Src := PByte(Before.ScanLine[Y]);
+        for var X := 0 to Result.Width-1 do begin
+          for var C := 0 to 2 do Dst[X*4+C] := (Dst[X*4+C]*Alpha+Src[X*4+C]*(255-Alpha)+127) div 255;
+          Dst[X*4+3] := 255;
+        end;
+      end;
+    finally Before.Free; end;
+  except Result.Free; raise; end;
+end;
 initialization
   CacheLock := TObject.Create; ActorCache := TObjectDictionary<string,TActorEntry>.Create([doOwnsValues]);
+  ImageCache := TObjectDictionary<string,TImageEntry>.Create([doOwnsValues]);
 finalization
-  ActorCache.Free; CacheLock.Free;
+  ImageCache.Free; ActorCache.Free; CacheLock.Free;
 end.

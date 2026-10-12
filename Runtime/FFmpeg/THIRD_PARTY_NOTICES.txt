@@ -1,0 +1,22 @@
+FFmpeg runtime for RIGM Maker (Win64)
+
+Version: 8.1.1-full_build-www.gyan.dev
+Origin: VM_Media_Output/Setup/VW_Media_Output.zip
+Upstream source: https://github.com/FFmpeg/FFmpeg/commit/239f2c733d
+Build provider: https://www.gyan.dev/ffmpeg/builds/
+
+Redistributed DLLs:
+avutil-60.dll, swresample-6.dll, swscale-9.dll,
+avcodec-62.dll, avformat-62.dll
+
+This full build includes GPL components (including libx264).
+The supplied FFmpeg-LICENSE.txt contains the GPL v3 license text.
+FFmpeg-README.txt contains the upstream package information.
+The version, archive hash and exact extracted file hashes are recorded
+in manifest.json. Preserve these notices with the runtime DLLs.
+
+The Delphi ABI declarations and encoder implementation were adapted
+with reference to VM_Media_Output/Plugin_Output/FFmpegApi.pas,
+FFmpegOutputApiTypes.pas and FFmpegOutputEncoder.pas.
+The reference project's GPL v3 text is retained at
+Source/Lib/FFmpeg/LICENSE.txt.

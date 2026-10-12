@@ -51,6 +51,8 @@ type
     FMouseDownPoint: TPoint;
     FHoverBoundary: Integer;
     FMoras: TArray<TSerifVoicevoxAccentMora>;
+    FPendingReadings: TArray<string>;
+    FCells: TArray<TRect>; FCellsPpi: Integer;
     FOnAccentPosition: TSerifVoicevoxAccentPositionEvent;
     FOnBoundary: TSerifVoicevoxAccentBoundaryEvent;
     FOnPreview: TNotifyEvent;
@@ -63,6 +65,8 @@ type
       Shift: TShiftState);
     procedure FinishReadingEdit(const Commit: Boolean);
     function GetContentWidth: Integer;
+    procedure EnsureCells;
+    procedure CMFontChanged(var Message: TMessage); message CM_FONTCHANGED;
     function GetMoraCenter(const MoraArrayIndex: Integer;
       out Center: TPoint): Boolean;
     function MoraAtPoint(const X, Y: Integer): Integer;
@@ -108,6 +112,8 @@ type
   private
     FEngineUrl: string;
     FAnalysisUpdate: Boolean;
+    FAutoAnalyze: Boolean;
+    FAccentPositionUpdate: Boolean;
     FCurrentSpeakerId: Integer;
     FCurrentText: string;
     FHasDisplay: Boolean;
@@ -167,7 +173,9 @@ type
     property ScrollPosition: Integer read GetScrollPosition write SetScrollPosition;
     property OnScrollChange: TNotifyEvent read FOnScrollChange write FOnScrollChange;
     property EngineUrl: string read FEngineUrl write FEngineUrl;
+    property AutoAnalyze: Boolean read FAutoAnalyze write FAutoAnalyze;
     property AnalysisUpdate: Boolean read FAnalysisUpdate;
+    property AccentPositionUpdate: Boolean read FAccentPositionUpdate;
     property OnChange: TSerifVoicevoxAccentQueryEvent read FOnChange write FOnChange;
     property OnError: TSerifVoicevoxAccentErrorEvent read FOnError write FOnError;
     property OnPreview: TNotifyEvent read FOnPreview write FOnPreview;
@@ -373,6 +381,7 @@ begin
   FBoundaryPending := -1;
   FHoverBoundary := -1;
   SetLength(FMoras, 0);
+  FCells := nil; FCellsPpi := 0;
   Invalidate;
 end;
 
@@ -381,32 +390,15 @@ function TSerifVoicevoxAccentPaintControl.GetMoraCenter(
 const
   HIGH_Y = 24;
   LOW_Y = 62;
-var
-  CellWidth: Integer;
-  I: Integer;
-  LeftPos: Integer;
 begin
   Result := False;
   Center := Point(0, 0);
   if (MoraArrayIndex < 0) or (MoraArrayIndex > High(FMoras)) then Exit;
-  Canvas.Font.Assign(Font);
-  LeftPos := AccentScale(10, CurrentPPI);
-  for I := 0 to MoraArrayIndex do
-  begin
-    if FMoras[I].PhraseStart and (I > 0) then
-      Inc(LeftPos, AccentScale(12, CurrentPPI));
-    CellWidth := Max(AccentScale(MORA_CELL_MIN_WIDTH, CurrentPPI),
-      Canvas.TextWidth(FMoras[I].Text) +
-      AccentScale(MORA_CELL_TEXT_PADDING, CurrentPPI));
-    if I = MoraArrayIndex then
-    begin
-      Center.X := LeftPos + (CellWidth div 2);
-      if FMoras[I].High then Center.Y := AccentScale(HIGH_Y, CurrentPPI)
-      else Center.Y := AccentScale(LOW_Y, CurrentPPI);
-      Exit(True);
-    end;
-    Inc(LeftPos, CellWidth);
-  end;
+  EnsureCells;
+  Center.X := (FCells[MoraArrayIndex].Left+FCells[MoraArrayIndex].Right) div 2;
+  if FMoras[MoraArrayIndex].High then Center.Y := AccentScale(HIGH_Y,CurrentPPI)
+  else Center.Y := AccentScale(LOW_Y,CurrentPPI);
+  Result := True;
 end;
 
 procedure TSerifVoicevoxAccentPaintControl.EditReadingExit(Sender: TObject);
@@ -471,51 +463,32 @@ begin
 end;
 
 function TSerifVoicevoxAccentPaintControl.GetContentWidth: Integer;
-var
-  I: Integer;
 begin
-  Canvas.Font.Assign(Font);
-  Result := AccentScale(20, CurrentPPI);
-  for I := 0 to High(FMoras) do
-  begin
-    if FMoras[I].PhraseStart and (I > 0) then
-      Inc(Result, AccentScale(12, CurrentPPI));
-    Inc(Result, Max(AccentScale(MORA_CELL_MIN_WIDTH, CurrentPPI),
-      Canvas.TextWidth(FMoras[I].Text) +
-      AccentScale(MORA_CELL_TEXT_PADDING, CurrentPPI)));
-  end;
-  Inc(Result, AccentScale(10, CurrentPPI));
+  EnsureCells; Result := AccentScale(30,CurrentPPI);
+  if Length(FCells)>0 then Result := FCells[High(FCells)].Right+AccentScale(20,CurrentPPI);
 end;
-
-function TSerifVoicevoxAccentPaintControl.MoraCells: TArray<TRect>;
+procedure TSerifVoicevoxAccentPaintControl.CMFontChanged(var Message: TMessage);
+begin FCells := nil; FCellsPpi := 0; inherited; end;
+procedure TSerifVoicevoxAccentPaintControl.EnsureCells;
 begin
-  SetLength(Result,Length(FMoras)); Canvas.Font.Assign(Font);
+  if (FCellsPpi=CurrentPPI) and (Length(FCells)=Length(FMoras)) then Exit;
+  SetLength(FCells,Length(FMoras)); FCellsPpi := CurrentPPI; Canvas.Font.Assign(Font);
   var X := AccentScale(10,CurrentPPI);
   for var I := 0 to High(FMoras) do begin
     if FMoras[I].PhraseStart and (I>0) then Inc(X,AccentScale(12,CurrentPPI));
     var W := Max(AccentScale(MORA_CELL_MIN_WIDTH,CurrentPPI),Canvas.TextWidth(FMoras[I].Text)+AccentScale(MORA_CELL_TEXT_PADDING,CurrentPPI));
-    Result[I] := Rect(X,0,X+W,AccentScale(104,CurrentPPI)); Inc(X,W);
+    FCells[I] := Rect(X,0,X+W,AccentScale(104,CurrentPPI)); Inc(X,W);
   end;
 end;
+function TSerifVoicevoxAccentPaintControl.MoraCells: TArray<TRect>;
+begin EnsureCells; Result := Copy(FCells); end;
 
 function TSerifVoicevoxAccentPaintControl.MoraAtX(const X: Integer): Integer;
-var
-  CellWidth: Integer;
-  I: Integer;
-  LeftPos: Integer;
 begin
-  Canvas.Font.Assign(Font);
-  Result := -1;
-  LeftPos := AccentScale(10, CurrentPPI);
-  for I := 0 to High(FMoras) do
-  begin
-    if FMoras[I].PhraseStart and (I > 0) then
-      Inc(LeftPos, AccentScale(12, CurrentPPI));
-    CellWidth := Max(AccentScale(MORA_CELL_MIN_WIDTH, CurrentPPI),
-      Canvas.TextWidth(FMoras[I].Text) +
-      AccentScale(MORA_CELL_TEXT_PADDING, CurrentPPI));
-    if (X >= LeftPos) and (X < LeftPos + CellWidth) then Exit(I);
-    Inc(LeftPos, CellWidth);
+  EnsureCells; Result := -1;
+  for var I := 0 to High(FCells) do begin
+    if X<FCells[I].Left then Exit;
+    if X<FCells[I].Right then Exit(I);
   end;
 end;
 
@@ -580,6 +553,8 @@ function TSerifVoicevoxAccentPaintControl.PhraseReading(
 var
   I: Integer;
 begin
+  if (PhraseIndex>=0) and (PhraseIndex<Length(FPendingReadings)) and (FPendingReadings[PhraseIndex]<>'') then
+    Exit(FPendingReadings[PhraseIndex]);
   Result := '';
   for I := 0 to High(FMoras) do
     if FMoras[I].PhraseIndex = PhraseIndex then
@@ -866,18 +841,22 @@ var
 begin
   FBoundaryPending := -1;
   FHoverBoundary := -1;
+  FCells := nil; FCellsPpi := 0;
   SetLength(FMoras, 0);
+  FPendingReadings := nil;
   RootValue := TJSONObject.ParseJSONValue(QueryJson);
   try
     if not (RootValue is TJSONObject) then Exit;
     RootObject := TJSONObject(RootValue);
     AccentPhrases := RootObject.GetValue<TJSONArray>('accent_phrases');
     if not Assigned(AccentPhrases) then Exit;
+    SetLength(FPendingReadings,AccentPhrases.Count);
 
     MoraCount := 0;
     for I := 0 to AccentPhrases.Count - 1 do
     begin
       PhraseObject := AccentPhrases.Items[I] as TJSONObject;
+      FPendingReadings[I] := PhraseObject.GetValue<string>('_rigm_pending_reading','');
       Moras := PhraseObject.GetValue<TJSONArray>('moras');
       if Assigned(Moras) then Inc(MoraCount, Moras.Count);
     end;
@@ -1000,7 +979,9 @@ begin
   finally
     RootValue.Free;
   end;
-  if Assigned(FOnChange) then FOnChange(Self, FQueryJson);
+  FAccentPositionUpdate := True;
+  try if Assigned(FOnChange) then FOnChange(Self,FQueryJson);
+  finally FAccentPositionUpdate := False; end;
 end;
 
 procedure TSerifVoicevoxAccentView.BoundaryChange(Sender: TObject;
@@ -1307,6 +1288,20 @@ begin
     [PhraseIndex, Length(ReadingText), BoolToStr(FQueryJson <> '', True),
      FCurrentSpeakerId]));
   if (FQueryJson = '') or (FCurrentSpeakerId < 0) then Exit;
+  if not FAutoAnalyze then begin
+    var Root := TJSONObject.ParseJSONValue(FQueryJson) as TJSONObject;
+    try
+      var Phrases := Root.GetValue<TJSONArray>('accent_phrases');
+      if (PhraseIndex<0) or (PhraseIndex>=Phrases.Count) then Exit;
+      var Phrase := Phrases[PhraseIndex] as TJSONObject;
+      Phrase.RemovePair('_rigm_pending_reading').Free;
+      Phrase.AddPair('_rigm_pending_reading',ReadingText);
+      FQueryJson := Root.ToJSON;
+    finally Root.Free; end;
+    FPaintControl.SetQueryJson(FQueryJson); UpdatePaintBounds;
+    if Assigned(FOnChange) then FOnChange(Self,FQueryJson);
+    Exit;
+  end;
   Inc(FReadingId);
   if FReadingId = 0 then Inc(FReadingId);
   FReadingPhraseIndex := PhraseIndex;
@@ -1324,6 +1319,7 @@ begin
   HorzScrollBar.Visible := False;
   VertScrollBar.Visible := False;
   FCurrentSpeakerId := -1;
+  FAutoAnalyze := True;
   FNotifyHandle := AllocateHWnd(QueryCompleteWindowProc);
 
   FPaintControl := TSerifVoicevoxAccentPaintControl.Create(Self);
@@ -1561,10 +1557,11 @@ begin
   NewText := Trim(Text);
   SameTarget := (FCurrentText = NewText) and
     (FCurrentSpeakerId = SpeakerId);
+  if SameTarget and FHasDisplay and (QueryJson<>'') and (FQueryJson=QueryJson) then Exit;
   SpeakerOnlyChange := (FCurrentText = NewText) and
     (FCurrentSpeakerId >= 0) and (SpeakerId >= 0) and
     (FCurrentSpeakerId <> SpeakerId);
-  KeepDisplay := SpeakerOnlyChange and FHasDisplay;
+  KeepDisplay := FHasDisplay and (SpeakerOnlyChange or (SameTarget and (QueryJson<>'')));
   FCurrentText := NewText;
   FCurrentSpeakerId := SpeakerId;
   // 編集中のクエリ再反映では現在位置を保ち、対象そのものの変更だけ先頭へ戻す。
@@ -1586,7 +1583,7 @@ begin
     FPaintControl.Clear;
     FHasDisplay := False;
   end;
-  UpdatePaintBounds;
+  if not KeepDisplay then UpdatePaintBounds;
 
   if Assigned(FQueryThread) then TRigmVoicevoxUiWorker(FQueryThread).Cancel;
   if (FCurrentText = '') or (FCurrentSpeakerId < 0) then
@@ -1606,6 +1603,7 @@ begin
     UpdatePaintBounds;
     Exit;
   end;
+  if not FAutoAnalyze then Exit;
   if SpeakerOnlyChange then
   begin
     VoicevoxDebugLog('AccentView.ShowText speaker changed -> audio_query immediately');

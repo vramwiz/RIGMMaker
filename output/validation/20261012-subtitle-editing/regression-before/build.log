@@ -1,0 +1,70 @@
+Embarcadero Delphi for Win64 compiler version 37.0
+Copyright (c) 1983,2026 Embarcadero Technologies, Inc.
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmAul2VoiceDrive.pas(173) �q���g: H2077 'CaptureRequested' �ɑ�����ꂽ�l�͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmAul2VoiceDrive.pas(156) �q���g: H2164 �ϐ� 'OutputCount' ���錾����Ă��܂��� 'ProcessVoiceDrive' �̒��ł͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmAul2VoiceDrive.pas(158) �q���g: H2164 �ϐ� 'SampleCount' ���錾����Ă��܂��� 'ProcessVoiceDrive' �̒��ł͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmAul2Noise.pas(186) �q���g: H2077 'CaptureRequested' �ɑ�����ꂽ�l�͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmAul2Noise.pas(168) �q���g: H2164 �ϐ� 'WaveSampleCount' ���錾����Ă��܂��� 'ProcessNoise' �̒��ł͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmAul2Noise.pas(169) �q���g: H2164 �ϐ� 'OutputSampleCount' ���錾����Ă��܂��� 'ProcessNoise' �̒��ł͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmAul2Tremble.pas(104) �q���g: H2077 'OutputSum' �ɑ�����ꂽ�l�͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmAul2Tremble.pas(103) �q���g: H2077 'InputSum' �ɑ�����ꂽ�l�͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmAul2Tremble.pas(102) �q���g: H2077 'CaptureRequested' �ɑ�����ꂽ�l�͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmAul2Tremble.pas(89) �q���g: H2164 �ϐ� 'Sample' ���錾����Ă��܂��� 'ProcessTremble' �̒��ł͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmAul2Tremble.pas(90) �q���g: H2164 �ϐ� 'Denominator' ���錾����Ă��܂��� 'ProcessTremble' �̒��ł͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmAul2Tremble.pas(91) �q���g: H2164 �ϐ� 'PhaseCycles' ���錾����Ă��܂��� 'ProcessTremble' �̒��ł͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmAul2Wobble.pas(187) �q���g: H2077 'CaptureRequested' �ɑ�����ꂽ�l�͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmAul2Wobble.pas(172) �q���g: H2164 �ϐ� 'CurrentDelayMs' ���錾����Ă��܂��� 'ProcessWobble' �̒��ł͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmAul2Wobble.pas(173) �q���g: H2164 �ϐ� 'PhaseCycles' ���錾����Ă��܂��� 'ProcessWobble' �̒��ł͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmAul2Pitch.pas(581) �q���g: H2077 'CaptureRequested' �ɑ�����ꂽ�l�͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmAul2RingMod.pas(85) �q���g: H2077 'CaptureRequested' �ɑ�����ꂽ�l�͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmAul2AutoGain.pas(176) �q���g: H2077 'CorrectionGainSum' �ɑ�����ꂽ�l�͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmAul2AutoGain.pas(175) �q���g: H2077 'OutputSum' �ɑ�����ꂽ�l�͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmAul2AutoGain.pas(174) �q���g: H2077 'InputSum' �ɑ�����ꂽ�l�͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmAul2AutoGain.pas(173) �q���g: H2077 'CaptureRequested' �ɑ�����ꂽ�l�͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmAul2AutoGain.pas(159) �q���g: H2164 �ϐ� 'Denominator' ���錾����Ă��܂��� 'ProcessAutoGain' �̒��ł͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmAul2AutoGain.pas(162) �q���g: H2164 �ϐ� 'Sample' ���錾����Ă��܂��� 'ProcessAutoGain' �̒��ł͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmAul2Ghost.pas(158) �q���g: H2164 �ϐ� 'Denominator' ���錾����Ă��܂��� 'ProcessGhost' �̒��ł͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmAul2Chorus.pas(244) �q���g: H2077 'SumLR' �ɑ�����ꂽ�l�͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmAul2Chorus.pas(243) �q���g: H2077 'SumR2' �ɑ�����ꂽ�l�͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmAul2Chorus.pas(242) �q���g: H2077 'SumL2' �ɑ�����ꂽ�l�͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmAul2Chorus.pas(241) �q���g: H2077 'CorrelationValid' �ɑ�����ꂽ�l�͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmAul2Chorus.pas(240) �q���g: H2077 'Correlation' �ɑ�����ꂽ�l�͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmAul2Chorus.pas(239) �q���g: H2077 'CaptureRequested' �ɑ�����ꂽ�l�͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmAul2Chorus.pas(220) �q���g: H2164 �ϐ� 'CurrentDelayL' ���錾����Ă��܂��� 'ProcessChorus' �̒��ł͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmAul2Chorus.pas(221) �q���g: H2164 �ϐ� 'CurrentDelayR' ���錾����Ă��܂��� 'ProcessChorus' �̒��ł͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmAul2Chorus.pas(222) �q���g: H2164 �ϐ� 'LeftOutput' ���錾����Ă��܂��� 'ProcessChorus' �̒��ł͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmAul2Chorus.pas(223) �q���g: H2164 �ϐ� 'PhaseCycles' ���錾����Ă��܂��� 'ProcessChorus' �̒��ł͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmAul2Chorus.pas(224) �q���g: H2164 �ϐ� 'Sample' ���錾����Ă��܂��� 'ProcessChorus' �̒��ł͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmAul2Reverb.pas(301) �q���g: H2164 �ϐ� 'Denominator' ���錾����Ă��܂��� 'ProcessReverb' �̒��ł͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmMovieAudio.pas(195) �x��: W1002 �V���{�� 'FILE_FLAG_OPEN_REPARSE_POINT' �͓���̃v���b�g�t�H�[���ɌŗL�̂��̂ł�
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmMovieAudio.pas(207) �x��: W1002 �V���{�� 'FILE_FLAG_OPEN_REPARSE_POINT' �͓���̃v���b�g�t�H�[���ɌŗL�̂��̂ł�
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmMovieAudio.pas(226) �x��: W1002 �V���{�� 'FILE_FLAG_OPEN_REPARSE_POINT' �͓���̃v���b�g�t�H�[���ɌŗL�̂��̂ł�
+D:\DelphiProg\RIGMMaker\Source\Psd\Persistence\PsdPackage.pas(88) �q���g: H2077 'LoadCharacter' �ɑ�����ꂽ�l�͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Psd\Persistence\PsdPackage.pas(65) �q���g: H2077 'LoadCharacter' �ɑ�����ꂽ�l�͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Assets\RigmMovieImageTransfer.pas(87) �x��: W1002 �V���{�� 'FILE_FLAG_OPEN_REPARSE_POINT' �͓���̃v���b�g�t�H�[���ɌŗL�̂��̂ł�
+D:\DelphiProg\RIGMMaker\Source\Studio\Assets\RigmMovieImageTransfer.pas(101) �q���g: H2077 'Status' �ɑ�����ꂽ�l�͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Assets\RigmMovieImageTransfer.pas(221) �x��: W1002 �V���{�� 'FILE_FLAG_OPEN_REPARSE_POINT' �͓���̃v���b�g�t�H�[���ɌŗL�̂��̂ł�
+D:\DelphiProg\RIGMMaker\Source\Studio\Assets\RigmMovieImageTransfer.pas(255) �x��: W1002 �V���{�� 'FILE_FLAG_OPEN_REPARSE_POINT' �͓���̃v���b�g�t�H�[���ɌŗL�̂��̂ł�
+D:\DelphiProg\RIGMMaker\Source\Studio\Assets\RigmMovieImageTransfer.pas(407) �x��: W1002 �V���{�� 'FILE_FLAG_OPEN_REPARSE_POINT' �͓���̃v���b�g�t�H�[���ɌŗL�̂��̂ł�
+D:\DelphiProg\RIGMMaker\Source\Studio\Assets\RigmMovieImageTransfer.pas(420) �x��: W1002 �V���{�� 'FILE_FLAG_OPEN_REPARSE_POINT' �͓���̃v���b�g�t�H�[���ɌŗL�̂��̂ł�
+D:\DelphiProg\RIGMMaker\Source\Studio\Assets\RigmMovieImageTransfer.pas(443) �x��: W1002 �V���{�� 'FILE_FLAG_OPEN_REPARSE_POINT' �͓���̃v���b�g�t�H�[���ɌŗL�̂��̂ł�
+D:\DelphiProg\RIGMMaker\Source\Studio\Assets\RigmMovieImageTransfer.pas(523) �x��: W1002 �V���{�� 'FILE_FLAG_OPEN_REPARSE_POINT' �͓���̃v���b�g�t�H�[���ɌŗL�̂��̂ł�
+D:\DelphiProg\RIGMMaker\Source\Studio\Model\RigmScriptThumbnailModel.pas(81) �q���g: H2443 �C�����C���֐� 'TJSONArray.GetValue' �̓��j�b�g 'System.Generics.Collections' �� USES ���X�g�Ŏw�肳��Ă��Ȃ����ߓW�J����܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Workflow\RigmMovieJobs.pas(209) �q���g: H2077 'Ready' �ɑ�����ꂽ�l�͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Session\RigmMovieSession.pas(476) �q���g: H2077 'Start' �ɑ�����ꂽ�l�͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Psd\Editor\PsdImport.pas(126) �q���g: H2077 'ImportPrepared' �ɑ�����ꂽ�l�͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Shell\Pages\RigmScriptVoiceWorkspace.inc(338) �x��: W1073 �����t���̌^�ƕ����Ȃ��� 64 �r�b�g�^��g�ݍ��킹�Ă��܂� - �����Ȃ��̌^�Ƃ��Ĉ����܂�
+D:\DelphiProg\RIGMMaker\Source\Shell\Pages\RigmScriptVoiceWorkspace.inc(400) �x��: W1073 �����t���̌^�ƕ����Ȃ��� 64 �r�b�g�^��g�ݍ��킹�Ă��܂� - �����Ȃ��̌^�Ƃ��Ĉ����܂�
+D:\DelphiProg\RIGMMaker\Source\Shell\Pages\RigmScriptManagerFrame.pas(49) �q���g: H2443 �C�����C���֐� 'TTimeZone.GetUtcOffset' �̓��j�b�g 'System.TimeSpan' �� USES ���X�g�Ŏw�肳��Ă��Ȃ����ߓW�J����܂���
+D:\DelphiProg\RIGMMaker\Source\Shell\Pages\RigmScriptLayoutFrame.pas(76) �q���g: H2443 �C�����C���֐� 'TJSONArray.GetValue' �̓��j�b�g 'System.Generics.Collections' �� USES ���X�g�Ŏw�肳��Ă��Ȃ����ߓW�J����܂���
+D:\DelphiProg\RIGMMaker\Source\Shell\Pages\RigmScriptPlacementFrame.pas(31) �x��: W1009 'Dragging' �̍Đ錾�ɂ����N���X�̃����o�̉B��
+D:\DelphiProg\RIGMMaker\Source\Lib\Voicevox\VoicevoxToolbarButtons.pas(39) �q���g: H2219 SetBackgroundColor�Fprivate ���Ő錾����Ă��܂����A�N���X���ł܂������g�p����Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Lib\Voicevox\VoicevoxToolbarButtons.pas(40) �q���g: H2219 SetCheckedColor�Fprivate ���Ő錾����Ă��܂����A�N���X���ł܂������g�p����Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Lib\Voicevox\VoicevoxToolbarButtons.pas(41) �q���g: H2219 SetFontColor�Fprivate ���Ő錾����Ă��܂����A�N���X���ł܂������g�p����Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Lib\Voicevox\VoicevoxToolbarButtons.pas(42) �q���g: H2219 SetHotColor�Fprivate ���Ő錾����Ă��܂����A�N���X���ł܂������g�p����Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Lib\Voicevox\VoicevoxToolbarButtons.pas(43) �q���g: H2219 SetPressedColor�Fprivate ���Ő錾����Ă��܂����A�N���X���ł܂������g�p����Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Lib\Voicevox\SerifVoicevoxLengthFrame.pas(271) �q���g: H2164 �ϐ� 'MoraObject' ���錾����Ă��܂��� 'TFrameSerifVoicevoxLength.ShowQuery' �̒��ł͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Lib\Voicevox\SerifVoicevoxLengthFrame.pas(398) �q���g: H2164 �ϐ� 'MoraObject' ���錾����Ă��܂��� 'TFrameSerifVoicevoxLength.UpdateQueryFromSliders' �̒��ł͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmEffectsPlayback.pas(219) �q���g: H2077 'ReadWave' �ɑ�����ꂽ�l�͎g���Ă��܂���
+D:\DelphiProg\RIGMMaker\Source\Studio\Audio\RigmEffectsPlayback.pas(159) �q���g: H2077 'ReadWave' �ɑ�����ꂽ�l�͎g���Ă��܂���
+55867 �s�A11.22 �b�A10885808 �o�C�g �R�[�h�A1041872 �o�C�g �f�[�^�B

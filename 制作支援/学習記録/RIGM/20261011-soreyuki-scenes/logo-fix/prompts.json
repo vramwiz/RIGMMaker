@@ -1,0 +1,25 @@
+{
+  "tool": "built-in imagegen",
+  "correction": "タイトル指定のシーン2・11を雪景色と大きく目立つ文字で修正",
+  "outputs": [
+    {
+      "sceneNumber": 2,
+      "prompt": "Use case: text-localization / illustration-story title-card redesign. EDIT the referenced current title-card image to follow this corrected brief. Completely redesign the composition: replace the cafe interior, characters, coffee cup and book with a beautiful OUTDOOR SNOWY LANDSCAPE, and make the TITLE LOGO overwhelmingly dominant. ONE landscape image, 16:9, requested 1920×1080. Exact Japanese title (do not abbreviate, do not add words): それは、降り積もる雪のような。\nTEXT IS THE MAIN SUBJECT, enormous bold eye-catching display typography, filling approximately 90% of the image width and 70% of its height, centered across three stacked lines:\nそれは、\n降り積もる\n雪のような。\nUse EXTRA-HEAVY Japanese display Mincho lettering with substantially thick strokes, dramatic but perfectly legible at small video display size. Deep saturated navy-to-cobalt letter fill, VERY THICK clean white outline, subtle gold outer accent, strong dark blue drop shadow. The second and third lines are the largest, each stretching almost edge to edge. Keep all glyphs and punctuation safely inside the image with 5% margins. No thin lettering, no quiet corner text. The viewer should read the title instantly before noticing the background. Background: softly detailed blue-white winter avenue with fresh deep snow on trees and pavement, large gently falling snowflakes, warm tiny lamplights at the edges, restrained romantic anime-painted atmosphere. Keep background detail lower-contrast behind the logo so all characters stand out strongly. No characters, no cafe, no coffee, no book, no other text, no small subtitle, no watermark, no logo other than the huge requested title. The edit reference establishes ONLY the exact title spelling; its old cafe composition and small delicate lettering must be replaced.",
+      "referenced_image_paths": [
+        "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\b790bfc5d13a822c9f9290a8f474f77056fdba61218e2310b55ee3ea92cb02dc.png"
+      ],
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a12a3b-12c0-7a32-948c-00d9ff0dde3f\\exec-3b76e5a1-e65f-4d39-b9b2-3ed629521e60.png",
+      "workspacePath": "D:\\DelphiProg\\RIGMMaker\\制作支援\\学習記録\\RIGM\\20261011-soreyuki-scenes\\logo-fix\\images\\scene-02-logo.png"
+    },
+    {
+      "sceneNumber": 11,
+      "prompt": "EDIT image 1, the current closing illustration. Replace the cafe table, cup and book completely with an outdoor snowy landscape and a HUGE JAPANESE TITLE LOGO. Image 2 is the approved TYPOGRAPHY STYLE AND SCALE REFERENCE for this edit, reproduce its exceptionally bold navy/cobalt title, very thick white outline, delicate gold outer accent and deep-blue shadow; match its title lettering and three-line layout. ONE landscape 16:9 image, requested 1920×1080. Exact full Japanese title, no abbreviations, no other words:\nそれは、\n降り積もる\n雪のような。\nThe logo is the main subject. It must occupy around 90% of image width and 80% of image height, extra-heavy thick strokes, centered stacked three lines, every glyph and punctuation fully visible with safe margins. The second and third lines nearly span edge to edge. Make it immediately legible when shown small in a video. No fine print, no corner title. Background is a lovely snow-covered quiet park path at blue-hour dusk: deep fresh snow on overhanging trees, soft drifting large snowflakes, a few tiny warm lamps along the edges, atmospheric romantic anime-painted winter scenery. Gently soften and reduce background contrast behind lettering. Snow scenery should frame the huge logo. No people, no cafe or interior, no cup, no book, no subtitle, no watermark. Keep the exact wording and dominant typography of image 2; vary only the winter background to make a coordinated closing title-card.",
+      "referenced_image_paths": [
+        "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\046c5d7946284b769c7ca0c3cdb2c48ed1a08b3c54ca1f3d7d384ac6241d600e.png",
+        "C:\\Users\\zan12\\.codex\\generated_images\\01a12a3b-12c0-7a32-948c-00d9ff0dde3f\\exec-3b76e5a1-e65f-4d39-b9b2-3ed629521e60.png"
+      ],
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a12a3b-12c0-7a32-948c-00d9ff0dde3f\\exec-572c905c-40db-4a98-89e3-7f425842d41d.png",
+      "workspacePath": "D:\\DelphiProg\\RIGMMaker\\制作支援\\学習記録\\RIGM\\20261011-soreyuki-scenes\\logo-fix\\images\\scene-11-logo.png"
+    }
+  ]
+}

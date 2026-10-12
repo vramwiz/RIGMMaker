@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "data": {
+    "count": 14,
+    "backgroundReady": false,
+    "allApproved": false,
+    "ready": 14,
+    "pendingRequests": 0,
+    "selectedScene": "common-background",
+    "state": "in-progress",
+    "projectId": "{C36C2A85-DD8A-4DDE-8A7D-D5072CF41A98}",
+    "revision": 1548,
+    "background": {
+      "id": "common-background",
+      "title": "共通背景画像",
+      "image": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{C36C2A85-DD8A-4DDE-8A7D-D5072CF41A98}\\Images\\2e5b185f49b6f2b780e198de26f57483b5271a84721c5de68c4bf819883f0886.png",
+      "description": "",
+      "imagePrompt": "作品のテーマに関係しない、単なる控えめな幾何学模様の共通背景。濃いグレーを基調に、低コントラストの小さな菱形と細線を繰り返す柄。人物・室内・料理などの具体物、文字、ロゴは描かない。",
+      "padding": 0,
+      "imageFeedback": "",
+      "imageApproved": false,
+      "imageApprovalKey": "",
+      "imageEditEpoch": 8,
+      "displayMode": "image",
+      "animation": {},
+      "target": "common-background",
+      "optional": true,
+      "ready": false,
+      "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{C36C2A85-DD8A-4DDE-8A7D-D5072CF41A98}\\Images\\2e5b185f49b6f2b780e198de26f57483b5271a84721c5de68c4bf819883f0886.png",
+      "width": 1920,
+      "height": 1080,
+      "sourceCues": [],
+      "imageRequest": {
+        "requestId": "{B6054542-DA98-48E5-A920-7586A14F5B01}",
+        "sceneId": "common-background",
+        "sceneNumber": 0,
+        "fingerprint": "9c3e9399386ea1d0f5975db61ea33c40ff812eab2534c438ff8de2665b314c14",
+        "prompt": "作品のテーマに関係しない、単なる控えめな幾何学模様の共通背景。濃いグレーを基調に、低コントラストの小さな菱形と細線を繰り返す柄。人物・室内・料理などの具体物、文字、ロゴは描かない。",
+        "feedback": "",
+        "provider": "external-codex",
+        "width": 1920,
+        "height": 1080,
+        "aspectRatio": "1920:1080",
+        "target": "common-background",
+        "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+        "state": "adopted",
+        "adoptedFingerprint": "ec75f9120a22a602960ff6b4b2a6bf55a9a6627fb66aec0d999f95b3b29cb2ff",
+        "imageProvenance": "external-generated",
+        "current": true
+      }
+    },
+    "rows": [
+      {
+        "id": "{AA07ECC8-74F0-4298-A7AA-DD0943D2376F}",
+        "title": "管理人のおじさん",
+        "image": "project.assets\\17b33c1496eef2fa00d65c7682beb114eb85c2cf3f247908996862515a81f19f.png",
+        "description": "",
+        "imagePrompt": "管理人のおじさん",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": true,
+        "imageApprovalKey": "c1b1c0f431573ab4f5edeec08b9488974f0f1ab6f6a1acb1739231a14f07806d",
+        "imageEditEpoch": 3,
+        "displayMode": "image",
+        "animation": {},
+        "sceneNumber": 11,
+        "start": 67.1533333333333,
+        "duration": 1.452,
+        "ready": true,
+        "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{C36C2A85-DD8A-4DDE-8A7D-D5072CF41A98}\\project.assets\\17b33c1496eef2fa00d65c7682beb114eb85c2cf3f247908996862515a81f19f.png",
+        "sourceCues": [
+          {
+            "cueId": "{6A33260F-B9FB-4B56-9C26-980529AD75EF}",
+            "sourceText": "管理人のおじさん"
+          }
+        ],
+        "cueCount": 1,
+        "hasMoreCues": false,
+        "imageRequest": {
+          "requestId": "{08FCBFC7-0567-4F80-B875-E80412AEB792}",
+          "sceneId": "{AA07ECC8-74F0-4298-A7AA-DD0943D2376F}",
+          "sceneNumber": 11,
+          "fingerprint": "d87b05fcc79be0617b5048fc316cf7ee2fe3333ec63e0277504cfb6a52fa529f",
+          "prompt": "管理人のおじさん",
+          "feedback": "",
+          "provider": "external-codex",
+          "width": 1920,
+          "height": 1080,
+          "aspectRatio": "1920:1080",
+          "target": "scene",
+          "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+          "adoptedFingerprint": "a04fbf4f7898480b47a0351df51b97d7e132c76c5a98eb7ffaf1e0494d3de940",
+          "imageProvenance": "external-generated",
+          "state": "cancelled",
+          "current": false
+        }
+      }
+    ],
+    "nextOffset": 11,
+    "hasMore": true,
+    "preview": {
+      "current": false,
+      "error": ""
+    },
+    "pipes": {
+      "format": "RIGMMaker.WorkspaceConnection",
+      "schemaVersion": 1,
+      "apiVersion": 2,
+      "pid": 13364,
+      "commandPipe": "RIGMMaker.Workspace.13364.{398A9234-BF79-455C-9A11-D0E50739806F}",
+      "controlPipe": "RIGMMaker.Workspace.13364.{398A9234-BF79-455C-9A11-D0E50739806F}",
+      "dataRoot": "C:\\Users\\zan12\\Documents\\RIGMMaker",
+      "connectionFile": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Exchange\\workspace-13364.json",
+      "routing": "common-command"
+    }
+  },
+  "requestId": "d0295167-ce0b-4e1e-a890-cb9bc39609a3"
+}

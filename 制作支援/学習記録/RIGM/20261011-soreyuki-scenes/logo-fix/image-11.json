@@ -1,0 +1,15 @@
+{
+  "sceneNumber": 11,
+  "sceneId": "{A3114F51-B0C2-4290-A61A-1FD51B81BD34}",
+  "requestId": "{79A04EA7-E3C4-41D2-847D-B5E4C0ACB57A}",
+  "revision": 1231,
+  "prompt": "降り積もる雪のような　をイメージする雪景色　を示す背景と　大きなタイトルロゴ",
+  "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a12a3b-12c0-7a32-948c-00d9ff0dde3f\\exec-572c905c-40db-4a98-89e3-7f425842d41d.png",
+  "workspacePath": "D:\\DelphiProg\\RIGMMaker\\制作支援\\学習記録\\RIGM\\20261011-soreyuki-scenes\\logo-fix\\images\\scene-11-logo.png",
+  "exchangePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Exchange\\CodexImages\\20261011-logo-fix-98a6a291\\scene-11-logo.png",
+  "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\7afd8a45589216144105bebfbded874581713f93b37bfc3fb977769a5d73dd0a.png",
+  "sha256": "7afd8a45589216144105bebfbded874581713f93b37bfc3fb977769a5d73dd0a",
+  "imageApproved": false,
+  "provider": "built-in imagegen",
+  "provenance": "external-generated"
+}

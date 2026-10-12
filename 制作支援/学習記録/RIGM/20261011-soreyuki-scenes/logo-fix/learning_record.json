@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "recordType": "rigm_scene_image_creation_learning",
+  "date": "2026-10-11",
+  "purpose": "タイトル指定の2か所を雪景色と大きく目立つ文字へ修正し、現在のアプリへ採用する。",
+  "projectId": "{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}",
+  "title": "それは、降り積もる雪のような。",
+  "authorization": {
+    "request": "ロゴを大きく　タイトルにと指定している箇所がただしくない　大きな文字　目立つ文字で"
+  },
+  "startingRevision": 1227,
+  "finalRevision": 1231,
+  "sceneNumbers": [
+    2,
+    11
+  ],
+  "method": "内蔵imagegenで1枚ずつ編集。シーン2の既存画像を雪景色と大きなロゴに変更し、シーン11も同じ文字デザインを参照して編集。PNG原本を無変換でworkspaceとExchangeへコピーし、現行sceneId・requestId・revision・SHA256照合の上app-script-adopt-scene-imageで採用。",
+  "priorIssue": "シーン2の文字が細く小さい構成で、シーン11にはタイトル文字がなかった。現在のユーザー要望の雪景色と大きなロゴに合っていなかった。",
+  "correction": "画面の大半を占める3段の太い濃紺文字に、太い白縁・金の細縁・影を付けた。タイトル全文と句読点を保持し、背景を雪景色にした。",
+  "requestedImageSize": {
+    "width": 1920,
+    "height": 1080
+  },
+  "actualImageSize": {
+    "width": 1672,
+    "height": 941
+  },
+  "promptSet": "prompts.json",
+  "imageBytesPreserved": true,
+  "verification": {
+    "applicationAdoption": "対象2枚ともadopted。pendingRequests=0。",
+    "managedImageSha256": "対象2枚の生成原本・workspace・Exchange・管理ImagesのSHA256一致。",
+    "visualInspection": "生成結果の日本語全文、太く大きな文字、雪景色を確認。",
+    "sourceCues": "全11シーンでcueId・sourceText・順序が開始時と一致。",
+    "otherScenes": "ほか9枚の画像参照・確定状態を保持。全シーンのアプリ画像要望を保持。",
+    "voiceState": "49行生成済み・49行聴取済みを保持。",
+    "userVisualEvaluation": "not_reviewed",
+    "imageHumanApproval": "対象2枚は人間の確定待ち。ほか9枚の確定を保持。",
+    "saveAndReload": "not_run"
+  },
+  "artifacts": {
+    "before": "before-scenes.json",
+    "after": "final-scenes.json",
+    "verification": "verification.json",
+    "images": [
+      "images/scene-02-logo.png",
+      "images/scene-11-logo.png"
+    ],
+    "individualReceipts": [
+      "image-02.json",
+      "image-11.json"
+    ]
+  },
+  "reusableRules": [
+    "「タイトルロゴを大きく目立たせる」は画面の主役として解釈し、太い字形・大きな占有率・縁取り・明暗差を明示する。",
+    "背景指定も現在のアプリ画像要望を優先し、前回のシーン構成へ引きずられない。",
+    "生成結果でタイトル全文、句読点、視認性を確認する。",
+    "ほかの確定済み画像を変更せず、対象シーンの現在の要求にのみ採用する。"
+  ],
+  "limitations": [
+    "出力は1672×941。PNG原本を保持し、アプリの既存表示で使う。",
+    "画像採用は人間の確定・作品保存とは別。作品保存とサムネイル生成は行っていない。"
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "data": {
+    "count": 14,
+    "backgroundReady": false,
+    "allApproved": false,
+    "ready": 0,
+    "pendingRequests": 0,
+    "selectedScene": "{15110FE5-0453-4C73-87EF-EA88E7B0F2F2}",
+    "state": "in-progress",
+    "projectId": "{C36C2A85-DD8A-4DDE-8A7D-D5072CF41A98}",
+    "revision": 1482,
+    "background": {
+      "id": "common-background",
+      "title": "共通背景画像",
+      "image": "",
+      "description": "",
+      "imagePrompt": "マンガの紹介用の背景、異世界から来た女騎士が男性に日本料理を勧められて美味しそうに食べる",
+      "padding": 0,
+      "imageFeedback": "",
+      "imageApproved": false,
+      "imageApprovalKey": "",
+      "imageEditEpoch": 0,
+      "displayMode": "image",
+      "animation": {},
+      "target": "common-background",
+      "optional": true,
+      "ready": false,
+      "imagePath": "",
+      "width": 1920,
+      "height": 1080,
+      "sourceCues": []
+    },
+    "rows": [
+      {
+        "id": "{BBB0A883-BB98-46BA-A4BA-4F6250B3DC3B}",
+        "title": "女騎士",
+        "image": "",
+        "description": "",
+        "imagePrompt": "女騎士",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 2,
+        "displayMode": "image",
+        "animation": {},
+        "sceneNumber": 9,
+        "start": 64.9,
+        "duration": 0.972,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{CC5150EB-1D13-4506-937F-F0F83BB5177C}",
+            "sourceText": "女騎士"
+          }
+        ],
+        "cueCount": 1,
+        "hasMoreCues": false
+      }
+    ],
+    "nextOffset": 9,
+    "hasMore": true,
+    "preview": {
+      "current": false,
+      "error": ""
+    },
+    "pipes": {
+      "format": "RIGMMaker.WorkspaceConnection",
+      "schemaVersion": 1,
+      "apiVersion": 2,
+      "pid": 13364,
+      "commandPipe": "RIGMMaker.Workspace.13364.{398A9234-BF79-455C-9A11-D0E50739806F}",
+      "controlPipe": "RIGMMaker.Workspace.13364.{398A9234-BF79-455C-9A11-D0E50739806F}",
+      "dataRoot": "C:\\Users\\zan12\\Documents\\RIGMMaker",
+      "connectionFile": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Exchange\\workspace-13364.json",
+      "routing": "common-command"
+    }
+  },
+  "requestId": "c191222f-5042-4bbd-8a50-53dfd7e551a4"
+}

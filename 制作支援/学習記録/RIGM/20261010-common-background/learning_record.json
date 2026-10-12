@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "recordType": "rigm_scene_image_generation_learning",
+  "date": "2026-10-10",
+  "purpose": "第16段階の共通背景を生成して現在の要求へパイプ採用",
+  "userRequest": "要望を書いたので画像を送って。パイプを使って",
+  "projectId": "{31E80E70-1F15-4E59-A1D6-B8219558F973}",
+  "title": "架空のアニメの話",
+  "startRevision": 566,
+  "appliedRevision": 567,
+  "prompt": "お話を紹介するときにあう背景　人物は書かない",
+  "method": "built-in image_gen; one new background; app-script-adopt-scene-image via the live workspace pipe",
+  "imageSpecificConditions": [
+    "人物なし。お話の紹介に合う共通背景",
+    "柔らかなアニメ背景美術の読書室と中央の余白は今回の補足。ユーザー確定のジャンル設定ではない",
+    "1920×1080をプロンプトで指定したが、生成画像は1672×941。原画像を変換せずアプリ描画時に配置"
+  ],
+  "preservedInformation": [
+    "人物を追加しない",
+    "実シーン7件の番号・割当を変更しない",
+    "既存シーン画像と音声を置換しない",
+    "生成原本とExchangeと管理ImagesのSHA256が一致"
+  ],
+  "verification": {
+    "applicationImport": "adopted/currentをパイプで再取得して確認",
+    "sha256": "128e9091d0763543f4c75f5005fe6d8e1157d41c32e28993763d56c0141e482b",
+    "projectSaveAndReload": "not_run_after_image_adoption",
+    "width": 1672,
+    "assistantVisualEvaluation": "生成画像を確認。人物なし、中央に余白のある暖かい読書室",
+    "liveGuiScreenshot": "not_captured_after_adoption",
+    "userVisualEvaluation": "not_reviewed",
+    "humanConfirmed": false,
+    "height": 941
+  },
+  "status": "adopted_awaiting_human_confirmation_and_save",
+  "lessons": [
+    "未反映のGUI入力はパイプのページ遷移により既存RequestFinishで保存して取得。以後の要求・採用・照合はパイプを使用",
+    "最初のUIキーボード操作で末尾に付加された文字を、取得済みの元の要望に戻した",
+    "生成サイズは実寸を確認する。指定サイズへの一致を保証したと扱わない"
+  ],
+  "artifacts": {
+    "finalImages": [
+      "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\common-background-20261010\\common-background-reading-room.png",
+      "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{31E80E70-1F15-4E59-A1D6-B8219558F973}\\Images\\128e9091d0763543f4c75f5005fe6d8e1157d41c32e28993763d56c0141e482b.png"
+    ],
+    "generationRequest": "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\common-background-20261010/generation-request.json",
+    "prompt": "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\common-background-20261010/prompt.txt",
+    "verification": "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\common-background-20261010/delivery.json"
+  }
+}

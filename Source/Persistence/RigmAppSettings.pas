@@ -158,9 +158,12 @@ begin
     Load; if FError<>'' then Exit;
     var I := IndexOf(Project.FileName); if I<0 then Exit;
     var O := TJSONObject(FRecent[I]);
+    // There is no write to authorize when the remembered position is already
+    // identical. Avoid hashing every material again on each idle timer tick.
+    // Read the MRU first so saves or other windows can still update it.
+    if SameValue(JN(O,'time'),Seconds,0.000001) and (JS(O,'cueId')=CueId) and (JS(O,'stage')=Project.WorkflowStage) then Exit;
     // Only a saved, unchanged work can be resumed at its remembered stage.
     if (JS(O,'fileHash')<>MovieFileIdentity(Project.FileName)) or (JS(O,'renderKey')<>MovieRenderKey(Project)) then Exit;
-    if SameValue(JN(O,'time'),Seconds,0.000001) and (JS(O,'cueId')=CueId) and (JS(O,'stage')=Project.WorkflowStage) then Exit;
     SetPair(O,'time',TJSONNumber.Create(Seconds)); SetPair(O,'cueId',TJSONString.Create(CueId));
     SetPair(O,'stage',TJSONString.Create(Project.WorkflowStage)); Persist;
   except on E: Exception do FError := E.Message; end;

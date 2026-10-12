@@ -4,7 +4,7 @@ unit RigmMovieControls;
 interface
 uses Winapi.Windows, System.Classes, Vcl.Forms, Vcl.Controls, Vcl.StdCtrls, Vcl.ExtCtrls,
   Vcl.ComCtrls, Vcl.AppEvnts, RigmIconToolbar, RigmMovieTimeline, RigmMoviePreview,
-  RigmPropertyScrollBox, RigmMovieNotification, RigmMoviePropertyPages;
+  RigmPropertyScrollBox, RigmMovieNotification, RigmMoviePropertyPages, RigmMoviePostingFrame;
 type
   TRigmMovieUiCallbacks = record
     ActionClick         : TNotifyEvent;       // ボタンのTagに対応する作品操作の要求。
@@ -23,6 +23,7 @@ type
     SplitterAfterResize : TNotifyEvent;       // ドラッグ終了時の保留配置と描画の再開。
     EditingAreaResize   : TNotifyEvent;       // 中央編集領域の最小寸法とスクロール範囲の更新。
     SelectCue           : TLVSelectItemEvent; // 台本一覧の区間選択。解除通知も届く。
+    CueListClick        : TNotifyEvent;       // 選択済みのセリフを再クリックした場合も先頭へ移動。
     ApplicationMessage  : TMessageEvent;      // カーソル位置に応じたホイール入力の振分け。
     Tick                : TNotifyEvent;       // ジョブ回収と再生・プレビューの定期更新。
   end;
@@ -46,6 +47,7 @@ type
     ChartMaximum      : TEdit;
     ChartTitle        : TEdit;
     Dialogue          : TMemo;
+    Posting           : TRigmMoviePostingFrame;
     Dimensions        : TEdit;                  // 幅×高さ×fpsの下書き。プリセットからの入力にも使う。
     EditHost          : TPanel;
     EditScroll        : TScrollBox;
@@ -164,7 +166,7 @@ begin
   Toolbar.AddIcon('MoviePreview','現在時刻をプレビュー',riPreview,11,FCallbacks.ActionClick);
   Toolbar.AddIcon('MoviePlay','再生 / 停止',riDirect,12,FCallbacks.ActionClick);
   Toolbar.AddIcon('MovieExport','音声付きAVI / MP4を書き出す',riSaveAs,13,FCallbacks.ActionClick);
-  Toolbar.AddIcon('MovieFfmpeg','MP4用の既存FFmpegを選ぶ',riOpen,22,FCallbacks.ActionClick);
+  Toolbar.AddIcon('MovieFfmpeg','外部FFmpegを選ぶ（任意）',riOpen,22,FCallbacks.ActionClick);
   Toolbar.AddIcon('MovieAssets','既存キャラクター素材一覧を取得',riSample,23,FCallbacks.ActionClick);
   Toolbar.AddIcon('MovieWaveform','音声波形を取得',riRefresh,24,FCallbacks.ActionClick);
   Toolbar.AddIcon('MovieShowScript','台本入力を表示 / 隠す',riEditPreview,34,FCallbacks.ActionClick);
@@ -207,6 +209,8 @@ begin
   ExportPanel := TPanel.Create(FOwner); ExportPanel.Parent := FOwner; ExportPanel.Align := alBottom;
   ExportPanel.Name := 'MovieExportFeedback'; ExportPanel.Caption := ''; ExportPanel.ShowCaption := False;
   ExportPanel.Height := 64; ExportPanel.BevelOuter := bvNone; ExportPanel.Visible := False;
+  // 進捗文字の変更時に親のテーマ背景を描き直さず、背景と文字を同じバッファで更新する。
+  ExportPanel.ParentBackground := False; ExportPanel.ParentDoubleBuffered := False; ExportPanel.DoubleBuffered := True;
   ExportStatus := TLabel.Create(FOwner); ExportStatus.Parent := ExportPanel; ExportStatus.Align := alClient;
   ExportStatus.Name := 'MovieExportFeedbackText'; ExportStatus.AutoSize := False; ExportStatus.WordWrap := True;
   ExportStatus.Layout := tlCenter; ExportStatus.ShowHint := True;
@@ -236,13 +240,16 @@ begin
   PropertyBar.Name := 'MoviePropertyPages';
   Right := TRigmPropertyScrollBox.Create(FOwner); Right.Parent := PropertyHost; Right.Align := alClient;
   FPages := TRigmMoviePropertyPages.Create(FOwner,Right,PropertyBar);
-  PropertyBar.AddIcon('MoviePropertiesDialogue','セリフ・字幕・話者',riEditPreview,0,FPages.PropertyPageClick,True);
+  PropertyBar.AddIcon('MoviePropertiesPosting','投稿用タイトル・概要・親作品',riEditPreview,0,FPages.PropertyPageClick,True);
   PropertyBar.AddIcon('MoviePropertiesScene','場面画像・説明・レイアウト',riPng,1,FPages.PropertyPageClick,True);
   PropertyBar.AddIcon('MoviePropertiesActing','表情・動作・演技',riPreview,2,FPages.PropertyPageClick,True);
-  PropertyBar.AddIcon('MoviePropertiesAudio','音声の詳細・再生成',riGenerate,3,FPages.PropertyPageClick,True);
+  PropertyBar.AddIcon('MoviePropertiesAudio','BGM',riGenerate,3,FPages.PropertyPageClick,True);
   PropertyBar.AddIcon('MoviePropertiesDiagnostics','素材と出力の診断',riClassify,4,FPages.PropertyPageClick,True);
   Right.BorderStyle := bsNone; Right.Name := 'MovieProperties';
   Right.HorzScrollBar.Visible := False; Right.VertScrollBar.Visible := True; Right.OnResize := FCallbacks.LayoutProperties;
+  FPages.BuildPage := 0;
+  Posting := TRigmMoviePostingFrame.Create(FOwner); Posting.Parent := Right;
+  FPages.AddProperty(nil,Posting,0,12,330,568);
   FPages.BuildPage := 1;
   SceneTitle := Edit(Right,'MovieSceneTitle','場面名',12,0,330);
   Scene := Edit(Right,'MovieCueScene','シーン',12,4,330);
@@ -274,7 +281,7 @@ begin
   L := TLabel.Create(FOwner); L.Parent := Right; L.Caption := '短い場面では登場・退場の時間を比例して縮めます。画像のみをフェードし、字幕と説明は保持します。';
   FPages.AddProperty(L,nil,888,12,330,0);
   Button(Right,'MovieApplyImageAnimation','画像アニメーションを適用',45,12,916,330);
-  FPages.BuildPage := 0;
+  FPages.BuildPage := -1;
   Speaker := Combo('MovieCueSpeaker','台本上の話者',12,53,158); Speaker.OnChange := FCallbacks.SelectSpeaker;
   Pause := Edit(Right,'MovieCuePause','セリフ後の間（秒）',184,53,158);
   FPages.BuildPage := 2;
@@ -291,7 +298,7 @@ begin
   WholeMotionStatus.AutoSize := False; WholeMotionStatus.WordWrap := True;
   FPages.AddProperty(nil,WholeMotionStatus,188,12,330,42);
   Button(Right,'MovieStopWholeMotion','全体モーションを停止',42,12,242,330);
-  FPages.BuildPage := 0;
+  FPages.BuildPage := -1;
   L := TLabel.Create(FOwner); L.Parent := Right; L.Caption := 'セリフ'; L.SetBounds(12,156,330,20);
   Dialogue := TMemo.Create(FOwner); Dialogue.Parent := Right; Dialogue.Name := 'MovieCueText'; Dialogue.Text := ''; Dialogue.SetBounds(12,178,330,85); Dialogue.ScrollBars := ssVertical;
   FPages.AddProperty(L,Dialogue,156,12,330,85);
@@ -300,11 +307,12 @@ begin
   FPages.AddProperty(L,Subtitle,269,12,330,75);
   Button(Right,'MovieApplyCue','セリフを適用',16,12,374,158); Button(Right,'MovieBackground','シーン画像を選ぶ',17,184,374,158);
   Button(Right,'MovieAddCue','セリフ追加',18,12,408,158); Button(Right,'MovieDeleteCue','セリフ削除',19,184,408,158);
-  FPages.BuildPage := 3;
+  FPages.BuildPage := -1;
   Style := Combo('MovieVoiceStyle','選択中の話者のVOICEVOX音声',12,448,330);
   Speed := Edit(Right,'MovieVoiceSpeed','話速（0.5～2）',12,500,158); Pitch := Edit(Right,'MovieVoicePitch','音高（-0.15～0.15）',184,500,158);
   Button(Right,'MovieApplyVoice','音声設定を適用',20,12,554,330);
   Button(Right,'MovieGenerateVoice','必要な音声を再生成',8,12,600,330);
+  FPages.BuildPage := 3;
   BgmPath := Edit(Right,'MovieBgmPath','動画全体のBGM（PCM16 WAV）',12,654,330); BgmPath.ReadOnly := True;
   BgmPath.ShowHint := True;
   Button(Right,'MovieSelectBgm','BGMを選ぶ...',47,12,708,158); Button(Right,'MovieClearBgm','BGMを解除',48,184,708,158);
@@ -366,6 +374,7 @@ begin
   List.ReadOnly := True; List.RowSelect := True; List.HideSelection := False;
   List.Columns.Add.Caption := '開始'; List.Columns[0].Width := 50; List.Columns.Add.Caption := '台本'; List.Columns[1].Width := 190;
   List.Columns.Add.Caption := '音声'; List.Columns[2].Width := 55; List.OnSelectItem := FCallbacks.SelectCue;
+  List.OnClick := FCallbacks.CueListClick;
   Splitter := TSplitter.Create(FOwner); Splitter.Parent := PreviewArea; Splitter.Align := alLeft;
   TransportScroll := TScrollBox.Create(FOwner); TransportScroll.Parent := PreviewArea; TransportScroll.Align := alBottom;
   TransportScroll.Name := 'MovieTransportScroll'; TransportScroll.Height := 64; TransportScroll.BorderStyle := bsNone;

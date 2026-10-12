@@ -159,7 +159,7 @@ constructor TRigmScriptSubtitleFrame.CreateForWorkspace(AOwner: TComponent; Work
 begin
   inherited Create(AOwner); Align := alClient; FWorkspace := Workspace;
   FToolbar := TRigmIconToolbar.Create(Self); FToolbar.Parent := Self; FToolbar.Align := alTop; FToolbar.Name := 'ScriptSubtitleToolbar';
-  FToolbar.AddIcon('ScriptSubtitleEdit','Enter：表示字幕・改行・メモを編集',riEditPreview,0,Detail);
+  FToolbar.AddIcon('ScriptSubtitleEdit','表示字幕の入力欄へ移動（Enter / 一覧をダブルクリック）',riEditPreview,0,Detail);
   FToolbar.AddIcon('ScriptSubtitleReady','字幕入力完了（Ctrl+Enter / Esc、次の工程へは左の工程リスト）',riComplete,0,Complete);
   FToolbar.AddSeparator; FToolbar.AddIcon('ScriptSubtitlePrevious','前の字幕ページ',riUp,0,Page).Tag := -1;
   FToolbar.AddIcon('ScriptSubtitleFollowing','次の字幕プレビューページ',riDown,0,Page).Tag := 1;
@@ -167,7 +167,7 @@ begin
   FList := TRigmSubtitleListView.Create(Self); FList.Parent := Self; FList.Align := alLeft; FList.Width := ScaleValue(310); FList.ViewStyle := vsReport;
   // ListViewの内部バッファだけで合成する。親からのVCLバッファ継承は列描画を壊す。
   FList.ParentDoubleBuffered := False; FList.DoubleBuffered := False;
-  FList.ReadOnly := True; FList.RowSelect := True; FList.HideSelection := False; FList.OnSelectItem := Selected; FList.OnKeyDown := HandleKey; FList.Name := 'ScriptSubtitleRows';
+  FList.ReadOnly := True; FList.RowSelect := True; FList.HideSelection := False; FList.OnSelectItem := Selected; FList.OnKeyDown := HandleKey; FList.OnDblClick := Detail; FList.Name := 'ScriptSubtitleRows';
   FList.Columns.Add.Caption := '配役'; FList.Columns[0].Width := ScaleValue(60);
   FList.Columns.Add.Caption := '表示字幕'; FList.Columns[1].Width := ScaleValue(240);
   var Splitter := TSplitter.Create(Self); Splitter.Parent := Self; Splitter.Align := alLeft;
@@ -188,10 +188,13 @@ end;
 function TRigmScriptSubtitleFrame.SelectedId: string;
 begin Result := ''; if FList.Selected<>nil then Result := FList.Selected.SubItems[1]; end;
 procedure TRigmScriptSubtitleFrame.BeginInput(Sender: TObject);
-begin if not FSync and FEditing then FWorkspace.BeginScriptTextEdit; end;
+begin
+  if FSync or FEditor.ReadOnly or (FLoaded='') then Exit;
+  FEditing := True; FWorkspace.BeginScriptTextEdit;
+end;
 procedure TRigmScriptSubtitleFrame.Changed(Sender: TObject);
 begin
-  if FSync or not FEditing then Exit; BeginInput(Sender);
+  if FSync or FEditor.ReadOnly then Exit; BeginInput(Sender);
   try FInputError := ''; FWorkspace.EditSubtitle(FLoaded,FEditor.Text,FNote.Text);
   except on E: Exception do begin FInputError := E.Message; FGuide.Caption := FInputError; end; end;
 end;
@@ -212,7 +215,7 @@ end;
 function TRigmScriptSubtitleFrame.RequestFinish: Boolean;
 begin
   Result := ApplyCurrent; if not Result then Exit;
-  FEditing := False; FEditor.ReadOnly := True; FNote.ReadOnly := True; FWorkspace.EndScriptTextEdit;
+  FEditing := False; FWorkspace.EndScriptTextEdit;
 end;
 procedure TRigmScriptSubtitleFrame.Selected(Sender: TObject; Item: TListItem; Selected: Boolean);
 begin
@@ -253,7 +256,7 @@ begin
   if not ApplyCurrent then Exit;
   try
     RequireCurrentSubtitles(FWorkspace.ScriptDraft);
-    FEditing := False; FEditor.ReadOnly := True; FNote.ReadOnly := True; FWorkspace.CompleteSubtitles; FList.SetFocus;
+    FEditing := False; FWorkspace.CompleteSubtitles; FList.SetFocus;
   except on E: Exception do FGuide.Caption := E.Message; end;
 end;
 procedure TRigmScriptSubtitleFrame.Page(Sender: TObject);
@@ -272,6 +275,7 @@ begin
   if not Rebuild then for var I := 0 to P.Cues.Count-1 do
     if (FList.Items[I].SubItems.Count<>2) or (FList.Items[I].SubItems[1]<>P.Cues[I].Id) then begin Rebuild := True; Break; end;
   var SelectionChanged := FLoaded<>Id;
+  var Problem := ScriptSubtitleBlockReason(P,False);
   FSync := True;
   // 選択通知の途中でItems.Clearするとネイティブ一覧の描画状態が壊れる。
   // 行構成が同じなら項目を保ち、実際に変わった文字・選択だけを反映する。
@@ -290,15 +294,17 @@ begin
     if (Rebuild or SelectionChanged) and (FList.Selected<>nil) then FList.Selected.MakeVisible(False);
     if SelectionChanged or not FEditing then begin
       if SelectionChanged then FEditing := False;
-      if FEditor.Text<>C.Subtitle then FEditor.Text := C.Subtitle;
-      if FNote.Text<>C.SubtitleNote then FNote.Text := C.SubtitleNote;
-      FEditor.ReadOnly := not FEditing; FNote.ReadOnly := not FEditing; FLoaded := Id;
+      if NormalizeScriptText(FEditor.Text)<>C.Subtitle then FEditor.Text := C.Subtitle;
+      if NormalizeScriptText(FNote.Text)<>C.SubtitleNote then FNote.Text := C.SubtitleNote;
+      FLoaded := Id;
     end;
+    // 選択後・入力完了後も直接編集する。前工程が古い場合だけ入力を止める。
+    FEditor.ReadOnly := Problem<>''; FNote.ReadOnly := Problem<>'';
     if FVoice.Text<>C.Text then FVoice.Text := C.Text;
     var RoleNumber := ScriptCueRole(P,Id); var Actor := RoleNumber.ToString+' / '+JS(CastingRole(P,RoleNumber),'name');
     if FActor.Caption<>Actor then FActor.Caption := Actor;
-    var Guide := '↑↓：セリフ選択 / ←→：最初の折返し移動 / Enter：表示文・改行・メモの編集。'+#13#10+'Ctrl+Enter / Esc：入力完了。原稿と音声文は保持します。';
-    var Problem := ScriptSubtitleBlockReason(P,False);
+    var Guide := '表示字幕・改行・メモは右側の欄で直接編集できます。Enter：字幕欄へ移動。'+#13#10+
+      '一覧の↑↓：セリフ選択 / ←→：最初の折返し移動 / Ctrl+Enter・Esc：入力完了。';
     TToolButton(FToolbar.FindComponent('ScriptSubtitleEdit')).Enabled := Problem='';
     TToolButton(FToolbar.FindComponent('ScriptSubtitleReady')).Enabled := Problem='';
     if Problem<>'' then Guide := Problem+' 以前の字幕とメモは保持しています。'

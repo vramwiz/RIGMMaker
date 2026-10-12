@@ -14,10 +14,11 @@ type
     MORA_DATA_URL = 'http://127.0.0.1:50021/mora_data';
     SYNTHESIS_URL = 'http://127.0.0.1:50021/synthesis';
     HTTP_TIMEOUT_MS = 120000;
+  public
+    // 合成せず音高・音素長を再計算する。編集メタデータと保留中の読みを保持する。
     class function RecalculateMoraData(const QueryJson: string;
       const SpeakerId: Integer; out ResultJson,
       ErrorMessage: string): Boolean; static;
-  public
     // 指定した本文とstyleから、アクセント句とモーラを含むaudio_query JSONを取得する。
     class function CreateAudioQuery(const Text: string;
       const SpeakerId: Integer; out QueryJson,
@@ -43,6 +44,12 @@ type
       const AudioValues: TSerifVoicevoxAudioValues;
       const QueryJsonOverride: string; out WaveFileName,
       TextFileName, LabFileName, ErrorMessage: string): Boolean; overload; static;
+    // 再生時に取得・読み変更を解決した編集用queryを返す。手動編集メタデータも保持する。
+    class function CreateInputFiles(const Text, CharacterName,
+      StyleName: string; const SpeakerId: Integer;
+      const AudioValues: TSerifVoicevoxAudioValues;
+      const QueryJsonOverride: string; out WaveFileName,
+      TextFileName, LabFileName, ResolvedQueryJson, ErrorMessage: string): Boolean; overload; static;
   end;
 
 implementation
@@ -306,6 +313,20 @@ begin
           MoraValue.Free;
           raise Exception.Create('mora_data returned invalid JSON');
         end;
+        // Engineは独自キーを返さないため、再生時に解決する読みを元の句へ戻す。
+        if TJSONArray(MoraValue).Count<>AccentPhrases.Count then begin
+          MoraValue.Free;
+          raise Exception.Create('mora_data returned a different phrase count');
+        end;
+        for var I := 0 to AccentPhrases.Count-1 do
+          if (AccentPhrases[I] is TJSONObject) and (TJSONArray(MoraValue)[I] is TJSONObject) then begin
+            var Pending := TJSONObject(AccentPhrases[I]).GetValue('_rigm_pending_reading');
+            if Pending<>nil then begin
+              var Phrase := TJSONObject(TJSONArray(MoraValue)[I]);
+              Phrase.RemovePair('_rigm_pending_reading').Free;
+              Phrase.AddPair('_rigm_pending_reading',Pending.Clone as TJSONValue);
+            end;
+          end;
         AccentPair := QueryObject.RemovePair('accent_phrases');
         AccentPair.Free;
         QueryObject.AddPair('accent_phrases', MoraValue);
@@ -679,6 +700,53 @@ class function TSerifVoicevoxApi.CreateInputFiles(const Text,
   const QueryJsonOverride: string;
   out WaveFileName, TextFileName, LabFileName,
   ErrorMessage: string): Boolean;
+var Query: string;
+begin
+  Result := CreateInputFiles(Text,CharacterName,StyleName,SpeakerId,AudioValues,
+    QueryJsonOverride,WaveFileName,TextFileName,LabFileName,Query,ErrorMessage);
+end;
+
+function ResolvePendingReadings(const QueryJson: string; SpeakerId: Integer): string;
+begin
+  var Root := TJSONObject.ParseJSONValue(QueryJson) as TJSONObject;
+  try
+    var Phrases := Root.GetValue<TJSONArray>('accent_phrases');
+    for var I := Phrases.Count-1 downto 0 do begin
+      var Phrase := Phrases[I] as TJSONObject;
+      var Pending := Phrase.GetValue<string>('_rigm_pending_reading','');
+      if Pending='' then Continue;
+      var Replacement,Error: string;
+      if not TSerifVoicevoxApi.CreateAccentPhrases(Pending,SpeakerId,Replacement,Error) then raise Exception.Create(Error);
+      var Parts := TJSONObject.ParseJSONValue(Replacement) as TJSONArray;
+      try
+        if Parts.Count=0 then raise Exception.Create('読みのアクセント句がありません。');
+        var Combined := TJSONArray.Create;
+        try
+          for var N := 0 to Phrases.Count-1 do
+            if N<>I then Combined.AddElement(Phrases[N].Clone as TJSONValue)
+            else for var J := 0 to Parts.Count-1 do begin
+              var Part := Parts[J].Clone as TJSONObject;
+              if J=Parts.Count-1 then begin
+                Part.RemovePair('pause_mora').Free;
+                if Phrase.GetValue('pause_mora')<>nil then Part.AddPair('pause_mora',Phrase.GetValue('pause_mora').Clone as TJSONValue)
+                else Part.AddPair('pause_mora',TJSONNull.Create);
+              end;
+              Combined.AddElement(Part);
+            end;
+          Root.RemovePair('accent_phrases').Free; Root.AddPair('accent_phrases',Combined); Phrases := Combined; Combined := nil;
+        finally Combined.Free; end;
+      finally Parts.Free; end;
+    end;
+    Result := Root.ToJSON;
+  finally Root.Free; end;
+end;
+
+class function TSerifVoicevoxApi.CreateInputFiles(const Text,
+  CharacterName, StyleName: string; const SpeakerId: Integer;
+  const AudioValues: TSerifVoicevoxAudioValues;
+  const QueryJsonOverride: string;
+  out WaveFileName, TextFileName, LabFileName, ResolvedQueryJson,
+  ErrorMessage: string): Boolean;
 var
   ApiResponse: IHTTPResponse;
   Client: THTTPClient;
@@ -712,6 +780,7 @@ begin
   WaveFileName := '';
   TextFileName := '';
   LabFileName := '';
+  ResolvedQueryJson := '';
   ErrorMessage := '';
   if Trim(Text) = '' then
   begin
@@ -753,6 +822,8 @@ begin
       if not HasQueryOverride and
         not CreateAudioQuery(Text, SpeakerId, QueryJson, ErrorMessage) then
         raise Exception.Create(ErrorMessage);
+      QueryJson := ResolvePendingReadings(QueryJson,SpeakerId);
+      var EditableQuery := QueryJson;
       // const入力とout出力に同じ変数を渡すと、出力初期化で入力JSONまで失われる。
       if HasQueryOverride and
         not RecalculateMoraData(QueryJson, SpeakerId,
@@ -791,6 +862,7 @@ begin
       TFile.WriteAllText(TextFileName, Text, TEncoding.UTF8);
       if not CreateLabFromAudioQuery(QueryJson, WaveFileName, LabFileName) then
         raise Exception.Create('VOICEVOX音素LABを生成できませんでした');
+      ResolvedQueryJson := EditableQuery;
       Result := True;
     except
       on E: Exception do

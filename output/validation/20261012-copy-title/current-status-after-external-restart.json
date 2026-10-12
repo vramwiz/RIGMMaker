@@ -1,0 +1,23 @@
+{
+  "hasProject": false,
+  "implementedStage": "closing-editor",
+  "placementEditing": false,
+  "textEditing": false,
+  "canAdvance": false,
+  "canConfirmVoice": false,
+  "canConfirmSubtitles": false,
+  "canConfirmCasting": false,
+  "editorProjectId": "{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}",
+  "editorPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}\\project.rigmovie",
+  "pipes": {
+    "format": "RIGMMaker.WorkspaceConnection",
+    "schemaVersion": 1,
+    "apiVersion": 2,
+    "pid": 6936,
+    "commandPipe": "RIGMMaker.Workspace.6936.{61877B53-4826-4DBF-BCEF-0D7B52E58842}",
+    "controlPipe": "RIGMMaker.Workspace.6936.{61877B53-4826-4DBF-BCEF-0D7B52E58842}",
+    "dataRoot": "C:\\Users\\zan12\\Documents\\RIGMMaker",
+    "connectionFile": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Exchange\\workspace-6936.json",
+    "routing": "common-command"
+  }
+}

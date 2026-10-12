@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "data": {
+    "count": 14,
+    "backgroundReady": false,
+    "allApproved": false,
+    "ready": 14,
+    "pendingRequests": 0,
+    "selectedScene": "common-background",
+    "state": "in-progress",
+    "projectId": "{C36C2A85-DD8A-4DDE-8A7D-D5072CF41A98}",
+    "revision": 1551,
+    "background": {
+      "id": "common-background",
+      "title": "共通背景画像",
+      "image": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{C36C2A85-DD8A-4DDE-8A7D-D5072CF41A98}\\Images\\d9a58fe6d700babdc120b14cf4a2ab34934b4b6902f610162a5751f0a8209c90.png",
+      "description": "",
+      "imagePrompt": "共通背景。作品のテーマに関係しない、適度に模様がある背景。模様には自然な強弱と余白をつけ、文字やシーン画像を重ねても邪魔にならない程度にする。人物・具体的な情景・文字・ロゴは描かない。",
+      "padding": 0,
+      "imageFeedback": "",
+      "imageApproved": false,
+      "imageApprovalKey": "",
+      "imageEditEpoch": 8,
+      "displayMode": "image",
+      "animation": {},
+      "target": "common-background",
+      "optional": true,
+      "ready": false,
+      "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{C36C2A85-DD8A-4DDE-8A7D-D5072CF41A98}\\Images\\d9a58fe6d700babdc120b14cf4a2ab34934b4b6902f610162a5751f0a8209c90.png",
+      "width": 1920,
+      "height": 1080,
+      "sourceCues": [],
+      "imageRequest": {
+        "requestId": "{A24AA13E-2017-426B-B743-EB5F712AB869}",
+        "sceneId": "common-background",
+        "sceneNumber": 0,
+        "fingerprint": "23013232b9e383aa171c0ce079dc1f131356ff89562160d82efc73d5e47dc4d4",
+        "prompt": "共通背景。作品のテーマに関係しない、適度に模様がある背景。模様には自然な強弱と余白をつけ、文字やシーン画像を重ねても邪魔にならない程度にする。人物・具体的な情景・文字・ロゴは描かない。",
+        "feedback": "",
+        "provider": "external-codex",
+        "width": 1920,
+        "height": 1080,
+        "aspectRatio": "1920:1080",
+        "target": "common-background",
+        "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+        "state": "adopted",
+        "adoptedFingerprint": "0c1b301d7fddf6d010adea34b636564b21f1be319f389469b9106327cd8142a2",
+        "imageProvenance": "external-generated",
+        "current": true
+      }
+    },
+    "rows": [
+      {
+        "id": "{F4BF6737-075D-4075-B788-C38065729178}",
+        "title": "異世界人に現代の料理やお酒を",
+        "image": "project.assets\\3be3589e6540067cf699e4dc476f5e5f9e5a2d766eabfe504dd059f5de4f9424.png",
+        "description": "",
+        "imagePrompt": "異世界人に現代の料理やお酒を振る舞って その反応を楽しむ",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": true,
+        "imageApprovalKey": "993257fabda35d50d12033a4c2e594d150f6cebd3b48bd1371f569c8ed6882e6",
+        "imageEditEpoch": 9,
+        "displayMode": "image",
+        "animation": {},
+        "sceneNumber": 5,
+        "start": 42.0706666666667,
+        "duration": 6.94800000000001,
+        "ready": true,
+        "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{C36C2A85-DD8A-4DDE-8A7D-D5072CF41A98}\\project.assets\\3be3589e6540067cf699e4dc476f5e5f9e5a2d766eabfe504dd059f5de4f9424.png",
+        "sourceCues": [
+          {
+            "cueId": "{2DF3AD4E-01B7-422A-85DE-B74C03E9860A}",
+            "sourceText": "いわゆる異世界人に現代の料理やお酒を振る舞って"
+          },
+          {
+            "cueId": "{04E3A983-A53A-4B62-9696-5AB5BD9DA7B8}",
+            "sourceText": "その反応を楽しむという作品"
+          },
+          {
+            "cueId": "{9109F689-DB68-4FB7-8E9A-56F80BB876AE}",
+            "sourceText": "出てくる料理は"
+          }
+        ],
+        "cueCount": 3,
+        "hasMoreCues": false,
+        "imageRequest": {
+          "requestId": "{37F9588D-7C4B-4147-984A-C4445CD91650}",
+          "sceneId": "{F4BF6737-075D-4075-B788-C38065729178}",
+          "sceneNumber": 5,
+          "fingerprint": "5fd82ce89d4189623b4bd877e82ba31de31663d0efe8d1d8e001e328fef6cdbd",
+          "prompt": "異世界人に現代の料理やお酒を振る舞って その反応を楽しむ",
+          "feedback": "",
+          "provider": "external-codex",
+          "width": 1920,
+          "height": 1080,
+          "aspectRatio": "1920:1080",
+          "target": "scene",
+          "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+          "adoptedFingerprint": "3fb428e5db32a61dce59beb6864b4c34d4a50bce54b2ee3c022c2ccdea8f9277",
+          "imageProvenance": "external-generated",
+          "state": "cancelled",
+          "current": false
+        }
+      }
+    ],
+    "nextOffset": 5,
+    "hasMore": true,
+    "preview": {
+      "current": false,
+      "error": ""
+    },
+    "pipes": {
+      "format": "RIGMMaker.WorkspaceConnection",
+      "schemaVersion": 1,
+      "apiVersion": 2,
+      "pid": 13364,
+      "commandPipe": "RIGMMaker.Workspace.13364.{398A9234-BF79-455C-9A11-D0E50739806F}",
+      "controlPipe": "RIGMMaker.Workspace.13364.{398A9234-BF79-455C-9A11-D0E50739806F}",
+      "dataRoot": "C:\\Users\\zan12\\Documents\\RIGMMaker",
+      "connectionFile": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Exchange\\workspace-13364.json",
+      "routing": "common-command"
+    }
+  },
+  "requestId": "a68419f2-7328-4afd-85dc-46d934282224"
+}

@@ -47,7 +47,7 @@ begin
       Check((Cue.Text=Voice) and (ScriptFingerprint(W.ScriptDraft)=Raw) and (W.ScriptDraft.AudioFingerprint(Cue)=Audio) and (Cue.Scene=Scene),'human display edits leave raw voice audio fingerprint and scene intact',Results);
       Other := W.ScriptDraft.Cues[2].Json; try Check(Other.ToJSON=OtherJson,'display edits never propagate to other section cue',Results); finally Other.Free; end;
       CaptureUiWindow(Main,ResultPath,'.editing'); Ready.Click;
-      Check(not W.ScriptTextEditing and Editor.ReadOnly and (JS(W.ScriptDraft.ScriptWizard,'subtitlesStatus')='complete'),'ready completes details and releases shared input lock',Results);
+      Check(not W.ScriptTextEditing and not Editor.ReadOnly and not Note.ReadOnly and (JS(W.ScriptDraft.ScriptWizard,'subtitlesStatus')='complete'),'ready completes details while keeping subtitle fields directly editable',Results);
       var Original := Cue.Subtitle; Press(List,VK_LEFT); Check(Cue.Subtitle.IndexOf(#13#10)=7,'left moves first break one character',Results);
       Press(List,VK_RIGHT); Check(Cue.Subtitle=Original,'right restores first break while later manual breaks stay intact',Results);
       W.SetSubtitleBreak(Id,4); Press(List,VK_LEFT); Check(Cue.Subtitle.IndexOf(#13#10)=2,'left skips surrogate middle safely',Results);

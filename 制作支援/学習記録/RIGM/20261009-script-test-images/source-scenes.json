@@ -1,0 +1,170 @@
+[
+  {
+    "id": "{68F202C6-E308-4CF8-9EE7-E5B40E1373CD}",
+    "title": "body 1",
+    "image": "",
+    "description": "",
+    "imagePrompt": "",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 1,
+    "displayMode": "none",
+    "animation": {},
+    "sceneNumber": 1,
+    "start": 0,
+    "duration": 15.4813333333333,
+    "ready": false,
+    "imagePath": "",
+    "sourceCues": [
+      {
+        "cueId": "{CB6D7FE9-DA09-4E4C-B9B5-990FC47BA9E9}",
+        "sourceText": "こんにちは。今日は、最近ちょっと気になっていることについて話してみます。"
+      },
+      {
+        "cueId": "{1A61B475-68C5-4FD5-893E-8B2D4D4AA45C}",
+        "sourceText": "皆さんは、何か新しいことを始めようと思ったのに、準備だけで満足してしまったことはありませんか？"
+      },
+      {
+        "cueId": "{314FC87E-67B2-4DA5-B929-5CA233F06EF5}",
+        "sourceText": "私は結構あります。"
+      }
+    ],
+    "cueCount": 3,
+    "hasMoreCues": false
+  },
+  {
+    "id": "{2CD85D49-9144-48D2-9EAA-B1DB23DB331B}",
+    "title": "シーン 2",
+    "image": "",
+    "description": "",
+    "imagePrompt": "",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 1,
+    "animation": {},
+    "sceneNumber": 2,
+    "start": 15.4813333333333,
+    "duration": 8.152,
+    "ready": false,
+    "imagePath": "",
+    "sourceCues": [
+      {
+        "cueId": "{00512DCC-489C-4657-B91F-71E7EA2FB8A5}",
+        "sourceText": "必要なものを調べて、道具をそろえて、使い方も確認する。"
+      },
+      {
+        "cueId": "{713BB016-F033-478C-B36B-9C4FF291BE86}",
+        "sourceText": "ここまでは、ものすごく順調なんです。"
+      }
+    ],
+    "cueCount": 2,
+    "hasMoreCues": false
+  },
+  {
+    "id": "{23D894AC-BEB0-4370-9D19-591CB276CB07}",
+    "title": "シーン 2",
+    "image": "",
+    "description": "",
+    "imagePrompt": "",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 1,
+    "displayMode": "none",
+    "animation": {},
+    "sceneNumber": 3,
+    "start": 23.6333333333333,
+    "duration": 7.83333333333334,
+    "ready": false,
+    "imagePath": "",
+    "sourceCues": [
+      {
+        "cueId": "{23127194-B0E0-4249-B32B-80D8D2A832D2}",
+        "sourceText": "ところが、いざ始めようとすると、"
+      },
+      {
+        "cueId": "{C65D75B7-9556-4803-9CC9-14F957818B8B}",
+        "sourceText": "「今日は時間がないから、明日からにしよう」"
+      },
+      {
+        "cueId": "{D37A9F92-98EF-443A-A475-D909CF1DBAD9}",
+        "sourceText": "なんて考えてしまう。"
+      }
+    ],
+    "cueCount": 3,
+    "hasMoreCues": false
+  },
+  {
+    "id": "{27FC1FF2-EABD-4CEE-8BEE-A294FC62BA7E}",
+    "title": "シーン 3",
+    "image": "",
+    "description": "",
+    "imagePrompt": "",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 2,
+    "animation": {},
+    "sceneNumber": 4,
+    "start": 31.4666666666667,
+    "duration": 12.2493333333333,
+    "ready": false,
+    "imagePath": "",
+    "sourceCues": [
+      {
+        "cueId": "{51E9537B-E564-4089-BAD2-1D39B15B9B9F}",
+        "sourceText": "そして次の日になると、また別の理由を見つけてしまいます。"
+      },
+      {
+        "cueId": "{F9B54EB4-33F5-4A74-83DA-1B5D3F7D7501}",
+        "sourceText": "でも最近は、とりあえず五分だけやってみることにしています。"
+      },
+      {
+        "cueId": "{EF077CF0-ED67-4525-9F34-7798A51D1405}",
+        "sourceText": "五分なら、それほど大変ではありません。"
+      }
+    ],
+    "cueCount": 3,
+    "hasMoreCues": false
+  },
+  {
+    "id": "{2B115417-21A2-4F32-BF05-F609B4E98DD4}",
+    "title": "シーン 6",
+    "image": "",
+    "description": "",
+    "imagePrompt": "",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 1,
+    "animation": {},
+    "sceneNumber": 5,
+    "start": 43.716,
+    "duration": 14.3826666666667,
+    "ready": false,
+    "imagePath": "",
+    "sourceCues": [
+      {
+        "cueId": "{247F841B-FF20-440E-BB12-DFA40DA5E864}",
+        "sourceText": "それに不思議なもので、一度始めると、そのまま続けられることも多いんですよね。"
+      },
+      {
+        "cueId": "{8F53096D-6670-414C-A1CA-0565AC61B465}",
+        "sourceText": "完璧に準備してから始めるより、まず少しだけ動いてみる。"
+      },
+      {
+        "cueId": "{D7C806BE-5496-4D74-948A-F8170BF2D522}",
+        "sourceText": "案外、そのくらいがちょうどいいのかもしれません。"
+      }
+    ],
+    "cueCount": 3,
+    "hasMoreCues": false
+  }
+]

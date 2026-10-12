@@ -1,0 +1,127 @@
+{
+  "count": 11,
+  "backgroundReady": true,
+  "thumbnailReady": false,
+  "thumbnailSourcesReady": false,
+  "allApproved": false,
+  "ready": 0,
+  "pendingRequests": 7,
+  "selectedScene": "thumbnail",
+  "state": "in-progress",
+  "projectId": "{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}",
+  "revision": 1212,
+  "background": {
+    "id": "common-background",
+    "title": "共通背景画像",
+    "image": "",
+    "description": "",
+    "imagePrompt": "",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 0,
+    "displayMode": "none",
+    "animation": {},
+    "target": "common-background",
+    "optional": true,
+    "ready": true,
+    "imagePath": "",
+    "width": 1920,
+    "height": 1080,
+    "sourceCues": []
+  },
+  "thumbnail": {
+    "id": "thumbnail",
+    "title": "サムネイル",
+    "image": "",
+    "description": "",
+    "imagePrompt": "これまでに作ったシーン画像を組み合わせた、動画の最後に表示するサムネイルを作成。\r\n使用中のキャラクターも必ず使い、見た目を参照素材に合わせる。\r\n「漫画」＋マンガの名前を大きく読みやすいロゴとして配置する。",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 0,
+    "displayMode": "image",
+    "animation": {},
+    "target": "thumbnail",
+    "required": true,
+    "ready": false,
+    "sourcesReady": false,
+    "duration": 10,
+    "imagePath": "",
+    "logoText": "漫画　異世界「嘘」ガイド"
+  },
+  "rows": [
+    {
+      "id": "{BFC55C30-29A1-40A5-B9AF-3F2EA0458134}",
+      "title": "シーン 4",
+      "image": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}\\Images\\cf01f475bb72b5019f25e1a996a861d644b8e498c4c8b1be4f144d9349018416.png",
+      "description": "",
+      "imagePrompt": "動画の漫画紹介に使う、横長16:9、1920x1080を目標とした高品質なカラー漫画イラストを1枚。細く明瞭な線、簡潔なセル塗り、自然な柔らかい光、親しみやすい異世界ラブコメの雰囲気。単一の完成した情景で、文字・吹き出し・字幕・ロゴ・透かし・枠・分割コマを入れない。キャラクターは公式参照画像の外見を維持する。ナナ：白銀の長い髪、中央の長い前髪と外へ跳ねる毛束、赤い半目がちな瞳、色白で細身、黒いチョーカー、小さな襟飾りのクリーム色の上衣、ゆったりした黒～濃いチャコール色の上着と金色の袖ボタン。髪の横の跳ねは毛束であり獣耳や角にしない。露出を強調しない普段着。ながれ：短く自然に乱れた黒髪、黒い瞳、色白で普通の体格の日本人青年、素朴で少し戸惑った表情。公式では服装の色を確認できないため本セットでは無地のくすんだ青い長袖上衣・濃い灰色のズボンで統一する。登場時の顔立ち・髪型・服の色・体格を全画像で維持。参照にある印刷文字や漫画コマそのものを複製せず、下記の新しい場面を描く。\r\n今回の場面：ある日突然、青年ながれが異世界の森に転移して困っている場面。木漏れ日の森の小道でながれは周囲を見回し、ナナが数歩先から彼に気付き振り返っている。ながれを画面の中心に、ナナの顔も分かる距離に置く。転移を示す柔らかな光の粒を少しだけ残し、派手な魔法陣や武器は付けない。次の森の案内場面へつながる。",
+      "padding": 0,
+      "imageFeedback": "",
+      "imageApproved": false,
+      "imageApprovalKey": "",
+      "imageEditEpoch": 4,
+      "displayMode": "image",
+      "animation": {},
+      "sceneNumber": 3,
+      "start": 21.9013333333333,
+      "duration": 7.86533333333333,
+      "ready": false,
+      "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}\\Images\\cf01f475bb72b5019f25e1a996a861d644b8e498c4c8b1be4f144d9349018416.png",
+      "sourceCues": [
+        {
+          "cueId": "{6693E745-F8FF-41C5-8B90-6DEAF48D81F8}",
+          "sourceText": "ある日突然、異世界に転移させられた青年"
+        },
+        {
+          "cueId": "{8AA74A06-9DEF-46C0-8A54-286FD454EFEB}",
+          "sourceText": "あーよくあるパターンと言われそうです"
+        },
+        {
+          "cueId": "{F85FFC08-C853-4BB2-A170-92105C827E4A}",
+          "sourceText": "ですが主人公はどっちかというとヒロインのほう"
+        }
+      ],
+      "cueCount": 3,
+      "hasMoreCues": false,
+      "imageRequest": {
+        "requestId": "{BA3207E3-D11A-4BDF-B32F-3B0768355AB4}",
+        "sceneId": "{BFC55C30-29A1-40A5-B9AF-3F2EA0458134}",
+        "sceneNumber": 3,
+        "fingerprint": "21a7984c9cc4a54842b5ab9bdda2e13eaef316f2213611e8b1266f3c3e7642e4",
+        "prompt": "動画の漫画紹介に使う、横長16:9、1920x1080を目標とした高品質なカラー漫画イラストを1枚。細く明瞭な線、簡潔なセル塗り、自然な柔らかい光、親しみやすい異世界ラブコメの雰囲気。単一の完成した情景で、文字・吹き出し・字幕・ロゴ・透かし・枠・分割コマを入れない。キャラクターは公式参照画像の外見を維持する。ナナ：白銀の長い髪、中央の長い前髪と外へ跳ねる毛束、赤い半目がちな瞳、色白で細身、黒いチョーカー、小さな襟飾りのクリーム色の上衣、ゆったりした黒～濃いチャコール色の上着と金色の袖ボタン。髪の横の跳ねは毛束であり獣耳や角にしない。露出を強調しない普段着。ながれ：短く自然に乱れた黒髪、黒い瞳、色白で普通の体格の日本人青年、素朴で少し戸惑った表情。公式では服装の色を確認できないため本セットでは無地のくすんだ青い長袖上衣・濃い灰色のズボンで統一する。登場時の顔立ち・髪型・服の色・体格を全画像で維持。参照にある印刷文字や漫画コマそのものを複製せず、下記の新しい場面を描く。\r\n今回の場面：ある日突然、青年ながれが異世界の森に転移して困っている場面。木漏れ日の森の小道でながれは周囲を見回し、ナナが数歩先から彼に気付き振り返っている。ながれを画面の中心に、ナナの顔も分かる距離に置く。転移を示す柔らかな光の粒を少しだけ残し、派手な魔法陣や武器は付けない。次の森の案内場面へつながる。",
+        "feedback": "",
+        "provider": "external-codex",
+        "width": 1920,
+        "height": 1080,
+        "aspectRatio": "1920:1080",
+        "target": "scene",
+        "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+        "state": "adopted",
+        "adoptedFingerprint": "5c9f60ffeff338b9a7264863dda392063b7b0bad9dee358234a5a839b9bcf199",
+        "imageProvenance": "external-generated",
+        "current": true
+      }
+    }
+  ],
+  "nextOffset": 3,
+  "hasMore": true,
+  "preview": {
+    "current": false,
+    "error": ""
+  },
+  "pipes": {
+    "format": "RIGMMaker.WorkspaceConnection",
+    "schemaVersion": 1,
+    "apiVersion": 2,
+    "pid": 24128,
+    "commandPipe": "RIGMMaker.Workspace.24128.{46CD3D5F-8F91-4BE6-AE52-5D28BABA7B15}",
+    "controlPipe": "RIGMMaker.Workspace.24128.{46CD3D5F-8F91-4BE6-AE52-5D28BABA7B15}",
+    "dataRoot": "C:\\Users\\zan12\\Documents\\RIGMMaker",
+    "connectionFile": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Exchange\\workspace-24128.json",
+    "routing": "common-command"
+  }
+}

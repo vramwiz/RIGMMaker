@@ -1,7 +1,7 @@
 ﻿unit RigmScriptTextFrame;
 interface
 uses System.Classes, RigmScriptPageFrame, Vcl.Forms, Vcl.Controls, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.ComCtrls,
-  Winapi.Messages, RigmWizardWorkspace, RigmIconToolbar;
+  Winapi.Messages, RigmWizardWorkspace;
 type
   TRigmScriptMemo = class(TMemo)
   private
@@ -16,11 +16,10 @@ type
   TRigmScriptTextFrame = class(TRigmScriptPageFrame)
   private
     FWorkspace: TRigmWizardWorkspace; FSync: Boolean;
-    FToolbar: TRigmIconToolbar; FParts: array[0..2] of TToolButton;
+    FSections: TTabControl;
     FEditors: array[0..2] of TRigmScriptMemo; FHeading,FGuide: TLabel;
     procedure BeginInput(Sender: TObject);
     procedure EndInput(Sender: TObject);
-    procedure CompleteInput(Sender: TObject);
     procedure SelectSection(Sender: TObject);
     procedure Changed(Sender: TObject);
     procedure UpdateGuide;
@@ -31,7 +30,7 @@ type
     procedure SetActive(Value: Boolean);
   end;
 implementation
-uses System.SysUtils, RigmJson, RigmScriptTextModel, RigmToolbarIcons;
+uses System.SysUtils, RigmJson, RigmScriptTextModel, RigmBufferedControls;
 {$R *.dfm}
 const SectionIds: array[0..2] of string = ('opening','body','closing');
   SectionNames: array[0..2] of string = ('共通の出だし','今回の本文','共通の締め');
@@ -44,16 +43,15 @@ begin if Assigned(FOnBeginInput) then FOnBeginInput(Self); inherited; end;
 constructor TRigmScriptTextFrame.CreateForWorkspace(AOwner: TComponent; Workspace: TRigmWizardWorkspace);
 begin
   inherited Create(AOwner); Align := alClient; FWorkspace := Workspace;
-  FToolbar := TRigmIconToolbar.Create(Self); FToolbar.Parent := Self; FToolbar.Align := alTop; FToolbar.Name := 'ScriptTextToolbar';
-  for var I := 0 to 2 do begin
-    FParts[I] := FToolbar.AddIcon('ScriptTextPart'+I.ToString,SectionNames[I],riEditPreview,0,SelectSection,True); FParts[I].Tag := I;
-  end;
-  FToolbar.AddSeparator; FToolbar.AddIcon('ScriptTextReady','入力内容を確認する',riComplete,0,CompleteInput);
+  FSections := TTabControl.Create(Self); FSections.Parent := Self; FSections.Align := alTop;
+  FSections.Name := 'ScriptTextSections'; FSections.Height := ScaleValue(38); FSections.DoubleBuffered := True;
+  for var SectionName in SectionNames do FSections.Tabs.Add(SectionName);
+  FSections.OnChange := SelectSection;
   FHeading := TRigmScriptLabel.Create(Self); FHeading.Parent := Self; FHeading.Align := alTop; FHeading.AutoSize := False;
   FHeading.Height := ScaleValue(38); FHeading.Font.Size := 16; FHeading.Name := 'ScriptTextHeading';
   FGuide := TRigmScriptLabel.Create(Self); FGuide.Parent := Self; FGuide.Align := alBottom; FGuide.Height := ScaleValue(56);
   FGuide.AutoSize := False; FGuide.WordWrap := True; FGuide.Name := 'ScriptTextGuide';
-  var Body := TPanel.Create(Self); Body.Parent := Self; Body.Align := alClient; Body.Caption := ''; Body.BevelOuter := bvNone; Body.Padding.SetBounds(ScaleValue(16),ScaleValue(8),ScaleValue(16),ScaleValue(8));
+  var Body := TRigmBufferedPanel.Create(Self); Body.Parent := Self; Body.Align := alClient; Body.Caption := ''; Body.BevelOuter := bvNone; Body.Padding.SetBounds(ScaleValue(16),ScaleValue(8),ScaleValue(16),ScaleValue(8));
   for var I := 0 to 2 do begin
     FEditors[I] := TRigmScriptMemo.Create(Self); FEditors[I].Parent := Body; FEditors[I].Align := alClient;
     FEditors[I].Name := 'ScriptText'+I.ToString; FEditors[I].Tag := I; FEditors[I].Font.Name := 'Yu Gothic UI'; FEditors[I].Font.Size := 14;
@@ -66,14 +64,12 @@ destructor TRigmScriptTextFrame.Destroy;
 begin FWorkspace.EndScriptTextEdit; inherited; end;
 procedure TRigmScriptTextFrame.UpdateGuide;
 begin
-  FGuide.Caption := 'Codexはフォーカスや入力操作に関係なく、パイプで現在の台本を取得・変更できます。';
-  FGuide.Caption := FGuide.Caption+#13#10+'戻る・終了・任意の保存で文章を保存します。左の工程リストで保存して作品情報・掘り下げ確認へ進みます。';
+  FGuide.Caption := 'Codexはフォーカスや入力操作に関係なく、パイプで現在の台本を取得・変更できます。'+#13#10+
+    '戻る・終了・任意の保存で文章を保存します。左の工程リストで保存して作品情報・掘り下げ確認へ進みます。';
 end;
 procedure TRigmScriptTextFrame.BeginInput(Sender: TObject);
 begin if FSync then Exit; FWorkspace.BeginScriptTextEdit; UpdateGuide; end;
 procedure TRigmScriptTextFrame.EndInput(Sender: TObject);
-begin FWorkspace.EndScriptTextEdit; UpdateGuide; end;
-procedure TRigmScriptTextFrame.CompleteInput(Sender: TObject);
 begin FWorkspace.EndScriptTextEdit; UpdateGuide; end;
 procedure TRigmScriptTextFrame.Changed(Sender: TObject);
 begin
@@ -83,8 +79,9 @@ begin
 end;
 procedure TRigmScriptTextFrame.SelectSection(Sender: TObject);
 begin
+  if FSync or (FSections.TabIndex<0) then Exit;
   FWorkspace.EndScriptTextEdit;
-  try FWorkspace.SelectScriptSection(SectionIds[TToolButton(Sender).Tag]);
+  try FWorkspace.SelectScriptSection(SectionIds[FSections.TabIndex]);
   except on E: Exception do FGuide.Caption := E.Message; end;
 end;
 procedure TRigmScriptTextFrame.RefreshState;
@@ -95,8 +92,11 @@ begin
     for var I := 0 to 2 do begin
       var Section := ScriptSection(FWorkspace.ScriptDraft,SectionIds[I]); if Section=nil then Continue;
       if NormalizeScriptText(FEditors[I].Text)<>JS(Section,'text') then FEditors[I].Text := JS(Section,'text');
-      FParts[I].Down := Active=SectionIds[I]; FEditors[I].Visible := FParts[I].Down;
-      if FParts[I].Down then FHeading.Caption := '第5段階：'+SectionNames[I]+'  （'+Length(JS(Section,'text')).ToString+'文字）';
+      FEditors[I].Visible := Active=SectionIds[I];
+      if FEditors[I].Visible then begin
+        if FSections.TabIndex<>I then FSections.TabIndex := I;
+        FHeading.Caption := '第5段階：'+SectionNames[I]+'  （'+Length(JS(Section,'text')).ToString+'文字）';
+      end;
     end;
     UpdateGuide;
   finally FSync := False; end;

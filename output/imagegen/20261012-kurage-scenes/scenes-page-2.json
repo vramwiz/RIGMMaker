@@ -1,0 +1,112 @@
+{
+  "count": 14,
+  "backgroundReady": true,
+  "thumbnailReady": false,
+  "thumbnailSourcesReady": false,
+  "allApproved": false,
+  "ready": 0,
+  "pendingRequests": 0,
+  "selectedScene": "{5E691476-DA47-43A5-B7BA-710255AF2212}",
+  "state": "in-progress",
+  "projectId": "{B0D28F94-242A-41D0-A527-882802487812}",
+  "revision": 915,
+  "background": {
+    "id": "common-background",
+    "title": "共通背景画像",
+    "image": "",
+    "description": "",
+    "imagePrompt": "",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 0,
+    "displayMode": "none",
+    "animation": {},
+    "target": "common-background",
+    "optional": true,
+    "ready": true,
+    "imagePath": "",
+    "width": 1920,
+    "height": 1080,
+    "sourceCues": []
+  },
+  "thumbnail": {
+    "id": "thumbnail",
+    "title": "サムネイル",
+    "image": "",
+    "description": "",
+    "imagePrompt": "これまでに作ったシーン画像を組み合わせた、動画の最後に表示するサムネイルを作成。\r\n使用中のキャラクターも必ず使い、見た目を参照素材に合わせる。\r\n「漫画」＋マンガの名前を大きく読みやすいロゴとして配置する。",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 0,
+    "displayMode": "image",
+    "animation": {},
+    "target": "thumbnail",
+    "required": true,
+    "ready": false,
+    "sourcesReady": false,
+    "duration": 10,
+    "imagePath": "",
+    "logoText": "漫画　男子校のくらげ先生"
+  },
+  "rows": [
+    {
+      "id": "{6461CD51-34D1-452D-B494-ABDB00201B0B}",
+      "title": "シーン 5",
+      "image": "",
+      "description": "",
+      "imagePrompt": "",
+      "padding": 0,
+      "imageFeedback": "",
+      "imageApproved": false,
+      "imageApprovalKey": "",
+      "imageEditEpoch": 2,
+      "animation": {},
+      "sceneNumber": 3,
+      "start": 9.916,
+      "duration": 8.37866666666666,
+      "ready": false,
+      "imagePath": "",
+      "sourceCues": [
+        {
+          "cueId": "{B333C8A0-EEC0-421B-A947-D920AE2E2577}",
+          "sourceText": "男子校の養護教諭のくらげ先生"
+        },
+        {
+          "cueId": "{183FCF9F-DE39-4B82-94E3-61505068003A}",
+          "sourceText": "彼女は男子校の中の癒やし"
+        },
+        {
+          "cueId": "{39762D8C-E068-4CE1-A494-24646D6DE70E}",
+          "sourceText": "麗しの花のような存在"
+        },
+        {
+          "cueId": "{03BC6987-8F21-4DA5-BBA0-375E4CF33404}",
+          "sourceText": "そんな美人教諭のところには"
+        }
+      ],
+      "cueCount": 4,
+      "hasMoreCues": false
+    }
+  ],
+  "nextOffset": 3,
+  "hasMore": true,
+  "preview": {
+    "current": false,
+    "error": ""
+  },
+  "pipes": {
+    "format": "RIGMMaker.WorkspaceConnection",
+    "schemaVersion": 1,
+    "apiVersion": 2,
+    "pid": 6936,
+    "commandPipe": "RIGMMaker.Workspace.6936.{61877B53-4826-4DBF-BCEF-0D7B52E58842}",
+    "controlPipe": "RIGMMaker.Workspace.6936.{61877B53-4826-4DBF-BCEF-0D7B52E58842}",
+    "dataRoot": "C:\\Users\\zan12\\Documents\\RIGMMaker",
+    "connectionFile": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Exchange\\workspace-6936.json",
+    "routing": "common-command"
+  }
+}

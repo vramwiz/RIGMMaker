@@ -8,6 +8,7 @@ type
   TRigmPcm = class
   public
     Rate: Integer;
+    StartSample: Int64; // Interactive cue-only audio uses an absolute timeline origin; full mixes start at zero.
     Samples: TArray<SmallInt>;
     SpeechSamples: TArray<SmallInt>; // Separate lip-sync envelope; BGM never drives mouth movement.
     function Duration: Double;
@@ -20,12 +21,44 @@ function CopyCheckedMovieBgm(const Source,Directory: string): string;
 function MixMovieAudio(Project: TRigmMovieProject; AllowStale: Boolean=False): TRigmPcm;
 function MovieAudioStamp(Project: TRigmMovieProject): string;
 function CachedMovieAudio(Project: TRigmMovieProject; AllowStale: Boolean=False): TRigmPcm;
+function PreviewMovieAudio(Project: TRigmMovieProject; Seconds: Double): TRigmPcm; // 呼出側所有。現在のセリフだけを不変PCMキャッシュから取得する。
 function MovieWaveform(Project: TRigmMovieProject; Bins: Integer = 2048): TJSONObject;
 
 implementation
 uses System.Math, System.IOUtils, System.Hash, System.StrUtils, System.Generics.Collections, Winapi.Windows, RigmModel, RigmJson, RigmVoiceEffects, RigmVoiceEffectsDsp, RigmAudioFilePaths;
 
 var CacheLock: TObject; CacheKey: string; CacheSamples,CacheSpeechSamples: TArray<SmallInt>;
+    PreviewAudioLock: TObject; PreviewAudioKey: string; PreviewSamples: TArray<SmallInt>;
+
+function PreviewMovieAudio(Project: TRigmMovieProject; Seconds: Double): TRigmPcm;
+var Local,Start: Double;
+begin
+  Result := nil;
+  var Cue := Project.CueAt(Seconds,Local,Start);
+  if (Cue=nil) or (Cue.AudioSeconds<=0) or (Cue.WaveFile='') then Exit;
+  if not Project.AudioReady(Cue) and not ((Project.Scenes.Count>0) and Project.HasStoredAudio(Cue)) then Exit;
+  var Key := CueEffectPreviewKey(Project,Cue)+'|'+FloatToStr(Cue.AudioSeconds,TFormatSettings.Invariant);
+  TMonitor.Enter(PreviewAudioLock);
+  try
+    if Key<>PreviewAudioKey then begin
+      var Source := TRigmPcm.Load(ResolveMoviePath(Project.FileName,Cue.WaveFile));
+      try
+        if Abs(Source.Duration-Cue.AudioSeconds)>0.002 then raise ERigm.Create('音声ファイルと台本の時間が一致しません: '+Cue.Id);
+        ApplyCueVoiceEffects(Cue,Source.Rate,Source.Samples);
+        var Samples: TArray<SmallInt>; var Count := Ceil(Source.Duration*48000);
+        SetLength(Samples,Count+48000 div 40+1); // full 25 ms envelope window, including trailing silence
+        for var I := 0 to Count-1 do begin
+          var Q := Double(I)*Source.Rate/48000; var A := Min(High(Source.Samples),Floor(Q)); var B := Min(High(Source.Samples),A+1);
+          Samples[I] := Round(Source.Samples[A]+(Source.Samples[B]-Source.Samples[A])*Frac(Q));
+        end;
+        // One cue, at most the model's 600 seconds / 55 MiB. A long movie
+        // never causes a full movie mix to be rebuilt on each display frame.
+        PreviewSamples := Samples; PreviewAudioKey := Key;
+      finally Source.Free; end;
+    end;
+    Result := TRigmPcm.Create; Result.Rate := 48000; Result.StartSample := Round(Start*Result.Rate); Result.Samples := PreviewSamples;
+  finally TMonitor.Exit(PreviewAudioLock); end;
+end;
 
 function MovieAudioStamp(Project: TRigmMovieProject): string;
 var Key: string;
@@ -82,7 +115,7 @@ function TRigmPcm.Envelope(Seconds: Double): Double;
 var First, Last: Integer; Sum: Double;
 begin
   var EnvelopeSamples := Samples; if Length(SpeechSamples)>0 then EnvelopeSamples := SpeechSamples;
-  First := Round(Seconds*Rate); Last := Min(High(EnvelopeSamples),First+Rate div 40); Sum := 0;
+  First := Round(Seconds*Rate)-StartSample; Last := Min(High(EnvelopeSamples),First+Rate div 40); Sum := 0;
   if (First<0) or (First>Last) then Exit(0);
   for var I := First to Last do Sum := Sum+Sqr(EnvelopeSamples[I]/32768.0);
   Result := EnsureRange(Sqrt(Sum/(Last-First+1))*7,0.0,1.0);
@@ -208,7 +241,8 @@ var Position: Double; Source: TRigmPcm;
 begin
   Result := TRigmPcm.Create; Result.Rate := 48000;
   try
-    SetLength(Result.Samples,Ceil(Project.Duration*Result.Rate));
+    var Duration := Project.Duration;
+    SetLength(Result.Samples,Ceil(Duration*Result.Rate));
     for var C in Project.Cues do begin
       Position := Project.CueStart(C);
       if not Project.AudioReady(C) and not (AllowStale and Project.HasStoredAudio(C)) then raise ERigm.Create('音声が未生成か変更されています: '+C.Id);
@@ -229,13 +263,13 @@ begin
       Result.SpeechSamples := Copy(Result.Samples);
       Source := TRigmPcm.Load(ResolveMoviePath(Project.FileName,Project.BgmFile));
       try
-        var Fade := Min(Project.BgmFadeOut,Project.Duration);
+        var Fade := Min(Project.BgmFadeOut,Duration);
         for var I := 0 to High(Result.Samples) do begin
           var Q := Double(I)*Source.Rate/Result.Rate; var A := Int64(Floor(Q)) mod Length(Source.Samples);
           var B := (A+1) mod Length(Source.Samples);
           var Gain := Project.BgmVolume;
-          if (Fade>0) and (I/Result.Rate>Project.Duration-Fade) then
-            Gain := Gain*EnsureRange((Project.Duration-I/Result.Rate)/Fade,0.0,1.0);
+          if (Fade>0) and (I/Result.Rate>Duration-Fade) then
+            Gain := Gain*EnsureRange((Duration-I/Result.Rate)/Fade,0.0,1.0);
           var Value := Source.Samples[A]+(Source.Samples[B]-Source.Samples[A])*Frac(Q);
           Result.Samples[I] := EnsureRange(Round(Result.Samples[I]+Value*Gain),-32768,32767);
         end;
@@ -245,6 +279,7 @@ begin
 end;
 initialization
   CacheLock := TObject.Create;
+  PreviewAudioLock := TObject.Create;
 finalization
-  CacheLock.Free;
+  PreviewAudioLock.Free; CacheLock.Free;
 end.

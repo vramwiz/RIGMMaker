@@ -9,7 +9,7 @@ type
     riSaveAs, riUndo, riRedo, riReset, riEditPreview, riDirect, riBoneOverlay,
     riMeshOverlay, riPng, riPsd, riGroup, riReference, riClassify, riUp, riDown,
     riDelete, riAddBone, riHideBone, riResetBone, riGenerate, riAddVertex,
-    riDeleteVertex, riNew, riOpen, riSample, riRefresh);
+    riDeleteVertex, riNew, riOpen, riSample, riRefresh, riCopy);
 
 procedure BuildRigmToolbarIcons(Images: TCustomImageList; Size: Integer; Color: TColor);
 
@@ -78,6 +78,7 @@ begin
     riAddVertex: begin C.Polygon([Point(S(3), S(4)), Point(S(20), S(4)), Point(S(6), S(21))]); Line(3, 4, 10, 10); Line(20, 4, 10, 10); Line(6, 21, 10, 10); Plus; end;
     riDeleteVertex: begin C.Polygon([Point(S(3), S(4)), Point(S(20), S(4)), Point(S(6), S(21))]); Line(14, 15, 22, 23); Line(14, 23, 22, 15); end;
     riNew: begin Box(3, 2, 17, 21); Plus; end;
+    riCopy: begin Line(5, 17, 2, 17); Line(2, 17, 2, 2); Line(2, 2, 16, 2); Line(16, 2, 16, 5); Box(7, 7, 21, 22); end;
     riRefresh: Refresh;
   end;
 end;

@@ -1,0 +1,112 @@
+{
+  "count": 14,
+  "backgroundReady": true,
+  "thumbnailReady": false,
+  "thumbnailSourcesReady": false,
+  "allApproved": false,
+  "ready": 0,
+  "pendingRequests": 0,
+  "selectedScene": "{5E691476-DA47-43A5-B7BA-710255AF2212}",
+  "state": "in-progress",
+  "projectId": "{B0D28F94-242A-41D0-A527-882802487812}",
+  "revision": 915,
+  "background": {
+    "id": "common-background",
+    "title": "共通背景画像",
+    "image": "",
+    "description": "",
+    "imagePrompt": "",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 0,
+    "displayMode": "none",
+    "animation": {},
+    "target": "common-background",
+    "optional": true,
+    "ready": true,
+    "imagePath": "",
+    "width": 1920,
+    "height": 1080,
+    "sourceCues": []
+  },
+  "thumbnail": {
+    "id": "thumbnail",
+    "title": "サムネイル",
+    "image": "",
+    "description": "",
+    "imagePrompt": "これまでに作ったシーン画像を組み合わせた、動画の最後に表示するサムネイルを作成。\r\n使用中のキャラクターも必ず使い、見た目を参照素材に合わせる。\r\n「漫画」＋マンガの名前を大きく読みやすいロゴとして配置する。",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 0,
+    "displayMode": "image",
+    "animation": {},
+    "target": "thumbnail",
+    "required": true,
+    "ready": false,
+    "sourcesReady": false,
+    "duration": 10,
+    "imagePath": "",
+    "logoText": "漫画　男子校のくらげ先生"
+  },
+  "rows": [
+    {
+      "id": "{39C56B9F-26CB-4D75-AC61-9D12BEA81AEB}",
+      "title": "シーン 11",
+      "image": "",
+      "description": "",
+      "imagePrompt": "",
+      "padding": 0,
+      "imageFeedback": "",
+      "imageApproved": false,
+      "imageApprovalKey": "",
+      "imageEditEpoch": 2,
+      "animation": {},
+      "sceneNumber": 9,
+      "start": 54.636,
+      "duration": 9.28533333333333,
+      "ready": false,
+      "imagePath": "",
+      "sourceCues": [
+        {
+          "cueId": "{E136A359-0B91-442C-8CC3-4431E0378E91}",
+          "sourceText": "へたれと軽く罵ってやりすごす先生"
+        },
+        {
+          "cueId": "{AEA9DE5D-85F1-4BCD-894F-AD8A1423FA69}",
+          "sourceText": "軽くあしらわれてしまう"
+        },
+        {
+          "cueId": "{63D08E5D-A3BA-4A86-826C-00FB7BDDF168}",
+          "sourceText": "主人公は次はどんな手を使って近づこうと策略を練る"
+        },
+        {
+          "cueId": "{3F30D07F-F877-4C97-A43F-1630B2DFA340}",
+          "sourceText": "ここまでは普通なのですが"
+        }
+      ],
+      "cueCount": 4,
+      "hasMoreCues": false
+    }
+  ],
+  "nextOffset": 9,
+  "hasMore": true,
+  "preview": {
+    "current": false,
+    "error": ""
+  },
+  "pipes": {
+    "format": "RIGMMaker.WorkspaceConnection",
+    "schemaVersion": 1,
+    "apiVersion": 2,
+    "pid": 6936,
+    "commandPipe": "RIGMMaker.Workspace.6936.{61877B53-4826-4DBF-BCEF-0D7B52E58842}",
+    "controlPipe": "RIGMMaker.Workspace.6936.{61877B53-4826-4DBF-BCEF-0D7B52E58842}",
+    "dataRoot": "C:\\Users\\zan12\\Documents\\RIGMMaker",
+    "connectionFile": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Exchange\\workspace-6936.json",
+    "routing": "common-command"
+  }
+}

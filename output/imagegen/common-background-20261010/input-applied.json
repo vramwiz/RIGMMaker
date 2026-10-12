@@ -1,0 +1,338 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "data": {
+    "openDocuments": 1,
+    "page": "home",
+    "pageTitle": "ホーム",
+    "dataRoot": "C:\\Users\\zan12\\Documents\\RIGMMaker",
+    "movie": {
+      "projectId": "{BD646DEF-9729-4387-921F-51C28B232411}",
+      "revision": 1,
+      "editSession": {
+        "locked": false,
+        "state": "",
+        "epoch": 0
+      },
+      "title": "新しい解説動画",
+      "fileName": "",
+      "modified": false,
+      "duration": 0,
+      "time": 0,
+      "cueCount": 0,
+      "retryPending": false,
+      "busy": false,
+      "playing": false,
+      "undoCount": 0,
+      "redoCount": 0,
+      "workflow": {
+        "needs": [
+          {
+            "code": "script_empty",
+            "message": "台本を作成・調整してください。",
+            "nextAction": "movie-import-script",
+            "blocking": true
+          }
+        ],
+        "projectId": "{BD646DEF-9729-4387-921F-51C28B232411}",
+        "revision": 1,
+        "currentStage": "script",
+        "title": "台本",
+        "nextStage": "setup",
+        "automaticAdvance": false,
+        "requiresHumanConfirmation": false,
+        "busy": false,
+        "canBack": false,
+        "runCommand": "movie-workflow-run",
+        "nextCommand": "movie-workflow-next",
+        "backCommand": "movie-workflow-back",
+        "rejectedJobId": "",
+        "canRun": true,
+        "ready": false,
+        "canNext": false,
+        "allowedCommands": [
+          "movie-update-project",
+          "movie-update-cue",
+          "movie-update-speaker",
+          "movie-diagnostics-refresh",
+          "movie-workflow-run"
+        ],
+        "regenerate": [
+          "audio",
+          "preview",
+          "export"
+        ],
+        "results": {
+          "audioCurrent": false,
+          "previewCurrent": false,
+          "videoCurrent": false,
+          "previewPath": "",
+          "videoPath": ""
+        },
+        "message": "台本: 必要な編集・生成を行ってください。"
+      }
+    },
+    "script": {
+      "hasProject": true,
+      "implementedStage": "closing-editor",
+      "placementEditing": false,
+      "textEditing": false,
+      "scriptConfirmed": true,
+      "projectId": "{31E80E70-1F15-4E59-A1D6-B8219558F973}",
+      "revision": 564,
+      "researchReady": false,
+      "title": "架空のアニメの話",
+      "savedTitle": "架空のアニメの話",
+      "scriptType": "",
+      "scriptTypeName": "未設定",
+      "scriptTypes": [
+        {
+          "id": "anime-review",
+          "name": "アニメ批評"
+        },
+        {
+          "id": "manga-introduction",
+          "name": "漫画紹介"
+        }
+      ],
+      "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{31E80E70-1F15-4E59-A1D6-B8219558F973}\\project.rigmovie",
+      "modified": false,
+      "resumeStage": "text",
+      "castingReady": true,
+      "layoutGuide": {
+        "choice": "theme",
+        "coordinateSpace": "ratio",
+        "referenceWidth": 1920,
+        "referenceHeight": 1080,
+        "videoWidth": 1920,
+        "videoHeight": 1080,
+        "hasCommonBackground": true,
+        "image": {
+          "left": 0.24479167163372,
+          "top": 0.0925925895571709,
+          "right": 0.755208313465118,
+          "bottom": 0.601851880550385
+        },
+        "description": {
+          "left": 0.260416656732559,
+          "top": 0.620370388031006,
+          "right": 0.739583313465118,
+          "bottom": 0.740740716457367
+        },
+        "subtitle": {
+          "left": 0.020833333954215,
+          "top": 0.791666686534882,
+          "right": 0.979166686534882,
+          "bottom": 0.967592597007751
+        },
+        "leftCharacters": {
+          "left": 0.020833333954215,
+          "top": 0.16666667163372,
+          "right": 0.22395832836628,
+          "bottom": 0.759259283542633
+        },
+        "rightCharacters": {
+          "left": 0.776041686534882,
+          "top": 0.16666667163372,
+          "right": 0.979166686534882,
+          "bottom": 0.759259283542633
+        }
+      },
+      "wizard": {
+        "format": "RIGMMaker.ScriptWizard",
+        "schemaVersion": 1,
+        "createdAt": "2026-10-07T09:06:51.408Z",
+        "titleStatus": "complete",
+        "selectedCharacters": [
+          {
+            "path": "RIGM\\character-904B63CF-20D7-4FB4-B8C0-11CB570949B5.rigm",
+            "name": "新しいキャラクター",
+            "renderFormat": "rigm",
+            "voiceBindingStatus": "unassigned"
+          }
+        ],
+        "layoutChoice": "theme",
+        "backgroundTone": "dark",
+        "charactersStatus": "complete",
+        "voiceEffects": {
+          "format": "RIGMMaker.ScriptVoiceEffects",
+          "schemaVersion": 1,
+          "selectedCue": "{C65D75B7-9556-4803-9CC9-14F957818B8B}"
+        },
+        "flowVersion": 2,
+        "summaryChoice": "none",
+        "reviewStatus": "in-progress",
+        "textStatus": "in-progress",
+        "summaryStatus": "complete",
+        "closingStatus": "complete",
+        "scriptConfirmedFingerprint": "0ffdbc122011df82dde097fa03057a373f31ff1414e0d42a5d67588a4691c17c",
+        "script-confirmStatus": "complete",
+        "subtitlesStatus": "complete",
+        "voiceStatus": "complete",
+        "voice-effectsStatus": "complete",
+        "titleInput": "架空のアニメの話",
+        "scene-assignmentStatus": "complete",
+        "placements": [
+          {
+            "path": "RIGM\\character-904B63CF-20D7-4FB4-B8C0-11CB570949B5.rigm",
+            "flipX": false,
+            "x": 0.791666666666667,
+            "y": 0.259259259259259,
+            "width": 0.1828125,
+            "height": 0.4875
+          }
+        ],
+        "placementSelected": "RIGM\\character-904B63CF-20D7-4FB4-B8C0-11CB570949B5.rigm",
+        "layoutStatus": "complete",
+        "furthestStage": "editor",
+        "placementStatus": "complete",
+        "scenesStatus": "in-progress",
+        "updatedAt": "2026-10-10T07:06:19.734Z",
+        "summaryData": {
+          "status": "draft",
+          "materialized": false,
+          "axisCount": 3
+        },
+        "scriptText": {
+          "format": "RIGMMaker.ScriptText",
+          "schemaVersion": 1,
+          "activeSection": "body",
+          "sections": [
+            {
+              "id": "opening",
+              "scope": "shared",
+              "length": 37
+            },
+            {
+              "id": "body",
+              "scope": "episode",
+              "length": 375
+            },
+            {
+              "id": "closing",
+              "scope": "shared",
+              "length": 21
+            }
+          ]
+        },
+        "subtitles": {
+          "format": "RIGMMaker.ScriptSubtitles",
+          "selectedCue": "{D7C806BE-5496-4D74-948A-F8170BF2D522}",
+          "count": 19,
+          "status": "complete"
+        },
+        "casting": {
+          "state": "requested",
+          "requestId": "{A7799ADA-E48B-4228-A4BB-0E8A13D71AF8}",
+          "fingerprint": "662a239a6a3639cb6994718c9b1e472d32a4b501b7824d8200092972e78217a7",
+          "selectedCue": "{A42D61D8-9C52-472A-A9F9-965D6E4CFCA0}",
+          "roles": [
+            {
+              "number": 1,
+              "path": "RIGM\\character-904B63CF-20D7-4FB4-B8C0-11CB570949B5.rigm",
+              "name": "新しいキャラクター",
+              "speakerId": "script-{66A57F90-415A-4121-B785-D972AC2F15E2}",
+              "active": true
+            }
+          ],
+          "count": 19,
+          "pending": 0,
+          "unassigned": 0,
+          "usedRoles": [
+            1
+          ],
+          "missingVoices": 0,
+          "rolesComplete": true,
+          "voicesComplete": true
+        },
+        "castingStatus": "complete",
+        "review": {
+          "requestId": "{172ECBA8-482C-4A8D-8682-8A10F6CACD08}",
+          "fingerprint": "28a1a7594525cab5a9e449d8a03f3b357315e5abef50f0a8519c3e739842fad8",
+          "state": "stale",
+          "count": 0,
+          "pending": 0,
+          "held": 0,
+          "stale": 0
+        },
+        "research": {
+          "pageId": "script-research",
+          "stage": "review",
+          "scriptType": "",
+          "scriptTypeName": "未設定",
+          "incompleteReason": "作品候補と概要を確認し、「この作品で正しい」にチェックしてください。",
+          "researchReady": false,
+          "advanceBlockedReason": "",
+          "canAdvance": true,
+          "initialized": true,
+          "researchId": "{5CFCEFBB-E693-4664-B0DC-F8F391468F5F}",
+          "title": "架空のアニメの話",
+          "selectedCandidateId": "",
+          "expandedElementId": "",
+          "humanConfirmed": false,
+          "definitionsReady": false,
+          "phase": "identify",
+          "candidateCount": 0,
+          "defaultCount": 0,
+          "extraCount": 0,
+          "confirmedCount": 0
+        },
+        "voice": {
+          "engineUrl": "http://127.0.0.1:50021",
+          "selectedCue": "{734343DF-D66E-4097-B1B7-1B8ABC2CEDDA}",
+          "count": 19,
+          "ready": 19,
+          "stored": 19,
+          "unbound": 0,
+          "heard": 19,
+          "state": "complete",
+          "playing": false,
+          "continuous": false,
+          "playingCue": "",
+          "sequenceStatus": "",
+          "sequencePhase": "",
+          "sequenceIndex": 1,
+          "sequenceTotal": 0,
+          "busy": false,
+          "error": "",
+          "catalogCount": 0,
+          "catalogUrl": ""
+        },
+        "scenes": {
+          "count": 7,
+          "backgroundReady": false,
+          "allApproved": false,
+          "ready": 7,
+          "pendingRequests": 0,
+          "selectedScene": "common-background",
+          "state": "in-progress"
+        },
+        "closingData": {
+          "status": "complete"
+        },
+        "stage": "scenes"
+      },
+      "subtitlesReady": true,
+      "voiceReady": true,
+      "assignmentReady": true,
+      "scenesReady": false,
+      "canAdvance": false,
+      "canConfirmCasting": false,
+      "canConfirmSubtitles": false,
+      "canConfirmVoice": false,
+      "advanceBlockedReason": "使用する共通背景・シーン画像を用意し、確定チェックを確認してください。"
+    },
+    "pipes": {
+      "format": "RIGMMaker.WorkspaceConnection",
+      "schemaVersion": 1,
+      "apiVersion": 2,
+      "pid": 13184,
+      "commandPipe": "RIGMMaker.Workspace.13184.{CDE39612-DE34-4031-9BFB-ED1B27B200E8}",
+      "controlPipe": "RIGMMaker.Workspace.13184.{CDE39612-DE34-4031-9BFB-ED1B27B200E8}",
+      "dataRoot": "C:\\Users\\zan12\\Documents\\RIGMMaker",
+      "connectionFile": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Exchange\\workspace-13184.json",
+      "routing": "common-command"
+    }
+  },
+  "requestId": "3692d08b-7f55-4222-b1b7-90695cb2b5e5"
+}

@@ -1,0 +1,9 @@
+{
+  "prompt": "Use case: stylized-concept\nAsset type: plain neutral patterned common background for a video, full-bleed opaque bitmap.\nPrimary request: テーマに関係ない、単なる柄に変更。人物は描かない。\nCreate ONLY a restrained abstract repeating geometric pattern across the entire frame. Deep neutral charcoal-gray base, slightly lighter gray ultra-fine diagonal lines forming a regular small diamond lattice. Subtle matte paper-like grain, low contrast, flat even lighting. Quiet, understated, visually clean, suitable behind video captions and foreground illustrations. The pattern is uniform across the whole image, with no focal subject, no scene, no vignette, no dramatic gradient and no 3D perspective.\nComposition: edge-to-edge evenly repeated small diamonds and thin lines, 16:9 landscape, target 1920x1080.\nMandatory constraints: absolutely no people, no faces, no silhouettes, no human reflections, no rooms, furniture, food, drinks, buildings, animals, armor, weapons, fantasy motifs, stars, symbols or other recognizable thematic objects. No letters, numbers, text, logos, speech bubbles or watermark. Do not depict the previous manga story or apartment. This is purely a simple neutral geometric decorative pattern.",
+  "originalPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a1283c-474e-71f1-8075-a6a54d55f396\\exec-5cb89944-ec96-4d39-9fff-1ef8d99cbb14.png",
+  "references": [],
+  "mode": "built-in imagegen",
+  "filename": "common-background-neutral-pattern-v4.png",
+  "userCorrection": "テーマに関係ない　単なる柄に変更",
+  "editIntent": "Replace common background with a neutral abstract geometric pattern; no people or recognizable subjects."
+}

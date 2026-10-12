@@ -1,0 +1,112 @@
+{
+  "count": 11,
+  "backgroundReady": true,
+  "thumbnailReady": false,
+  "thumbnailSourcesReady": false,
+  "allApproved": false,
+  "ready": 0,
+  "pendingRequests": 0,
+  "selectedScene": "thumbnail",
+  "state": "in-progress",
+  "projectId": "{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}",
+  "revision": 1189,
+  "background": {
+    "id": "common-background",
+    "title": "共通背景画像",
+    "image": "",
+    "description": "",
+    "imagePrompt": "",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 0,
+    "displayMode": "none",
+    "animation": {},
+    "target": "common-background",
+    "optional": true,
+    "ready": true,
+    "imagePath": "",
+    "width": 1920,
+    "height": 1080,
+    "sourceCues": []
+  },
+  "thumbnail": {
+    "id": "thumbnail",
+    "title": "サムネイル",
+    "image": "",
+    "description": "",
+    "imagePrompt": "これまでに作ったシーン画像を組み合わせた、動画の最後に表示するサムネイルを作成。\r\n使用中のキャラクターも必ず使い、見た目を参照素材に合わせる。\r\n「漫画」＋マンガの名前を大きく読みやすいロゴとして配置する。",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 0,
+    "displayMode": "image",
+    "animation": {},
+    "target": "thumbnail",
+    "required": true,
+    "ready": false,
+    "sourcesReady": false,
+    "duration": 10,
+    "imagePath": "",
+    "logoText": "漫画　異世界「嘘」ガイド"
+  },
+  "rows": [
+    {
+      "id": "{2781DBF7-6D04-448E-98BB-9CF729D2F70B}",
+      "title": "シーン 9",
+      "image": "",
+      "description": "",
+      "imagePrompt": "",
+      "padding": 0,
+      "imageFeedback": "",
+      "imageApproved": false,
+      "imageApprovalKey": "",
+      "imageEditEpoch": 2,
+      "animation": {},
+      "sceneNumber": 8,
+      "start": 61.84,
+      "duration": 12.784,
+      "ready": false,
+      "imagePath": "",
+      "sourceCues": [
+        {
+          "cueId": "{D75B1C1D-CBD5-4F1B-9290-89224F402B68}",
+          "sourceText": "ナナは自分の都合のよいウソはつくための説明をしますが"
+        },
+        {
+          "cueId": "{4A48CDAA-A703-43F9-B9F3-A41AD0CD88FB}",
+          "sourceText": "そもそも異世界の常識が日本人にとっては非常識なので"
+        },
+        {
+          "cueId": "{B3030889-72E4-410D-83DC-075ADDE1EF08}",
+          "sourceText": "ウソなのか本当なのかがわからなくなります"
+        },
+        {
+          "cueId": "{6B8025F5-3C82-4367-8488-F3D69633BD12}",
+          "sourceText": "まあそんなむずかしいことを考えなくてもいいんですけどね"
+        }
+      ],
+      "cueCount": 4,
+      "hasMoreCues": false
+    }
+  ],
+  "nextOffset": 8,
+  "hasMore": true,
+  "preview": {
+    "current": false,
+    "error": ""
+  },
+  "pipes": {
+    "format": "RIGMMaker.WorkspaceConnection",
+    "schemaVersion": 1,
+    "apiVersion": 2,
+    "pid": 24128,
+    "commandPipe": "RIGMMaker.Workspace.24128.{46CD3D5F-8F91-4BE6-AE52-5D28BABA7B15}",
+    "controlPipe": "RIGMMaker.Workspace.24128.{46CD3D5F-8F91-4BE6-AE52-5D28BABA7B15}",
+    "dataRoot": "C:\\Users\\zan12\\Documents\\RIGMMaker",
+    "connectionFile": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Exchange\\workspace-24128.json",
+    "routing": "common-command"
+  }
+}

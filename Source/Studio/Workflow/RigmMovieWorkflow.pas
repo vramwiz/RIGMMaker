@@ -38,7 +38,7 @@ function MovieRenderKey(Project: TRigmMovieProject): string;
 begin
   var O := Project.Json;
   try
-    for var Key in ['projectId','revision','workflow','engineUrl','ffmpeg','outputTarget'] do O.RemovePair(Key).Free;
+    for var Key in ['projectId','revision','workflow','engineUrl','ffmpeg','outputTarget','posting'] do O.RemovePair(Key).Free;
     FileValue(O,'character'); if O.GetValue('bgm')<>nil then FileValue(JO(O,'bgm'),'file');
     if O.GetValue('themeBackground')<>nil then FileValue(O,'themeBackground');
     if O.GetValue('characters')<>nil then for var V in JA(O,'characters') do begin
@@ -49,6 +49,8 @@ begin
         for var Frame in JA(TJSONObject(Pair.JsonValue),'frames') do FileValue(TJSONObject(Frame),'image');
     end;
     if O.GetValue('scenes')<>nil then for var V in JA(O,'scenes') do FileValue(TJSONObject(V),'image');
+    if O.GetValue('thumbnail')<>nil then FileValue(JO(O,'thumbnail'),'image');
+    if O.GetValue('endCards')<>nil then for var V in JA(O,'endCards') do FileValue(TJSONObject(V),'image');
     for var V in JA(O,'cues') do begin
       var Cue := TJSONObject(V); for var Key in ['waveFile','labFile','background'] do FileValue(Cue,Key);
     end;

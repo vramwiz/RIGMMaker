@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "data": {
+    "count": 14,
+    "backgroundReady": false,
+    "allApproved": false,
+    "ready": 0,
+    "pendingRequests": 0,
+    "selectedScene": "{15110FE5-0453-4C73-87EF-EA88E7B0F2F2}",
+    "state": "in-progress",
+    "projectId": "{C36C2A85-DD8A-4DDE-8A7D-D5072CF41A98}",
+    "revision": 1482,
+    "background": {
+      "id": "common-background",
+      "title": "共通背景画像",
+      "image": "",
+      "description": "",
+      "imagePrompt": "マンガの紹介用の背景、異世界から来た女騎士が男性に日本料理を勧められて美味しそうに食べる",
+      "padding": 0,
+      "imageFeedback": "",
+      "imageApproved": false,
+      "imageApprovalKey": "",
+      "imageEditEpoch": 0,
+      "displayMode": "image",
+      "animation": {},
+      "target": "common-background",
+      "optional": true,
+      "ready": false,
+      "imagePath": "",
+      "width": 1920,
+      "height": 1080,
+      "sourceCues": []
+    },
+    "rows": [
+      {
+        "id": "{EB1CAB47-7C53-433A-B2F0-DCD094C6F99D}",
+        "title": "ほかにも焼酎と焼き牡蠣 ",
+        "image": "",
+        "description": "",
+        "imagePrompt": "ほかにも焼酎と焼き牡蠣 ",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 2,
+        "displayMode": "image",
+        "animation": {},
+        "sceneNumber": 8,
+        "start": 56.3413333333333,
+        "duration": 8.55866666666667,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{D4A0527C-D30E-442B-AA00-8B9ADD7C6131}",
+            "sourceText": "ほかにも焼酎と焼き牡蠣"
+          },
+          {
+            "cueId": "{B13167C9-CF40-4CB2-9F77-CEF65F06DFD6}",
+            "sourceText": "日本酒でもあうと思うけどあえて焼酎"
+          },
+          {
+            "cueId": "{0EE020B0-6EE3-46C4-93D7-D6A5C60964DA}",
+            "sourceText": "登場人物としては本当に読者の要望通りにキャラが増えていく"
+          }
+        ],
+        "cueCount": 3,
+        "hasMoreCues": false
+      }
+    ],
+    "nextOffset": 8,
+    "hasMore": true,
+    "preview": {
+      "current": false,
+      "error": ""
+    },
+    "pipes": {
+      "format": "RIGMMaker.WorkspaceConnection",
+      "schemaVersion": 1,
+      "apiVersion": 2,
+      "pid": 13364,
+      "commandPipe": "RIGMMaker.Workspace.13364.{398A9234-BF79-455C-9A11-D0E50739806F}",
+      "controlPipe": "RIGMMaker.Workspace.13364.{398A9234-BF79-455C-9A11-D0E50739806F}",
+      "dataRoot": "C:\\Users\\zan12\\Documents\\RIGMMaker",
+      "connectionFile": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Exchange\\workspace-13364.json",
+      "routing": "common-command"
+    }
+  },
+  "requestId": "3b2ea7c5-04ee-4e02-a28b-aae10aed152d"
+}

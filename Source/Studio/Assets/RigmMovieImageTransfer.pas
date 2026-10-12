@@ -278,7 +278,7 @@ end;
 
 function MovieImageTransferSchema: TJSONObject;
 begin
-  Result := ParseObject('{"image-transfer-begin":{"sceneId":"existing scene","byteCount":"1..33554432","sha256":"64 hex characters","mimeType":"image/png"},'+
+  Result := ParseObject('{"image-transfer-begin":{"sceneId":"existing scene, common-background or thumbnail","byteCount":"1..33554432","sha256":"64 hex characters","mimeType":"image/png"},'+
     '"image-transfer-chunk":{"transferId":"returned ID","offset":"next accepted byte offset","data":"canonical base64; at most 16384 decoded bytes"},'+
     '"image-transfer-finish":{"transferId":"ID; starts asynchronous hash/decode/publication"},'+
     '"image-transfer-status":{"transferId":"ID; state, acceptedBytes, receivedBytes, nextOffset, path"},'+
@@ -294,8 +294,9 @@ end;
 
 function TransferSceneKey(Project: TRigmMovieProject; const Id: string): string;
 begin
-  var S := Project.Scene(Id); if S=nil then raise ERigm.Create('Scene is missing'); var O := S.Json;
+  var S := Project.ImageTarget(Id); if S=nil then raise ERigm.Create('Scene is missing'); var O := S.Json;
   try
+    O.RemovePair('title').Free; // 動画表示名だけの変更では進行中の画像転送を失効させない。
     if S.Image<>'' then begin var Path := ResolveMoviePath(Project.FileName,S.Image); if FileExists(Path) then PsdJson.Put(O,'image','sha256:'+CheckedMovieImageHash(Path)); end;
     var A := TJSONArray.Create; O.AddPair('cues',A); for var C in Project.Cues do if C.Scene=Id then begin var V := TJSONObject.Create; V.AddPair('id',C.Id); V.AddPair('text',C.Text); A.AddElement(V); end;
     Result := THashSHA2.GetHashString(O.ToJSON);
@@ -313,8 +314,8 @@ begin
   for var Key in ['path','fileName','directory','outputPath'] do
     if Args.GetValue(Key)<>nil then raise ERigm.Create('Image transfer destination is derived from the project; paths are not accepted');
   FScene := JS(Args,'sceneId');
-  if Project.Scene(FScene)=nil then raise ERigm.Create('Image transfer scene does not exist');
-  if Project.Scene(FScene).ImageApproved then raise ERigm.Create('Approved scene image is locked');
+  if Project.ImageTarget(FScene)=nil then raise ERigm.Create('Image transfer scene does not exist');
+  if Project.ImageTarget(FScene).ImageApproved then raise ERigm.Create('Approved scene image is locked');
   FSceneKey := TransferSceneKey(Project,FScene);
   FProject := Project.Id; FProjectFile := Project.FileName;
   FId := TGUID.NewGuid.ToString.Trim(['{','}']);
@@ -478,6 +479,7 @@ begin
       TMonitor.Enter(FLock); try FState := 'validating'; finally TMonitor.Exit(FLock); end;
       FreeAndNil(Stream); CheckCancel;
       if not SameText(Hash.HashAsString,FHash) then raise ERigm.Create('Image SHA-256 does not match the declared digest');
+      Stream := TFileStream.Create(FStage,fmOpenRead or fmShareDenyWrite);
       ImageHeader(Stream,'.png'); CheckCancel; var Image := TPngImage.Create; Image.CheckCRC := True;
       try Image.LoadFromStream(Stream); FWidth := Image.Width; FHeight := Image.Height; finally Image.Free; end;
       FreeAndNil(Stream); CheckCancel; Publish;
@@ -512,7 +514,7 @@ begin
   TMonitor.Enter(FLock);
   try
     if (FProject<>Project.Id) or not SameText(FProjectFile,Project.FileName) then raise ERigm.Create('Image transfer belongs to another project or save location');
-    if (Project.Scene(FScene)=nil) or Project.Scene(FScene).ImageApproved then raise ERigm.Create('Scene was removed or approved before adoption');
+    if (Project.ImageTarget(FScene)=nil) or Project.ImageTarget(FScene).ImageApproved then raise ERigm.Create('Scene was removed or approved before adoption');
     if FSceneKey<>TransferSceneKey(Project,FScene) then raise ERigm.Create('Scene context changed before image adoption');
     if FState<>'ready' then raise ERigm.Create('Image transfer is not ready for adoption');
     if FAdopted then raise ERigm.Create('Image transfer was already adopted; undo does not silently re-adopt it');

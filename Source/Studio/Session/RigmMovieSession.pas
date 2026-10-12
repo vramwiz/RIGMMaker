@@ -11,10 +11,12 @@ type
     FProject: TRigmMovieProject;
     FImageTransfers: TRigmImageTransfers;
     FJob: TRigmMovieJob;
+    FJobAcceptRevision: Integer; // 投稿文だけの変更を許容する回収先の版。ワーカーのsnapshotは変更しない。
     FDiagnosticJob: TRigmMovieJob;
     FDiagnostics: TJSONObject;
     FDiagnosticCollected: Boolean;
     FPreviewRevision: Integer;
+    FPreviewKeyTick: UInt64; // 保存素材の外部更新は自動再生中も1秒以内に再照合する。
     FPreviewRenderKey,FRejectedJobId: string;
     FCollected: Boolean;
     FUndo,FRedo: TObjectList<TRigmMovieProject>;
@@ -29,6 +31,7 @@ type
     FResumeCue: string;
     FLastKind,FLastOutput: string;
     FLastTime: Double;
+    FLastOverwrite: Boolean;
     FPlaying,FRetryPending,FAutomaticPreview: Boolean;
     FOnChanged: TNotifyEvent;
     FProductions: TObjectDictionary<string,TJSONObject>;
@@ -45,7 +48,9 @@ type
     procedure CollectProduction(JobStatus: TJSONObject);
     procedure RequireRevision(Args: TJSONObject);
     procedure Commit(Project: TRigmMovieProject);
-    function StartJob(const Kind,Output: string; Seconds: Double): TJSONObject;
+    procedure RememberMp4Target(const Path: string); // MP4開始前に出力先をフルパス化し、既存の台本へ原子保存する。
+    function StartJob(const Kind,Output: string; Seconds: Double; AllowOverwrite: Boolean=False;
+      PreviewWidth: Integer=0; PreviewHeight: Integer=0): TJSONObject;
     function JobStatus: TJSONObject;
     function Timeline: TJSONObject;
     function Preparation(const OutputPath: string=''): TJSONObject;
@@ -54,8 +59,11 @@ type
   public
     constructor Create;
     destructor Destroy; override;
+    // 制作命令を実行する。MP4出力は開始前に出力先と適用済み台本を保存する。Argsは借用、結果は呼出側所有。
     function Execute(const Command: string; Args: TJSONObject): TJSONObject;
-    function PreviewFrame(Seconds: Double): TJSONObject;
+    function PreviewFrame(Seconds: Double; MaxWidth: Integer=0; MaxHeight: Integer=0): TJSONObject;
+    procedure SeekTo(Seconds: Double); // GUIの再生時計。作品全体の診断やJSON生成を行わない。
+    function TransportStatus: TJSONObject; // 再生・ジョブ表示用。工程診断はStatusで明示取得する。
     procedure AdoptImage(const SceneId,Path: string; Theme: Boolean=False);
     function Status: TJSONObject;
     procedure Poll;
@@ -75,7 +83,7 @@ type
 
 implementation
 uses System.Math, System.IOUtils, System.StrUtils, RigmJson, RigmModel, RigmMovieAudio,
-  RigmMovieOutput, RigmMoviePreparation, RigmMovieProduction, RigmMovieWorkflow, RigmAppSettings, RigmMovieCompositionCommands, RigmMovieComposition, RigmMovieWorkspace, RigmVoiceEffects, Winapi.Windows;
+  RigmMovieOutput, RigmMoviePreparation, RigmMovieProduction, RigmMovieWorkflow, RigmAppSettings, RigmMovieCompositionCommands, RigmMovieComposition, RigmMovieWorkspace, RigmVoiceEffects, Winapi.Windows, RigmMoviePosting, RigmScriptThumbnailModel;
 
 constructor TRigmMovieSession.Create;
 begin
@@ -105,6 +113,22 @@ begin
 end;
 procedure GuardApprovedSceneUpdates(Current,Next: TRigmMovieProject);
 begin
+  if Current.Thumbnail.ImageApproved then begin
+    var A := Current.Thumbnail; var B := Next.Thumbnail;
+    if not B.ImageApproved or (A.ImageEditEpoch<>B.ImageEditEpoch) or (A.ImageApprovalKey<>B.ImageApprovalKey) or
+      (A.ImagePrompt<>B.ImagePrompt) or (A.ImageFeedback<>B.ImageFeedback) or
+      not SameText(ResolveMoviePath(Current.FileName,A.Image),ResolveMoviePath(Next.FileName,B.Image)) then
+      raise ERigm.Create('確定済みサムネイルは画像工程で確定を解除してから変更してください。');
+  end;
+  if Current.CommonBackground.ImageApproved then begin
+    var Existing := Current.ImageTarget(RigmCommonBackgroundId); var Imported := Next.ImageTarget(RigmCommonBackgroundId);
+    if not Imported.ImageApproved or (Imported.ImageApprovalKey<>Existing.ImageApprovalKey) or
+      (Imported.ImageEditEpoch<>Existing.ImageEditEpoch) or (Imported.ImagePrompt<>Existing.ImagePrompt) or
+      (Imported.ImageFeedback<>Existing.ImageFeedback) or (Imported.Description<>Existing.Description) or
+      (Imported.DisplayMode<>Existing.DisplayMode) or (Imported.DescriptionPosition<>Existing.DescriptionPosition) or
+      not SameText(ResolveMoviePath(Next.FileName,Imported.Image),ResolveMoviePath(Current.FileName,Existing.Image)) then
+      raise ERigm.Create('確定済みの共通背景は変更できません。画像工程の確定チェックを外してください。');
+  end;
   // Every pipe/model commit shares this guard. Only the trusted image checkbox uses SetProject to unlock.
   for var Existing in Current.Scenes do if Existing.ImageApproved then begin
     var Imported := Next.Scene(Existing.Id); if Imported=nil then Continue;
@@ -166,6 +190,11 @@ begin
   AddN(Result,'epoch',FEditEpoch); if FEditToken<>'' then AddN(Result,'leaseRemainingMs',Max(0,Int64(FEditDeadline)-Int64(GetTickCount64)));
 end;
 function TRigmMovieSession.Status: TJSONObject;
+begin
+  Result := TransportStatus;
+  Result.AddPair('workflow',WorkflowStatus);
+end;
+function TRigmMovieSession.TransportStatus: TJSONObject;
 var Job: TJSONObject;
 begin
   Job := JobStatus;
@@ -176,8 +205,9 @@ begin
   AddB(Result,'retryPending',FRetryPending); AddB(Result,'busy',Busy); AddB(Result,'playing',FPlaying); AddN(Result,'undoCount',FUndo.Count); AddN(Result,'redoCount',FRedo.Count);
   if FJob<>nil then Result.AddPair('job',Job) else Job.Free;
   if FProductionKey<>'' then Result.AddPair('production',ProductionStatus(FProductionKey));
-  Result.AddPair('workflow',WorkflowStatus);
 end;
+procedure TRigmMovieSession.SeekTo(Seconds: Double);
+begin FTime := EnsureRange(Seconds,0.0,FProject.Duration); end;
 function TRigmMovieSession.JobStatus: TJSONObject;
 begin
   if FJob=nil then Exit(ParseObject('{"state":"none","done":true}'));
@@ -224,7 +254,7 @@ begin
   O := FJob.Status;
   try
     // A finished snapshot must never replace edits made after it started.
-    if (FJob.Project.Id<>FProject.Id) or (FJob.Project.Revision<>FProject.Revision) then begin
+    if (FJob.Project.Id<>FProject.Id) or (FJobAcceptRevision<>FProject.Revision) then begin
       FRejectedJobId := FJob.Id; FRetryPending := False;
       if Assigned(FOnChanged) then FOnChanged(Self);
       Exit;
@@ -254,10 +284,15 @@ begin
       FWaveform.Free; FWaveform := ParseObject(FJob.Catalog); AddN(FWaveform,'revision',FProject.Revision);
     end;
     if MatchText(FJob.Kind,['preview','production']) and (JS(O,'state')='succeeded') and (FJob.Project.Id=FProject.Id) and
-      ((FJob.Kind='production') or (FJob.Project.Revision=FProject.Revision)) then begin
+      ((FJob.Kind='production') or (FJobAcceptRevision=FProject.Revision)) then begin
       FFrame.Free; FFrame := FJob.TakeFrame; FFrameTime := FJob.Seconds;
+      // Automatic display frames share one revision. Hashing every referenced
+      // material for each animation frame needlessly blocks the UI thread.
+      if not FAutomaticPreview or (FPreviewRevision<>FProject.Revision) or (FPreviewRenderKey='') or
+        (GetTickCount64-FPreviewKeyTick>=1000) then begin
+        FPreviewRenderKey := MovieRenderKey(FProject); FPreviewKeyTick := GetTickCount64;
+      end;
       FPreviewRevision := FProject.Revision;
-      FPreviewRenderKey := MovieRenderKey(FProject);
       var PreviewPath := FJob.Output;
       if FJob.Kind='production' then PreviewPath := JS(JO(JO(O,'production'),'result'),'previewPath');
       if (PreviewPath<>'') and FileExists(PreviewPath) then begin
@@ -281,7 +316,7 @@ begin
     if FJob.Kind='production' then CollectProduction(O);
     if Assigned(FOnChanged) then FOnChanged(Self);
   finally O.Free; end;
-  if FRetryPending then begin FRetryPending := False; O := StartJob(FLastKind,FLastOutput,FLastTime); O.Free; end;
+  if FRetryPending then begin FRetryPending := False; O := StartJob(FLastKind,FLastOutput,FLastTime,FLastOverwrite); O.Free; end;
 end;
 function TRigmMovieSession.WorkflowStatus: TJSONObject;
 begin
@@ -343,7 +378,8 @@ begin
     raise ERigm.Create('Unknown workflow command');
   finally Ready.Free; end;
 end;
-function TRigmMovieSession.StartJob(const Kind,Output: string; Seconds: Double): TJSONObject;
+function TRigmMovieSession.StartJob(const Kind,Output: string; Seconds: Double; AllowOverwrite: Boolean;
+  PreviewWidth,PreviewHeight: Integer): TJSONObject;
 begin
   Poll;
   RememberJob;
@@ -353,26 +389,53 @@ begin
     FJob.Cancel; FObsoletePreviews.Add(FJob); FJob := nil;
   end;
   if Busy then raise ERigm.Create('別の制作ジョブが処理中です。');
-  FProject.Validate; FreeAndNil(FJob); FJob := TRigmMovieJob.Create(FProject,Kind,Output,Seconds);
+  if Kind='export' then RequireScriptThumbnail(FProject);
+  if (Kind='export') and FileExists(Output) and not AllowOverwrite then raise ERigm.Create('保存ダイアログで上書きを確認してください。');
+  if (Kind='export') and SameText(ExtractFileExt(Output),'.mp4') then RememberMp4Target(Output);
+  FProject.Validate; FreeAndNil(FJob);
+  var Options := TJSONObject.Create;
+  try
+    AddB(Options,'overwrite',AllowOverwrite);
+    if (Kind='preview') and (Output='') and (PreviewWidth>0) and (PreviewHeight>0) then begin
+      AddN(Options,'previewWidth',PreviewWidth); AddN(Options,'previewHeight',PreviewHeight);
+    end;
+    FJob := TRigmMovieJob.Create(FProject,Kind,Output,Seconds,Options);
+    FJobAcceptRevision := FProject.Revision;
+  finally Options.Free; end;
   FAutomaticPreview := False;
-  FCollected := False; FLastKind := Kind; FLastOutput := Output; FLastTime := Seconds; FJob.Start;
+  FCollected := False; FLastKind := Kind; FLastOutput := Output; FLastTime := Seconds; FLastOverwrite := AllowOverwrite; FJob.Start;
   FRejectedJobId := '';
   Result := FJob.Status;
+end;
+procedure TRigmMovieSession.RememberMp4Target(const Path: string);
+begin
+  var Target := ResolveMoviePath(FProject.FileName,Path);
+  if (FProject.FileName<>'') and not FileExists(FProject.FileName) then
+    raise ERigm.Create('台本ファイルが見つかりません。保存してからMP4を書き出してください。');
+  if FProject.OutputTarget<>Target then begin
+    var Next := FProject.Clone;
+    try Next.OutputTarget := Target; Commit(Next); Next := nil; finally Next.Free; end;
+  end;
+  // 適用済みの台本を保存してから出力する。未保存の新規作品は、次の通常保存で出力先も保持する。
+  if FProject.FileName<>'' then begin
+    SaveMovie(FProject,FProject.FileName,IsMovieWorkPath(FProject.FileName));
+    AppSettings.RecordMovie(FProject,FTime,FResumeCue);
+  end;
 end;
 procedure TRigmMovieSession.RetireAutomaticPreview;
 begin
   if not Busy or not FAutomaticPreview then Exit;
   FJob.Cancel; FObsoletePreviews.Add(FJob); FJob := nil; FAutomaticPreview := False;
 end;
-function TRigmMovieSession.PreviewFrame(Seconds: Double): TJSONObject;
+function TRigmMovieSession.PreviewFrame(Seconds: Double; MaxWidth,MaxHeight: Integer): TJSONObject;
 begin
-  var Kind := FLastKind; var Output := FLastOutput; var Time := FLastTime;
+  var Kind := FLastKind; var Output := FLastOutput; var Time := FLastTime; var Overwrite := FLastOverwrite;
   try
-    FTime := EnsureRange(Seconds,0.0,FProject.Duration);
-    Result := StartJob('preview','',FTime); FAutomaticPreview := True;
+    SeekTo(Seconds);
+    Result := StartJob('preview','',FTime,False,MaxWidth,MaxHeight); FAutomaticPreview := True;
   finally
     // Rendering the current frame must not replace the author's retry target.
-    FLastKind := Kind; FLastOutput := Output; FLastTime := Time;
+    FLastKind := Kind; FLastOutput := Output; FLastTime := Time; FLastOverwrite := Overwrite;
   end;
 end;
 procedure TRigmMovieSession.RememberJob;
@@ -555,6 +618,7 @@ begin
     end; end;
     Commit(Next); Next := nil; FPlaying := False;
     FreeAndNil(FJob); FJob := TRigmMovieJob.Create(FProject,'production',FProject.OutputTarget,0,Options);
+    FJobAcceptRevision := FProject.Revision;
     ReplacePair(Entry,'jobId',TJSONString.Create(FJob.Id));
     ReplacePair(Entry,'attempt',TJSONNumber.Create(JI(Entry,'attempt')+1));
     // Production retries need their saved options: only production-resume may restart them.
@@ -566,7 +630,8 @@ end;
 function TRigmMovieSession.Execute(const Command: string; Args: TJSONObject): TJSONObject;
 var Next: TRigmMovieProject; O: TJSONObject; Cues: TJSONArray;
 begin
-  Poll;
+  // 投稿入力の途中で完了ジョブを回収すると、入力時点の版が失効する。通常のTickで回収する。
+  if Command<>'update-posting' then Poll;
   if MatchText(Command,['workflow-run','produce','production-resume','audio-generate','job-retry','save','open','undo','redo']) then begin
     if GuiLocked and (JS(Args,'editToken')<>FEditToken) then raise ERigm.Create('Codex edit session holds the project');
     if (Args.GetValue('editToken')<>nil) and ((JS(Args,'editToken')<>FEditToken) or (JI(Args,'editEpoch',FEditEpoch)<>FEditEpoch)) then raise ERigm.Create('Expired edit token');
@@ -606,9 +671,10 @@ begin
       var SceneId: string; var Path := FImageTransfers.ReadyPath(FProject,Args,SceneId);
       Next := FProject.Clone;
       try
-        var Scene := Next.Scene(SceneId);
+        var Scene := Next.ImageTarget(SceneId);
         if (Scene=nil) or Scene.ImageApproved then raise ERigm.Create('Image transfer scene was removed or approved before adoption');
-        Scene.Image := Path; Commit(Next); Next := nil;
+        Scene.Image := Path; if SceneId=RigmCommonBackgroundId then Next.ThemeBackground := Path;
+        Commit(Next); Next := nil;
         FImageTransfers.Adopted(Args);
       finally Next.Free; end;
       Result := FImageTransfers.Execute('image-transfer-status',Args);
@@ -617,6 +683,27 @@ begin
     Exit(FImageTransfers.Execute(Command,Args));
   end;
   if Command='composition-requests' then Exit(CompositionRequests(FProject));
+  if Command='update-posting' then begin
+    // 投稿文は書き出し中も入力できる。音声・素材・フレームは変更せず、版とリースだけ照合する。
+    if GuiLocked and (JS(Args,'editToken')<>FEditToken) then raise ERigm.Create('Codex edit session holds the project');
+    if (Args.GetValue('editToken')<>nil) and ((JS(Args,'editToken')<>FEditToken) or (JI(Args,'editEpoch',FEditEpoch)<>FEditEpoch)) then raise ERigm.Create('Expired edit token');
+    if (JS(Args,'projectId')<>FProject.Id) or (JI(Args,'revision',-1)<>FProject.Revision) then raise ERigm.Create('投稿用情報の対象作品または版が変わりました。');
+    var Info := MoviePostingInfo(FProject);
+    try
+      for var Key in ['title','description'] do if Args.GetValue(Key)<>nil then begin
+        if not (Args.GetValue(Key) is TJSONString) then raise ERigm.Create('投稿用情報は文字列で指定してください。');
+        Info.RemovePair(Key).Free; Info.AddPair(Key,Args.GetValue(Key).Clone as TJSONValue);
+      end;
+      ValidateMoviePosting(Info);
+      if (FProject.Posting=nil) or (FProject.Posting.ToJSON<>Info.ToJSON) then begin
+        var Revision := FProject.Revision;
+        FProject.Posting.Free; FProject.Posting := Info; Info := nil; FProject.Changed;
+        if FPreviewRevision=Revision then FPreviewRevision := FProject.Revision;
+        if (FJob<>nil) and (FJobAcceptRevision=Revision) then FJobAcceptRevision := FProject.Revision;
+      end;
+    finally Info.Free; end;
+    Result := MoviePostingInfo(FProject); AddN(Result,'revision',FProject.Revision); Exit;
+  end;
   if IsCompositionCommand(Command) then begin
     RequireRevision(Args); Next := FProject.Clone;
     try
@@ -632,9 +719,10 @@ begin
     Result.AddPair('editing','mutations require status.projectId + revision; snapshot job; generated audio is undoable; no RIGM edits');
     Result.AddPair('examples',MovieExamples);
     Result.AddPair('commands',ParseObject('{"status":{},'+
+      '"update-posting":{"title":"posting title; manual episode number","description":"posting description"},'+
       '"project":{"offset":0,"limit":20},'+
       '"import-script":{"text":"text or JSON","path":"optional local file","format":"text|json"},'+
-      '"update-project":{"title":"string","character":"local .rigm or @sample","engineUrl":"loopback URL","width":1920,"height":1080,"fps":30,"outputPreset":"draft|hd|fullhd|custom","encodeProfile":"fast|balanced|quality","backgroundColor":3156000,"ffmpeg":"optional existing local ffmpeg.exe","outputTarget":"new .mp4 or .avi","bgm":{"file":"local PCM16 .wav, copied before adoption; empty to clear","volume":0.25,"fadeOut":2}},'+
+      '"update-project":{"title":"string","character":"local .rigm or @sample","engineUrl":"loopback URL","width":1920,"height":1080,"fps":30,"outputPreset":"draft|hd|fullhd|custom","encodeProfile":"fast|balanced|quality","backgroundColor":3156000,"ffmpeg":"optional existing local ffmpeg.exe override; empty uses bundled DLLs","outputTarget":"new .mp4 or .avi","bgm":{"file":"local PCM16 .wav, copied before adoption; empty to clear","volume":0.25,"fadeOut":2}},'+
       '"update-cue":{"id":"cue id","text":"string","subtitle":"string","pause":0.3,"expression":"neutral|smile|serious|sad","motion":"idle|still|nod|emphasis","background":"local image","parameters":{},"acting":{},"audioEffects":{"Out: Use":1,"Out: Gain(dB)":-3}},'+
       '"add-cue":{"cue":{},'+
       '"index":0},'+
@@ -650,7 +738,7 @@ begin
       '"timeline":{},'+
       '"seek":{"time":0},'+
       '"preview":{"time":0,"path":"optional new PNG"},'+
-      '"export":{"path":"new .avi or .mp4"},'+
+      '"export":{"path":"new .avi or .mp4; relative to project; MP4 target and applied project are saved before encoding"},'+
       '"save":{"path":".rigmovie"},'+
       '"open":{"path":".rigmovie"},'+
       '"undo":{},'+
@@ -735,25 +823,25 @@ begin
     if FLastKind='' then raise ERigm.Create('再試行するジョブがありません。');
     if Busy and FAutomaticPreview then begin
       FJob.Cancel; FObsoletePreviews.Add(FJob); FJob := nil;
-      Exit(StartJob(FLastKind,FLastOutput,FLastTime));
+      Exit(StartJob(FLastKind,FLastOutput,FLastTime,FLastOverwrite));
     end;
     if Busy then begin
       O := FJob.Status;
       try if not JB(O,'cancelRequested') then raise ERigm.Create('処理中のジョブを取消してから再試行してください。'); finally O.Free; end;
       FRetryPending := True; Exit(Status);
     end;
-    Exit(StartJob(FLastKind,FLastOutput,FLastTime));
+    Exit(StartJob(FLastKind,FLastOutput,FLastTime,FLastOverwrite));
   end;
-  if MatchText(Command,['audio-generate','job-retry','workflow-run','produce','production-resume','save','open','undo','redo']) then begin
+  if MatchText(Command,['audio-generate','job-retry','workflow-run','produce','production-resume','export','save','open','undo','redo']) then begin
     if GuiLocked and (JS(Args,'editToken')<>FEditToken) then raise ERigm.Create('Codex edit session holds the project');
     if (Args.GetValue('editToken')<>nil) and (JS(Args,'editToken')<>FEditToken) then raise ERigm.Create('Expired edit token');
   end;
   if Command='speakers-refresh' then Exit(StartJob('speakers','',0));
   if Command='audio-generate' then Exit(StartJob('audio',JS(Args,'directory'),0));
   if Command='playback-audio' then Exit(StartJob('playback-audio',JS(Args,'path'),JN(Args,'time',FTime)));
-  if Command='export' then Exit(StartJob('export',ExpandFileName(JS(Args,'path',FProject.OutputTarget)),0));
+  if Command='export' then Exit(StartJob('export',ResolveMoviePath(FProject.FileName,JS(Args,'path',FProject.OutputTarget)),0,JB(Args,'overwrite')));
   if Command='preview' then begin FTime := EnsureRange(JN(Args,'time',FTime),0.0,FProject.Duration); Exit(StartJob('preview',JS(Args,'path'),FTime)); end;
-  if Command='seek' then begin FTime := EnsureRange(JN(Args,'time'),0.0,FProject.Duration); Exit(Status); end;
+  if Command='seek' then begin SeekTo(JN(Args,'time')); Exit(Status); end;
   if Command='play' then begin FPlaying := True; Exit(Status); end;
   if Command='pause' then begin FPlaying := False; Exit(Status); end;
   if Command='save' then begin
@@ -767,10 +855,14 @@ begin
   RequireRevision(Args);
   if Command='undo' then begin
     if FUndo.Count=0 then raise ERigm.Create('取り消す編集がありません。'); Next := FUndo.Extract(FUndo.Last);
+    if Next.Id=FProject.Id then begin Next.Posting.Free; Next.Posting := nil;
+      if FProject.Posting<>nil then Next.Posting := FProject.Posting.Clone as TJSONObject; end;
     Next.Revision := FProject.Revision+1; Next.Modified := True; FRedo.Add(FProject); FProject := Next; Exit(Status);
   end;
   if Command='redo' then begin
     if FRedo.Count=0 then raise ERigm.Create('やり直す編集がありません。'); Next := FRedo.Extract(FRedo.Last);
+    if Next.Id=FProject.Id then begin Next.Posting.Free; Next.Posting := nil;
+      if FProject.Posting<>nil then Next.Posting := FProject.Posting.Clone as TJSONObject; end;
     Next.Revision := FProject.Revision+1; Next.Modified := True; FUndo.Add(FProject); FProject := Next; Exit(Status);
   end;
   if Command='open' then begin
@@ -807,6 +899,9 @@ begin
         Next.OutputTarget := FProject.OutputTarget;
         Next.BgmFile := FProject.BgmFile; Next.BgmVolume := FProject.BgmVolume; Next.BgmFadeOut := FProject.BgmFadeOut;
         Next.Layout := FProject.Layout; Next.ThemeBackground := FProject.ThemeBackground; Next.LDirection := FProject.LDirection;
+        var Background := FProject.CommonBackground.Json;
+        try var Copy := TRigmMovieScene.FromJson(Background); Next.CommonBackground.Free; Next.CommonBackground := Copy;
+        finally Background.Free; end;
         for var Character in FProject.Characters do begin
           if Next.Speaker(Character.SpeakerId)=nil then begin
             var ExistingSpeaker := FProject.Speaker(Character.SpeakerId); var Added := TRigmMovieSpeaker.Create;
@@ -891,7 +986,10 @@ begin
     else if Command='update-cue' then begin
       var Found := False;
       for var V in JA(O,'cues') do if JS(TJSONObject(V),'id')=JS(Args,'id') then begin
-        Merge(TJSONObject(V),Args,['scene','speaker','text','subtitle','pause','expression','motion','background','parameters','emotion','voiceStyleId']);
+        Merge(TJSONObject(V),Args,['scene','speaker','text','subtitle','pause','expression','motion','background','parameters','emotion','faceAutomatic','voiceStyleId']);
+        if (Args.GetValue('emotion')<>nil) and (Args.GetValue('faceAutomatic')=nil) then begin
+          TJSONObject(V).RemovePair('faceAutomatic').Free; TJSONObject(V).AddPair('faceAutomatic',TJSONBool.Create(False));
+        end;
         if Args.GetValue('acting')<>nil then Merge(JO(TJSONObject(V),'acting'),JO(Args,'acting'),
           ['mouthMode','blinkMode','mouthGain','lipLead','blinkStrength','blinkInterval','blinkDuration','blinkPhase','headGain','bodyGain','onset','duration','fadeIn','fadeOut','variants','imageAttention']);
         Found := True; Break;

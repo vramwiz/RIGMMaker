@@ -1,0 +1,8 @@
+Use case: illustration-story
+Asset type: 16:9 manga introduction video scene, target 1920x1080.
+Primary request: 異世界人に現代の料理やお酒を振る舞って、その反応を楽しむ。
+References: image 1 is the previous scene's modern apartment/fantasy visual continuity. Image 2 is the main identity and dining-room reference: preserve Kotaro's adult face, black hair and charcoal shirt, and Maribel's adult face, blonde braided long hair, blue eyes and practical silver-blue armor. Create a NEW composition distinct from the reference.
+Scene: at the same wooden table inside Kotaro's warm apartment, he has served a freshly cooked Japanese meal and two small clear glasses of amber beer. Adult Maribel in armor leans forward with bright eyes, visibly delighted and pleasantly surprised by the flavor; she holds a bite with chopsticks. Kotaro watches her reaction with a gentle amused smile. A platter of savory omelet and rice, a couple of modest side dishes and steam make the meal appetizing.
+Composition: candid side-angle medium two-shot across the table, natural hands, both faces visible and expressive, food in foreground. Both characters are clearly adults. Cozy playful friendship.
+Style: same polished full-color manga/anime linework, soft cel shading, warm golden lighting and detailed food.
+Constraints: no extra people, no text, speech bubbles, captions, branding, logos or watermark.

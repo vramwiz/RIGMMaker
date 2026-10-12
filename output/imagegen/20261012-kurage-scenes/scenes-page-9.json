@@ -1,0 +1,112 @@
+{
+  "count": 14,
+  "backgroundReady": true,
+  "thumbnailReady": false,
+  "thumbnailSourcesReady": false,
+  "allApproved": false,
+  "ready": 0,
+  "pendingRequests": 0,
+  "selectedScene": "{5E691476-DA47-43A5-B7BA-710255AF2212}",
+  "state": "in-progress",
+  "projectId": "{B0D28F94-242A-41D0-A527-882802487812}",
+  "revision": 915,
+  "background": {
+    "id": "common-background",
+    "title": "共通背景画像",
+    "image": "",
+    "description": "",
+    "imagePrompt": "",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 0,
+    "displayMode": "none",
+    "animation": {},
+    "target": "common-background",
+    "optional": true,
+    "ready": true,
+    "imagePath": "",
+    "width": 1920,
+    "height": 1080,
+    "sourceCues": []
+  },
+  "thumbnail": {
+    "id": "thumbnail",
+    "title": "サムネイル",
+    "image": "",
+    "description": "",
+    "imagePrompt": "これまでに作ったシーン画像を組み合わせた、動画の最後に表示するサムネイルを作成。\r\n使用中のキャラクターも必ず使い、見た目を参照素材に合わせる。\r\n「漫画」＋マンガの名前を大きく読みやすいロゴとして配置する。",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 0,
+    "displayMode": "image",
+    "animation": {},
+    "target": "thumbnail",
+    "required": true,
+    "ready": false,
+    "sourcesReady": false,
+    "duration": 10,
+    "imagePath": "",
+    "logoText": "漫画　男子校のくらげ先生"
+  },
+  "rows": [
+    {
+      "id": "{1407B11A-51BC-4102-B860-0A231B6A4E2B}",
+      "title": "シーン 12",
+      "image": "",
+      "description": "",
+      "imagePrompt": "",
+      "padding": 0,
+      "imageFeedback": "",
+      "imageApproved": false,
+      "imageApprovalKey": "",
+      "imageEditEpoch": 2,
+      "animation": {},
+      "sceneNumber": 10,
+      "start": 63.9213333333333,
+      "duration": 9.71200000000001,
+      "ready": false,
+      "imagePath": "",
+      "sourceCues": [
+        {
+          "cueId": "{EA12853C-2E0D-4DAA-846D-E3AB420C047A}",
+          "sourceText": "本当はこの先生、男子に免疫がないのです"
+        },
+        {
+          "cueId": "{919EBE2A-67FA-4A97-8210-0B585E237650}",
+          "sourceText": "生徒の前では平気な顔をしていますが"
+        },
+        {
+          "cueId": "{3A551783-E25E-440E-90BF-24D388C24362}",
+          "sourceText": "本当はそんなことはなく"
+        },
+        {
+          "cueId": "{43B9AAA4-331F-443B-94BF-CEB6E739AD57}",
+          "sourceText": "生徒への態度を後悔してしまう"
+        }
+      ],
+      "cueCount": 4,
+      "hasMoreCues": false
+    }
+  ],
+  "nextOffset": 10,
+  "hasMore": true,
+  "preview": {
+    "current": false,
+    "error": ""
+  },
+  "pipes": {
+    "format": "RIGMMaker.WorkspaceConnection",
+    "schemaVersion": 1,
+    "apiVersion": 2,
+    "pid": 6936,
+    "commandPipe": "RIGMMaker.Workspace.6936.{61877B53-4826-4DBF-BCEF-0D7B52E58842}",
+    "controlPipe": "RIGMMaker.Workspace.6936.{61877B53-4826-4DBF-BCEF-0D7B52E58842}",
+    "dataRoot": "C:\\Users\\zan12\\Documents\\RIGMMaker",
+    "connectionFile": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Exchange\\workspace-6936.json",
+    "routing": "common-command"
+  }
+}

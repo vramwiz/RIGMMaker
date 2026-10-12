@@ -10,7 +10,8 @@ type
     FLock: TObject;
     FDone, FCancel, FCancelCallMs, FCancelWorkerMs: Integer;
     FCancelAt: UInt64;
-    FState, FError: string;
+    FState, FError, FErrorClass: string;
+    FErrorCode: Integer; FHasErrorCode: Boolean;
     FProgress, FTotal: Integer;
     FProject: TRigmMovieProject;
     FFrame: TBitmap;
@@ -65,7 +66,7 @@ uses System.IOUtils, System.Math, System.SyncObjs, Winapi.Windows, Winapi.Active
   Vcl.Imaging.pngimage, RigmModel, RigmJson, RigmSample, RigmStorage,
   RigmMovieAudio, RigmMovieRendering, RigmMovieAvi, RigmMovieMp4, RigmMovieActing, RigmMovieOutput,
   SerifVoicevoxApi, SerifVoicevoxSpeakerCatalog, SerifVoicevoxAudioSettings, RigmVoicevoxConfig,
-  RigmMoviePreparation, RigmMovieProduction, RigmMovieCompositor, RigmCharacterCatalog;
+  RigmMoviePreparation, RigmMovieProduction, RigmMovieCompositor, RigmCharacterCatalog, RigmScriptThumbnailModel;
 
 constructor TRigmMovieJob.Create(Project: TRigmMovieProject; const Kind,Output: string; Seconds: Double;
   Options: TJSONObject);
@@ -112,6 +113,8 @@ begin
     Result := TJSONObject.Create; Result.AddPair('jobId',Id); Result.AddPair('kind',FKind);
     Result.AddPair('snapshotProjectId',FProject.Id); AddN(Result,'snapshotRevision',FProject.Revision);
     Result.AddPair('state',FState); Result.AddPair('error',FError); AddN(Result,'completed',FProgress); AddN(Result,'total',FTotal);
+    if FErrorClass<>'' then Result.AddPair('exceptionClass',FErrorClass);
+    if FHasErrorCode then AddN(Result,'win32ErrorCode',FErrorCode);
     AddB(Result,'done',Done); AddB(Result,'cancelRequested',Cancelled); AddN(Result,'cancelCallMs',TInterlocked.CompareExchange(FCancelCallMs,0,0));
     AddN(Result,'cancelWorkerMs',TInterlocked.CompareExchange(FCancelWorkerMs,0,0));
     if FKind='production' then Result.AddPair('output',FTarget) else Result.AddPair('output',FOutput);
@@ -155,6 +158,8 @@ begin
       on E: Exception do begin
         TMonitor.Enter(FLock);
         try if Cancelled or (E is EAbort) then FState := 'cancelled' else FState := 'failed'; FError := E.Message;
+          FErrorClass := E.ClassName; FHasErrorCode := E is EOSError;
+          if FHasErrorCode then FErrorCode := EOSError(E).ErrorCode;
         finally TMonitor.Exit(FLock); end;
       end;
     end;
@@ -182,6 +187,7 @@ end;
 procedure TRigmMovieJob.LoadCatalog;
 var Catalog: TSerifVoicevoxSpeakerCatalog; Error: string; A: TJSONArray;
 begin
+  SetPhase('voice-speakers',1);
   Catalog := TSerifVoicevoxSpeakerCatalog.Create;
   try
     Report(0,1); if not Catalog.LoadFromApi(Error) then raise ERigm.Create('VOICEVOX接続: '+Error);
@@ -217,11 +223,13 @@ begin
   var Port := Copy(FProject.EngineUrl,LastDelimiter(':',FProject.EngineUrl)+1,MaxInt);
   var Host := Copy(FProject.EngineUrl,8,LastDelimiter(':',FProject.EngineUrl)-8);
   Command := '"'+Exe+'" --host '+Host+' --port '+Port; UniqueString(Command);
+  SetPhase('voice-engine-start',1);
   FillChar(Startup,SizeOf(Startup),0); Startup.cb := SizeOf(Startup); Startup.dwFlags := STARTF_USESHOWWINDOW; Startup.wShowWindow := SW_HIDE;
   FillChar(Process,SizeOf(Process),0);
   if not CreateProcess(PChar(Exe),PChar(Command),nil,nil,False,CREATE_NO_WINDOW,nil,PChar(ExtractFileDir(Exe)),Startup,Process) then RaiseLastOSError;
   CloseHandle(Process.hThread);
   try
+    SetPhase('voice-engine-wait',1);
     var Started := GetTickCount64;
     repeat
       CheckCancel;
@@ -237,7 +245,7 @@ begin
 end;
 
 procedure TRigmMovieJob.GenerateAudio;
-var Values: TSerifVoicevoxAudioValues; Wave,TextFile,Lab,Error,Directory: string; Pcm: TRigmPcm;
+var Values: TSerifVoicevoxAudioValues; Wave,TextFile,Lab,Query,Error,Directory: string; Pcm: TRigmPcm;
 begin
   Directory := FOutput; if Directory='' then Directory := TPath.Combine(TPath.GetTempPath,'RIGMMaker\MovieAudio\'+FProject.Id);
   Directory := ExpandFileName(Directory);
@@ -247,6 +255,8 @@ begin
   var Completed := 0; ForceDirectories(Directory); Report(0,Total);
   for var I := 0 to FProject.Cues.Count-1 do begin
     CheckCancel; var C := FProject.Cues[I]; if (Selected<>'') and (C.Id<>Selected) then Continue;
+    // 旧版のWAVだけがある行も、再生操作時に編集用queryを取得する。
+    if (Selected<>'') and JB(FProductionOptions,'captureQuery') and (FProject.EffectiveVoiceQuery(C)='') then C.AudioKey := '';
     if (C.SpokenText='') and not FProject.AudioReady(C) then begin
       C.WaveFile := ''; C.LabFile := ''; C.AudioSeconds := 0; C.AudioKey := FProject.AudioFingerprint(C);
     end;
@@ -255,10 +265,11 @@ begin
       if FProject.EffectiveStyle(C)<0 then raise ERigm.Create('VOICEVOX話者一覧から音声を選択してください: '+S.Name);
       Values := TSerifVoicevoxAudioValues.Defaults; Values.SpeedScale := S.Speed; Values.PitchScale := S.Pitch;
       Values.IntonationScale := S.Intonation; Values.VolumeScale := S.Volume;
-      Values.SpeedScale := JN(C.VoiceSettings,'speedScale',Values.SpeedScale); Values.PitchScale := JN(C.VoiceSettings,'pitchScale',Values.PitchScale);
-      Values.IntonationScale := JN(C.VoiceSettings,'intonationScale',Values.IntonationScale); Values.VolumeScale := JN(C.VoiceSettings,'volumeScale',Values.VolumeScale);
-      Values.PrePhonemeLength := JN(C.VoiceSettings,'prePhonemeLength',Values.PrePhonemeLength); Values.PostPhonemeLength := JN(C.VoiceSettings,'postPhonemeLength',Values.PostPhonemeLength);
-      if not TSerifVoicevoxApi.CreateInputFiles(C.SpokenText,S.Name,IntToStr(FProject.EffectiveStyle(C)),FProject.EffectiveStyle(C),Values,FProject.EffectiveVoiceQuery(C),Wave,TextFile,Lab,Error) then
+      var Settings := FProject.EffectiveVoiceSettings(C);
+      Values.SpeedScale := JN(Settings,'speedScale',Values.SpeedScale); Values.PitchScale := JN(Settings,'pitchScale',Values.PitchScale);
+      Values.IntonationScale := JN(Settings,'intonationScale',Values.IntonationScale); Values.VolumeScale := JN(Settings,'volumeScale',Values.VolumeScale);
+      Values.PrePhonemeLength := JN(Settings,'prePhonemeLength',Values.PrePhonemeLength); Values.PostPhonemeLength := JN(Settings,'postPhonemeLength',Values.PostPhonemeLength);
+      if not TSerifVoicevoxApi.CreateInputFiles(C.SpokenText,S.Name,IntToStr(FProject.EffectiveStyle(C)),FProject.EffectiveStyle(C),Values,FProject.EffectiveVoiceQuery(C),Wave,TextFile,Lab,Query,Error) then
         raise ERigm.Create('音声生成 '+C.Id+': '+Error);
       try
         CheckCancel; Pcm := TRigmPcm.Load(Wave);
@@ -266,6 +277,7 @@ begin
           var Token := NewRigmId; var Target := TPath.Combine(Directory,Token+'.wav');
           var TargetLab := TPath.Combine(Directory,Token+'.lab');
           TFile.Copy(Wave,Target,False); TFile.Copy(Lab,TargetLab,False);
+          if JB(FProductionOptions,'captureQuery') then begin C.VoiceQuery := Query; C.VoiceQueryKey := FProject.VoiceQuerySourceKey(C); end;
           C.WaveFile := Target; C.LabFile := TargetLab; C.AudioSeconds := Pcm.Duration; C.AudioKey := FProject.AudioFingerprint(C);
         finally Pcm.Free; end;
       finally
@@ -292,13 +304,24 @@ begin
   Result := MovieActorAssets(Document); Result.AddPair('capabilities',MovieCapabilities(Document));
 end;
 procedure TRigmMovieJob.Preview;
-var Document: TRigmDocument; Audio: TRigmPcm; Ready: Boolean;
+var Document: TRigmDocument; Audio: TRigmPcm; Ready: Boolean; W,H: Integer;
 begin
-  Report(0,1); Document := LoadActor(FProject); Audio := nil;
+  Report(0,1); Document := nil; Audio := nil;
+  // Composition owns its cached actor sources; the legacy actor was loaded
+  // and discarded again for every composition frame without being used.
+  if (FProject.Scenes.Count=0) and (FProject.Characters.Count=0) then Document := LoadActor(FProject);
   try
-    Ready := True; for var C in FProject.Cues do if not FProject.AudioReady(C) and not ((FProject.Scenes.Count>0) and FProject.HasStoredAudio(C)) then Ready := False;
-    if Ready and (FProject.Cues.Count>0) then Audio := CachedMovieAudio(FProject,FProject.Scenes.Count>0);
-    CheckCancel; FFrame := RenderMovieFrame(FProject,Document,FTime,Audio); CheckCancel;
+    W := JI(FProductionOptions,'previewWidth'); H := JI(FProductionOptions,'previewHeight');
+    if (FOutput='') and (W>0) and (H>0) then Audio := PreviewMovieAudio(FProject,FTime)
+    else begin
+      Ready := True; for var C in FProject.Cues do if not FProject.AudioReady(C) and not ((FProject.Scenes.Count>0) and FProject.HasStoredAudio(C)) then Ready := False;
+      if Ready and (FProject.Cues.Count>0) then Audio := CachedMovieAudio(FProject,FProject.Scenes.Count>0);
+    end;
+    CheckCancel;
+    if (FOutput='') and (W>0) and (H>0) then
+      FFrame := RenderMoviePreview(FProject,Document,FTime,Audio,W,H)
+    else FFrame := RenderMovieFrame(FProject,Document,FTime,Audio);
+    CheckCancel;
     if FOutput<>'' then begin
       var Image := TPngImage.Create; var Temporary := FOutput+'.'+Id+'.tmp';
       try
@@ -314,10 +337,13 @@ var Document: TRigmDocument; Audio: TRigmPcm; Writer: TRigmMovieAvi; Frame: Vcl.
   Temporary, Encoded: string; Frames: Integer; Mp4: Boolean;
 begin
   if FProject.Cues.Count=0 then raise ERigm.Create('台本が空です。');
-  if (FOutput='') or FileExists(FOutput) then raise ERigm.Create('新しい動画出力先を指定してください。既存ファイルは上書きしません。');
+  RequireScriptThumbnail(FProject);
+  if (FOutput='') or (FileExists(FOutput) and not JB(FProductionOptions,'overwrite')) then raise ERigm.Create('出力先を指定し、既存動画の上書きを確認してください。');
+  var MoveFlags: DWORD := MOVEFILE_WRITE_THROUGH;
+  if JB(FProductionOptions,'overwrite') then MoveFlags := MoveFlags or MOVEFILE_REPLACE_EXISTING;
   Mp4 := SameText(ExtractFileExt(FOutput),'.mp4');
   if not Mp4 and not SameText(ExtractFileExt(FOutput),'.avi') then raise ERigm.Create('動画形式はAVIまたはMP4です。');
-  if Mp4 and not FileExists(FProject.FfmpegExe) then raise ERigm.Create('MP4には既存のffmpeg.exeの設定が必要です。');
+  if Mp4 and not MovieMp4Available(FProject.FfmpegExe) then raise ERigm.Create('MP4出力用の同梱DLLがありません。Runtime\FFmpegを確認してください。');
   ForceDirectories(ExtractFilePath(ExpandFileName(FOutput))); Temporary := FOutput+'.'+Id+'.part';
   Encoded := Temporary+'.mp4'; Document := nil; Audio := nil; Writer := nil;
   try
@@ -325,7 +351,7 @@ begin
     CheckCancel; SetPhase('prepare-audio',1); Audio := CachedMovieAudio(FProject);
     Frames := Ceil(FProject.Duration*FProject.Fps); SetPhase('render',Frames); Report(0,Frames+Ord(Mp4));
       if Mp4 then begin
-        TMonitor.Enter(FLock); try FExportBackend := 'ffmpeg-raw-bgra-pipe'; finally TMonitor.Exit(FLock); end;
+        TMonitor.Enter(FLock); try FExportBackend := MovieMp4Backend(FProject.FfmpegExe); finally TMonitor.Exit(FLock); end;
         StreamMovieMp4(FProject,Document,Audio,Encoded,Cancelled,
           procedure(Current,Total: Integer; StagingBytes: UInt64)
           begin
@@ -343,7 +369,7 @@ begin
               FEncoderPid := ProcessId; FEncoderExited := Exited;
           finally TMonitor.Exit(FLock); end;
         end); CheckCancel;
-      if not MoveFileEx(PChar(Encoded),PChar(FOutput),MOVEFILE_WRITE_THROUGH) then RaiseLastOSError;
+      if not MoveFileEx(PChar(Encoded),PChar(FOutput),MoveFlags) then RaiseLastOSError;
       Report(Frames+1,Frames+1);
       end else begin
         TMonitor.Enter(FLock); try FExportBackend := 'legacy-mjpeg-avi'; finally TMonitor.Exit(FLock); end;
@@ -354,7 +380,7 @@ begin
           TMonitor.Enter(FLock); try FStagingPeak := Max(FStagingPeak,UInt64(TFile.GetSize(Temporary))); finally TMonitor.Exit(FLock); end;
         end;
         CheckCancel; Writer.Finish; FreeAndNil(Writer);
-        if not MoveFileEx(PChar(Temporary),PChar(FOutput),MOVEFILE_WRITE_THROUGH) then RaiseLastOSError;
+        if not MoveFileEx(PChar(Temporary),PChar(FOutput),MoveFlags) then RaiseLastOSError;
       end;
   finally Writer.Free; Audio.Free; Document.Free; if FileExists(Temporary) then TFile.Delete(Temporary);
     if FileExists(Encoded) then TFile.Delete(Encoded); end;

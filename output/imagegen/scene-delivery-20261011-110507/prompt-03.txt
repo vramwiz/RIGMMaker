@@ -1,0 +1,8 @@
+Use case: illustration-story
+Asset type: scene for a Japanese manga introduction, 16:9 landscape, target 1920x1080.
+Primary request: 異世界と通じているマンション。
+Reference image 1: continuity reference for the modern Japanese apartment entry, blue magical threshold, warm lamplight, silver-blue fantasy atmosphere and polished full-color manga/anime linework. Create a NEW environment shot without the person.
+Scene: a slightly wider view of an ordinary Japanese apartment building's shared corridor in the evening. One open apartment door contains a gently luminous blue portal, revealing an expansive bright green fantasy valley, stone castle and mountains beyond. Other apartment doors and everyday building details establish that this is a normal mansion/apartment block. Warm interior glow and blue portal light combine naturally.
+Composition: eye-level wide establishing shot, strong depth along the corridor, the magical connection is instantly understandable. No people in frame.
+Style: same clean manga/anime illustration with soft cel shading, detailed but uncluttered architecture, charming everyday fantasy, not horror.
+Constraints: no written room numbers or signs, no lettering, captions, logos or watermark.

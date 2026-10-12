@@ -6,13 +6,14 @@ procedure RequireCurrentVoice(Project: TRigmMovieProject);
 procedure PrepareScriptVoice(Project: TRigmMovieProject);
 procedure ValidateScriptVoice(Project: TRigmMovieProject);
 procedure EditScriptVoice(Project: TRigmMovieProject; const CueId,Reading: string; Settings: TJSONObject);
+function EditScriptVoiceSettings(Project: TRigmMovieProject; Cue: TRigmMovieCue; Settings: TJSONObject): Boolean;
 function ScriptVoiceSummary(Project: TRigmMovieProject): TJSONObject;
 function RefreshScriptVoiceCompletion(Project: TRigmMovieProject): Boolean;
 function MarkScriptVoiceHeard(Project: TRigmMovieProject; const CueId,AudioKey: string): Boolean;
 procedure PrepareScriptVoiceEffects(Project: TRigmMovieProject);
 procedure ValidateScriptVoiceEffects(Project: TRigmMovieProject);
 implementation
-uses System.SysUtils, RigmJson, PsdJson, RigmScriptTextModel, RigmScriptCastingModel, RigmScriptReviewModel;
+uses System.SysUtils, System.StrUtils, RigmJson, PsdJson, RigmScriptTextModel, RigmScriptCastingModel, RigmScriptReviewModel;
 procedure RequireCurrentVoice(Project: TRigmMovieProject);
 begin
   if (Project=nil) or (Project.ScriptWizard=nil) or (Project.ScriptWizard.GetValue('casting')=nil) then raise Exception.Create('配役を準備してください。');
@@ -36,16 +37,49 @@ end;
 procedure ValidateScriptVoice(Project: TRigmMovieProject);
 begin
   var O := JO(Project.ScriptWizard,'voice');
-  if (JS(O,'format')<>'RIGMMaker.ScriptVoice') or (JI(O,'schemaVersion')<>1) or (Project.Cue(JS(O,'selectedCue'))=nil) then raise Exception.Create('音声工程の保存状態が不正です。');
+  if O.GetValue('commonSettings')<>nil then begin
+    if not(O.GetValue('commonSettings') is TJSONObject) then raise Exception.Create('共通音声設定の保存形式が不正です。');
+    ValidateVoiceValues(JO(O,'commonSettings'));
+  end;
+  // コピー直後の台本はセリフを持たず、共通設定だけを保持する。配役時にselectedCueを設定する。
+  var SettingsOnly := (Project.Cues.Count=0) and (Project.ScriptWizard.GetValue('casting')=nil) and
+    (O.GetValue('commonSettings') is TJSONObject) and (JS(O,'selectedCue')='') and
+    MatchStr(JS(Project.ScriptWizard,'stage'),['title','characters','layout','placement','text','review','summary','summary-edit','closing','script-confirm']);
+  if (JS(O,'format')<>'RIGMMaker.ScriptVoice') or (JI(O,'schemaVersion')<>1) or
+    ((Project.Cue(JS(O,'selectedCue'))=nil) and not SettingsOnly) then raise Exception.Create('音声工程の保存状態が不正です。');
 end;
 procedure EditScriptVoice(Project: TRigmMovieProject; const CueId,Reading: string; Settings: TJSONObject);
 begin
   RequireCurrentVoice(Project); var C := Project.Cue(CueId); if C=nil then raise Exception.Create('読みを編集するセリフがありません。');
   var Text := NormalizeScriptText(Reading); ValidateVoiceReading(Text); ValidateVoiceValues(Settings);
-  // 検査完了後に両値を反映する。既存WAV/LAB/秒数は保持し、指紋が異なる場合だけ古い状態になる。
-  var Values := Settings.Clone as TJSONObject; var OldReading := C.SpokenText; C.VoiceReading := Text;
-  if C.SpokenText<>OldReading then begin C.VoiceQuery := ''; C.VoiceQueryKey := ''; end; C.VoiceSettings.Free; C.VoiceSettings := Values;
+  // 読みは対象行、基本設定は作品共通へ反映する。旧WAV/LAB/秒数と個別queryは保持する。
+  EditScriptVoiceSettings(Project,C,Settings);
+  var OldReading := C.SpokenText; C.VoiceReading := Text;
+  if C.SpokenText<>OldReading then begin C.VoiceQuery := ''; C.VoiceQueryKey := ''; end;
   PsdJson.Put(Project.ScriptWizard,'voiceStatus','in-progress');
+end;
+function EditScriptVoiceSettings(Project: TRigmMovieProject; Cue: TRigmMovieCue; Settings: TJSONObject): Boolean;
+const Keys: array[0..5] of string = ('speedScale','pitchScale','intonationScale','volumeScale','prePhonemeLength','postPhonemeLength');
+begin
+  Result := False; ValidateVoiceValues(Settings); if Settings.Count=0 then Exit;
+  var Voice := JO(Project.ScriptWizard,'voice'); var Previous := Project.EffectiveVoiceSettings(Cue);
+  var Speaker := Project.Speaker(Cue.SpeakerId);
+  var Defaults: array[0..5] of Double;
+  Defaults[0] := Speaker.Speed; Defaults[1] := Speaker.Pitch; Defaults[2] := Speaker.Intonation;
+  Defaults[3] := Speaker.Volume; Defaults[4] := 0.1; Defaults[5] := 0.1;
+  var Values := TJSONObject.Create;
+  try
+    var Different := not (Voice.GetValue('commonSettings') is TJSONObject);
+    for var I := 0 to High(Keys) do begin
+      var Old := JN(Previous,Keys[I],Defaults[I]); var Value := JN(Settings,Keys[I],Old);
+      AddN(Values,Keys[I],Value); if Value<>Old then Different := True;
+    end;
+    if not Different then Exit;
+    PsdJson.Put(Voice,'commonSettings',Values); Values := nil;
+    // 旧ファイルと個別のアクセント・音高・音素長を残し、採用音声と再生確認だけを全行で無効化する。
+    for var C in Project.Cues do begin C.AudioKey := ''; C.VoiceHeardKey := ''; end;
+    PsdJson.Put(Project.ScriptWizard,'voiceStatus','in-progress'); Result := True;
+  finally Values.Free; end;
 end;
 function ScriptVoiceSummary(Project: TRigmMovieProject): TJSONObject;
 begin

@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "data": {
+    "count": 14,
+    "backgroundReady": false,
+    "allApproved": false,
+    "ready": 0,
+    "pendingRequests": 0,
+    "selectedScene": "{15110FE5-0453-4C73-87EF-EA88E7B0F2F2}",
+    "state": "in-progress",
+    "projectId": "{C36C2A85-DD8A-4DDE-8A7D-D5072CF41A98}",
+    "revision": 1482,
+    "background": {
+      "id": "common-background",
+      "title": "共通背景画像",
+      "image": "",
+      "description": "",
+      "imagePrompt": "マンガの紹介用の背景、異世界から来た女騎士が男性に日本料理を勧められて美味しそうに食べる",
+      "padding": 0,
+      "imageFeedback": "",
+      "imageApproved": false,
+      "imageApprovalKey": "",
+      "imageEditEpoch": 0,
+      "displayMode": "image",
+      "animation": {},
+      "target": "common-background",
+      "optional": true,
+      "ready": false,
+      "imagePath": "",
+      "width": 1920,
+      "height": 1080,
+      "sourceCues": []
+    },
+    "rows": [
+      {
+        "id": "{E1E24A04-D187-4FFC-B3CF-A019276EBAD0}",
+        "title": "とん平焼きとビール",
+        "image": "",
+        "description": "",
+        "imagePrompt": "とん平焼きとビール",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 2,
+        "displayMode": "image",
+        "animation": {},
+        "sceneNumber": 7,
+        "start": 52.936,
+        "duration": 3.40533333333333,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{EDE1690A-4377-416E-9148-7FF7E728A8D5}",
+            "sourceText": "とん平焼きとビール"
+          },
+          {
+            "cueId": "{60C55173-B6E7-45BC-869F-AE0FBFA66474}",
+            "sourceText": "これは絶対にあう組み合わせ"
+          }
+        ],
+        "cueCount": 2,
+        "hasMoreCues": false
+      }
+    ],
+    "nextOffset": 7,
+    "hasMore": true,
+    "preview": {
+      "current": false,
+      "error": ""
+    },
+    "pipes": {
+      "format": "RIGMMaker.WorkspaceConnection",
+      "schemaVersion": 1,
+      "apiVersion": 2,
+      "pid": 13364,
+      "commandPipe": "RIGMMaker.Workspace.13364.{398A9234-BF79-455C-9A11-D0E50739806F}",
+      "controlPipe": "RIGMMaker.Workspace.13364.{398A9234-BF79-455C-9A11-D0E50739806F}",
+      "dataRoot": "C:\\Users\\zan12\\Documents\\RIGMMaker",
+      "connectionFile": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Exchange\\workspace-13364.json",
+      "routing": "common-command"
+    }
+  },
+  "requestId": "013c1966-a229-40d8-b336-553227335bfa"
+}

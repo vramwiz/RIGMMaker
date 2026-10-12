@@ -1,10 +1,14 @@
-﻿// 既存FFmpegで映像・音声をMP4へ出力する。子プロセスの終了・取消・進捗回収を担当する。
+﻿// 同梱DLLで映像・音声をMP4へ出力する。明示された外部FFmpegの終了・取消・進捗も扱う。
 unit RigmMovieMp4;
 
 interface
 uses System.SysUtils, RigmMovieModel, RigmModel, RigmMovieAudio;
 type TRigmEncoderProgress = reference to procedure(Seconds: Double; PrivateBytes,WorkingBytes: UInt64; ProcessId: Cardinal; Exited: Boolean);
      TRigmStreamFrameProgress = reference to procedure(Current,Total: Integer; StagingBytes: UInt64);
+// 同梱DLLまたは明示された外部EXEの存在を診断する。場所の選択・ロードは行わない。
+function MovieMp4Available(const Executable: string): Boolean;
+// 未設定・無効な旧パスでは同梱DLLを使う。進捗と準備診断で共通の識別子を返す。
+function MovieMp4Backend(const Executable: string): string;
 procedure EncodeMovieMp4(const Executable, InputFile, OutputFile: string; Cancelled: TFunc<Boolean>;
   const Profile: string='balanced'; Progress: TRigmEncoderProgress=nil);
 procedure StreamMovieMp4(Project: TRigmMovieProject; Document: TRigmDocument; Audio: TRigmPcm;
@@ -13,7 +17,72 @@ procedure StreamMovieMp4(Project: TRigmMovieProject; Document: TRigmDocument; Au
 
 implementation
 uses System.IOUtils, System.Math, System.Classes, System.SyncObjs, Winapi.Windows, Winapi.PsAPI,
-  Vcl.Graphics, RigmMovieOutput, RigmMovieRendering;
+  Vcl.Graphics, RigmMovieOutput, RigmMovieRendering, RigmFFmpegApi, RigmFFmpegWriter;
+
+function ExternalEncoderAvailable(const Executable: string): Boolean;
+begin Result := FileExists(Executable) and SameText(ExtractFileName(Executable),'ffmpeg.exe'); end;
+function MovieMp4Available(const Executable: string): Boolean;
+begin Result := BundledFFmpegAvailable or ExternalEncoderAvailable(Executable); end;
+function MovieMp4Backend(const Executable: string): string;
+begin
+  Result := 'ffmpeg-shared-h264-aac';
+  if ExternalEncoderAvailable(Executable) then Result := 'ffmpeg-raw-bgra-pipe';
+end;
+procedure CheckMp4Cancelled(Cancelled: TFunc<Boolean>);
+begin if Assigned(Cancelled) and Cancelled() then raise EAbort.Create('MP4出力を中止しました。'); end;
+function Mp4FileSize(const Path: string): UInt64;
+begin Result := 0; if FileExists(Path) then Result := TFile.GetSize(Path); end;
+procedure AddMp4FailureContext(E: Exception; Project: TRigmMovieProject;
+  FrameIndex,Total: Integer; const Stage: string);
+begin
+  if E is EAbort then Exit;
+  var Position := '開始前';
+  if FrameIndex>=0 then Position := Format('出力フレーム %d/%d (%.3f秒)',[FrameIndex+1,Total,FrameIndex/Project.Fps]);
+  var ErrorClass := E.ClassName;
+  if E is EOSError then ErrorClass := ErrorClass+Format('; Win32=%d',[EOSError(E).ErrorCode]);
+  var Handles: DWORD := 0; GetProcessHandleCount(GetCurrentProcess,Handles);
+  E.Message := Format('MP4 %s / %s / %s / %dx%d %dfps [%s; GDI=%d; handles=%d]: %s',
+    [MovieMp4Backend(Project.FfmpegExe),Stage,Position,Project.Width,Project.Height,Project.Fps,
+     ErrorClass,GetGuiResources(GetCurrentProcess,GR_GDIOBJECTS),Handles,E.Message]);
+end;
+procedure StreamBundledMovieMp4(Project: TRigmMovieProject; Document: TRigmDocument; Audio: TRigmPcm;
+  const OutputFile: string; Cancelled: TFunc<Boolean>; Frames: TRigmStreamFrameProgress;
+  Finishing: TProc; Progress: TRigmEncoderProgress);
+var Writer: TRigmFFmpegWriter; Current,Total: Integer; Stage: string;
+begin
+  Writer := nil; Current := -1; Total := Ceil(Project.Duration*Project.Fps); Stage := 'encoder-open';
+  try
+    try
+      CheckMp4Cancelled(Cancelled);
+      Writer := TRigmFFmpegWriter.Create(OutputFile,Project.Width,Project.Height,Project.Fps,Audio.Rate,Project.EncodeProfile);
+      var AudioOffset := 0;
+      for var I := 0 to Total-1 do begin
+        Current := I; Stage := 'render'; CheckMp4Cancelled(Cancelled);
+        var Bitmap := RenderMovieFrame(Project,Document,I/Project.Fps,Audio);
+        try Stage := 'video-encode'; Bitmap.PixelFormat := pf32bit; Writer.AddVideo(Bitmap); finally Bitmap.Free; end;
+        Stage := 'audio-encode';
+        var UntilSample := Min(Length(Audio.Samples),Round((I+1)*Audio.Rate/Project.Fps));
+        while AudioOffset+Writer.AudioFrameSamples<=UntilSample do begin
+          CheckMp4Cancelled(Cancelled); Writer.AddAudio(Audio.Samples,AudioOffset,Writer.AudioFrameSamples);
+          Inc(AudioOffset,Writer.AudioFrameSamples);
+        end;
+        Stage := 'frame-progress';
+        if Assigned(Frames) then Frames(I+1,Total,Mp4FileSize(OutputFile));
+        if Assigned(Progress) then Progress((I+1)/Project.Fps,0,0,0,False);
+      end;
+      Stage := 'finishing-progress'; if Assigned(Finishing) then Finishing;
+      Stage := 'audio-drain';
+      while AudioOffset<Length(Audio.Samples) do begin
+        CheckMp4Cancelled(Cancelled);
+        var Count := Min(Writer.AudioFrameSamples,Length(Audio.Samples)-AudioOffset);
+        Writer.AddAudio(Audio.Samples,AudioOffset,Count); Inc(AudioOffset,Count);
+      end;
+      Stage := 'MP4-finish'; CheckMp4Cancelled(Cancelled); Writer.Finish;
+    except on E: Exception do begin AddMp4FailureContext(E,Project,Current,Total,Stage); raise; end; end;
+  finally Writer.Free; end;
+  // 子プロセスを使わない経路では、解放済みwriterを既存の完了フィールドで通知する。
+  if Assigned(Progress) then Progress(Project.Duration,0,0,0,True);
+end;
 
 type
   TRigmFramePipeWriter = class(TThread)
@@ -76,7 +145,8 @@ procedure StreamMovieMp4(Project: TRigmMovieProject; Document: TRigmDocument; Au
   Finishing: TProc; Progress: TRigmEncoderProgress);
 var Startup: TStartupInfo; Process: TProcessInformation; Security: TSecurityAttributes;
   LogHandle,PipeRead,PipeWrite: THandle; Writer: TRigmFramePipeWriter;
-  LogFile,WaveFile,Command: string; Buffer: TBytes; Started,Success: Boolean; ReportAt: UInt64;
+  LogFile,WaveFile,Command,Stage: string; Buffer: TBytes; Started,Success: Boolean; ReportAt: UInt64;
+  Current,Total: Integer;
   procedure CheckCancel;
   begin if Assigned(Cancelled) and Cancelled() then raise EAbort.Create('MP4出力を中止しました。'); end;
   function StagingBytes: UInt64;
@@ -114,6 +184,9 @@ var Startup: TStartupInfo; Process: TProcessInformation; Security: TSecurityAttr
       WaitForSingleObject(Process.hProcess,0)=WAIT_OBJECT_0);
   end;
 begin
+  if not ExternalEncoderAvailable(Project.FfmpegExe) then begin
+    StreamBundledMovieMp4(Project,Document,Audio,OutputFile,Cancelled,Frames,Finishing,Progress); Exit;
+  end;
   if not FileExists(Project.FfmpegExe) or not SameText(ExtractFileName(Project.FfmpegExe),'ffmpeg.exe') then
     raise ERigm.Create('MP4出力には既存のffmpeg.exeを設定してください。');
   if FileExists(OutputFile) then raise ERigm.Create('既存のMP4出力は上書きできません。');
@@ -121,8 +194,10 @@ begin
   if FileExists(WaveFile) or FileExists(LogFile) then raise ERigm.Create('一時出力が既に存在します。');
   LogHandle := INVALID_HANDLE_VALUE; PipeRead := INVALID_HANDLE_VALUE; PipeWrite := INVALID_HANDLE_VALUE;
   Writer := nil; Started := False; Success := False; ReportAt := 0; Process := Default(TProcessInformation);
+  Current := -1; Total := Ceil(Project.Duration*Project.Fps); Stage := 'encoder-open';
   try
-    CheckCancel; Audio.Save(WaveFile); CheckCancel;
+   try
+    Stage := 'audio-staging'; CheckCancel; Audio.Save(WaveFile); CheckCancel; Stage := 'encoder-open';
     Security := Default(TSecurityAttributes); Security.nLength := SizeOf(Security); Security.bInheritHandle := True;
     LogHandle := CreateFile(PChar(LogFile),GENERIC_WRITE,FILE_SHARE_READ,@Security,CREATE_NEW,FILE_ATTRIBUTE_NORMAL,0);
     if LogHandle=INVALID_HANDLE_VALUE then RaiseLastOSError;
@@ -145,17 +220,17 @@ begin
     // Only the child owns the read end. Its exit then unblocks the writer.
     CloseHandle(PipeRead); PipeRead := INVALID_HANDLE_VALUE;
     Writer := TRigmFramePipeWriter.Create(PipeWrite); Writer.Start;
-    var Total := Ceil(Project.Duration*Project.Fps);
+    // Total is retained for failure diagnostics.
     SetLength(Buffer,Project.Width*Project.Height*4); Report(True);
     for var I := 0 to Total-1 do begin
-      CheckCancel;
+      Current := I; Stage := 'render'; CheckCancel;
       var Bitmap := RenderMovieFrame(Project,Document,I/Project.Fps,Audio);
       try
         if (Bitmap.Width<>Project.Width) or (Bitmap.Height<>Project.Height) then raise ERigm.Create('MP4フレーム寸法が一致しません。');
         Bitmap.PixelFormat := pf32bit; GdiFlush;
         for var Y := 0 to Project.Height-1 do Move(Bitmap.ScanLine[Y]^,Buffer[Y*Project.Width*4],Project.Width*4);
       finally Bitmap.Free; end;
-      Writer.Submit(Buffer);
+      Stage := 'pipe-write'; Writer.Submit(Buffer);
       while not Writer.Completed do begin
         CheckCancel; Report;
         if WaitForSingleObject(Process.hProcess,0)=WAIT_OBJECT_0 then raise ERigm.Create('FFmpegがフレーム受信中に終了しました: '+Detail);
@@ -165,7 +240,7 @@ begin
       if Assigned(Frames) then Frames(I+1,Total,StagingBytes);
       Report;
     end;
-    FreeAndNil(Writer); CloseHandle(PipeWrite); PipeWrite := INVALID_HANDLE_VALUE;
+    Stage := 'encoder-finish'; FreeAndNil(Writer); CloseHandle(PipeWrite); PipeWrite := INVALID_HANDLE_VALUE;
     if Assigned(Finishing) then Finishing;
     repeat CheckCancel; Report; until WaitForSingleObject(Process.hProcess,100)=WAIT_OBJECT_0;
     Report(True); var Code: Cardinal;
@@ -173,6 +248,7 @@ begin
     if (Code<>0) or not FileExists(OutputFile) or (TFile.GetSize(OutputFile)=0) then
       raise ERigm.Create('FFmpeg MP4出力に失敗しました: '+Detail);
     Success := True;
+   except on E: Exception do begin AddMp4FailureContext(E,Project,Current,Total,Stage); raise; end; end;
   finally
     if Started and (WaitForSingleObject(Process.hProcess,0)<>WAIT_OBJECT_0) then begin
       // Cancellation targets only this encoder, including a blocked pipe write.

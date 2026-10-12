@@ -1,0 +1,26 @@
+{
+  "characters": [
+    {
+      "path": "RIGM\\character-904B63CF-20D7-4FB4-B8C0-11CB570949B5.rigm",
+      "voiceBindingStatus": "unassigned",
+      "name": "新しいキャラクター",
+      "sourceId": "{1A117963-EDC6-4266-8114-C24203F6D29E}",
+      "renderFormat": "rigm",
+      "readyForScript": true,
+      "productionReason": "",
+      "productionState": "検査済み",
+      "loading": false
+    }
+  ],
+  "pipes": {
+    "format": "RIGMMaker.WorkspaceConnection",
+    "schemaVersion": 1,
+    "apiVersion": 2,
+    "pid": 24128,
+    "commandPipe": "RIGMMaker.Workspace.24128.{46CD3D5F-8F91-4BE6-AE52-5D28BABA7B15}",
+    "controlPipe": "RIGMMaker.Workspace.24128.{46CD3D5F-8F91-4BE6-AE52-5D28BABA7B15}",
+    "dataRoot": "C:\\Users\\zan12\\Documents\\RIGMMaker",
+    "connectionFile": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Exchange\\workspace-24128.json",
+    "routing": "common-command"
+  }
+}

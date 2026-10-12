@@ -1,0 +1,696 @@
+{
+  "projectId": "{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}",
+  "revision": 1231,
+  "title": "それは、降り積もる雪のような。",
+  "rows": [
+    {
+      "id": "{DCA3DDB7-2257-41ED-9BB8-4393804EACBB}",
+      "title": "opening 1",
+      "image": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\ae88e1c997fff5bb1a6d694eac21e5098520330f03ef7fbf83eed7ed256395a0.png",
+      "description": "",
+      "imagePrompt": "",
+      "padding": 0,
+      "imageFeedback": "",
+      "imageApproved": true,
+      "imageApprovalKey": "3466d233030ed443b935501b3ac824b9a4a5238b5ebd2ce04dd1a2cb36d6c37d",
+      "imageEditEpoch": 4,
+      "displayMode": "none",
+      "animation": {},
+      "sceneNumber": 1,
+      "start": 0,
+      "duration": 13.8626666666667,
+      "ready": true,
+      "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\ae88e1c997fff5bb1a6d694eac21e5098520330f03ef7fbf83eed7ed256395a0.png",
+      "sourceCues": [
+        {
+          "cueId": "{389D1F0A-0119-4CF8-8D63-D667991FB116}",
+          "sourceText": "東北きりたんです"
+        },
+        {
+          "cueId": "{6FA58262-E981-4A3D-B2C6-39908C0F0537}",
+          "sourceText": "今回もニコニコ漫画から"
+        },
+        {
+          "cueId": "{E98D7DCD-4841-4B56-9B67-2A36CD74A16B}",
+          "sourceText": "無料で最新話まで読める作品を紹介します"
+        },
+        {
+          "cueId": "{2309E52D-1151-4D96-9926-CBE7EEAB30F9}",
+          "sourceText": "今回は事前に確認したので大丈夫だと思います"
+        },
+        {
+          "cueId": "{9D5157D6-EB58-4A1F-8B58-B78533734FBA}",
+          "sourceText": "今回紹介する作品は"
+        }
+      ],
+      "cueCount": 5,
+      "hasMoreCues": false,
+      "imageRequest": {
+        "requestId": "{28961ECE-1A65-4968-9282-04C6265C288F}",
+        "sceneId": "{DCA3DDB7-2257-41ED-9BB8-4393804EACBB}",
+        "sceneNumber": 1,
+        "fingerprint": "8a3061d4ccb08eba4b0b1b0f375daf469373b42c0eabd8293ecb113f98c0b177",
+        "prompt": "漫画紹介動画の導入。冬の夕方、暖かな喫茶店の窓際の木のテーブルに、開いた漫画、白いコーヒーカップ。カウンターの奥に高校生の男女が穏やかに働く姿を小さく入れる。文字は入れない。\r\n1920×1080、16:9の横長。青春恋愛漫画に合うフルカラーのアニメ調イラスト、繊細で清潔な線、落ち着いた冬の色、木の茶色と琥珀色の暖色照明。現代日本の小さな喫茶店。登場人物は一連の画像で同じ外見を維持する。男子は短い黒髪で紺の制服、女子は長い栗色の髪と深緑の目、母親は栗色の肩までの髪。これらの外見と内装は台本を補う今回の創作上の設定。不要な看板・ロゴ・透かし・漫画のコマ枠は入れない。",
+        "feedback": "",
+        "provider": "external-codex",
+        "width": 1920,
+        "height": 1080,
+        "aspectRatio": "1920:1080",
+        "target": "scene",
+        "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+        "adoptedFingerprint": "c44cf8502f96489a57b4961bdeb0098de0d144a1b4093bf53fdf14d2b8dc60f7",
+        "imageProvenance": "external-generated",
+        "state": "cancelled",
+        "current": false
+      }
+    },
+    {
+      "id": "{6037132E-2E81-4056-9518-7F794206949A}",
+      "title": "それは降り積もる雪のような",
+      "image": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\563c7c842e410b7193d3d0516a31c89146cecb095e1bdbbb582074bbe1b62acd.png",
+      "description": "",
+      "imagePrompt": "それは降り積もる雪のような　を　タイトルロゴにして目立たせる　背景は雪景色",
+      "padding": 0,
+      "imageFeedback": "",
+      "imageApproved": false,
+      "imageApprovalKey": "",
+      "imageEditEpoch": 4,
+      "displayMode": "image",
+      "animation": {},
+      "sceneNumber": 2,
+      "start": 13.8626666666667,
+      "duration": 3.88533333333333,
+      "ready": false,
+      "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\563c7c842e410b7193d3d0516a31c89146cecb095e1bdbbb582074bbe1b62acd.png",
+      "sourceCues": [
+        {
+          "cueId": "{DBD13EDF-19C1-4FED-BEC8-0697A5559EBF}",
+          "sourceText": "それは降り積もる雪のような"
+        },
+        {
+          "cueId": "{23BF8E4D-7BEA-462E-8D9D-4DE500FB7F3C}",
+          "sourceText": "という作品です"
+        }
+      ],
+      "cueCount": 2,
+      "hasMoreCues": false,
+      "imageRequest": {
+        "requestId": "{E68DE04F-85FF-4620-A3D5-4C3A2C11EC91}",
+        "sceneId": "{6037132E-2E81-4056-9518-7F794206949A}",
+        "sceneNumber": 2,
+        "fingerprint": "d153ddacf16d105dee012b8e96767ed0b48b61623754a3579b528d1d7cb3297c",
+        "prompt": "それは降り積もる雪のような　を　タイトルロゴにして目立たせる　背景は雪景色",
+        "feedback": "",
+        "provider": "external-codex",
+        "width": 1920,
+        "height": 1080,
+        "aspectRatio": "1920:1080",
+        "target": "scene",
+        "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+        "state": "adopted",
+        "adoptedFingerprint": "af388299a091d2aa291a95c01e2ec570f5da1293488d5312343e37c082c4411f",
+        "imageProvenance": "external-generated",
+        "current": true
+      }
+    },
+    {
+      "id": "{94A51E0E-BD82-429E-929A-1B36246EF19C}",
+      "title": "主人公",
+      "image": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\a278dc5e99a9a31732b67facbbc7fb25115b8b493bba84104f561eeeac09c3d4.png",
+      "description": "",
+      "imagePrompt": "主人公の高校生の青年　真面目そう",
+      "padding": 0,
+      "imageFeedback": "",
+      "imageApproved": true,
+      "imageApprovalKey": "3055ecf8e91f462260710a7ad6a80f4ee08badad888507bd6eb4cf44d7fb29af",
+      "imageEditEpoch": 2,
+      "displayMode": "image",
+      "animation": {},
+      "sceneNumber": 3,
+      "start": 17.748,
+      "duration": 18.6,
+      "ready": true,
+      "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\a278dc5e99a9a31732b67facbbc7fb25115b8b493bba84104f561eeeac09c3d4.png",
+      "sourceCues": [
+        {
+          "cueId": "{919AAAB7-E5B0-4E3A-8BE7-76B246DAC1CE}",
+          "sourceText": "この作品の主人公はちょっとわけあって"
+        },
+        {
+          "cueId": "{C431E9C9-E8BC-4F24-A25F-12C7E55A7C4B}",
+          "sourceText": "家に帰ることができないという事情をかかえています"
+        },
+        {
+          "cueId": "{463A7324-6623-4EE9-A129-3C44D88EEB43}",
+          "sourceText": "そこで親戚のおじさんが"
+        },
+        {
+          "cueId": "{88D6D0E2-CEE5-4A3E-BD59-0A41EDF5E03E}",
+          "sourceText": "自分が関係している喫茶店を手伝うなら同居してもいい"
+        },
+        {
+          "cueId": "{EEC5F076-8BCD-443D-AC4D-451B707CF292}",
+          "sourceText": "そんな条件を出されて同居しつつ"
+        },
+        {
+          "cueId": "{BD4A8502-3DBE-4B5F-8E0B-436095EEFE95}",
+          "sourceText": "喫茶店も手伝うという生活をしている"
+        }
+      ],
+      "cueCount": 6,
+      "hasMoreCues": false,
+      "imageRequest": {
+        "requestId": "{7C8BDBBD-68F1-48D2-A7EF-F618C092B154}",
+        "sceneId": "{94A51E0E-BD82-429E-929A-1B36246EF19C}",
+        "sceneNumber": 3,
+        "fingerprint": "1af31ff2bbeabbf9f35115c99b24ee0679e85ae87d805058e3c64682f6e808d1",
+        "prompt": "住み込みで喫茶店を手伝う主人公。前と同じ店内、カウンター内で高校生の男子が白いカップとコーヒーを丁寧に準備。大人の男性が控えめに見守り、制服姿の同級生女子が店内にいる。住居へ続く階段を背景に少し入れる。文字なし。\r\n1920×1080、16:9の横長。青春恋愛漫画に合うフルカラーのアニメ調イラスト、繊細で清潔な線、落ち着いた冬の色、木の茶色と琥珀色の暖色照明。現代日本の小さな喫茶店。登場人物は一連の画像で同じ外見を維持する。男子は短い黒髪で紺の制服、女子は長い栗色の髪と深緑の目、母親は栗色の肩までの髪。これらの外見と内装は台本を補う今回の創作上の設定。不要な看板・ロゴ・透かし・漫画のコマ枠は入れない。",
+        "feedback": "",
+        "provider": "external-codex",
+        "width": 1920,
+        "height": 1080,
+        "aspectRatio": "1920:1080",
+        "target": "scene",
+        "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+        "adoptedFingerprint": "247fa8a19a80cee084517c40cb022d262f1f66bb62ce46322a082041c11a9087",
+        "imageProvenance": "external-generated",
+        "state": "cancelled",
+        "current": false
+      }
+    },
+    {
+      "id": "{C84D377B-1E68-425B-A70D-30E5B112DDF2}",
+      "title": "問題は同居人がクラスメイト",
+      "image": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\4a2fc67179e025a28014067751206b93e5a0106d4341923c258ae3e016bb956d.png",
+      "description": "",
+      "imagePrompt": "喫茶店で働いている　女子高生がメイド服で働いている",
+      "padding": 0,
+      "imageFeedback": "",
+      "imageApproved": true,
+      "imageApprovalKey": "82c72bab1a6b1b36ab1ba7cf5f565537bbf3b1ed6e6809f77dd94e6b8b0ee956",
+      "imageEditEpoch": 3,
+      "displayMode": "image",
+      "animation": {},
+      "sceneNumber": 4,
+      "start": 36.348,
+      "duration": 13.6813333333333,
+      "ready": true,
+      "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\4a2fc67179e025a28014067751206b93e5a0106d4341923c258ae3e016bb956d.png",
+      "sourceCues": [
+        {
+          "cueId": "{DE4A81F7-9717-42ED-9A3C-88D8BCF3D230}",
+          "sourceText": "問題は同居人がクラスメイト"
+        },
+        {
+          "cueId": "{C037125A-356C-491E-B66C-B0FF5B632638}",
+          "sourceText": "しかも手伝ってと言われた喫茶店の店長でもある"
+        },
+        {
+          "cueId": "{BDB2FD88-17A4-4FBB-84F2-BB7A3D95EC9C}",
+          "sourceText": "どういうことかというと"
+        },
+        {
+          "cueId": "{C5C17CBD-CA2A-4B7E-B0FF-D5EAA026AC28}",
+          "sourceText": "喫茶店の元々の店長は亡くなっていて"
+        },
+        {
+          "cueId": "{3F788C7D-F558-4501-A168-AAC329AC1034}",
+          "sourceText": "それを引き継いだのはいいのだけど"
+        }
+      ],
+      "cueCount": 5,
+      "hasMoreCues": false,
+      "imageRequest": {
+        "requestId": "{32B6F694-032E-4CD3-BAAE-24CC204DFBC0}",
+        "sceneId": "{C84D377B-1E68-425B-A70D-30E5B112DDF2}",
+        "sceneNumber": 4,
+        "fingerprint": "e0a75cb3802457c1fea1f6c9e08f80998491e0fa78077d240ce8bec9174e75e1",
+        "prompt": "同居人はクラスメイトで喫茶店の若い店長。前と同じ店のカウンターで、女子が帳簿を確かめ、男子がそばで手伝う。女子は落ち着いた上品なメイド服。先代から受け継いだ古い店のあたたかさ。亡くなった先代本人は描かない。文字なし。\r\n1920×1080、16:9の横長。青春恋愛漫画に合うフルカラーのアニメ調イラスト、繊細で清潔な線、落ち着いた冬の色、木の茶色と琥珀色の暖色照明。現代日本の小さな喫茶店。登場人物は一連の画像で同じ外見を維持する。男子は短い黒髪で紺の制服、女子は長い栗色の髪と深緑の目、母親は栗色の肩までの髪。これらの外見と内装は台本を補う今回の創作上の設定。不要な看板・ロゴ・透かし・漫画のコマ枠は入れない。",
+        "feedback": "",
+        "provider": "external-codex",
+        "width": 1920,
+        "height": 1080,
+        "aspectRatio": "1920:1080",
+        "target": "scene",
+        "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+        "adoptedFingerprint": "a456fe6ead7f282e9c2d1eee925ff482f6d05026cdab5fe1c0c99626d232d059",
+        "imageProvenance": "external-generated",
+        "state": "cancelled",
+        "current": false
+      }
+    },
+    {
+      "id": "{73D35C39-2FE4-491D-8169-68B23361BBCF}",
+      "title": "コーヒーを飲むことが苦手",
+      "image": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\766a9624ebc4c024b1e179a7e4882e722b5af9a7df3ed6b50ccd1facb3681551.png",
+      "description": "",
+      "imagePrompt": "その女子高生のメイドはコーヒーが苦手",
+      "padding": 0,
+      "imageFeedback": "",
+      "imageApproved": true,
+      "imageApprovalKey": "fce203117ed742e3c703dff15885ce902753142151022b914a40664739a63c71",
+      "imageEditEpoch": 3,
+      "displayMode": "image",
+      "animation": {},
+      "sceneNumber": 5,
+      "start": 50.0293333333333,
+      "duration": 12.2186666666667,
+      "ready": true,
+      "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\766a9624ebc4c024b1e179a7e4882e722b5af9a7df3ed6b50ccd1facb3681551.png",
+      "sourceCues": [
+        {
+          "cueId": "{C422CEF6-269C-49F0-B4B7-4E0855AEF18F}",
+          "sourceText": "コーヒーを飲むことが苦手な新しい店長では味を引き継げない"
+        },
+        {
+          "cueId": "{19DBB775-79F6-439D-8FE4-A854BD1AE636}",
+          "sourceText": "そこで先代の味をなぜか知っている主人公と"
+        },
+        {
+          "cueId": "{41663551-DD7D-45B9-A2B0-BFBBD78BE563}",
+          "sourceText": "この喫茶店をうまくやっていこう"
+        },
+        {
+          "cueId": "{59AD2058-EA91-49A5-B773-FC8491EFFA0E}",
+          "sourceText": "そういうお話です"
+        }
+      ],
+      "cueCount": 4,
+      "hasMoreCues": false,
+      "imageRequest": {
+        "requestId": "{8357CE7B-B0C1-4D8B-8ED3-6A3BA0C3081C}",
+        "sceneId": "{73D35C39-2FE4-491D-8169-68B23361BBCF}",
+        "sceneNumber": 5,
+        "fingerprint": "521cf32bd66f5a40816fb99a2f9cb0c98610e0d7dfc98ec0b0c394d2bad9135c",
+        "prompt": "先代のコーヒーの味を二人で受け継ぐ。前と同じ男女とカウンター。主人公がハンドドリップで白いカップへコーヒーを注ぎ、女子は苦い飲み物に少し戸惑いつつも真剣に見守る。コーヒー器具と湯気、協力する関係を主役にする。文字なし。\r\n1920×1080、16:9の横長。青春恋愛漫画に合うフルカラーのアニメ調イラスト、繊細で清潔な線、落ち着いた冬の色、木の茶色と琥珀色の暖色照明。現代日本の小さな喫茶店。登場人物は一連の画像で同じ外見を維持する。男子は短い黒髪で紺の制服、女子は長い栗色の髪と深緑の目、母親は栗色の肩までの髪。これらの外見と内装は台本を補う今回の創作上の設定。不要な看板・ロゴ・透かし・漫画のコマ枠は入れない。",
+        "feedback": "",
+        "provider": "external-codex",
+        "width": 1920,
+        "height": 1080,
+        "aspectRatio": "1920:1080",
+        "target": "scene",
+        "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+        "adoptedFingerprint": "f67ba9027167a08e441c8444313119ed332c73217842705cd6cc74298df5e632",
+        "imageProvenance": "external-generated",
+        "state": "cancelled",
+        "current": false
+      }
+    },
+    {
+      "id": "{6C78A905-E9FA-4AA4-86E4-F97A68DE51B2}",
+      "title": "気になる点",
+      "image": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\3751264e736d2a38767328b8c1641a84c61c8d86c7a308a3ca61b3da5c488872.png",
+      "description": "",
+      "imagePrompt": "自宅で高校生の青年と　女子高生が一緒に暮らしている",
+      "padding": 0,
+      "imageFeedback": "",
+      "imageApproved": true,
+      "imageApprovalKey": "653c209768225442e7bb688ab3da744516bfd438bc4f7316ff4dd22a3cbb3836",
+      "imageEditEpoch": 3,
+      "displayMode": "image",
+      "animation": {},
+      "sceneNumber": 6,
+      "start": 62.248,
+      "duration": 11.696,
+      "ready": true,
+      "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\3751264e736d2a38767328b8c1641a84c61c8d86c7a308a3ca61b3da5c488872.png",
+      "sourceCues": [
+        {
+          "cueId": "{825F196D-7C5F-41F1-9D7B-553EBB174C5A}",
+          "sourceText": "喫茶店のお話ももちろんありますが"
+        },
+        {
+          "cueId": "{15A32F59-BF82-4EDF-B0D2-697E5FBDE9CD}",
+          "sourceText": "気になるのはやはり同級生と同居しているという点"
+        },
+        {
+          "cueId": "{29AA8E8A-6014-42DB-9A2A-F5469DED1077}",
+          "sourceText": "もちろん2人きりではありません"
+        },
+        {
+          "cueId": "{AF724FBF-2038-456E-95E7-C53C44625484}",
+          "sourceText": "喫茶店ではうまくいっている2人ですが"
+        }
+      ],
+      "cueCount": 4,
+      "hasMoreCues": false,
+      "imageRequest": {
+        "requestId": "{D2474016-44B4-45F7-A9B4-B5BCDE7E9B95}",
+        "sceneId": "{6C78A905-E9FA-4AA4-86E4-F97A68DE51B2}",
+        "sceneNumber": 6,
+        "fingerprint": "6716bd6d8d49b448cdc0d3d2e06a2d33555550ad454dbc96421386c02db92d3a",
+        "prompt": "同じ家で暮らす同級生。喫茶店の生活スペースで、同じ高校生男女が家族と夕食の支度。女子とよく似た髪色の成人の母親も入り、二人きりの暮らしではないことが伝わる。冬の窓、木の家具、穏やかな日常。文字なし。\r\n1920×1080、16:9の横長。青春恋愛漫画に合うフルカラーのアニメ調イラスト、繊細で清潔な線、落ち着いた冬の色、木の茶色と琥珀色の暖色照明。現代日本の小さな喫茶店。登場人物は一連の画像で同じ外見を維持する。男子は短い黒髪で紺の制服、女子は長い栗色の髪と深緑の目、母親は栗色の肩までの髪。これらの外見と内装は台本を補う今回の創作上の設定。不要な看板・ロゴ・透かし・漫画のコマ枠は入れない。",
+        "feedback": "",
+        "provider": "external-codex",
+        "width": 1920,
+        "height": 1080,
+        "aspectRatio": "1920:1080",
+        "target": "scene",
+        "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+        "adoptedFingerprint": "e26f5c88954fbfa5fec55157b6ee04aed235fb4cd1b39fdaca6a30f899148f6d",
+        "imageProvenance": "external-generated",
+        "state": "cancelled",
+        "current": false
+      }
+    },
+    {
+      "id": "{F55EB441-D7D4-4A1D-8D9A-E2CED88553C4}",
+      "title": "学校",
+      "image": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\25a3143b972d2997bd3f7f9b6df595ed103de2601e874acdd748b97419f2baa6.png",
+      "description": "",
+      "imagePrompt": "高校生の青年と　女子高生が　学校ではお互いを無視している",
+      "padding": 0,
+      "imageFeedback": "",
+      "imageApproved": true,
+      "imageApprovalKey": "b239186653000877b3abe9c9f1f45266214d235563d4d53af1deb905b108ae73",
+      "imageEditEpoch": 3,
+      "displayMode": "image",
+      "animation": {},
+      "sceneNumber": 7,
+      "start": 73.944,
+      "duration": 35.1706666666666,
+      "ready": true,
+      "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\25a3143b972d2997bd3f7f9b6df595ed103de2601e874acdd748b97419f2baa6.png",
+      "sourceCues": [
+        {
+          "cueId": "{954EFF47-19D0-476C-A2BC-0FC50F90B140}",
+          "sourceText": "学校ではもちろん同居の事は秘密です"
+        },
+        {
+          "cueId": "{7E1CC862-4C7E-461A-B3C6-E15FAF283C0F}",
+          "sourceText": "クラスの中で美少女のヒロインはモテモテ"
+        },
+        {
+          "cueId": "{06E0BFD9-F043-4693-B540-B4ED47DD3EA0}",
+          "sourceText": "対する主人公は自分の目立たせないように生きてます"
+        },
+        {
+          "cueId": "{53E88055-CCE1-4766-AD55-2E1FC25043DF}",
+          "sourceText": "このよくあるパターンの作品も増えてきましたね"
+        },
+        {
+          "cueId": "{A0A78CC1-A889-4EBB-B8B9-8868AAD47965}",
+          "sourceText": "ちょっと変わってるのが"
+        },
+        {
+          "cueId": "{24330F2E-0060-417C-9E30-D8A7E6F82400}",
+          "sourceText": "この目立たなくしていた主人公が話が進んでいくとモテそうになる"
+        },
+        {
+          "cueId": "{3350D758-519C-409D-92AB-7402E387887A}",
+          "sourceText": "対するヒロインは彼氏ができそうになると"
+        },
+        {
+          "cueId": "{830770EE-4380-4902-8EDF-754E542598FC}",
+          "sourceText": "周りの友人達が勝手にブロックしていくというよけいなお世話状態"
+        },
+        {
+          "cueId": "{F33B5E4F-BDBD-4CCB-B7A7-2D118427C854}",
+          "sourceText": "話が進むと三角関係が四角関係になりそうな感じがします"
+        },
+        {
+          "cueId": "{0551B914-FE68-492A-AB3E-D28D63CA7380}",
+          "sourceText": "おすすめポイントになるかどうかわかりませんが"
+        }
+      ],
+      "cueCount": 10,
+      "hasMoreCues": false,
+      "imageRequest": {
+        "requestId": "{4A97AACB-76C6-4165-9C50-44F0A95DCFC4}",
+        "sceneId": "{F55EB441-D7D4-4A1D-8D9A-E2CED88553C4}",
+        "sceneNumber": 7,
+        "fingerprint": "b2a98a7bd4256e0eccef8114d026ffab0496ce881b39ceca4531266ddc03dc9d",
+        "prompt": "学校では同居は秘密。冬の日本の高校の教室、同じ男女は制服姿。美少女の女子の周囲に友人が集まり、男子は少し離れた窓際で控えめに座る。女子の友人たちが二人の距離を気にする、軽い恋愛のすれ違い。吹き出し・相関図・文字なし。\r\n1920×1080、16:9の横長。青春恋愛漫画に合うフルカラーのアニメ調イラスト、繊細で清潔な線、落ち着いた冬の色、木の茶色と琥珀色の暖色照明。現代日本の小さな喫茶店。登場人物は一連の画像で同じ外見を維持する。男子は短い黒髪で紺の制服、女子は長い栗色の髪と深緑の目、母親は栗色の肩までの髪。これらの外見と内装は台本を補う今回の創作上の設定。不要な看板・ロゴ・透かし・漫画のコマ枠は入れない。",
+        "feedback": "",
+        "provider": "external-codex",
+        "width": 1920,
+        "height": 1080,
+        "aspectRatio": "1920:1080",
+        "target": "scene",
+        "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+        "adoptedFingerprint": "aefeb294e5d087f9ef64a90eb9a4c7f58a3017506d1c261931b01d9347ed3797",
+        "imageProvenance": "external-generated",
+        "state": "cancelled",
+        "current": false
+      }
+    },
+    {
+      "id": "{AF727F12-24B5-4A97-96DA-F45EB05EC6F3}",
+      "title": "シーン 9",
+      "image": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\ea313ed84951e81d1bd0b043c3d9f08da477765bbc7d9ea4623e8beb5a9ee3e5.png",
+      "description": "",
+      "imagePrompt": "喫茶店のメイド服を着ている女子高生のヒロイン　場所は喫茶店",
+      "padding": 0,
+      "imageFeedback": "",
+      "imageApproved": true,
+      "imageApprovalKey": "ea19f12446a78c1267c513bfc9c2887c551f5c0f84c435e124667c6f606aa83d",
+      "imageEditEpoch": 3,
+      "displayMode": "image",
+      "animation": {},
+      "sceneNumber": 8,
+      "start": 109.114666666667,
+      "duration": 3.44666666666667,
+      "ready": true,
+      "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\ea313ed84951e81d1bd0b043c3d9f08da477765bbc7d9ea4623e8beb5a9ee3e5.png",
+      "sourceCues": [
+        {
+          "cueId": "{243410DA-9CE0-4096-A4F5-CA67D87E9F7B}",
+          "sourceText": "喫茶店のメイド服を着ているヒロインもよいですが"
+        }
+      ],
+      "cueCount": 1,
+      "hasMoreCues": false,
+      "imageRequest": {
+        "requestId": "{A980C44E-4457-4B0E-BA68-52717791EEAA}",
+        "sceneId": "{AF727F12-24B5-4A97-96DA-F45EB05EC6F3}",
+        "sceneNumber": 8,
+        "fingerprint": "2050c7ae7221e478357e6fac8db46c580dd96c688d3cc4e060238da139dc4450",
+        "prompt": "喫茶店のメイド服を着たヒロイン。前と同じ女子が清潔で上品な紺黒のメイド服と白いエプロンで、白いカップを載せたトレーを丁寧に持つ。膝下丈のスカート、健全で落ち着いた接客。前と同じ店内、自然な笑顔。文字なし。\r\n1920×1080、16:9の横長。青春恋愛漫画に合うフルカラーのアニメ調イラスト、繊細で清潔な線、落ち着いた冬の色、木の茶色と琥珀色の暖色照明。現代日本の小さな喫茶店。登場人物は一連の画像で同じ外見を維持する。男子は短い黒髪で紺の制服、女子は長い栗色の髪と深緑の目、母親は栗色の肩までの髪。これらの外見と内装は台本を補う今回の創作上の設定。不要な看板・ロゴ・透かし・漫画のコマ枠は入れない。",
+        "feedback": "",
+        "provider": "external-codex",
+        "width": 1920,
+        "height": 1080,
+        "aspectRatio": "1920:1080",
+        "target": "scene",
+        "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+        "adoptedFingerprint": "2db515f160cdda66469be88287694185fc487f99a61524095144a5f146ae625b",
+        "imageProvenance": "external-generated",
+        "state": "cancelled",
+        "current": false
+      }
+    },
+    {
+      "id": "{25B3245F-C731-43B8-80AC-0EEC8D5F420A}",
+      "title": "シーン 10",
+      "image": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\000c19ea31866e6611daccc1dd8ddef30101d333f5752faeac77064a167ae17e.png",
+      "description": "",
+      "imagePrompt": "喫茶店のメイド服を着ている見た目は若い母親　場所は喫茶店",
+      "padding": 0,
+      "imageFeedback": "",
+      "imageApproved": true,
+      "imageApprovalKey": "947816f0af01fb51fe58b7ad244a06038ea20f06f065f900912a9deb38967acb",
+      "imageEditEpoch": 3,
+      "displayMode": "image",
+      "animation": {},
+      "sceneNumber": 9,
+      "start": 112.561333333333,
+      "duration": 3.02,
+      "ready": true,
+      "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\000c19ea31866e6611daccc1dd8ddef30101d333f5752faeac77064a167ae17e.png",
+      "sourceCues": [
+        {
+          "cueId": "{F4C42576-80E7-48C9-9B83-BE056402AD65}",
+          "sourceText": "母親もメイド服を着て働いています"
+        }
+      ],
+      "cueCount": 1,
+      "hasMoreCues": false,
+      "imageRequest": {
+        "requestId": "{FFB3F597-1AD1-4C92-B2E2-633F4A98634D}",
+        "sceneId": "{25B3245F-C731-43B8-80AC-0EEC8D5F420A}",
+        "sceneNumber": 9,
+        "fingerprint": "1c163b3222773b74ba9530e74dc2ef5bcea4c6d6def517b671a1095b59834517",
+        "prompt": "母親もメイド服で働く喫茶店。同じ女子の母親にあたる成人女性を主役に、上品な同系統のメイド服と白いエプロンでカウンターに白いカップを並べる。成熟した落ち着いた雰囲気、親子と分かる共通の髪色。文字なし。\r\n1920×1080、16:9の横長。青春恋愛漫画に合うフルカラーのアニメ調イラスト、繊細で清潔な線、落ち着いた冬の色、木の茶色と琥珀色の暖色照明。現代日本の小さな喫茶店。登場人物は一連の画像で同じ外見を維持する。男子は短い黒髪で紺の制服、女子は長い栗色の髪と深緑の目、母親は栗色の肩までの髪。これらの外見と内装は台本を補う今回の創作上の設定。不要な看板・ロゴ・透かし・漫画のコマ枠は入れない。",
+        "feedback": "",
+        "provider": "external-codex",
+        "width": 1920,
+        "height": 1080,
+        "aspectRatio": "1920:1080",
+        "target": "scene",
+        "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+        "adoptedFingerprint": "0e0bbc08558bd0504316e64c889d8650432ebdbc5e4aa8331fb8b40c9575f19e",
+        "imageProvenance": "external-generated",
+        "state": "cancelled",
+        "current": false
+      }
+    },
+    {
+      "id": "{6917CC1F-0624-4455-814C-6B72CA62D15B}",
+      "title": "シーン 11",
+      "image": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\e2fca503dbfc8a115a053d8d882c78aae713137a6c88c83aa6aa9a6a011fa3f0.png",
+      "description": "",
+      "imagePrompt": "喫茶店のメイド服を着ている女子高生のヒロイン　と　　喫茶店のメイド服を着ている見た目は若い母親　場所は喫茶店",
+      "padding": 0,
+      "imageFeedback": "",
+      "imageApproved": true,
+      "imageApprovalKey": "fc6d38850f8c7c1d8e47379312dc1ec2c27d7f392992fe475c062996bb9bf077",
+      "imageEditEpoch": 2,
+      "displayMode": "image",
+      "animation": {},
+      "sceneNumber": 10,
+      "start": 115.581333333333,
+      "duration": 6.94666666666667,
+      "ready": true,
+      "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\e2fca503dbfc8a115a053d8d882c78aae713137a6c88c83aa6aa9a6a011fa3f0.png",
+      "sourceCues": [
+        {
+          "cueId": "{8CE7C384-61D9-491D-A7BB-D5D977EA900C}",
+          "sourceText": "そんな親子が働いている喫茶店"
+        },
+        {
+          "cueId": "{6E47EE7B-3FA0-4E33-BBB4-5FCE8AC8B180}",
+          "sourceText": "こんな場所が現実にあったら毎日通ってしまいそうですよね"
+        }
+      ],
+      "cueCount": 2,
+      "hasMoreCues": false,
+      "imageRequest": {
+        "requestId": "{260EFA61-E2E6-4295-A3E3-3DF30FFAF330}",
+        "sceneId": "{6917CC1F-0624-4455-814C-6B72CA62D15B}",
+        "sceneNumber": 10,
+        "fingerprint": "1c47ada110b29350bdf33a3efcbe458e9304b4b6d958bc5d6048a145f9e2336e",
+        "prompt": "親子が働く、毎日通いたくなる喫茶店。同じヒロインと母親が並び、客席へコーヒーを運ぶ暖かい日常の全景。奥では同じ男子がコーヒーを準備。これまでと同じ店内、冬の窓とやわらかい照明。文字なし。\r\n1920×1080、16:9の横長。青春恋愛漫画に合うフルカラーのアニメ調イラスト、繊細で清潔な線、落ち着いた冬の色、木の茶色と琥珀色の暖色照明。現代日本の小さな喫茶店。登場人物は一連の画像で同じ外見を維持する。男子は短い黒髪で紺の制服、女子は長い栗色の髪と深緑の目、母親は栗色の肩までの髪。これらの外見と内装は台本を補う今回の創作上の設定。不要な看板・ロゴ・透かし・漫画のコマ枠は入れない。",
+        "feedback": "",
+        "provider": "external-codex",
+        "width": 1920,
+        "height": 1080,
+        "aspectRatio": "1920:1080",
+        "target": "scene",
+        "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+        "adoptedFingerprint": "548d90b58c9a11518d53f0f15c864f0736d8e797ba8d5f66ebfd44d591f57ba8",
+        "imageProvenance": "external-generated",
+        "state": "cancelled",
+        "current": false
+      }
+    },
+    {
+      "id": "{A3114F51-B0C2-4290-A61A-1FD51B81BD34}",
+      "title": "closing 1",
+      "image": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\7afd8a45589216144105bebfbded874581713f93b37bfc3fb977769a5d73dd0a.png",
+      "description": "",
+      "imagePrompt": "降り積もる雪のような　をイメージする雪景色　を示す背景と　大きなタイトルロゴ",
+      "padding": 0,
+      "imageFeedback": "",
+      "imageApproved": false,
+      "imageApprovalKey": "",
+      "imageEditEpoch": 0,
+      "displayMode": "image",
+      "animation": {},
+      "sceneNumber": 11,
+      "start": 122.528,
+      "duration": 24.172,
+      "ready": false,
+      "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\7afd8a45589216144105bebfbded874581713f93b37bfc3fb977769a5d73dd0a.png",
+      "sourceCues": [
+        {
+          "cueId": "{B55A02CA-6DB8-4208-ADC6-B334442CE751}",
+          "sourceText": "いかがでしたか？"
+        },
+        {
+          "cueId": "{4D817659-2DFD-4FCD-9C95-8B53A21B643F}",
+          "sourceText": "こんな感じで1日1作品紹介出来たらいいなと思ってます"
+        },
+        {
+          "cueId": "{72087986-2C06-40BE-9B98-6DF18E37E204}",
+          "sourceText": "本日2本目なのは"
+        },
+        {
+          "cueId": "{EEA8C65D-4A95-4D32-AD77-81F1B0A05772}",
+          "sourceText": "さきほど紹介した"
+        },
+        {
+          "cueId": "{B0A6C5E6-441A-4254-B5DE-A9C47841CE9F}",
+          "sourceText": "隣の部屋の女騎士は異世界人で飲み友達が"
+        },
+        {
+          "cueId": "{61347395-B1A7-4592-BED5-290ECD1D7ABC}",
+          "sourceText": "すでに一部エピソード有料化だったので"
+        },
+        {
+          "cueId": "{75607241-F608-40E6-8574-B43F119BEDA3}",
+          "sourceText": "もう1本紹介とさせていただきました"
+        },
+        {
+          "cueId": "{AB4A756B-9102-4F6F-A6D8-DC4F4F11E963}",
+          "sourceText": "今後もマンガを紹介していきますので"
+        },
+        {
+          "cueId": "{D8483184-36F9-42FC-9DF2-332221C6F648}",
+          "sourceText": "よろしくお願いします"
+        }
+      ],
+      "cueCount": 9,
+      "hasMoreCues": false,
+      "imageRequest": {
+        "requestId": "{79A04EA7-E3C4-41D2-847D-B5E4C0ACB57A}",
+        "sceneId": "{A3114F51-B0C2-4290-A61A-1FD51B81BD34}",
+        "sceneNumber": 11,
+        "fingerprint": "3407b2ba64b779f342df50f68d1a985212ee3b69a7b3901105e3128ce0b2913d",
+        "prompt": "降り積もる雪のような　をイメージする雪景色　を示す背景と　大きなタイトルロゴ",
+        "feedback": "",
+        "provider": "external-codex",
+        "width": 1920,
+        "height": 1080,
+        "aspectRatio": "1920:1080",
+        "target": "scene",
+        "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+        "state": "adopted",
+        "adoptedFingerprint": "39bd68e24668efa000e4857a779aabe46455ac3922226227ddaf180cc05c9c19",
+        "imageProvenance": "external-generated",
+        "current": true
+      }
+    }
+  ],
+  "background": {
+    "id": "common-background",
+    "title": "共通背景画像",
+    "image": "",
+    "description": "",
+    "imagePrompt": "降り積もる雪のような　をイメージする雪景色",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 0,
+    "displayMode": "image",
+    "animation": {},
+    "target": "common-background",
+    "optional": true,
+    "ready": false,
+    "imagePath": "",
+    "width": 1920,
+    "height": 1080,
+    "sourceCues": []
+  },
+  "thumbnail": {
+    "id": "thumbnail",
+    "title": "サムネイル",
+    "image": "",
+    "description": "",
+    "imagePrompt": "これまでに作ったシーン画像を組み合わせた、動画の最後に表示するサムネイルを作成。\r\n使用中のキャラクターも必ず使い、見た目を参照素材に合わせる。\r\n「漫画」＋マンガの名前を大きく読みやすいロゴとして配置する。",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 0,
+    "displayMode": "image",
+    "animation": {},
+    "target": "thumbnail",
+    "required": true,
+    "ready": false,
+    "sourcesReady": false,
+    "duration": 10,
+    "imagePath": "",
+    "logoText": "漫画　それは、降り積もる雪のような。"
+  }
+}

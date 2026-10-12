@@ -1,0 +1,132 @@
+{
+  "passed": true,
+  "projectId": "{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}",
+  "startingRevision": 1227,
+  "finalRevision": 1231,
+  "targetScenes": [
+    2,
+    11
+  ],
+  "sceneCount": 11,
+  "allSourceCuesUnchanged": true,
+  "allPromptsUnchanged": true,
+  "otherNineImagesAndApprovalsUnchanged": true,
+  "targetHashesMatchGeneratedOriginals": true,
+  "pendingRequests": 0,
+  "voiceReady": 49,
+  "voiceHeard": 49,
+  "modified": true,
+  "thumbnailSourcesReady": false,
+  "checks": [
+    {
+      "sceneNumber": 1,
+      "sceneId": "{DCA3DDB7-2257-41ED-9BB8-4393804EACBB}",
+      "target": false,
+      "sourceCuesUnchanged": true,
+      "promptUnchanged": true,
+      "imageApproved": true,
+      "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\ae88e1c997fff5bb1a6d694eac21e5098520330f03ef7fbf83eed7ed256395a0.png",
+      "sha256": "ae88e1c997fff5bb1a6d694eac21e5098520330f03ef7fbf83eed7ed256395a0"
+    },
+    {
+      "sceneNumber": 2,
+      "sceneId": "{6037132E-2E81-4056-9518-7F794206949A}",
+      "target": true,
+      "sourceCuesUnchanged": true,
+      "promptUnchanged": true,
+      "imageApproved": false,
+      "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\563c7c842e410b7193d3d0516a31c89146cecb095e1bdbbb582074bbe1b62acd.png",
+      "sha256": "563c7c842e410b7193d3d0516a31c89146cecb095e1bdbbb582074bbe1b62acd"
+    },
+    {
+      "sceneNumber": 3,
+      "sceneId": "{94A51E0E-BD82-429E-929A-1B36246EF19C}",
+      "target": false,
+      "sourceCuesUnchanged": true,
+      "promptUnchanged": true,
+      "imageApproved": true,
+      "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\a278dc5e99a9a31732b67facbbc7fb25115b8b493bba84104f561eeeac09c3d4.png",
+      "sha256": "a278dc5e99a9a31732b67facbbc7fb25115b8b493bba84104f561eeeac09c3d4"
+    },
+    {
+      "sceneNumber": 4,
+      "sceneId": "{C84D377B-1E68-425B-A70D-30E5B112DDF2}",
+      "target": false,
+      "sourceCuesUnchanged": true,
+      "promptUnchanged": true,
+      "imageApproved": true,
+      "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\4a2fc67179e025a28014067751206b93e5a0106d4341923c258ae3e016bb956d.png",
+      "sha256": "4a2fc67179e025a28014067751206b93e5a0106d4341923c258ae3e016bb956d"
+    },
+    {
+      "sceneNumber": 5,
+      "sceneId": "{73D35C39-2FE4-491D-8169-68B23361BBCF}",
+      "target": false,
+      "sourceCuesUnchanged": true,
+      "promptUnchanged": true,
+      "imageApproved": true,
+      "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\766a9624ebc4c024b1e179a7e4882e722b5af9a7df3ed6b50ccd1facb3681551.png",
+      "sha256": "766a9624ebc4c024b1e179a7e4882e722b5af9a7df3ed6b50ccd1facb3681551"
+    },
+    {
+      "sceneNumber": 6,
+      "sceneId": "{6C78A905-E9FA-4AA4-86E4-F97A68DE51B2}",
+      "target": false,
+      "sourceCuesUnchanged": true,
+      "promptUnchanged": true,
+      "imageApproved": true,
+      "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\3751264e736d2a38767328b8c1641a84c61c8d86c7a308a3ca61b3da5c488872.png",
+      "sha256": "3751264e736d2a38767328b8c1641a84c61c8d86c7a308a3ca61b3da5c488872"
+    },
+    {
+      "sceneNumber": 7,
+      "sceneId": "{F55EB441-D7D4-4A1D-8D9A-E2CED88553C4}",
+      "target": false,
+      "sourceCuesUnchanged": true,
+      "promptUnchanged": true,
+      "imageApproved": true,
+      "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\25a3143b972d2997bd3f7f9b6df595ed103de2601e874acdd748b97419f2baa6.png",
+      "sha256": "25a3143b972d2997bd3f7f9b6df595ed103de2601e874acdd748b97419f2baa6"
+    },
+    {
+      "sceneNumber": 8,
+      "sceneId": "{AF727F12-24B5-4A97-96DA-F45EB05EC6F3}",
+      "target": false,
+      "sourceCuesUnchanged": true,
+      "promptUnchanged": true,
+      "imageApproved": true,
+      "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\ea313ed84951e81d1bd0b043c3d9f08da477765bbc7d9ea4623e8beb5a9ee3e5.png",
+      "sha256": "ea313ed84951e81d1bd0b043c3d9f08da477765bbc7d9ea4623e8beb5a9ee3e5"
+    },
+    {
+      "sceneNumber": 9,
+      "sceneId": "{25B3245F-C731-43B8-80AC-0EEC8D5F420A}",
+      "target": false,
+      "sourceCuesUnchanged": true,
+      "promptUnchanged": true,
+      "imageApproved": true,
+      "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\000c19ea31866e6611daccc1dd8ddef30101d333f5752faeac77064a167ae17e.png",
+      "sha256": "000c19ea31866e6611daccc1dd8ddef30101d333f5752faeac77064a167ae17e"
+    },
+    {
+      "sceneNumber": 10,
+      "sceneId": "{6917CC1F-0624-4455-814C-6B72CA62D15B}",
+      "target": false,
+      "sourceCuesUnchanged": true,
+      "promptUnchanged": true,
+      "imageApproved": true,
+      "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\e2fca503dbfc8a115a053d8d882c78aae713137a6c88c83aa6aa9a6a011fa3f0.png",
+      "sha256": "e2fca503dbfc8a115a053d8d882c78aae713137a6c88c83aa6aa9a6a011fa3f0"
+    },
+    {
+      "sceneNumber": 11,
+      "sceneId": "{A3114F51-B0C2-4290-A61A-1FD51B81BD34}",
+      "target": true,
+      "sourceCuesUnchanged": true,
+      "promptUnchanged": true,
+      "imageApproved": false,
+      "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\7afd8a45589216144105bebfbded874581713f93b37bfc3fb977769a5d73dd0a.png",
+      "sha256": "7afd8a45589216144105bebfbded874581713f93b37bfc3fb977769a5d73dd0a"
+    }
+  ]
+}

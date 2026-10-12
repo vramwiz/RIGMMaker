@@ -5,6 +5,8 @@ interface
 
 uses System.SysUtils, System.JSON, System.Generics.Collections, RigmModel, RigmMovieActing, RigmMovieComposition;
 
+const RigmCommonBackgroundId = 'common-background';
+      RigmThumbnailId = 'thumbnail';
 type
   TRigmMovieSpeaker = class
   public
@@ -17,6 +19,7 @@ type
   TRigmMovieCue = class
   public
     Id, Scene, SpeakerId, Text, Subtitle, Expression, Motion, Background, Emotion: string;
+    FaceAutomatic: Boolean; // 映像の表情。VOICEVOXのstyleとは独立。
     VoiceQuery, VoiceQueryKey: string; // 選択行の詳細queryと、その入力元の指紋。
     VoiceReading: string; VoiceSettings: TJSONObject; // 空の読みは元の音声文。個別query値は任意。
     SubtitleNote: string; // 表示字幕のメモ。音声キーには含めない。
@@ -33,11 +36,13 @@ type
     destructor Destroy; override;
     function Json: TJSONObject;
     function SpokenText: string; // 実際に合成へ送る文。字幕・原稿は変更しない。
+    function VisualEmotion: string;
     class function FromJson(O: TJSONObject): TRigmMovieCue; static; // 既存保存値の再利用・複製。呼出側所有。
   end;
   TRigmMovieProject = class
   public
-    Id, Title, CharacterFile, EngineUrl, FileName, FfmpegExe,EncodeProfile,OutputTarget: string;
+    Id, Title, CharacterFile, EngineUrl, FileName, FfmpegExe,EncodeProfile: string;
+    OutputTarget: string; // 台本に保存する動画出力先。保存・読込時に作品基準のフルパスへそろえる。
     Width, Height, Fps: Integer;
     BackgroundColor: Cardinal;
     BgmFile: string; // Managed PCM16 WAV; original audio is never modified.
@@ -45,9 +50,12 @@ type
     Revision: Integer;
     Modified: Boolean;
     ScriptWizard: TJSONObject; // 任意の段階式台本情報。旧作品ではnilのまま。
+    Posting: TJSONObject; // 投稿用タイトル・概要・作成日。映像・音声の指紋へ含めない。
     EndCards: TJSONArray; // 発話sceneの後の独立した無音画像区間。
     WorkflowStage, PreviewKey, PreviewPath, PreviewHash, VideoKey, VideoPath, VideoHash: string;
     Layout,ThemeBackground,LDirection: string;
+    CommonBackground: TRigmMovieScene; // 所有する画像制作情報。実シーン・区間には含めず、画像の正本はThemeBackground。
+    Thumbnail: TRigmMovieScene; // 所有する必須サムネイルの制作情報。発話sceneには含めない。
     Characters: TObjectList<TRigmMovieCharacter>;
     Scenes: TObjectList<TRigmMovieScene>;
     Speakers: TObjectList<TRigmMovieSpeaker>;
@@ -58,6 +66,7 @@ type
     function Cue(const CueId: string): TRigmMovieCue;
     function Character(const Id: string): TRigmMovieCharacter;
     function Scene(const Id: string): TRigmMovieScene;
+    function ImageTarget(const Id: string): TRigmMovieScene; // 借用。共通背景の画像参照はThemeBackgroundへ同期する。
     function SceneAt(Seconds: Double; out Start,Local: Double): TRigmMovieScene;
     function SceneDuration(S: TRigmMovieScene): Double;
     function CueStart(C: TRigmMovieCue): Double;
@@ -72,6 +81,7 @@ type
     class function FromText(const Script: string): TRigmMovieProject; static;
     function VoiceQuerySourceKey(C: TRigmMovieCue): string;
     function EffectiveVoiceQuery(C: TRigmMovieCue): string;
+    function EffectiveVoiceSettings(C: TRigmMovieCue): TJSONObject; // 借用。作品共通値がなければ旧セリフ値。
     function AudioFingerprint(C: TRigmMovieCue): string;
     function AudioReady(C: TRigmMovieCue): Boolean;
     function AudioHeard(C: TRigmMovieCue): Boolean;
@@ -86,6 +96,7 @@ type
 procedure ValidateVoiceQuery(const QueryJson: string);
 procedure ValidateVoiceValues(Settings: TJSONObject); // 個別queryパラメータの範囲。
 procedure ValidateVoiceReading(const Text: string); // UTF16と音声上限。
+// 作品と素材を原子保存し、成功時に保存後の参照をProjectへ反映する。出力先は元作品基準のフルパスを保持する。
 procedure SaveMovie(Project: TRigmMovieProject; const FileName: string; Organized: Boolean=False);
 function LoadMovie(const FileName: string): TRigmMovieProject;
 function MovieSchema: TJSONObject;
@@ -93,7 +104,7 @@ function ResolveMoviePath(const BaseFile, Path: string): string;
 
 implementation
 
-uses System.IOUtils, System.Math, System.StrUtils, System.Hash, Winapi.Windows, RigmJson, RigmMovieOutput, RigmMovieEndCards, RigmMovieTransitions, RigmVoiceEffectSettings, RigmAudioFilePaths;
+uses System.IOUtils, System.Math, System.StrUtils, System.Hash, Winapi.Windows, RigmJson, RigmMovieOutput, RigmMovieEndCards, RigmMovieTransitions, RigmVoiceEffectSettings, RigmAudioFilePaths, RigmMoviePosting;
 
 constructor TRigmMovieSpeaker.Create;
 begin inherited; Id := 'narrator'; Name := 'ナレーター'; StyleId := -1; Speed := 1; Intonation := 1; Volume := 1; end;
@@ -107,12 +118,20 @@ end;
 constructor TRigmMovieCue.Create;
 begin
   inherited; Id := NewRigmId; Scene := 'scene1'; SpeakerId := 'narrator';
-  AudioEffects := TJSONObject.Create; VoiceSettings := TJSONObject.Create; VoiceStyleId := -1; AudioEffect := 'none'; Emotion := 'neutral'; Pause := 0.3; Expression := 'neutral'; Motion := 'idle'; Parameters := TJSONObject.Create; Acting := TRigmMovieActing.Create;
+  AudioEffects := TJSONObject.Create; VoiceSettings := TJSONObject.Create; VoiceStyleId := -1; AudioEffect := 'none'; Emotion := 'neutral'; FaceAutomatic := True; Pause := 0.3; Expression := 'neutral'; Motion := 'idle'; Parameters := TJSONObject.Create; Acting := TRigmMovieActing.Create;
 end;
 destructor TRigmMovieCue.Destroy;
 begin AudioEffects.Free; VoiceSettings.Free; Acting.Free; Parameters.Free; inherited; end;
 function TRigmMovieCue.SpokenText: string;
 begin Result := VoiceReading; if Result='' then Result := Text; end;
+function TRigmMovieCue.VisualEmotion: string;
+begin
+  Result := Emotion; if not FaceAutomatic then Exit;
+  var Question := Text.Contains('?') or Text.Contains('？') or Text.Contains('⁇') or Text.Contains('⁈') or Text.Contains('⁉');
+  var Surprise := Text.Contains('!') or Text.Contains('！') or Text.Contains('‼') or Text.Contains('⁈') or Text.Contains('⁉');
+  if Question and Surprise then Result := 'confused'
+  else if Question then Result := 'doubt' else if Surprise then Result := 'surprised';
+end;
 function TRigmMovieCue.Json: TJSONObject;
 begin
   Result := TJSONObject.Create; Result.AddPair('id',Id); Result.AddPair('scene',Scene);
@@ -129,6 +148,7 @@ begin
   Result.AddPair('parameters',Parameters.Clone as TJSONObject);
   Result.AddPair('acting',Acting.Json);
   if Emotion<>'neutral' then Result.AddPair('emotion',Emotion);
+  AddB(Result,'faceAutomatic',FaceAutomatic);
   if VoiceStyleId>=0 then AddN(Result,'voiceStyleId',VoiceStyleId);
 end;
 class function TRigmMovieCue.FromJson(O: TJSONObject): TRigmMovieCue;
@@ -147,6 +167,8 @@ begin
         var Values := JO(Q,'voiceSettings').Clone as TJSONObject; C.VoiceSettings.Free; C.VoiceSettings := Values;
       end;
       C.Emotion := JS(Q,'emotion','neutral'); C.VoiceStyleId := JI(Q,'voiceStyleId',-1); C.Expression := JS(Q,'expression','neutral'); C.Motion := JS(Q,'motion','idle'); C.Background := JS(Q,'background');
+      if (Q.GetValue('faceAutomatic')<>nil) and not (Q.GetValue('faceAutomatic') is TJSONBool) then raise ERigm.Create('表情の自動設定は真偽値で指定してください。');
+      C.FaceAutomatic := JB(Q,'faceAutomatic',(C.Emotion='neutral') and (C.Expression='neutral'));
       C.Pause := JN(Q,'pause',0.3); C.AudioSeconds := JN(Q,'audioSeconds');
       C.WaveFile := JS(Q,'waveFile'); C.LabFile := JS(Q,'labFile'); C.AudioKey := JS(Q,'audioKey');
       for var K in ['voiceHeardKey','audioEffect','effectWaveFile','effectAudioKey'] do
@@ -169,11 +191,15 @@ begin
   Characters := TObjectList<TRigmMovieCharacter>.Create(True); Scenes := TObjectList<TRigmMovieScene>.Create(True);
   EncodeProfile := 'balanced'; BgmVolume := 0.25;
   EndCards := TJSONArray.Create;
+  CommonBackground := TRigmMovieScene.Create; CommonBackground.Id := RigmCommonBackgroundId;
+  CommonBackground.Title := '共通背景画像'; CommonBackground.DisplayMode := 'none';
+  Thumbnail := TRigmMovieScene.Create; Thumbnail.Id := RigmThumbnailId;
+  Thumbnail.Title := 'サムネイル'; Thumbnail.DisplayMode := 'image';
   Speakers := TObjectList<TRigmMovieSpeaker>.Create(True); Cues := TObjectList<TRigmMovieCue>.Create(True);
   Speakers.Add(TRigmMovieSpeaker.Create); Revision := 1;
 end;
 destructor TRigmMovieProject.Destroy;
-begin EndCards.Free; ScriptWizard.Free; Scenes.Free; Characters.Free; Cues.Free; Speakers.Free; inherited; end;
+begin Thumbnail.Free; Posting.Free; CommonBackground.Free; EndCards.Free; ScriptWizard.Free; Scenes.Free; Characters.Free; Cues.Free; Speakers.Free; inherited; end;
 procedure TRigmMovieProject.Changed;
 begin Inc(Revision); Modified := True; end;
 function TRigmMovieProject.Speaker(const SpeakerId: string): TRigmMovieSpeaker;
@@ -197,11 +223,19 @@ begin
   Workflow.AddPair('videoKey',VideoKey); Workflow.AddPair('videoPath',VideoPath); Workflow.AddPair('videoHash',VideoHash);
   Result.AddPair('workflow',Workflow);
   if ScriptWizard<>nil then Result.AddPair('scriptWizard',ScriptWizard.Clone as TJSONObject);
+  if Posting<>nil then Result.AddPair('posting',Posting.Clone as TJSONObject);
   if EndCards.Count>0 then Result.AddPair('endCards',EndCards.Clone as TJSONArray);
+  if (Thumbnail.Image<>'') or (Thumbnail.ImagePrompt<>'') or (Thumbnail.ImageFeedback<>'') or Thumbnail.ImageApproved or (Thumbnail.ImageEditEpoch<>0) then
+    Result.AddPair('thumbnail',Thumbnail.Json);
   AddN(Result,'backgroundColor',BackgroundColor); AddN(Result,'revision',Revision);
   A := TJSONArray.Create; Result.AddPair('speakers',A); for var S in Speakers do A.AddElement(S.Json);
   A := TJSONArray.Create; Result.AddPair('cues',A); for var C in Cues do A.AddElement(C.Json);
-  if (Scenes.Count>0) or (Characters.Count>0) or
+  if (ThemeBackground<>'') or (CommonBackground.ImagePrompt<>'') or (CommonBackground.ImageFeedback<>'') or
+    CommonBackground.ImageApproved or (CommonBackground.ImageEditEpoch<>0) then begin
+    var Background := CommonBackground.Json; Background.RemovePair('image').Free; Background.AddPair('image',ThemeBackground);
+    Result.AddPair('commonBackground',Background);
+  end;
+  if (Scenes.Count>0) or (Characters.Count>0) or (ThemeBackground<>'') or
     ((ScriptWizard<>nil) and (ScriptWizard.GetValue('layoutChoice')<>nil)) then begin
     Result.AddPair('layout',Layout); Result.AddPair('themeBackground',ThemeBackground); Result.AddPair('lDirection',LDirection);
     A := TJSONArray.Create; Result.AddPair('characters',A); for var Character in Characters do A.AddElement(Character.Json);
@@ -220,12 +254,26 @@ begin
     if JI(O,'formatVersion',1) <> 1 then raise ERigm.Create('未対応の動画プロジェクト版です。');
     Result.Id := JS(O,'projectId',Result.Id); Result.Title := JS(O,'title',Result.Title);
     if O.GetValue('scriptWizard')<>nil then Result.ScriptWizard := JO(O,'scriptWizard').Clone as TJSONObject;
+    if O.GetValue('posting')<>nil then begin
+      if not (O.GetValue('posting') is TJSONObject) then raise ERigm.Create('投稿用情報はオブジェクトで指定してください。');
+      Result.Posting := JO(O,'posting').Clone as TJSONObject; ValidateMoviePosting(Result.Posting);
+    end;
     if O.GetValue('endCards')<>nil then begin if not(O.GetValue('endCards') is TJSONArray) then raise ERigm.Create('末尾カードは配列です。'); Result.EndCards.Free; Result.EndCards := JA(O,'endCards').Clone as TJSONArray; end;
     Result.FfmpegExe := JS(O,'ffmpeg'); Result.CharacterFile := JS(O,'character'); Result.EngineUrl := JS(O,'engineUrl',Result.EngineUrl);
     var Preset := JS(O,'outputPreset','custom'); var PW,PH,PF: Integer; MoviePresetDimensions(Preset,PW,PH,PF);
     if PW>0 then begin Result.Width := PW; Result.Height := PH; Result.Fps := PF; end;
     Result.Width := JI(O,'width',Result.Width); Result.Height := JI(O,'height',Result.Height); Result.Fps := JI(O,'fps',Result.Fps);
     Result.Layout := LowerCase(JS(O,'layout','theme')); Result.ThemeBackground := JS(O,'themeBackground'); Result.LDirection := LowerCase(JS(O,'lDirection','right'));
+    if O.GetValue('commonBackground')<>nil then begin
+      var Background := TRigmMovieScene.FromJson(JO(O,'commonBackground'));
+      Result.CommonBackground.Free; Result.CommonBackground := Background;
+    end;
+    Result.CommonBackground.Image := Result.ThemeBackground;
+    if O.GetValue('thumbnail')<>nil then begin
+      if not (O.GetValue('thumbnail') is TJSONObject) then raise ERigm.Create('サムネイルの形式が不正です。');
+      var Thumb := TRigmMovieScene.FromJson(JO(O,'thumbnail'));
+      Result.Thumbnail.Free; Result.Thumbnail := Thumb;
+    end;
     if O.GetValue('characters')<>nil then for var V in JA(O,'characters') do begin if not(V is TJSONObject) then raise ERigm.Create('Character object required'); Result.Characters.Add(TRigmMovieCharacter.FromJson(TJSONObject(V))); end;
     if O.GetValue('scenes')<>nil then for var V in JA(O,'scenes') do begin if not(V is TJSONObject) then raise ERigm.Create('Scene object required'); Result.Scenes.Add(TRigmMovieScene.FromJson(TJSONObject(V))); end;
     Result.EncodeProfile := JS(O,'encodeProfile','balanced');
@@ -352,7 +400,19 @@ end;
 procedure TRigmMovieProject.Validate;
 var Seen: TDictionary<string,Boolean>;
 begin
+  ValidateMoviePosting(Posting);
   BindCharacterPlacements;
+  CommonBackground.Validate;
+  Thumbnail.Validate;
+  if (Thumbnail.Id<>RigmThumbnailId) or (Thumbnail.DisplayMode<>'image') then raise ERigm.Create('サムネイルは必須の画像項目です。');
+  if (ScriptWizard<>nil) and (ScriptWizard.GetValue('voice') is TJSONObject) then begin
+    var Voice := JO(ScriptWizard,'voice');
+    if Voice.GetValue('commonSettings')<>nil then begin
+      var Settings := JO(Voice,'commonSettings'); ValidateVoiceValues(Settings);
+      if Settings.Count<>6 then raise ERigm.Create('共通VOICEVOX設定には6項目が必要です。');
+    end;
+  end;
+  if CommonBackground.Id<>RigmCommonBackgroundId then raise ERigm.Create('共通背景の識別子が不正です。');
   ValidateMovieEndCards(EndCards);
   if not MatchText(WorkflowStage,['script','setup','audio','preview','export','complete']) then raise ERigm.Create('Invalid movie workflow stage');
   MovieEncoderOptions(EncodeProfile);
@@ -385,6 +445,7 @@ begin
     end;
     Seen.Clear;
     for var Scene in Scenes do begin
+      if (Scene.Id=RigmCommonBackgroundId) or (Scene.Id=RigmThumbnailId) then raise ERigm.Create('背景・サムネイルを発話シーンに割り当てることはできません。');
       Scene.Validate; ValidateMovieImageTransitions(Scene.Animation); if Seen.ContainsKey(Scene.Id) then raise ERigm.Create('Duplicate scene identifier'); Seen.Add(Scene.Id,True);
       var Count := 0; for var C in Cues do if C.Scene=Scene.Id then Inc(Count);
       if Count=0 then raise ERigm.Create('Each scene needs at least one dialogue or subtitle cue');
@@ -415,12 +476,20 @@ function TRigmMovieProject.VoiceQuerySourceKey(C: TRigmMovieCue): string;
 begin Result := THashSHA2.GetHashString(EngineUrl+#10+C.SpokenText+#10+EffectiveStyle(C).ToString+#10+Speaker(C.SpeakerId).VoiceUuid); end;
 function TRigmMovieProject.EffectiveVoiceQuery(C: TRigmMovieCue): string;
 begin Result := ''; if (C.VoiceQuery<>'') and (C.VoiceQueryKey=VoiceQuerySourceKey(C)) then Result := C.VoiceQuery; end;
+function TRigmMovieProject.EffectiveVoiceSettings(C: TRigmMovieCue): TJSONObject;
+begin
+  Result := C.VoiceSettings;
+  if (ScriptWizard=nil) or not (ScriptWizard.GetValue('voice') is TJSONObject) then Exit;
+  var Voice := JO(ScriptWizard,'voice');
+  if Voice.GetValue('commonSettings') is TJSONObject then Result := JO(Voice,'commonSettings');
+end;
 function TRigmMovieProject.AudioFingerprint(C: TRigmMovieCue): string;
 var O: TJSONObject;
 begin
   O := Speaker(C.SpeakerId).Json;
   if C.VoiceStyleId>=0 then begin O.RemovePair('styleId').Free; AddN(O,'styleId',C.VoiceStyleId); end;
-  if C.VoiceSettings.Count>0 then O.AddPair('voiceSettings',C.VoiceSettings.Clone as TJSONObject);
+  var Settings := EffectiveVoiceSettings(C);
+  if Settings.Count>0 then O.AddPair('voiceSettings',Settings.Clone as TJSONObject);
   if EffectiveVoiceQuery(C)<>'' then O.AddPair('voiceQuery',EffectiveVoiceQuery(C));
   try Result := THashSHA2.GetHashString(EngineUrl+#10+C.SpokenText+#10+O.ToJSON); finally O.Free; end;
 end;
@@ -441,6 +510,12 @@ function TRigmMovieProject.Character(const Id: string): TRigmMovieCharacter;
 begin Result := nil; for var C in Characters do if C.Id=Id then Exit(C); end;
 function TRigmMovieProject.Scene(const Id: string): TRigmMovieScene;
 begin Result := nil; for var S in Scenes do if S.Id=Id then Exit(S); end;
+function TRigmMovieProject.ImageTarget(const Id: string): TRigmMovieScene;
+begin
+  if Id=RigmThumbnailId then Exit(Thumbnail);
+  if Id<>RigmCommonBackgroundId then Exit(Scene(Id));
+  CommonBackground.Image := ThemeBackground; Result := CommonBackground;
+end;
 function TRigmMovieProject.HasStoredAudio(C: TRigmMovieCue): Boolean;
 begin Result := (C.Text='') or ((C.AudioSeconds>0) and (C.WaveFile<>'') and AudioFileExists(ResolveMoviePath(FileName,C.WaveFile))); end;
 function TRigmMovieProject.EffectiveStyle(C: TRigmMovieCue): Integer;
@@ -576,8 +651,10 @@ begin
   Saved := Project.Clone; O := nil;
   Temp := TargetFile+'.'+NewRigmId+'.tmp';
   try
+    Saved.OutputTarget := ResolveMoviePath(Project.FileName,Project.OutputTarget);
     Saved.CharacterFile := Asset(Project.CharacterFile);
     Saved.ThemeBackground := Asset(Project.ThemeBackground);
+    Saved.Thumbnail.Image := Asset(Project.Thumbnail.Image);
     Saved.BgmFile := Asset(Project.BgmFile);
     for var I := 0 to Saved.Characters.Count-1 do begin
       Saved.Characters[I].FileName := Asset(Project.Characters[I].FileName);
@@ -609,6 +686,8 @@ begin
     TFile.WriteAllText(Temp,O.ToJSON,TEncoding.UTF8);
     if not MoveFileEx(PChar(Temp),PChar(TargetFile),MOVEFILE_REPLACE_EXISTING or MOVEFILE_WRITE_THROUGH) then RaiseLastOSError;
     Project.CharacterFile := Saved.CharacterFile; Project.ThemeBackground := Saved.ThemeBackground; Project.BgmFile := Saved.BgmFile;
+    Project.CommonBackground.Image := Project.ThemeBackground;
+    Project.Thumbnail.Image := Saved.Thumbnail.Image;
     for var I := 0 to Project.Characters.Count-1 do begin
       Project.Characters[I].FileName := Saved.Characters[I].FileName;
       Project.Characters[I].Expressions.Free; Project.Characters[I].Expressions := Saved.Characters[I].Expressions.Clone as TJSONObject;
@@ -617,7 +696,7 @@ begin
     for var I := 0 to Project.Scenes.Count-1 do begin Project.Scenes[I].Image := Saved.Scenes[I].Image; Project.Scenes[I].Animation.Free; Project.Scenes[I].Animation := Saved.Scenes[I].Animation.Clone as TJSONObject; end;
     Project.EndCards.Free; Project.EndCards := Saved.EndCards.Clone as TJSONArray;
     if (Saved.ScriptWizard<>nil) and (Saved.ScriptWizard.GetValue('closingData') is TJSONObject) then begin Project.ScriptWizard.RemovePair('closingData').Free; Project.ScriptWizard.AddPair('closingData',JO(Saved.ScriptWizard,'closingData').Clone as TJSONObject); end;
-    Project.PreviewPath := Saved.PreviewPath; Project.VideoPath := Saved.VideoPath;
+    Project.PreviewPath := Saved.PreviewPath; Project.VideoPath := Saved.VideoPath; Project.OutputTarget := Saved.OutputTarget;
     for var I := 0 to Project.Cues.Count-1 do begin
       Project.Cues[I].EffectWaveFile := Saved.Cues[I].EffectWaveFile;
       Project.Cues[I].WaveFile := Saved.Cues[I].WaveFile; Project.Cues[I].LabFile := Saved.Cues[I].LabFile; Project.Cues[I].Background := Saved.Cues[I].Background;
@@ -630,17 +709,23 @@ var O: TJSONObject;
 begin
   if TFile.GetSize(FileName)>16*1024*1024 then raise ERigm.Create('動画プロジェクトが大きすぎます。');
   O := ParseObject(TFile.ReadAllText(FileName,TEncoding.UTF8));
-  try Result := TRigmMovieProject.FromJson(O); Result.FileName := ExpandFileName(FileName); finally O.Free; end;
+  try
+    Result := TRigmMovieProject.FromJson(O);
+    try
+      Result.FileName := ExpandFileName(FileName);
+      Result.OutputTarget := ResolveMoviePath(Result.FileName,Result.OutputTarget);
+    except Result.Free; raise; end;
+  finally O.Free; end;
 end;
 function MovieSchema: TJSONObject;
 begin
   Result := ParseObject('{"format":"RIGM-MOVIE","formatVersion":1,"textSyntax":"# scene title / speaker: text / plain text uses narrator",'+
     '"cueFields":{"id":"stable string","scene":"string","speaker":"speaker id","text":"spoken text <=2000 characters","subtitle":"display text","pause":"seconds 0..60 after audio",'+
-    '"expression":"neutral|smile|serious|sad","motion":"idle|still|nod|emphasis","background":"local image file","parameters":"RIGM parameter id -> number","acting":"partial actingFields object"},'+
+    '"expression":"neutral|smile|serious|sad","emotion":"neutral|happy|sad|serious|angry|gentle|surprised|doubt|joy|confused; visual face, independent of voiceStyleId","faceAutomatic":"boolean; ?=doubt, !=surprised, both=confused","motion":"idle|still|nod|emphasis","background":"local image file","parameters":"RIGM parameter id -> number","acting":"partial actingFields object"},'+
     '"actingFields":{"mouthMode":"auto|assets|deform","blinkMode":"auto|assets|deform","mouthGain":"0..2","lipLead":"-0.3..0.3 seconds; positive samples later audio","blinkStrength":"0..1","blinkInterval":"0.3..30 seconds","blinkDuration":"0.04..1 seconds, <= interval","blinkPhase":"0..30 seconds",'+
     '"headGain":"0..3","bodyGain":"0..3","imageAttention":"auto|off|head; image-direction head tilt only; no pupil gaze; auto uses scene.animation.explainImage or explicit image-explanation text","onset":"0..600 cue-local seconds","duration":"-1=cue end or 0..660 seconds","fadeIn":"0..60 seconds","fadeOut":"0..60 seconds","variants":"array of actual groupId/partId; direct children only; runtime visibility; no source edits"},'+
     '"speakerFields":{"id":"string","name":"display name","styleId":"from engine speakers catalog; -1 unselected","speed":"0.5..2","pitch":"-0.15..0.15","intonation":"0..2","volume":"0..2"},'+
-    '"audioPolicy":"fingerprint invalidation; no synthetic fallback speech","video":"MJPEG + PCM16 mono AVI or optional H264/AAC MP4 via existing ffmpeg.exe; every spoken cue must be ready",'+
+    '"audioPolicy":"fingerprint invalidation; no synthetic fallback speech","video":"MJPEG + PCM16 mono AVI or H264/AAC MP4 via bundled FFmpeg DLLs; optional external ffmpeg.exe override; every spoken cue must be ready",'+
     '"coordinates":"character centered in frame; subtitles below; time in seconds"}');
   Result.AddPair('outputPresets',MovieOutputPresets);
   Result.AddPair('bgmFields',ParseObject('{"file":"managed PCM16 mono/stereo WAV; local path input copied and validated","volume":"independent gain 0..2","fadeOut":"0..3600 requested seconds, clamped to video duration; shorter BGM repeats"}'));

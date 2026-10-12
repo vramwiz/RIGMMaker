@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "recordType": "rigm_scene_image_creation_learning",
+  "date": "2026-10-12",
+  "purpose": "背景・総評の追加画像と最後のサムネイル",
+  "userInstruction": "サムネイル　背景　ほか1シーンの画像が来ていないので作って送って",
+  "method": "内蔵image_gen.imagegenで既存生成画像を参照し、現行pending要求を照合してパイプ採用・保存。",
+  "initialRequirements": "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\20261012-scene-images\\additional\\initial-scenes.json",
+  "prompts": [
+    "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\20261012-scene-images\\additional\\background-prompt.json",
+    "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\20261012-scene-images\\additional\\summary-prompt.json",
+    "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\20261012-scene-images\\additional\\thumbnail-prompt.json"
+  ],
+  "verification": {
+    "checkedAt": "2026-10-12T05:48:17.016875+00:00",
+    "projectId": "{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}",
+    "revision": 1250,
+    "generatedAndSent": [
+      "background",
+      "summary",
+      "thumbnail"
+    ],
+    "workspaceManagedSavedHashesMatch": true,
+    "other10ImagesAndExistingApprovalsPreserved": true,
+    "source44CuesAndAssignmentsPreserved": true,
+    "summaryChartPreserved": true,
+    "thumbnailSourcesReady": true,
+    "thumbnailReady": false,
+    "images": [
+      {
+        "requestId": "{FE7B41A8-6657-4355-BFDD-9D3C43167857}",
+        "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a12df3-e8ce-7aa3-9c6e-aaa7f2a622d3\\exec-3689d5cd-9344-48c3-b96b-e78bdbed8c8a.png",
+        "revision": 1241,
+        "sha256": "b637b895be7804d693dfe8f6a20ad6232f0c4b6ead50da382307b95db824e221",
+        "sceneId": "common-background",
+        "key": "background",
+        "workspacePath": "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\20261012-scene-images\\additional\\background.png",
+        "sentAt": "2026-10-12T05:41:56.6061685Z",
+        "verified": true,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}\\Images\\b637b895be7804d693dfe8f6a20ad6232f0c4b6ead50da382307b95db824e221.png",
+        "humanApproved": false,
+        "exchangePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Exchange\\generated-additional-20261012-background-b637b895be78.png",
+        "savedAssetPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}\\project.assets\\b637b895be7804d693dfe8f6a20ad6232f0c4b6ead50da382307b95db824e221.png",
+        "savedAssetHashVerified": true,
+        "width": 1672,
+        "height": 941,
+        "mode": "RGB"
+      },
+      {
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}\\Images\\20f9dfb419b2c6b243b8ce059242c32b311fea6eb36e01aa4271d92ddfa6f737.png",
+        "exchangePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Exchange\\generated-additional-20261012-summary-20f9dfb419b2.png",
+        "sentAt": "2026-10-12T05:43:00.3558986Z",
+        "requestId": "{86838FD3-33FE-4917-9017-FA8856E7EBBC}",
+        "revision": 1242,
+        "verified": true,
+        "key": "summary",
+        "sceneId": "{2708DD7B-E59B-49EA-A3AC-06456B4B3BF8}",
+        "sha256": "20f9dfb419b2c6b243b8ce059242c32b311fea6eb36e01aa4271d92ddfa6f737",
+        "workspacePath": "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\20261012-scene-images\\additional\\summary.png",
+        "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a12df3-e8ce-7aa3-9c6e-aaa7f2a622d3\\exec-2df4f373-e9f2-4842-99fd-36c87fed403f.png",
+        "humanApproved": false,
+        "savedAssetPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}\\project.assets\\20f9dfb419b2c6b243b8ce059242c32b311fea6eb36e01aa4271d92ddfa6f737.png",
+        "savedAssetHashVerified": true,
+        "width": 1672,
+        "height": 941,
+        "mode": "RGB"
+      },
+      {
+        "key": "thumbnail",
+        "workspacePath": "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\20261012-scene-images\\additional\\thumbnail.png",
+        "requestId": "{1900DE4E-6196-48A0-9B57-63F448FF52B8}",
+        "sceneId": "thumbnail",
+        "sentAt": "2026-10-12T05:48:13.3038217Z",
+        "exchangePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Exchange\\generated-additional-20261012-thumbnail-3083c9d47141.png",
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}\\Images\\3083c9d47141bcb2f2a3ee7844cf89bb770b4a77f14db227572a391f5ff4423b.png",
+        "humanApproved": false,
+        "revision": 1250,
+        "verified": true,
+        "sha256": "3083c9d47141bcb2f2a3ee7844cf89bb770b4a77f14db227572a391f5ff4423b",
+        "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a12df3-e8ce-7aa3-9c6e-aaa7f2a622d3\\exec-d1ff4e94-4d15-49a1-a3d8-c053eb0ef182.png",
+        "savedAssetPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}\\project.assets\\3083c9d47141bcb2f2a3ee7844cf89bb770b4a77f14db227572a391f5ff4423b.png",
+        "savedAssetHashVerified": true,
+        "width": 1672,
+        "height": 941,
+        "mode": "RGB"
+      }
+    ]
+  },
+  "observations": [
+    "共通背景の新しい要望は人物なしの単純な異世界イラスト。",
+    "未着のシーンは新しくナナの色白・細身・小柄さを指定された総評。既存チャートは保持し、別途画像を採用。",
+    "通常の9画像は既にユーザー確定済みであり、上書きせず維持。",
+    "サムネイル要求は共通背景・全通常シーンの人間確定後にのみ有効。"
+  ],
+  "userVisualEvaluation": "see live approvals; no inferred approval",
+  "artifacts": {
+    "finalImages": [
+      "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\20261012-scene-images\\additional\\background.png",
+      "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\20261012-scene-images\\additional\\summary.png",
+      "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\20261012-scene-images\\additional\\thumbnail.png"
+    ],
+    "verification": "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\20261012-scene-images\\additional\\asset-verification.json",
+    "savedProject": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}\\project.rigmovie"
+  }
+}

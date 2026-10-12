@@ -5,6 +5,7 @@ interface
 uses System.JSON, RigmMovieModel;
 procedure PrepareScriptCasting(Project: TRigmMovieProject); // 未変更区分の配役・字幕・音声を保持して準備する。
 function UpgradeScriptCastingLines(Project: TRigmMovieProject): Boolean; // 未割当・未編集の旧配役だけを改行単位へ更新する。
+function UpgradeScriptSummaryLines(Project: TRigmMovieProject): Boolean; // 旧総評1行を配役・音声を保持して改行単位へ移行する。
 function CastingFingerprint(Project: TRigmMovieProject): string; // 原稿・セリフ境界・キャラ番号の指紋。
 function CastingRow(Project: TRigmMovieProject; const CueId: string): TJSONObject; // 借用。未登録ならnil。
 function CastingRole(Project: TRigmMovieProject; Number: Integer): TJSONObject; // 借用。無効番号ならnil。
@@ -23,9 +24,47 @@ procedure ApplyScriptVoiceDefaults(Project: TRigmMovieProject);
 procedure RefreshScriptCastingStatus(Project: TRigmMovieProject);
 function UsedCastingRoles(Project: TRigmMovieProject): TJSONArray; // 実セリフが参照する番号。呼出側所有。
 function MissingCastingVoices(Project: TRigmMovieProject): Integer;
+function ReadCastingExpressionAssets(const Path: string): TJSONObject; // 呼出側所有。実素材の選択肢。
+procedure SetCastingExpression(Project: TRigmMovieProject; const CueId,Expression: string;
+  Variants: TJSONArray; Assets: TJSONObject; const CharacterPath: string=''); // nilのVariantsは個別差分を保持。
 implementation
-uses System.SysUtils, System.Math, System.StrUtils, System.Hash, System.Generics.Collections,
-  RigmJson, PsdJson, RigmScriptTextModel, RigmScriptReviewModel, RigmMovieComposition;
+uses System.SysUtils, System.Types, System.Math, System.StrUtils, System.Hash, System.Generics.Collections,
+  RigmJson, PsdJson, RigmScriptTextModel, RigmScriptReviewModel, RigmMovieComposition, RigmScriptSummaryModel,
+  RigmMovieActing, RigmCharacterCatalog, RigmStorage, RigmModel;
+function ReadCastingExpressionAssets(const Path: string): TJSONObject;
+begin
+  if CharacterFormat(Path)='psd' then Exit(ReadPsdActorAssets(Path));
+  var D := LoadRigm(Path); try Result := MovieActorAssets(D); finally D.Free; end;
+end;
+procedure SetCastingExpression(Project: TRigmMovieProject; const CueId,Expression: string;
+  Variants: TJSONArray; Assets: TJSONObject; const CharacterPath: string);
+begin
+  var C := Project.Cue(CueId);
+  if (C=nil) or (CastingRow(Project,CueId)=nil) then raise Exception.Create('表情を設定するセリフを選んでください。');
+  if (Expression<>'auto') and not MatchText(Expression,MovieEmotionIds) then raise Exception.Create('表情の選択が不正です。');
+  var Checked: TRigmMovieActing := nil;
+  try
+    if Variants<>nil then begin
+      var O := C.Acting.Json;
+      try PsdJson.Put(O,'variants',Variants.Clone as TJSONArray); Checked := TRigmMovieActing.FromJson(O); finally O.Free; end;
+      if (Checked.Variants.Count>0) and (Assets=nil) then raise Exception.Create('キャラを配役してから表情の差分を選んでください。');
+      for var V in Checked.Variants do begin
+        var Found := False;
+        for var G in JA(Assets,'groups') do if JS(TJSONObject(G),'id')=JS(TJSONObject(V),'groupId') then
+          for var P in JA(TJSONObject(G),'children') do if JS(TJSONObject(P),'id')=JS(TJSONObject(V),'partId') then Found := True;
+        if not Found then raise Exception.Create('選択したキャラに表情の差分がありません。差分を選び直してください。');
+      end;
+      if (Checked.Variants.Count>0) and (CharacterPath<>'') and (CharacterFormat(CharacterPath)='rigm') then begin
+        var D := LoadRigm(CharacterPath); var Pose := TRigmPose.Create;
+        try Checked.ApplyVariants(D,Pose); finally Pose.Free; D.Free; end;
+      end;
+    end;
+    C.FaceAutomatic := Expression='auto'; C.Emotion := 'neutral';
+    if not C.FaceAutomatic then C.Emotion := LowerCase(Expression);
+    C.Expression := 'neutral'; // 旧4種類の変形を二重適用しない。
+    if Checked<>nil then begin C.Acting.Free; C.Acting := Checked; Checked := nil; end;
+  finally Checked.Free; end;
+end;
 function CastingRow(Project: TRigmMovieProject; const CueId: string): TJSONObject;
 begin
   Result := nil; if not (Project.ScriptWizard.GetValue('casting') is TJSONObject) then Exit;
@@ -100,7 +139,7 @@ procedure RequestScriptCasting(Project: TRigmMovieProject);
 begin
   var Cast := JO(Project.ScriptWizard,'casting');
   if (JS(Cast,'state')='stale') or (JS(Cast,'sourceFingerprint')<>ScriptFingerprint(Project)) then
-    raise Exception.Create('前工程が変わりました。校正からNextで配役を準備してください。');
+    raise Exception.Create('前工程が変わりました。台本確認から配役へ進んで準備してください。');
   PsdJson.Put(Cast,'requestId',PsdJson.NewId); PsdJson.Put(Cast,'fingerprint',CastingFingerprint(Project));
   PsdJson.Put(Cast,'state','requested'); RefreshScriptCastingStatus(Project);
 end;
@@ -125,7 +164,7 @@ begin
   var Cast := JO(Project.ScriptWizard,'casting'); var Row := CastingRow(Project,CueId); var Role := CastingRole(Project,Number);
   if (Row=nil) or (Role=nil) or (JS(Cast,'state')='stale') then raise Exception.Create('有効なキャラ番号と現在のセリフを選んでください。');
   var C := Project.Cue(CueId);
-  if C.SpeakerId<>JS(Role,'speakerId') then begin C.VoiceStyleId := -1; C.VoiceQuery := ''; C.VoiceQueryKey := ''; end;
+  if C.SpeakerId<>JS(Role,'speakerId') then begin C.Acting.Variants.Free; C.Acting.Variants := TJSONArray.Create; C.VoiceStyleId := -1; C.VoiceQuery := ''; C.VoiceQueryKey := ''; end;
   C.SpeakerId := JS(Role,'speakerId');
   PsdJson.Put(Row,'role',TJSONNumber.Create(Number)); PsdJson.Put(Row,'confirmed',TJSONBool.Create(True));
   if not Confirm then PsdJson.Put(Row,'origin','human');
@@ -194,6 +233,107 @@ begin
     PsdJson.Put(Project.ScriptWizard,'castingStatus',JS(Snapshot.ScriptWizard,'castingStatus')); Result := True;
   finally Snapshot.Free; end;
 end;
+{$I RigmScriptCastingReuse.inc}
+procedure AddScriptSummaryLines(Project: TRigmMovieProject; Old: TJSONObject; const Text: string;
+  Cues: TObjectList<TRigmMovieCue>; Rows: TJSONArray; Scenes: TObjectList<TRigmMovieScene>);
+begin
+  var O := JO(Project.ScriptWizard,'summaryData'); var D := JO(O,'draft');
+  var First := ScriptSummaryCue(Project); var Scene := Project.Scene(JS(O,'sceneId'));
+  if Scene=nil then begin
+    if O.GetValue('archivedScene') is TJSONObject then Scene := TRigmMovieScene.FromJson(JO(O,'archivedScene'))
+    else Scene := TRigmMovieScene.Create;
+  end else begin var Q := Scene.Json; try Scene := TRigmMovieScene.FromJson(Q); finally Q.Free; end; end;
+  Scenes.Add(Scene);
+  var Start := Cues.Count; var Parts := ScriptSourceParts(Text);
+  // 独立した読みの区切りが原稿と異なる場合は、入力済みの一続きの読みを保つ。
+  var ReadingParts := ScriptSourceParts(JS(D,'reading'));
+  var WholeReading := (Length(ReadingParts)>0) and (Length(ReadingParts)<>Length(Parts)) and
+    ((O.GetValue('cueIds')=nil) or ((First<>nil) and First.Text.Contains(#13#10)));
+  if (First=nil) and (O.GetValue('archivedCues') is TJSONArray) and (O.GetValue('archivedRows') is TJSONArray) then begin
+    var Archived := JA(O,'archivedCues'); var SavedRows := JA(O,'archivedRows');
+    var Restore := (Archived.Count=Length(Parts)) and (SavedRows.Count=Archived.Count) and not WholeReading;
+    if Restore then for var I := 0 to Archived.Count-1 do
+      Restore := Restore and (JS(TJSONObject(Archived[I]),'text')=Parts[I].Text);
+    if Restore then begin
+      for var I := 0 to Archived.Count-1 do begin
+        var C := TRigmMovieCue.FromJson(TJSONObject(Archived[I])); C.Scene := Scene.Id; Cues.Add(C);
+        var Row := SavedRows[I].Clone as TJSONObject; Rows.AddElement(Row);
+        PsdJson.Put(Row,'offset',TJSONNumber.Create(Parts[I].Offset));
+      end;
+      Exit;
+    end;
+  end;
+  // 初期版の総評はcasting.rowsへ未登録。1行の既存字幕・読み・音声もそのまま引き継ぐ。
+  if (First<>nil) and (CastingRow(Project,First.Id)=nil) and (First.Text=Text) and not First.Text.Contains(#13#10) then begin
+    var Q := First.Json; try Cues.Add(TRigmMovieCue.FromJson(Q)); finally Q.Free; end;
+    var Row := TJSONObject.Create; Rows.AddElement(Row); Row.AddPair('cueId',First.Id); Row.AddPair('section','summary');
+    AddN(Row,'offset',0); AddN(Row,'length',Length(Text)); AddN(Row,'role',JI(D,'role'));
+    AddB(Row,'confirmed',True); Row.AddPair('origin','human'); Exit;
+  end;
+  var Legacy := (First<>nil) and First.Text.Contains(#13#10);
+  if Legacy or (Old=nil) or WholeReading then begin
+    var TemplateRow: TJSONObject := nil;
+    if First<>nil then TemplateRow := CastingRow(Project,First.Id);
+    if Legacy and (O.GetValue('lineMigration')=nil) then begin
+      var Archive := TJSONObject.Create; Archive.AddPair('cue',First.Json);
+      if TemplateRow<>nil then Archive.AddPair('row',TemplateRow.Clone as TJSONObject);
+      PsdJson.Put(O,'lineMigration',Archive);
+    end;
+    if WholeReading then begin
+      var C := TRigmMovieCue.Create;
+      if First<>nil then begin C.Free; var Q := First.Json; try C := TRigmMovieCue.FromJson(Q); finally Q.Free; end; end;
+      C.Scene := Scene.Id; C.Text := Text; Cues.Add(C);
+      var Row := TJSONObject.Create;
+      if TemplateRow<>nil then begin Row.Free; Row := TemplateRow.Clone as TJSONObject; end
+      else begin AddN(Row,'role',JI(D,'role')); AddB(Row,'confirmed',False); Row.AddPair('origin','unassigned'); end;
+      Rows.AddElement(Row); PsdJson.Put(Row,'cueId',C.Id); PsdJson.Put(Row,'section','summary');
+      PsdJson.Put(Row,'offset',TJSONNumber.Create(0)); PsdJson.Put(Row,'length',TJSONNumber.Create(Length(Text)));
+    end else begin
+      AddLineCues(Text,'summary',Scene.Id,0,Length(Text),Cues,Rows,First,TemplateRow);
+      for var I := Start to Cues.Count-1 do begin
+        var C := Cues[I]; C.Subtitle := ''; C.VoiceReading := '';
+        C.WaveFile := ''; C.LabFile := ''; C.AudioKey := ''; C.AudioSeconds := 0;
+        C.VoiceQuery := ''; C.VoiceQueryKey := ''; C.VoiceHeardKey := ''; C.EffectWaveFile := ''; C.EffectAudioKey := '';
+      end;
+    end;
+  end else AddReconciledScriptSection(Project,Old,'summary',Text,Cues,Rows,Scenes,Scene.Id);
+  for var I := Start to Cues.Count-1 do begin
+    var C := Cues[I]; C.Scene := Scene.Id;
+    var Row: TJSONObject := nil;
+    for var V in Rows do if JS(TJSONObject(V),'cueId')=C.Id then begin Row := TJSONObject(V); Break; end;
+    if (First<>nil) and (Project.Cue(C.Id)=nil) and (JI(Row,'role')=0) then begin
+      C.SpeakerId := First.SpeakerId; C.VoiceStyleId := First.VoiceStyleId;
+      C.VoiceSettings.Free; C.VoiceSettings := First.VoiceSettings.Clone as TJSONObject;
+      var PreviousRow := CastingRow(Project,First.Id);
+      if PreviousRow<>nil then begin
+        PsdJson.Put(Row,'role',TJSONNumber.Create(JI(PreviousRow,'role'))); PsdJson.Put(Row,'origin',JS(PreviousRow,'origin'));
+      end;
+    end;
+    if (First=nil) and (JI(Row,'role')=0) then PsdJson.Put(Row,'role',TJSONNumber.Create(JI(D,'role')));
+  end;
+end;
+function UpgradeScriptSummaryLines(Project: TRigmMovieProject): Boolean;
+begin
+  Result := False;
+  if (Project.ScriptWizard=nil) or not (Project.ScriptWizard.GetValue('casting') is TJSONObject) or
+    (JS(Project.ScriptWizard,'summaryChoice')<>'yes') then Exit;
+  var C := ScriptSummaryCue(Project); if (C=nil) or not C.Text.Contains(#13#10) then Exit;
+  var D := JO(JO(Project.ScriptWizard,'summaryData'),'draft');
+  if (ScriptSummaryDraftReason(D)<>'') or (JS(D,'text')<>C.Text) or
+    (JS(JO(Project.ScriptWizard,'casting'),'sourceFingerprint')<>ScriptFingerprint(Project)) then Exit;
+  if (JS(D,'reading')<>'') and (Length(ScriptSourceParts(JS(D,'reading')))<>Length(ScriptSourceParts(C.Text))) then Exit;
+  var Snapshot := Project.Clone;
+  try
+    var Selected := JS(JO(Project.ScriptWizard,'casting'),'selectedCue');
+    PrepareScriptCasting(Snapshot);
+    if CastingRow(Snapshot,Selected)<>nil then PsdJson.Put(JO(Snapshot.ScriptWizard,'casting'),'selectedCue',Selected);
+    PsdJson.Put(Snapshot.ScriptWizard,'voiceStatus','in-progress'); Snapshot.Validate;
+    Project.Cues.Free; Project.Cues := Snapshot.Cues; Snapshot.Cues := TObjectList<TRigmMovieCue>.Create(True);
+    Project.Scenes.Free; Project.Scenes := Snapshot.Scenes; Snapshot.Scenes := TObjectList<TRigmMovieScene>.Create(True);
+    Project.Speakers.Free; Project.Speakers := Snapshot.Speakers; Snapshot.Speakers := TObjectList<TRigmMovieSpeaker>.Create(True);
+    Project.ScriptWizard.Free; Project.ScriptWizard := Snapshot.ScriptWizard; Snapshot.ScriptWizard := nil; Result := True;
+  finally Snapshot.Free; end;
+end;
 procedure PrepareScriptCasting(Project: TRigmMovieProject);
 begin
   var Selected := JA(Project.ScriptWizard,'selectedCharacters');
@@ -235,8 +375,10 @@ begin
       for var C in Project.Cues do A.AddElement(C.Json); A := TJSONArray.Create; Archive.AddPair('scenes',A);
       for var S in Project.Scenes do A.AddElement(S.Json);
     end;
-    for var Id in ['opening','body','closing'] do begin
+    for var Id in ['opening','body','summary','closing'] do begin
+      if (Id='summary') and (JS(Project.ScriptWizard,'summaryChoice')<>'yes') then Continue;
       var Text := JS(ScriptSection(Project,Id),'text'); var S := TJSONObject.Create; Sections.AddElement(S); S.AddPair('id',Id); S.AddPair('text',Text);
+      if Id='summary' then begin AddScriptSummaryLines(Project,Old,Text,NewCues,Rows,NewScenes); Continue; end;
       var Unchanged := False;
       if Old<>nil then for var V in JA(Old,'sections') do if (JS(TJSONObject(V),'id')=Id) and (JS(TJSONObject(V),'text')=Text) then Unchanged := True;
       if Unchanged then begin
@@ -249,17 +391,7 @@ begin
         end;
         Continue;
       end;
-      var Start := 0; var Paragraph := 0;
-      while Start<Length(Text) do begin
-        while (Start<Length(Text)) and CharInSet(Text[Start+1],[#13,#10]) do Inc(Start);
-        if Start=Length(Text) then Break;
-        var Finish := Text.IndexOf(#13#10+#13#10,Start); if Finish<0 then Finish := Length(Text);
-        if Trim(Text.Substring(Start,Finish-Start))<>'' then begin
-          Inc(Paragraph); var Scene := TRigmMovieScene.Create; Scene.Title := Id+' '+Paragraph.ToString; NewScenes.Add(Scene);
-          AddLineCues(Text,Id,Scene.Id,Start,Finish,NewCues,Rows);
-        end;
-        Start := Finish+4;
-      end;
+      AddReconciledScriptSection(Project,Old,Id,Text,NewCues,Rows,NewScenes);
     end;
     if Rows.Count=0 then raise Exception.Create('配役するセリフがありません。');
     if Rows.Count>2000 then raise Exception.Create('セリフは既存モデルの2000件上限以内にしてください。');
@@ -271,12 +403,19 @@ begin
     if Selected.Count=1 then for var V in Roles do if JB(TJSONObject(V),'active') then Single := TJSONObject(V);
     for var V in Rows do begin
       var Row := TJSONObject(V); var C := Project.Cue(JS(Row,'cueId')); var Role := CastingRole(Project,JI(Row,'role'));
-      if (Role=nil) or (not JB(Row,'confirmed') and (SourceChanged or (Old=nil))) then begin
+      if (Role<>nil) and (C.SpeakerId='narrator') then C.SpeakerId := JS(Role,'speakerId');
+      if Role=nil then begin
         PsdJson.Put(Row,'confirmed',TJSONBool.Create(False));
         if Single<>nil then begin PsdJson.Put(Row,'role',TJSONNumber.Create(JI(Single,'number'))); PsdJson.Put(Row,'origin','single-default'); C.SpeakerId := JS(Single,'speakerId'); end
         else begin PsdJson.Put(Row,'role',TJSONNumber.Create(0)); PsdJson.Put(Row,'origin','unassigned'); C.SpeakerId := 'narrator'; end;
       end;
     end;
+    for var Key in ['voice','voiceEffects','subtitles'] do
+      if Project.ScriptWizard.GetValue(Key) is TJSONObject then begin
+        var Page := JO(Project.ScriptWizard,Key);
+        if Project.Cue(JS(Page,'selectedCue'))=nil then PsdJson.Put(Page,'selectedCue',Project.Cues[0].Id);
+      end;
+    ConfigureScriptSummaryScene(Project);
     ApplyScriptVoiceDefaults(Project); RequestScriptCasting(Project); ValidateScriptCasting(Project); UpgradeScriptCastingLines(Project);
   finally Cast.Free; NewCues.Free; NewScenes.Free; end;
 end;
@@ -300,7 +439,7 @@ begin
       var O := TJSONObject(V); var Row := CastingRow(Project,JS(O,'cueId')); var Role := CastingRole(Project,JI(O,'role'));
       PsdJson.Put(Row,'role',TJSONNumber.Create(JI(O,'role'))); PsdJson.Put(Row,'origin','ai'); PsdJson.Put(Row,'reason',JS(O,'reason'));
       var C := Project.Cue(JS(Row,'cueId'));
-      if C.SpeakerId<>JS(Role,'speakerId') then begin C.VoiceStyleId := -1; C.VoiceQuery := ''; C.VoiceQueryKey := ''; end;
+      if C.SpeakerId<>JS(Role,'speakerId') then begin C.Acting.Variants.Free; C.Acting.Variants := TJSONArray.Create; C.VoiceStyleId := -1; C.VoiceQuery := ''; C.VoiceQueryKey := ''; end;
       C.SpeakerId := JS(Role,'speakerId');
     end;
     if JB(Args,'complete') then PsdJson.Put(Cast,'state','ready'); RefreshScriptCastingStatus(Project);
@@ -310,19 +449,23 @@ procedure CheckUneditedCue(Project: TRigmMovieProject; Row: TJSONObject);
 begin
   var Cast := JO(Project.ScriptWizard,'casting');
   if (JS(Cast,'state')='stale') or (JS(Cast,'fingerprint')<>CastingFingerprint(Project)) then
-    raise Exception.Create('原稿が変わりました。校正から配役へ進んで再確認してください。');
+    raise Exception.Create('原稿が変わりました。台本確認から配役へ進んで再確認してください。');
   var C := Project.Cue(JS(Row,'cueId')); var Text := JS(ScriptSection(Project,JS(Row,'section')),'text').Substring(JI(Row,'offset'),JI(Row,'length'));
   if (C.Text<>Text) or (C.Subtitle<>Text) or (C.WaveFile<>'') then raise Exception.Create('字幕または音声を編集済みのセリフは、この工程で分割・結合できません。');
 end;
 procedure SplitCastingRow(Project: TRigmMovieProject; const CueId: string; Offset: Integer);
 begin
   var Cast := JO(Project.ScriptWizard,'casting'); var Rows := JA(Cast,'rows'); var Row := CastingRow(Project,CueId); if Row=nil then raise Exception.Create('セリフを選んでください。');
+  if JS(Row,'section')='summary' then raise Exception.Create('総評の行区切りは台本確認で編集してください。総評は1つのチャートシーンにまとめます。');
   CheckUneditedCue(Project,Row); var C := Project.Cue(CueId);
   if (Offset<=0) or (Offset>=Length(C.Text)) or not ScriptTextBoundary(C.Text,Offset) or
     ((C.Text[Offset]=#13) and (C.Text[Offset+1]=#10)) or
     (Trim(C.Text.Substring(0,Offset))='') or (Trim(C.Text.Substring(Offset))='') then raise Exception.Create('文章内の分割位置を選んでください。');
   var Next := TRigmMovieCue.Create; Next.Scene := C.Scene; Next.SpeakerId := C.SpeakerId;
   Next.VoiceStyleId := C.VoiceStyleId;
+  Next.Emotion := C.Emotion; Next.FaceAutomatic := C.FaceAutomatic; Next.Expression := C.Expression;
+  var Acting := C.Acting.Json;
+  try Next.Acting.Free; Next.Acting := nil; Next.Acting := TRigmMovieActing.FromJson(Acting); finally Acting.Free; end;
   Next.Text := C.Text.Substring(Offset); Next.Subtitle := Next.Text; C.Text := C.Text.Substring(0,Offset); C.Subtitle := C.Text;
   var Index := Project.Cues.IndexOf(C); Project.Cues.Insert(Index+1,Next);
   var NewRow := Row.Clone as TJSONObject; PsdJson.Put(NewRow,'cueId',Next.Id); PsdJson.Put(NewRow,'offset',TJSONNumber.Create(JI(Row,'offset')+Offset));
@@ -337,6 +480,7 @@ begin
   var Cast := JO(Project.ScriptWizard,'casting'); var Rows := JA(Cast,'rows'); var C := Project.Cue(CueId);
   if (C=nil) or (Project.Cues.IndexOf(C)=Project.Cues.Count-1) then raise Exception.Create('結合する次のセリフがありません。');
   var Next := Project.Cues[Project.Cues.IndexOf(C)+1]; var Row := CastingRow(Project,C.Id); var Other := CastingRow(Project,Next.Id);
+  if JS(Row,'section')='summary' then raise Exception.Create('総評のセリフは結合できません。');
   if (C.Scene<>Next.Scene) or (JS(Row,'section')<>JS(Other,'section')) then raise Exception.Create('同じシーン・台本区分内の次のセリフと結合できます。');
   CheckUneditedCue(Project,Row); CheckUneditedCue(Project,Other);
   var Count := JI(Other,'offset')+JI(Other,'length')-JI(Row,'offset'); if Count>2000 then raise Exception.Create('結合後の音声文は2000文字以内にしてください。');

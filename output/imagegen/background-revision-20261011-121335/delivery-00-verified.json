@@ -1,0 +1,14 @@
+{
+  "targetIndex": 0,
+  "sceneId": "common-background",
+  "sceneNumber": null,
+  "title": "共通背景画像",
+  "requestId": "{94F57082-5471-4B26-B842-7B4FDF9067AE}",
+  "sourcePath": "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\background-revision-20261011-121335\\common-background-v2.png",
+  "sha256": "f0790399e053fe8bad10a43c4a75cfa5e97173a6fa93a1e003543f38cb2a92d6",
+  "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{C36C2A85-DD8A-4DDE-8A7D-D5072CF41A98}\\Images\\f0790399e053fe8bad10a43c4a75cfa5e97173a6fa93a1e003543f38cb2a92d6.png",
+  "imageRequestState": "adopted",
+  "imageApproved": false,
+  "revision": 1535,
+  "deliveredAt": "2026-10-11T12:16:07.2020304+09:00"
+}

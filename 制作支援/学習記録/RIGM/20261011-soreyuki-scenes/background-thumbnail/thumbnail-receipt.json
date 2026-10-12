@@ -1,0 +1,14 @@
+{
+  "projectId": "{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}",
+  "revision": 1251,
+  "sceneId": "thumbnail",
+  "requestId": "{B758E136-275D-42F9-8089-1D302919FC98}",
+  "prompt": "これまでに作ったシーン画像を組み合わせた、動画の最後に表示するサムネイルを作成。\r\n使用中のキャラクターも必ず使い、見た目を参照素材に合わせる。\r\n「漫画」＋マンガの名前を大きく読みやすいロゴとして配置する。",
+  "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a12a3b-12c0-7a32-948c-00d9ff0dde3f\\exec-c6f62996-f8f8-417f-b71b-23123b82b48d.png",
+  "workspacePath": "D:\\DelphiProg\\RIGMMaker\\制作支援\\学習記録\\RIGM\\20261011-soreyuki-scenes\\background-thumbnail\\images\\thumbnail.png",
+  "exchangePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Exchange\\CodexImages\\20261011-missing-images-2659575d\\thumbnail.png",
+  "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\Images\\34b710276a27240b71609e5a99799f6f9eeac8de2592dde7dc32c839b86ef0b1.png",
+  "sha256": "34b710276a27240b71609e5a99799f6f9eeac8de2592dde7dc32c839b86ef0b1",
+  "imageApproved": false,
+  "provider": "built-in imagegen"
+}

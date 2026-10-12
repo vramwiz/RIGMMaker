@@ -1,0 +1,492 @@
+[
+  {
+    "id": "{BD294C65-AA21-4125-986A-EB4CC47A8EFE}",
+    "title": "オープニング",
+    "image": "",
+    "description": "",
+    "imagePrompt": "",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 2,
+    "displayMode": "none",
+    "animation": {},
+    "sceneNumber": 1,
+    "start": 0,
+    "duration": 17.248,
+    "ready": false,
+    "imagePath": "",
+    "sourceCues": [
+      {
+        "cueId": "{B55F44B5-6320-4619-80B0-D8AD0733F3A0}",
+        "sourceText": "東北きりたんです"
+      },
+      {
+        "cueId": "{BC3880FB-A22C-4DFA-A31A-F830E98286B6}",
+        "sourceText": "以前まで投稿していた漫画紹介ですが"
+      },
+      {
+        "cueId": "{4093E9EC-D6F6-4F82-B17E-A555F730710B}",
+        "sourceText": "今後は方針を変えて"
+      },
+      {
+        "cueId": "{F615C84F-3F2F-4556-8AEE-E3B9003E40A3}",
+        "sourceText": "1日1作品以上を紹介していくように"
+      },
+      {
+        "cueId": "{F0AD5121-B781-435C-9E6C-9EFA7FD4EBF4}",
+        "sourceText": "していきたいと思います"
+      },
+      {
+        "cueId": "{3F4B6E5D-1911-44F2-B190-6F889CE909C7}",
+        "sourceText": "今回紹介する作品は"
+      },
+      {
+        "cueId": "{AB43555E-969F-4280-8F59-F136C6783B69}",
+        "sourceText": "隣の部屋の女騎士は、異世界人で飲み友達"
+      },
+      {
+        "cueId": "{CA628436-85F0-451D-B720-F795B22D93AA}",
+        "sourceText": "というマンガです"
+      }
+    ],
+    "cueCount": 8,
+    "hasMoreCues": false
+  },
+  {
+    "id": "{50161FB2-4A53-448E-AC8F-977F19B2AB1C}",
+    "title": "主人公は30代独身男の虎太朗",
+    "image": "",
+    "description": "",
+    "imagePrompt": "青年がマンションの部屋でお酒を飲んでいる",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 1,
+    "displayMode": "image",
+    "animation": {},
+    "sceneNumber": 2,
+    "start": 17.248,
+    "duration": 8.132,
+    "ready": false,
+    "imagePath": "",
+    "sourceCues": [
+      {
+        "cueId": "{7856B6BB-2FB1-4FD6-9B2D-F37DA7BB2E45}",
+        "sourceText": "主人公は30代独身男の虎太朗"
+      },
+      {
+        "cueId": "{3A1E95BF-27DE-4B10-8B80-37476B439F9E}",
+        "sourceText": "その楽しみは、酒を飲むこと"
+      },
+      {
+        "cueId": "{F71C4070-FA77-45CB-9A86-644F7E18706C}",
+        "sourceText": "ある日、マンションの隣室に異世界から"
+      }
+    ],
+    "cueCount": 3,
+    "hasMoreCues": false
+  },
+  {
+    "id": "{45350BB5-BF0F-49FF-AEE5-6C8EDE7BE85E}",
+    "title": "女騎士マリベル",
+    "image": "",
+    "description": "",
+    "imagePrompt": "女騎士マリベルが異世界からマンションにやってうる",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 2,
+    "displayMode": "image",
+    "animation": {},
+    "sceneNumber": 3,
+    "start": 25.38,
+    "duration": 11.6426666666667,
+    "ready": false,
+    "imagePath": "",
+    "sourceCues": [
+      {
+        "cueId": "{03F8F96A-C905-4F2E-9759-EAA08892BAC7}",
+        "sourceText": "女騎士マリベルがやって来たことでその楽しみ方が変わってしまう"
+      },
+      {
+        "cueId": "{E6B64BC3-E326-42C3-B0E9-1D4EC917F188}",
+        "sourceText": "戦闘後なのか空腹の彼女に料理をふるまったところ"
+      },
+      {
+        "cueId": "{515F87CF-CC49-4A5B-9508-D49ED0AB6FCC}",
+        "sourceText": "礼をしたいというので飲み友達になってもらう"
+      },
+      {
+        "cueId": "{3BF2B5DA-9E1E-4315-A404-78DC21EECD16}",
+        "sourceText": "そういうお話です"
+      }
+    ],
+    "cueCount": 4,
+    "hasMoreCues": false
+  },
+  {
+    "id": "{DA88676D-EDAF-4398-B005-B8797085C256}",
+    "title": "異世界と通じているマンション",
+    "image": "",
+    "description": "",
+    "imagePrompt": "異世界と通じているマンション",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 2,
+    "displayMode": "image",
+    "animation": {},
+    "sceneNumber": 4,
+    "start": 37.0226666666667,
+    "duration": 5.048,
+    "ready": false,
+    "imagePath": "",
+    "sourceCues": [
+      {
+        "cueId": "{3918968C-776E-4C1F-9E71-33716FD988ED}",
+        "sourceText": "この異世界と通じているマンション"
+      },
+      {
+        "cueId": "{F66EEA47-355C-48D4-B9EA-63D6500CB021}",
+        "sourceText": "都合良く異世界と繋がるというツッコミは無しで"
+      }
+    ],
+    "cueCount": 2,
+    "hasMoreCues": false
+  },
+  {
+    "id": "{F4BF6737-075D-4075-B788-C38065729178}",
+    "title": "異世界人に現代の料理やお酒を",
+    "image": "",
+    "description": "",
+    "imagePrompt": "異世界人に現代の料理やお酒を振る舞って その反応を楽しむ",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 8,
+    "displayMode": "image",
+    "animation": {},
+    "sceneNumber": 5,
+    "start": 42.0706666666667,
+    "duration": 6.94800000000001,
+    "ready": false,
+    "imagePath": "",
+    "sourceCues": [
+      {
+        "cueId": "{2DF3AD4E-01B7-422A-85DE-B74C03E9860A}",
+        "sourceText": "いわゆる異世界人に現代の料理やお酒を振る舞って"
+      },
+      {
+        "cueId": "{04E3A983-A53A-4B62-9696-5AB5BD9DA7B8}",
+        "sourceText": "その反応を楽しむという作品"
+      },
+      {
+        "cueId": "{9109F689-DB68-4FB7-8E9A-56F80BB876AE}",
+        "sourceText": "出てくる料理は"
+      }
+    ],
+    "cueCount": 3,
+    "hasMoreCues": false
+  },
+  {
+    "id": "{A4091417-9645-4A1B-81AD-11E7D4AEEED3}",
+    "title": "おにぎりとだし巻き玉子と味噌汁",
+    "image": "",
+    "description": "",
+    "imagePrompt": "おにぎりとだし巻き玉子と味噌汁",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 5,
+    "displayMode": "image",
+    "animation": {},
+    "sceneNumber": 6,
+    "start": 49.0186666666667,
+    "duration": 3.91733333333334,
+    "ready": false,
+    "imagePath": "",
+    "sourceCues": [
+      {
+        "cueId": "{AE2E8B5C-13E3-4BB5-A0E6-710880E8D349}",
+        "sourceText": "おにぎりとだし巻き玉子と味噌汁"
+      },
+      {
+        "cueId": "{71331551-6040-4FFA-A116-ABE084A69DC7}",
+        "sourceText": "こういうのでいいんですよね"
+      }
+    ],
+    "cueCount": 2,
+    "hasMoreCues": false
+  },
+  {
+    "id": "{E1E24A04-D187-4FFC-B3CF-A019276EBAD0}",
+    "title": "とん平焼きとビール",
+    "image": "",
+    "description": "",
+    "imagePrompt": "とん平焼きとビール",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 2,
+    "displayMode": "image",
+    "animation": {},
+    "sceneNumber": 7,
+    "start": 52.936,
+    "duration": 3.40533333333333,
+    "ready": false,
+    "imagePath": "",
+    "sourceCues": [
+      {
+        "cueId": "{EDE1690A-4377-416E-9148-7FF7E728A8D5}",
+        "sourceText": "とん平焼きとビール"
+      },
+      {
+        "cueId": "{60C55173-B6E7-45BC-869F-AE0FBFA66474}",
+        "sourceText": "これは絶対にあう組み合わせ"
+      }
+    ],
+    "cueCount": 2,
+    "hasMoreCues": false
+  },
+  {
+    "id": "{EB1CAB47-7C53-433A-B2F0-DCD094C6F99D}",
+    "title": "ほかにも焼酎と焼き牡蠣 ",
+    "image": "",
+    "description": "",
+    "imagePrompt": "ほかにも焼酎と焼き牡蠣 ",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 2,
+    "displayMode": "image",
+    "animation": {},
+    "sceneNumber": 8,
+    "start": 56.3413333333333,
+    "duration": 8.55866666666667,
+    "ready": false,
+    "imagePath": "",
+    "sourceCues": [
+      {
+        "cueId": "{D4A0527C-D30E-442B-AA00-8B9ADD7C6131}",
+        "sourceText": "ほかにも焼酎と焼き牡蠣"
+      },
+      {
+        "cueId": "{B13167C9-CF40-4CB2-9F77-CEF65F06DFD6}",
+        "sourceText": "日本酒でもあうと思うけどあえて焼酎"
+      },
+      {
+        "cueId": "{0EE020B0-6EE3-46C4-93D7-D6A5C60964DA}",
+        "sourceText": "登場人物としては本当に読者の要望通りにキャラが増えていく"
+      }
+    ],
+    "cueCount": 3,
+    "hasMoreCues": false
+  },
+  {
+    "id": "{BBB0A883-BB98-46BA-A4BA-4F6250B3DC3B}",
+    "title": "女騎士",
+    "image": "",
+    "description": "",
+    "imagePrompt": "女騎士",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 2,
+    "displayMode": "image",
+    "animation": {},
+    "sceneNumber": 9,
+    "start": 64.9,
+    "duration": 0.972,
+    "ready": false,
+    "imagePath": "",
+    "sourceCues": [
+      {
+        "cueId": "{CC5150EB-1D13-4506-937F-F0F83BB5177C}",
+        "sourceText": "女騎士"
+      }
+    ],
+    "cueCount": 1,
+    "hasMoreCues": false
+  },
+  {
+    "id": "{E208B45F-14CA-493F-973A-1767B041571F}",
+    "title": "女吸血鬼",
+    "image": "",
+    "description": "",
+    "imagePrompt": "女吸血鬼",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 2,
+    "displayMode": "image",
+    "animation": {},
+    "sceneNumber": 10,
+    "start": 65.872,
+    "duration": 1.28133333333333,
+    "ready": false,
+    "imagePath": "",
+    "sourceCues": [
+      {
+        "cueId": "{C573EF14-8328-43D0-9054-283D82E9A722}",
+        "sourceText": "女吸血鬼"
+      }
+    ],
+    "cueCount": 1,
+    "hasMoreCues": false
+  },
+  {
+    "id": "{AA07ECC8-74F0-4298-A7AA-DD0943D2376F}",
+    "title": "管理人のおじさん",
+    "image": "",
+    "description": "",
+    "imagePrompt": "管理人のおじさん",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 2,
+    "displayMode": "image",
+    "animation": {},
+    "sceneNumber": 11,
+    "start": 67.1533333333333,
+    "duration": 1.452,
+    "ready": false,
+    "imagePath": "",
+    "sourceCues": [
+      {
+        "cueId": "{6A33260F-B9FB-4B56-9C26-980529AD75EF}",
+        "sourceText": "管理人のおじさん"
+      }
+    ],
+    "cueCount": 1,
+    "hasMoreCues": false
+  },
+  {
+    "id": "{53F34DC2-5B71-424D-84BD-7128CF598934}",
+    "title": "管理人の娘さん",
+    "image": "",
+    "description": "",
+    "imagePrompt": "管理人の娘さん",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 2,
+    "displayMode": "image",
+    "animation": {},
+    "sceneNumber": 12,
+    "start": 68.6053333333333,
+    "duration": 5.82800000000001,
+    "ready": false,
+    "imagePath": "",
+    "sourceCues": [
+      {
+        "cueId": "{17D11259-6B41-49EF-9CC4-700CBB91A18F}",
+        "sourceText": "管理人の娘さん"
+      },
+      {
+        "cueId": "{630D9B0C-4C83-43AD-8642-DBC1E80B5EC1}",
+        "sourceText": "異世界から敵はやってこないのか？"
+      },
+      {
+        "cueId": "{8E47A28E-66D2-4C4C-82B0-B287770C715F}",
+        "sourceText": "そういう心配はないみたい"
+      }
+    ],
+    "cueCount": 3,
+    "hasMoreCues": false
+  },
+  {
+    "id": "{BBA35690-930A-4406-BFAD-8F51C5E4E6FE}",
+    "title": "異世界の戦闘を観戦しながら",
+    "image": "",
+    "description": "",
+    "imagePrompt": "異世界の戦闘を観戦しながら一杯飲む ",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 1,
+    "displayMode": "image",
+    "animation": {},
+    "sceneNumber": 13,
+    "start": 74.4333333333333,
+    "duration": 6.39333333333333,
+    "ready": false,
+    "imagePath": "",
+    "sourceCues": [
+      {
+        "cueId": "{BE379CB6-F4E4-4CDA-91AA-B5CF7E9AA161}",
+        "sourceText": "戦闘を観戦しながら一杯飲む"
+      },
+      {
+        "cueId": "{4CE1B146-63AA-43A4-B95D-B6BFF6F61412}",
+        "sourceText": "そんな日常的なマンガ"
+      },
+      {
+        "cueId": "{A077C484-A80E-4073-B459-5C5186C228BC}",
+        "sourceText": "今ならアプリからだと全話読めます"
+      }
+    ],
+    "cueCount": 3,
+    "hasMoreCues": false
+  },
+  {
+    "id": "{15110FE5-0453-4C73-87EF-EA88E7B0F2F2}",
+    "title": "〆の挨拶",
+    "image": "",
+    "description": "",
+    "imagePrompt": "",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 0,
+    "displayMode": "none",
+    "animation": {},
+    "sceneNumber": 14,
+    "start": 80.8266666666667,
+    "duration": 12.7013333333333,
+    "ready": false,
+    "imagePath": "",
+    "sourceCues": [
+      {
+        "cueId": "{D618806D-AE1A-44F8-AAF2-15A6B5AB71DC}",
+        "sourceText": "いかがでしたか？"
+      },
+      {
+        "cueId": "{BD4C7725-C71A-49F8-A653-2C3BF88AF8A5}",
+        "sourceText": "今後はこんな感じでいくつか省略して"
+      },
+      {
+        "cueId": "{C25C29F1-4C4B-4B8C-AAC0-6B990A8744BB}",
+        "sourceText": "1日1作品以上を紹介していきたいと思います"
+      },
+      {
+        "cueId": "{754A8EF5-748A-4A2C-848B-66C6AF09AC46}",
+        "sourceText": "動画に関する意見などありましたら"
+      },
+      {
+        "cueId": "{66CCD8BC-0421-4E77-9EA8-980ED41F3691}",
+        "sourceText": "コメントでお願いします"
+      },
+      {
+        "cueId": "{793D8BD9-D4EB-4089-B619-A9AC1345B752}",
+        "sourceText": "それではまたねー"
+      }
+    ],
+    "cueCount": 6,
+    "hasMoreCues": false
+  }
+]

@@ -7,9 +7,9 @@ function ScriptResearch(Project: TRigmMovieProject): TJSONObject; // 借用。�
 function ResearchCandidate(R: TJSONObject; const Id: string): TJSONObject;
 function ResearchElement(R: TJSONObject; const Id: string): TJSONObject;
 function ResearchWorkReady(R: TJSONObject): Boolean;
-function ResearchAdvanceReason(Project: TRigmMovieProject): string;
+function ResearchIncompleteReason(Project: TRigmMovieProject): string; // 調査の未完了理由。工程移動は制限しない。
 function ResearchSummary(Project: TRigmMovieProject): TJSONObject; // 呼出側が解放。
-function ResearchIntegrationData(Project: TRigmMovieProject): TJSONObject; // 情報ありの確定項目だけを返す。
+function ResearchIntegrationData(Project: TRigmMovieProject): TJSONObject; // 人間が承認した作品の確定情報。未承認なら空。
 function ResearchStateName(const State: string): string;
 function ResearchSingleLine(const Text: string): string;
 procedure PrepareScriptResearch(Project: TRigmMovieProject; Definitions: TJSONArray = nil);
@@ -19,7 +19,7 @@ procedure ChangeResearchType(Project: TRigmMovieProject);
 procedure ApplyScriptResearch(Project: TRigmMovieProject; const Action: string;
   Args: TJSONObject; Human: Boolean = False);
 implementation
-uses System.SysUtils, System.StrUtils, System.Generics.Collections, RigmJson, PsdJson, RigmScriptTypes;
+uses System.SysUtils, System.StrUtils, System.Generics.Collections, RigmJson, PsdJson, RigmScriptTypes, RigmNicoManga;
 
 function ScriptResearch(Project: TRigmMovieProject): TJSONObject;
 begin
@@ -53,13 +53,13 @@ begin
 end;
 function ResearchSingleLine(const Text: string): string;
 begin Result := Text.Replace(#13#10,' ').Replace(#13,' ').Replace(#10,' '); end;
-function ResearchAdvanceReason(Project: TRigmMovieProject): string;
+function ResearchIncompleteReason(Project: TRigmMovieProject): string;
 begin
   var R := ScriptResearch(Project);
   if not ResearchWorkReady(R) then Exit('作品候補と概要を確認し、「この作品で正しい」にチェックしてください。');
   if not JB(R,'definitionsReady') then Exit('台本の種類に応じた既定要素は未定義です。Codex側で要素一覧を設定してください。');
   for var V in JA(R,'elements') do if not MatchStr(JS(TJSONObject(V),'state'),['confirmed-info','confirmed-none']) then
-    Exit('未確認または確認中の項目があります。すべての項目を確定してください。');
+    Exit('未確認または確認中の項目があります。');
   Result := '';
 end;
 procedure CheckText(O: TJSONObject; const Key: string; Limit: Integer; Required: Boolean = False);
@@ -93,6 +93,12 @@ begin
       if not (V is TJSONObject) then raise Exception.Create('作品候補はオブジェクトで指定してください。');
       var C := TJSONObject(V); CheckText(C,'id',64,True); CheckText(C,'name',256,True);
       CheckText(C,'overview',3000,True); CheckText(C,'identity',2000); CheckText(C,'details',8000); CheckSources(C);
+      for var Key in ['author','niconicoUrl','postingSummary'] do if C.GetValue(Key)<>nil then begin
+        if not (C.GetValue(Key) is TJSONString) then raise Exception.Create('作者・ニコニコ漫画URL・投稿用紹介文は文字列です。');
+        CheckText(C,Key,3000);
+      end;
+      if (JS(C,'niconicoUrl')<>'') and not NicoComicUrl(JS(C,'niconicoUrl')) then
+        raise Exception.Create('ニコニコ漫画URLはhttps://manga.nicovideo.jp/comic/作品番号で指定してください。');
       if Seen.ContainsKey(JS(C,'id')) then raise Exception.Create('作品候補IDが重複しています。'); Seen.Add(JS(C,'id'),True);
     end;
     Seen.Clear;
@@ -277,7 +283,9 @@ begin
   Result := TJSONObject.Create; var R := ScriptResearch(Project);
   Result.AddPair('pageId','script-research'); Result.AddPair('stage','review');
   Result.AddPair('scriptType',ProjectScriptType(Project)); Result.AddPair('scriptTypeName',ScriptTypeName(ProjectScriptType(Project)));
-  var Reason := ResearchAdvanceReason(Project); Result.AddPair('advanceBlockedReason',Reason); AddB(Result,'canAdvance',Reason='');
+  var Reason := ResearchIncompleteReason(Project);
+  Result.AddPair('incompleteReason',Reason); AddB(Result,'researchReady',Reason='');
+  Result.AddPair('advanceBlockedReason',''); AddB(Result,'canAdvance',R<>nil);
   if R=nil then begin Result.AddPair('phase','identify'); AddB(Result,'initialized',False); Exit; end;
   AddB(Result,'initialized',True);
   for var Key in ['researchId','title','selectedCandidateId','expandedElementId','humanConfirmed','definitionsReady'] do
@@ -295,10 +303,12 @@ begin
 end;
 function ResearchIntegrationData(Project: TRigmMovieProject): TJSONObject;
 begin
-  if ResearchAdvanceReason(Project)<>'' then raise Exception.Create(ResearchAdvanceReason(Project));
   var R := ScriptResearch(Project); Result := TJSONObject.Create;
-  Result.AddPair('work',ResearchCandidate(R,JS(R,'selectedCandidateId')).Clone as TJSONObject);
   var A := TJSONArray.Create; Result.AddPair('elements',A);
-  for var V in JA(R,'elements') do if JS(TJSONObject(V),'state')='confirmed-info' then A.AddElement(V.Clone as TJSONObject);
+  // 掘り下げは任意。未承認の候補や確認途中の項目を次工程の確定情報へ混ぜない。
+  if not ResearchWorkReady(R) then Exit;
+  Result.AddPair('work',ResearchCandidate(R,JS(R,'selectedCandidateId')).Clone as TJSONObject);
+  for var V in JA(R,'elements') do if (JS(TJSONObject(V),'state')='confirmed-info') and
+    (JS(TJSONObject(V),'workId')=JS(R,'selectedCandidateId')) then A.AddElement(V.Clone as TJSONObject);
 end;
 end.

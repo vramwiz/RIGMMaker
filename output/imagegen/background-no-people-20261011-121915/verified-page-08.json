@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "data": {
+    "count": 14,
+    "backgroundReady": false,
+    "allApproved": false,
+    "ready": 14,
+    "pendingRequests": 0,
+    "selectedScene": "common-background",
+    "state": "in-progress",
+    "projectId": "{C36C2A85-DD8A-4DDE-8A7D-D5072CF41A98}",
+    "revision": 1538,
+    "background": {
+      "id": "common-background",
+      "title": "共通背景画像",
+      "image": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{C36C2A85-DD8A-4DDE-8A7D-D5072CF41A98}\\Images\\28e1a7da9e227381605a9472f2a8b498865ad81231b806b1b321b3ff8e6998e2.png",
+      "description": "",
+      "imagePrompt": "マンガの紹介用の共通背景。異世界からの来客に日本料理を振る舞う、現代の日本のマンションの室内と食卓。人物は一切描かない。女騎士・男性・人影・人の映り込みも入れず、室内・食卓・日本料理だけを描く。",
+      "padding": 0,
+      "imageFeedback": "",
+      "imageApproved": false,
+      "imageApprovalKey": "",
+      "imageEditEpoch": 2,
+      "displayMode": "image",
+      "animation": {},
+      "target": "common-background",
+      "optional": true,
+      "ready": false,
+      "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{C36C2A85-DD8A-4DDE-8A7D-D5072CF41A98}\\Images\\28e1a7da9e227381605a9472f2a8b498865ad81231b806b1b321b3ff8e6998e2.png",
+      "width": 1920,
+      "height": 1080,
+      "sourceCues": [],
+      "imageRequest": {
+        "requestId": "{C933CF6D-D1E4-448C-8A1F-80324BD84A2B}",
+        "sceneId": "common-background",
+        "sceneNumber": 0,
+        "fingerprint": "cba12cc946fad052f46ea2b7a158f35ada05bac4793263d324eb0a7d134b8cc2",
+        "prompt": "マンガの紹介用の共通背景。異世界からの来客に日本料理を振る舞う、現代の日本のマンションの室内と食卓。人物は一切描かない。女騎士・男性・人影・人の映り込みも入れず、室内・食卓・日本料理だけを描く。",
+        "feedback": "",
+        "provider": "external-codex",
+        "width": 1920,
+        "height": 1080,
+        "aspectRatio": "1920:1080",
+        "target": "common-background",
+        "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+        "state": "adopted",
+        "adoptedFingerprint": "5c107f82087c1fe6251e82df523bd970be20de20dc07fad2f027826cfe4d1509",
+        "imageProvenance": "external-generated",
+        "current": true
+      }
+    },
+    "rows": [
+      {
+        "id": "{BBB0A883-BB98-46BA-A4BA-4F6250B3DC3B}",
+        "title": "女騎士",
+        "image": "project.assets\\fd7f09db9c1f7b6468869e13c51608c72eb5a13377c4bc4409e5c8c5a0accd64.png",
+        "description": "",
+        "imagePrompt": "女騎士",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": true,
+        "imageApprovalKey": "4353c7f17fdc06de1fa8923838fecf7f3bc01de363ceadc32df2a4356c2a22d4",
+        "imageEditEpoch": 3,
+        "displayMode": "image",
+        "animation": {},
+        "sceneNumber": 9,
+        "start": 64.9,
+        "duration": 0.972,
+        "ready": true,
+        "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{C36C2A85-DD8A-4DDE-8A7D-D5072CF41A98}\\project.assets\\fd7f09db9c1f7b6468869e13c51608c72eb5a13377c4bc4409e5c8c5a0accd64.png",
+        "sourceCues": [
+          {
+            "cueId": "{CC5150EB-1D13-4506-937F-F0F83BB5177C}",
+            "sourceText": "女騎士"
+          }
+        ],
+        "cueCount": 1,
+        "hasMoreCues": false,
+        "imageRequest": {
+          "requestId": "{3F52ACBC-6878-4069-B875-AF2996381CEC}",
+          "sceneId": "{BBB0A883-BB98-46BA-A4BA-4F6250B3DC3B}",
+          "sceneNumber": 9,
+          "fingerprint": "9942d52f993ddafe76fb077496060b93e116b3a13baa413877b077e987dd66a3",
+          "prompt": "女騎士",
+          "feedback": "",
+          "provider": "external-codex",
+          "width": 1920,
+          "height": 1080,
+          "aspectRatio": "1920:1080",
+          "target": "scene",
+          "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+          "adoptedFingerprint": "a19768e71d903faf38775574294a2864a00b355a687ac087b136aee8a236b5cc",
+          "imageProvenance": "external-generated",
+          "state": "cancelled",
+          "current": false
+        }
+      }
+    ],
+    "nextOffset": 9,
+    "hasMore": true,
+    "preview": {
+      "current": false,
+      "error": ""
+    },
+    "pipes": {
+      "format": "RIGMMaker.WorkspaceConnection",
+      "schemaVersion": 1,
+      "apiVersion": 2,
+      "pid": 13364,
+      "commandPipe": "RIGMMaker.Workspace.13364.{398A9234-BF79-455C-9A11-D0E50739806F}",
+      "controlPipe": "RIGMMaker.Workspace.13364.{398A9234-BF79-455C-9A11-D0E50739806F}",
+      "dataRoot": "C:\\Users\\zan12\\Documents\\RIGMMaker",
+      "connectionFile": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Exchange\\workspace-13364.json",
+      "routing": "common-command"
+    }
+  },
+  "requestId": "a84dfb6e-b1cf-4b38-b10c-cebdb7cb643c"
+}

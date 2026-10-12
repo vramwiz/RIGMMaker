@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "data": {
+    "count": 14,
+    "backgroundReady": false,
+    "allApproved": false,
+    "ready": 14,
+    "pendingRequests": 0,
+    "selectedScene": "common-background",
+    "state": "in-progress",
+    "projectId": "{C36C2A85-DD8A-4DDE-8A7D-D5072CF41A98}",
+    "revision": 1548,
+    "background": {
+      "id": "common-background",
+      "title": "共通背景画像",
+      "image": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{C36C2A85-DD8A-4DDE-8A7D-D5072CF41A98}\\Images\\2e5b185f49b6f2b780e198de26f57483b5271a84721c5de68c4bf819883f0886.png",
+      "description": "",
+      "imagePrompt": "作品のテーマに関係しない、単なる控えめな幾何学模様の共通背景。濃いグレーを基調に、低コントラストの小さな菱形と細線を繰り返す柄。人物・室内・料理などの具体物、文字、ロゴは描かない。",
+      "padding": 0,
+      "imageFeedback": "",
+      "imageApproved": false,
+      "imageApprovalKey": "",
+      "imageEditEpoch": 8,
+      "displayMode": "image",
+      "animation": {},
+      "target": "common-background",
+      "optional": true,
+      "ready": false,
+      "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{C36C2A85-DD8A-4DDE-8A7D-D5072CF41A98}\\Images\\2e5b185f49b6f2b780e198de26f57483b5271a84721c5de68c4bf819883f0886.png",
+      "width": 1920,
+      "height": 1080,
+      "sourceCues": [],
+      "imageRequest": {
+        "requestId": "{B6054542-DA98-48E5-A920-7586A14F5B01}",
+        "sceneId": "common-background",
+        "sceneNumber": 0,
+        "fingerprint": "9c3e9399386ea1d0f5975db61ea33c40ff812eab2534c438ff8de2665b314c14",
+        "prompt": "作品のテーマに関係しない、単なる控えめな幾何学模様の共通背景。濃いグレーを基調に、低コントラストの小さな菱形と細線を繰り返す柄。人物・室内・料理などの具体物、文字、ロゴは描かない。",
+        "feedback": "",
+        "provider": "external-codex",
+        "width": 1920,
+        "height": 1080,
+        "aspectRatio": "1920:1080",
+        "target": "common-background",
+        "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+        "state": "adopted",
+        "adoptedFingerprint": "ec75f9120a22a602960ff6b4b2a6bf55a9a6627fb66aec0d999f95b3b29cb2ff",
+        "imageProvenance": "external-generated",
+        "current": true
+      }
+    },
+    "rows": [
+      {
+        "id": "{BBA35690-930A-4406-BFAD-8F51C5E4E6FE}",
+        "title": "異世界の戦闘を観戦しながら",
+        "image": "project.assets\\4d1d868ee0c6a52f081c2aade4a7d2fcf2bf9d3e29df8feaecb25bdc4e61a299.png",
+        "description": "",
+        "imagePrompt": "異世界の戦闘を観戦しながら一杯飲む ",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": true,
+        "imageApprovalKey": "aea2fec7ebbe80c4c5ecd0e0dd90ff587299c87656d1034daea6a1763a659823",
+        "imageEditEpoch": 2,
+        "displayMode": "image",
+        "animation": {},
+        "sceneNumber": 13,
+        "start": 74.4333333333333,
+        "duration": 6.39333333333333,
+        "ready": true,
+        "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{C36C2A85-DD8A-4DDE-8A7D-D5072CF41A98}\\project.assets\\4d1d868ee0c6a52f081c2aade4a7d2fcf2bf9d3e29df8feaecb25bdc4e61a299.png",
+        "sourceCues": [
+          {
+            "cueId": "{BE379CB6-F4E4-4CDA-91AA-B5CF7E9AA161}",
+            "sourceText": "戦闘を観戦しながら一杯飲む"
+          },
+          {
+            "cueId": "{4CE1B146-63AA-43A4-B95D-B6BFF6F61412}",
+            "sourceText": "そんな日常的なマンガ"
+          },
+          {
+            "cueId": "{A077C484-A80E-4073-B459-5C5186C228BC}",
+            "sourceText": "今ならアプリからだと全話読めます"
+          }
+        ],
+        "cueCount": 3,
+        "hasMoreCues": false,
+        "imageRequest": {
+          "requestId": "{4EC6D53F-35BB-49F9-A8E9-A045F315F865}",
+          "sceneId": "{BBA35690-930A-4406-BFAD-8F51C5E4E6FE}",
+          "sceneNumber": 13,
+          "fingerprint": "f40a7f09bf12057a7e98649e0a8ea67281b7581f1b236e73a0f8fd4bcce13091",
+          "prompt": "異世界の戦闘を観戦しながら一杯飲む ",
+          "feedback": "",
+          "provider": "external-codex",
+          "width": 1920,
+          "height": 1080,
+          "aspectRatio": "1920:1080",
+          "target": "scene",
+          "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+          "adoptedFingerprint": "722fc06721687c5d5f739c72dac266cef32c1ee3f285f727c09914f98cfbceae",
+          "imageProvenance": "external-generated",
+          "state": "cancelled",
+          "current": false
+        }
+      }
+    ],
+    "nextOffset": 13,
+    "hasMore": true,
+    "preview": {
+      "current": false,
+      "error": ""
+    },
+    "pipes": {
+      "format": "RIGMMaker.WorkspaceConnection",
+      "schemaVersion": 1,
+      "apiVersion": 2,
+      "pid": 13364,
+      "commandPipe": "RIGMMaker.Workspace.13364.{398A9234-BF79-455C-9A11-D0E50739806F}",
+      "controlPipe": "RIGMMaker.Workspace.13364.{398A9234-BF79-455C-9A11-D0E50739806F}",
+      "dataRoot": "C:\\Users\\zan12\\Documents\\RIGMMaker",
+      "connectionFile": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Exchange\\workspace-13364.json",
+      "routing": "common-command"
+    }
+  },
+  "requestId": "d748dbc1-aff7-42bc-8df1-e43a1e6a9749"
+}

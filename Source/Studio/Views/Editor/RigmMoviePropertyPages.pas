@@ -11,7 +11,7 @@ type
     Row         : Integer;  // ページ内での論理行の識別値。
     Column      : Integer;  // 0=全幅、1=左列、2=右列。
     Height      : Integer;  // コントロールの最低高（96 DPI基準）。
-    Page        : Integer;  // セリフ・場面・演技・音声・診断のページ番号。
+    Page        : Integer;  // 投稿文・場面・演技・BGM・診断のページ番号。
   end;
   TRigmMoviePropertyPages = class
   private
@@ -45,7 +45,7 @@ type
     // DPI変更時は保存済みスクロール位置も同じ比率で変換する。
     procedure ChangeScale(M,D: Integer; isDpiChange: Boolean);
     property Page: Integer read FPropertyPage;
-    property BuildPage: Integer read FBuildPropertyPage write FBuildPropertyPage; // 次のAddPropertyが所属する0..4のページ番号。
+    property BuildPage: Integer read FBuildPropertyPage write FBuildPropertyPage; // 登録先0..4。-1は旧内部値を非表示で保持。
     property Fields: TList<TRigmMovieProperty> read FPropertyFields; // 入力配線と下書き判定用の非所有参照。内容の変更はAddPropertyで行う。
     property LayoutCount: Integer read FPropertyLayouts;
     property Paused: Boolean read FPaused write FPaused; // True中は配置を保留する。解除後にLayoutPropertiesを呼ぶ。
@@ -70,6 +70,12 @@ begin
   Field.Row := Row; Field.Height := H; Field.Column := 0;
   Field.Page := FBuildPropertyPage;
   if (Control<>nil) and (Control.Name='MovieBackground') then begin Field.Page := 1; Field.Row := 110; end;
+  // 旧セリフ・VOICEVOX欄は互換操作の内部値だけを保持し、画面やページ一覧へ登録しない。
+  if Field.Page<0 then begin
+    if LabelControl<>nil then LabelControl.Visible := False;
+    if Control<>nil then Control.Visible := False;
+    Exit;
+  end;
   if Field.Page=0 then case Row of 156: Field.Row := 0; 269: Field.Row := 110; 53: Field.Row := 210;
     374: Field.Row := 265; 408: Field.Row := 299; end;
   if (Field.Page=1) and (Control<>nil) and (Control.Name='MovieCueScene') then Field.Row := 55;
@@ -82,11 +88,11 @@ begin
 end;
 
 function TRigmMoviePropertyPages.PropertyPageName: string;
-const Names: array[0..4] of string = ('dialogue','scene','acting','audio','diagnostics');
+const Names: array[0..4] of string = ('posting','scene','acting','audio','diagnostics');
 begin Result := Names[FPropertyPage]; end;
 
 procedure TRigmMoviePropertyPages.PropertyPageClick(Sender: TObject);
-const Names: array[0..4] of string = ('dialogue','scene','acting','audio','diagnostics');
+const Names: array[0..4] of string = ('posting','scene','acting','audio','diagnostics');
 begin SelectPropertyPage(Names[TComponent(Sender).Tag]); end;
 
 procedure TRigmMoviePropertyPages.PropertyInputEntered(Sender: TObject);
@@ -97,7 +103,7 @@ begin
 end;
 
 procedure TRigmMoviePropertyPages.SelectPropertyPage(const Page: string);
-const Names: array[0..4] of string = ('dialogue','scene','acting','audio','diagnostics');
+const Names: array[0..4] of string = ('posting','scene','acting','audio','diagnostics');
 begin
   var Index := -1; for var I := 0 to High(Names) do if Page=Names[I] then Index := I;
   if Index<0 then raise ERigm.Create('Unknown movie property page');

@@ -7,7 +7,7 @@ uses System.Classes, System.JSON, Vcl.Forms, Vcl.Controls, Vcl.ExtCtrls, Vcl.Std
 type
   TRigmWizardMainForm = class(TForm)
   private
-    FRoot: string; FHost,FHeader: TPanel; FTitle: TLabel;
+    FRoot: string; FHost,FHeader: TPanel; FTitle: TLabel; FReturnScript: TButton;
     FPages: array[TRigmAppPage] of TFrame;
     FCurrentPage: TRigmAppPage;
     FWorkspace: TRigmWizardWorkspace;
@@ -19,6 +19,7 @@ type
     procedure ReturnCharacters(Sender: TObject);
     procedure SavedCharacter(Sender: TObject);
     procedure Home(Sender: TObject);
+    procedure ReturnToScript(Sender: TObject);
     procedure Closing(Sender: TObject; var CanClose: Boolean);
   public
     constructor Create(AOwner: TComponent); override;
@@ -31,7 +32,7 @@ type
   end;
 var RigmWizardMain: TRigmWizardMainForm;
 implementation
-uses System.SysUtils, System.Math, Winapi.Windows, RigmAppSettings, RigmCharacterEditPage, RigmMovieWorkspaceFrame,
+uses System.SysUtils, System.Math, Winapi.Windows, Vcl.Dialogs, RigmAppSettings, RigmCharacterEditPage, RigmMovieWorkspaceFrame,
   RigmHomeFrame, RigmCharacterManagerFrame, RigmScriptManagerFrame, RigmScriptCreatorFrame;
 constructor TRigmWizardMainForm.Create(AOwner: TComponent);
 begin
@@ -45,8 +46,11 @@ begin
   Position := poScreenCenter; Font.Name := 'Yu Gothic UI'; Font.Size := 10; OnCloseQuery := Closing;
   KeyPreview := True; OnKeyDown := CommonKey;
   FRoot := RigmDocumentsDirectory;
-  FHeader := TPanel.Create(Self); FHeader.Parent := Self; FHeader.Align := alTop; FHeader.Height := 44; FHeader.BevelOuter := bvNone; FHeader.Name := 'WizardHeader';
+  FHeader := TPanel.Create(Self); FHeader.Parent := Self; FHeader.Align := alTop; FHeader.Height := 44; FHeader.BevelOuter := bvNone; FHeader.Name := 'WizardHeader'; FHeader.ShowCaption := False;
   var Button := TButton.Create(Self); Button.Parent := FHeader; Button.Align := alLeft; Button.Width := 140; Button.Caption := 'ホームへ戻る'; Button.Name := 'WizardHome'; Button.OnClick := Home;
+  FReturnScript := TButton.Create(Self); FReturnScript.Parent := FHeader; FReturnScript.Align := alRight;
+  FReturnScript.Width := 160; FReturnScript.Caption := '台本編集へ戻る'; FReturnScript.Name := 'WizardReturnScript';
+  FReturnScript.OnClick := ReturnToScript; FReturnScript.Visible := False;
   FTitle := TLabel.Create(Self); FTitle.Parent := FHeader; FTitle.Align := alClient; FTitle.Layout := tlCenter; FTitle.Font.Size := 16; FTitle.Name := 'WizardTitle';
   FHost := TPanel.Create(Self); FHost.Parent := Self; FHost.Align := alClient; FHost.BevelOuter := bvNone;
   EnsureWorkspace; NavigateTo(apHome);
@@ -85,30 +89,39 @@ begin
   var Lifecycle: IRigmPageLifecycle;
   if (Page<>FCurrentPage) and (FCurrentPage=apScriptCreate) and (FPages[apScriptCreate]<>nil) and
     not TRigmScriptCreatorFrame(FPages[apScriptCreate]).RequestFinish then Exit;
-  var Target := EnsurePage(Page);
-  var Loading := False;
-  if Page=apCharacterEdit then Loading := (Path<>'') or
-    ((TRigmCharacterEditPage(Target).PsdEditor=nil) and (TRigmCharacterEditPage(Target).LegacyEditor=nil));
-  if Loading then TRigmCharacterEditPage(Target).BeginCharacterLoad(Path);
-  var Previous := FPages[FCurrentPage];
-  if Previous<>nil then begin if Supports(Previous,IRigmPageLifecycle,Lifecycle) then Lifecycle.SetActive(False); Previous.Visible := False; end;
-  FCurrentPage := Page; Target.Visible := True; Target.BringToFront; FTitle.Caption := '  '+RigmPageTitle(Page);
-  FHeader.Visible := Page<>apScriptCreate;
-  if FWorkspace<>nil then FWorkspace.CurrentPage := Page;
+  // 親の描画を止めたまま生成・ヘッダー変更・初期反映まで済ませる。
+  // Visibleの切替だけでは、表示時の再配置が途中で描画される。
+  var BatchDisplay := Page in [apMovieEdit,apScriptCreate];
+  if BatchDisplay then FHost.LockDrawing;
   try
-    if Loading then begin
-      // 読み込み前に新画面と案内のWM_PAINTだけを処理する。入力・パイプの再入を起こさない。
-      RedrawWindow(Handle,nil,0,RDW_INVALIDATE or RDW_UPDATENOW or RDW_ALLCHILDREN);
-      if (Path<>'') and not TRigmCharacterEditPage(Target).ActivateCharacter(Path) then
-        raise Exception.Create('キャラを開けません。編集中の入力とファイルを確認してください。');
-    end;
-    if Page=apScripts then TRigmScriptManagerFrame(Target).RefreshLibrary;
-  finally
+    var Target := EnsurePage(Page);
+    var Loading := False;
+    if Page=apCharacterEdit then Loading := (Path<>'') or
+      ((TRigmCharacterEditPage(Target).PsdEditor=nil) and (TRigmCharacterEditPage(Target).LegacyEditor=nil));
+    if Loading then TRigmCharacterEditPage(Target).BeginCharacterLoad(Path);
+    var Previous := FPages[FCurrentPage];
+    if Previous<>nil then begin if Supports(Previous,IRigmPageLifecycle,Lifecycle) then Lifecycle.SetActive(False); Previous.Visible := False; end;
+    FCurrentPage := Page; Target.Visible := True; Target.BringToFront; FTitle.Caption := '  '+RigmPageTitle(Page);
+    FHeader.Visible := Page<>apScriptCreate;
+    FReturnScript.Visible := (Page=apMovieEdit) and FWorkspace.CanReturnMovieToScript;
+    if FWorkspace<>nil then FWorkspace.CurrentPage := Page;
     try
-      if Supports(Target,IRigmPageLifecycle,Lifecycle) then Lifecycle.SetActive(True);
+      if Loading then begin
+        // 読み込み前に新画面と案内のWM_PAINTだけを処理する。入力・パイプの再入を起こさない。
+        RedrawWindow(Handle,nil,0,RDW_INVALIDATE or RDW_UPDATENOW or RDW_ALLCHILDREN);
+        if (Path<>'') and not TRigmCharacterEditPage(Target).ActivateCharacter(Path) then
+          raise Exception.Create('キャラを開けません。編集中の入力とファイルを確認してください。');
+      end;
+      if Page=apScripts then TRigmScriptManagerFrame(Target).RefreshLibrary;
     finally
-      if Loading then TRigmCharacterEditPage(Target).EndCharacterLoad;
+      try
+        if Supports(Target,IRigmPageLifecycle,Lifecycle) then Lifecycle.SetActive(True);
+      finally
+        if Loading then TRigmCharacterEditPage(Target).EndCharacterLoad;
+      end;
     end;
+  finally
+    if BatchDisplay then FHost.UnlockDrawing(True);
   end;
 end;
 procedure TRigmWizardMainForm.NavigationRequested(Sender: TObject; Page: TRigmAppPage; const Path: string);
@@ -119,6 +132,14 @@ procedure TRigmWizardMainForm.SavedCharacter(Sender: TObject);
 begin if FPages[apCharacters]<>nil then TRigmCharacterManagerFrame(FPages[apCharacters]).RefreshLibrary(Self); end;
 procedure TRigmWizardMainForm.Home(Sender: TObject);
 begin NavigateTo(apHome); end;
+procedure TRigmWizardMainForm.ReturnToScript(Sender: TObject);
+begin
+  if (FCurrentPage<>apMovieEdit) or not FWorkspace.CanReturnMovieToScript then Exit;
+  try
+    TRigmMovieWorkspaceFrame(FPages[apMovieEdit]).CurrentEditor.PrepareScriptReturn;
+    FWorkspace.ReturnMovieToScript;
+  except on E: Exception do ShowMessage(E.Message); end;
+end;
 procedure TRigmWizardMainForm.Closing(Sender: TObject; var CanClose: Boolean);
 begin
   CanClose := False; var Lifecycle: IRigmPageLifecycle;

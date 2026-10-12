@@ -1,0 +1,8 @@
+Use case: illustration-story
+Asset type: a scene illustration for a Japanese manga introduction video, 16:9 landscape, target 1920x1080.
+Primary request: 青年がマンションの部屋でお酒を飲んでいる。主人公は30代独身男の虎太朗。
+Reference image: use image 1 only as the continuity reference for Kotaro's face, tousled short black hair, charcoal casual shirt, clean linework, warm colors, wooden table and modern Japanese apartment. This is a NEW composition.
+Scene: Kotaro alone in his cozy bachelor apartment at night, relaxed after work, happily sipping an amber beer from a simple clear glass with natural hands. A small savory snack on the wooden dining table, kitchen shelves and evening window behind him. He is clearly an adult in his thirties, friendly and ordinary, not a teen.
+Composition: medium-wide environmental portrait, enough room to establish the apartment and his quiet enjoyment, no other people.
+Style: polished full-color Japanese manga/anime illustration, soft cel shading, clean precise linework, warm domestic mood.
+Constraints: no text, lettering, speech bubbles, logos or watermark. No knight in this scene.

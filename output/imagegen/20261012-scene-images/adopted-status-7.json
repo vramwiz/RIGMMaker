@@ -1,0 +1,294 @@
+{
+  "hasProject": true,
+  "implementedStage": "closing-editor",
+  "placementEditing": false,
+  "textEditing": false,
+  "scriptConfirmed": true,
+  "projectId": "{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}",
+  "revision": 1216,
+  "researchReady": false,
+  "title": "異世界「嘘」ガイド",
+  "savedTitle": "異世界「嘘」ガイド",
+  "scriptType": "manga-introduction",
+  "scriptTypeName": "漫画紹介",
+  "scriptTypes": [
+    {
+      "id": "anime-review",
+      "name": "アニメ批評"
+    },
+    {
+      "id": "manga-introduction",
+      "name": "漫画紹介"
+    }
+  ],
+  "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}\\project.rigmovie",
+  "modified": true,
+  "resumeStage": "scenes",
+  "castingReady": true,
+  "layoutGuide": {
+    "choice": "theme",
+    "coordinateSpace": "ratio",
+    "referenceWidth": 1920,
+    "referenceHeight": 1080,
+    "videoWidth": 1920,
+    "videoHeight": 1080,
+    "hasCommonBackground": true,
+    "image": {
+      "left": 0.24479167163372,
+      "top": 0.0925925895571709,
+      "right": 0.755208313465118,
+      "bottom": 0.601851880550385
+    },
+    "description": {
+      "left": 0.260416656732559,
+      "top": 0.620370388031006,
+      "right": 0.739583313465118,
+      "bottom": 0.740740716457367
+    },
+    "subtitle": {
+      "left": 0.020833333954215,
+      "top": 0.791666686534882,
+      "right": 0.979166686534882,
+      "bottom": 0.967592597007751
+    },
+    "leftCharacters": {
+      "left": 0.020833333954215,
+      "top": 0.16666667163372,
+      "right": 0.22395832836628,
+      "bottom": 0.759259283542633
+    },
+    "rightCharacters": {
+      "left": 0.776041686534882,
+      "top": 0.16666667163372,
+      "right": 0.979166686534882,
+      "bottom": 0.759259283542633
+    }
+  },
+  "wizard": {
+    "format": "RIGMMaker.ScriptWizard",
+    "schemaVersion": 1,
+    "flowVersion": 2,
+    "selectedCharacters": [
+      {
+        "path": "RIGM\\character-904B63CF-20D7-4FB4-B8C0-11CB570949B5.rigm",
+        "name": "新しいキャラクター",
+        "renderFormat": "rigm",
+        "voiceBinding": {
+          "uuid": "1bd6b32b-d650-4072-bbe5-1d0ef4aaa28b",
+          "name": "東北きりたん",
+          "styleId": 108,
+          "style": "ノーマル"
+        }
+      }
+    ],
+    "createdAt": "2026-10-12T02:20:21.914Z",
+    "titleInput": "異世界「嘘」ガイド",
+    "scriptType": "manga-introduction",
+    "titleStatus": "complete",
+    "layoutChoice": "theme",
+    "backgroundTone": "dark",
+    "charactersStatus": "complete",
+    "placements": [
+      {
+        "path": "RIGM\\character-904B63CF-20D7-4FB4-B8C0-11CB570949B5.rigm",
+        "x": 0.697916666666667,
+        "y": 0.277777777777778,
+        "width": 0.336805534362793,
+        "height": 0.898148148148148,
+        "flipX": false
+      }
+    ],
+    "placementSelected": "RIGM\\character-904B63CF-20D7-4FB4-B8C0-11CB570949B5.rigm",
+    "layoutStatus": "complete",
+    "placementStatus": "complete",
+    "reviewStatus": "complete",
+    "textStatus": "in-progress",
+    "voiceEffects": {
+      "format": "RIGMMaker.ScriptVoiceEffects",
+      "schemaVersion": 1,
+      "selectedCue": "{6B8025F5-3C82-4367-8488-F3D69633BD12}"
+    },
+    "summaryChoice": "yes",
+    "summaryStatus": "complete",
+    "summary-editStatus": "complete",
+    "scriptConfirmedFingerprint": "e66ecf512c79154280b7b44ab574e7796a771ea2189812e2a0c42d9d507b1bd4",
+    "script-confirmStatus": "complete",
+    "subtitlesStatus": "complete",
+    "closingStatus": "complete",
+    "voiceStatus": "complete",
+    "voice-effectsStatus": "complete",
+    "furthestStage": "scenes",
+    "scene-assignmentStatus": "complete",
+    "updatedAt": "2026-10-12T05:28:28.8Z",
+    "scenesStatus": "in-progress",
+    "summaryData": {
+      "status": "complete",
+      "materialized": true,
+      "axisCount": 5
+    },
+    "scriptText": {
+      "format": "RIGMMaker.ScriptText",
+      "schemaVersion": 1,
+      "activeSection": "body",
+      "sections": [
+        {
+          "id": "opening",
+          "scope": "shared",
+          "length": 73
+        },
+        {
+          "id": "body",
+          "scope": "episode",
+          "length": 549
+        },
+        {
+          "id": "closing",
+          "scope": "shared",
+          "length": 67
+        },
+        {
+          "id": "summary",
+          "scope": "episode",
+          "length": 127
+        }
+      ]
+    },
+    "subtitles": {
+      "format": "RIGMMaker.ScriptSubtitles",
+      "selectedCue": "{BAD54216-9F51-4A8B-A1ED-F4D6E81E4BD8}",
+      "count": 44,
+      "status": "complete"
+    },
+    "casting": {
+      "state": "requested",
+      "requestId": "{D8A84DF2-D7F3-47E9-A97E-B21666B7D69F}",
+      "fingerprint": "70924084fbcf02edd6c87f649eb52f2a294b0754cff60ed27bfd4d87bf66ca7f",
+      "selectedCue": "{BAD54216-9F51-4A8B-A1ED-F4D6E81E4BD8}",
+      "roles": [
+        {
+          "number": 1,
+          "path": "RIGM\\character-904B63CF-20D7-4FB4-B8C0-11CB570949B5.rigm",
+          "name": "新しいキャラクター",
+          "speakerId": "script-{6C4B197A-8EAC-463D-81A3-877726F23764}",
+          "active": true
+        }
+      ],
+      "count": 44,
+      "pending": 0,
+      "unassigned": 0,
+      "usedRoles": [
+        1
+      ],
+      "missingVoices": 0,
+      "rolesComplete": true,
+      "voicesComplete": true
+    },
+    "castingStatus": "complete",
+    "research": {
+      "pageId": "script-research",
+      "stage": "review",
+      "scriptType": "manga-introduction",
+      "scriptTypeName": "漫画紹介",
+      "incompleteReason": "台本の種類に応じた既定要素は未定義です。Codex側で要素一覧を設定してください。",
+      "researchReady": false,
+      "advanceBlockedReason": "",
+      "canAdvance": true,
+      "initialized": true,
+      "researchId": "{5641B45C-F589-4632-A87B-1FC5DC75DDF6}",
+      "title": "異世界「嘘」ガイド",
+      "selectedCandidateId": "nico-84566",
+      "expandedElementId": "",
+      "humanConfirmed": true,
+      "definitionsReady": false,
+      "phase": "deepen",
+      "candidateCount": 1,
+      "defaultCount": 0,
+      "extraCount": 0,
+      "confirmedCount": 0,
+      "selectedCandidateName": "異世界「嘘」ガイド"
+    },
+    "voice": {
+      "engineUrl": "http://127.0.0.1:50021",
+      "selectedCue": "{ED872686-F223-496B-8FFF-E2444B30B3D4}",
+      "count": 44,
+      "ready": 44,
+      "stored": 44,
+      "unbound": 0,
+      "heard": 44,
+      "state": "complete",
+      "playing": false,
+      "continuous": false,
+      "playingCue": "",
+      "sequenceStatus": "連続再生が最後まで完了しました。",
+      "sequencePhase": "",
+      "sequenceIndex": 6,
+      "sequenceTotal": 0,
+      "busy": false,
+      "error": "",
+      "catalogCount": 127,
+      "catalogUrl": "http://127.0.0.1:50021",
+      "job": {
+        "jobId": "{5C4D06B5-5F06-42FE-ACA0-AC7019C299A5}",
+        "kind": "audio",
+        "snapshotProjectId": "{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}",
+        "snapshotRevision": 1164,
+        "state": "succeeded",
+        "error": "",
+        "completed": 1,
+        "total": 1,
+        "done": true,
+        "cancelRequested": false,
+        "cancelCallMs": 0,
+        "cancelWorkerMs": 0,
+        "output": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}\\Audio",
+        "phase": "",
+        "phaseCompleted": 0,
+        "phaseTotal": 0,
+        "elapsedSeconds": 2.422,
+        "remainingSeconds": 0,
+        "remainingScope": "current phase estimate; rendering then encoding",
+        "encoderPeakPrivateBytes": 0,
+        "encoderPeakWorkingSetBytes": 0,
+        "exportStagingPeakBytes": 0,
+        "encoderProcessId": 0,
+        "encoderExited": false,
+        "cancelPolicy": "cancels active HTTP request; retry requested during cancellation queues once; export stops between frames or stops its own FFmpeg child"
+      }
+    },
+    "scenes": {
+      "count": 11,
+      "backgroundReady": true,
+      "thumbnailReady": false,
+      "thumbnailSourcesReady": false,
+      "allApproved": false,
+      "ready": 0,
+      "pendingRequests": 3,
+      "selectedScene": "thumbnail",
+      "state": "in-progress"
+    },
+    "closingData": {
+      "status": "complete"
+    },
+    "stage": "scenes"
+  },
+  "subtitlesReady": true,
+  "voiceReady": true,
+  "assignmentReady": true,
+  "scenesReady": false,
+  "canAdvance": false,
+  "canConfirmCasting": false,
+  "canConfirmSubtitles": false,
+  "canConfirmVoice": false,
+  "advanceBlockedReason": "使用する共通背景・シーン画像を用意し、確定チェックを確認してください。",
+  "pipes": {
+    "format": "RIGMMaker.WorkspaceConnection",
+    "schemaVersion": 1,
+    "apiVersion": 2,
+    "pid": 24128,
+    "commandPipe": "RIGMMaker.Workspace.24128.{46CD3D5F-8F91-4BE6-AE52-5D28BABA7B15}",
+    "controlPipe": "RIGMMaker.Workspace.24128.{46CD3D5F-8F91-4BE6-AE52-5D28BABA7B15}",
+    "dataRoot": "C:\\Users\\zan12\\Documents\\RIGMMaker",
+    "connectionFile": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Exchange\\workspace-24128.json",
+    "routing": "common-command"
+  }
+}

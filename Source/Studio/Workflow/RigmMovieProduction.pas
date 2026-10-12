@@ -9,7 +9,7 @@ function MovieProductionNeeds(Preparation: TJSONObject; const Deliver: string;
   Project: TRigmMovieProject=nil): TJSONArray;
 implementation
 uses System.SysUtils, System.IOUtils, System.Hash, System.Math, System.Generics.Collections, RigmJson, RigmModel,
-  RigmMovieActing, RigmMovieOutput, RigmMovieAudio, RigmMovieWorkspace;
+  RigmMovieActing, RigmMovieOutput, RigmMovieAudio, RigmMovieWorkspace, RigmMovieMp4;
 
 procedure Put(O: TJSONObject; const Key: string; V: TJSONValue);
 begin O.RemovePair(Key).Free; O.AddPair(Key,V); end;
@@ -121,6 +121,7 @@ begin
       for var I := 0 to Min(P.Cues.Count,Current.Cues.Count)-1 do begin
         var C := P.Cues[I]; var Old := Current.Cues[I];
         C.Pause := Old.Pause; C.Expression := Old.Expression; C.Motion := Old.Motion; C.Background := Old.Background;
+        C.Emotion := Old.Emotion; C.FaceAutomatic := Old.FaceAutomatic;
         C.Parameters.Free; C.Parameters := Old.Parameters.Clone as TJSONObject;
         var ExistingActing := Old.Acting.Json;
         try C.Acting.Free; C.Acting := TRigmMovieActing.FromJson(ExistingActing); finally ExistingActing.Free; end;
@@ -163,7 +164,7 @@ begin
       var Directory := ExtractFilePath(ResolveMoviePath(Current.FileName,Current.OutputTarget));
       if Current.OutputTarget='' then Directory := TPath.Combine(TPath.GetDocumentsPath,'RIGMMaker\Movies');
       var Ext := ExtractFileExt(Current.OutputTarget);
-      if Ext='' then begin Ext := '.avi'; if FileExists(P.FfmpegExe) then Ext := '.mp4'; end;
+      if Ext='' then begin Ext := '.avi'; if MovieMp4Available(P.FfmpegExe) then Ext := '.mp4'; end;
       Target := TPath.Combine(Directory,'production-'+THashSHA2.GetHashString(RequestKey).Substring(0,24)+Ext);
     end;
     P.OutputTarget := ResolveMoviePath(Current.FileName,Target);

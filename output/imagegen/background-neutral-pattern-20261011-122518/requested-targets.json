@@ -1,0 +1,39 @@
+[
+  {
+    "id": "common-background",
+    "title": "共通背景画像",
+    "image": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{C36C2A85-DD8A-4DDE-8A7D-D5072CF41A98}\\Images\\28e1a7da9e227381605a9472f2a8b498865ad81231b806b1b321b3ff8e6998e2.png",
+    "description": "",
+    "imagePrompt": "作品のテーマに関係しない、単なる控えめな幾何学模様の共通背景。濃いグレーを基調に、低コントラストの小さな菱形と細線を繰り返す柄。人物・室内・料理などの具体物、文字、ロゴは描かない。",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 8,
+    "displayMode": "image",
+    "animation": {},
+    "target": "common-background",
+    "optional": true,
+    "ready": false,
+    "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{C36C2A85-DD8A-4DDE-8A7D-D5072CF41A98}\\Images\\28e1a7da9e227381605a9472f2a8b498865ad81231b806b1b321b3ff8e6998e2.png",
+    "width": 1920,
+    "height": 1080,
+    "sourceCues": [],
+    "imageRequest": {
+      "requestId": "{B6054542-DA98-48E5-A920-7586A14F5B01}",
+      "sceneId": "common-background",
+      "sceneNumber": 0,
+      "fingerprint": "9c3e9399386ea1d0f5975db61ea33c40ff812eab2534c438ff8de2665b314c14",
+      "prompt": "作品のテーマに関係しない、単なる控えめな幾何学模様の共通背景。濃いグレーを基調に、低コントラストの小さな菱形と細線を繰り返す柄。人物・室内・料理などの具体物、文字、ロゴは描かない。",
+      "feedback": "",
+      "state": "pending",
+      "provider": "external-codex",
+      "width": 1920,
+      "height": 1080,
+      "aspectRatio": "1920:1080",
+      "target": "common-background",
+      "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+      "current": true
+    }
+  }
+]

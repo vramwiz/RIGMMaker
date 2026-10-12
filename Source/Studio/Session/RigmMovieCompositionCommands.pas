@@ -13,7 +13,7 @@ function CompositionRequests(Project: TRigmMovieProject): TJSONObject;
 
 implementation
 uses System.SysUtils, System.IOUtils, System.Math, System.StrUtils,
-  RigmScriptClosingModel, RigmJson, RigmModel, RigmMovieComposition, RigmMovieCompositor, RigmStorage, RigmSample, RigmMovieMotionLibrary, RigmMoviePsdRendering, RigmCharacterCatalog, RigmMovieTransitions, RigmMovieWorkspace, RigmMovieImageTransfer;
+  RigmScriptClosingModel, RigmJson, RigmModel, RigmMovieComposition, RigmMovieCompositor, RigmStorage, RigmSample, RigmMovieMotionLibrary, RigmMoviePsdRendering, RigmCharacterCatalog, RigmMovieTransitions, RigmMovieWorkspace, RigmMovieImageTransfer, RigmMovieActing;
 function IsCompositionCommand(const Name: string): Boolean;
 begin
   Result := MatchText(Name,['composition-enable','add-character','update-character','delete-character','add-scene','update-scene',
@@ -105,7 +105,7 @@ begin
   end;
   if Name='register-expression' then begin
     var C := RequiredCharacter; var Preset := JO(Args,'preset'); var Emotion := JS(Args,'emotion');
-    if not MatchText(Emotion,['neutral','happy','sad','serious','angry','gentle']) then raise ERigm.Create('Unknown expression emotion');
+    if not MatchText(Emotion,MovieEmotionIds) then raise ERigm.Create('Unknown expression emotion');
     if JB(Preset,'generated') and not C.AllowGeneratedExpressions then raise ERigm.Create('Original PSD modification and generated character expressions are not enabled');
     var Image := JS(Preset,'image');
     if (Image<>'') and not FileExists(ResolveMoviePath(Project.FileName,Image)) then raise ERigm.Create('Expression image does not exist');
@@ -202,6 +202,7 @@ begin
     end;
     for var C in Project.Cues do begin
       if (JS(Args,'id')<>'') and (JS(Args,'id')<>C.Id) then Continue;
+      if not C.FaceAutomatic then Continue; // 人が確定した映像の表情を再解析で変更しない。
       var Text := C.Text;
       C.Emotion := 'neutral';
       if ContainsText(Text,'ありがとう') or ContainsText(Text,'おすすめ') or ContainsText(Text,'良い') or ContainsText(Text,'嬉し') then C.Emotion := 'happy';
@@ -225,8 +226,8 @@ begin
   end;
   var Expressions := TJSONArray.Create; Result.AddPair('expressions',Expressions);
   for var C in Project.Cues do for var Character in Project.Characters do if (Character.SpeakerId=C.SpeakerId) and
-    (Character.Expressions.GetValue(C.Emotion)=nil) and (C.Emotion<>'neutral') then begin
-    var O := TJSONObject.Create; O.AddPair('characterId',Character.Id); O.AddPair('emotion',C.Emotion);
+    (Character.Expressions.GetValue(C.VisualEmotion)=nil) and (C.VisualEmotion<>'neutral') then begin
+    var O := TJSONObject.Create; O.AddPair('characterId',Character.Id); O.AddPair('emotion',C.VisualEmotion);
     AddB(O,'generationAllowed',Character.AllowGeneratedExpressions); O.AddPair('sourcePolicy','existing PSD differences first; never modify original PSD');
     O.AddPair('registerCommand','movie-register-expression'); Expressions.AddElement(O);
   end;

@@ -54,13 +54,13 @@ $stale=Args @{id='one';workId='work-a';state='checking'}; $stale.revision--
 [void](Call 'app-script-research-element' (Args @{id='one';workId='other-work';state='checking'}) $true)
 [void](Call 'app-script-research-element' (Args @{id='one';workId='work-a';name='パイプで取得した検証用名称';summary='パイプ経由の概要';details='実在作品の事実ではない検証データ。';state='checking'}))
 $current=Call 'app-script-research' (Args @{section='element';id='one'})
-if($current.expandedElementId -ne 'one' -or $current.item.state -ne 'checking' -or $current.canAdvance){throw 'Pipe update did not affect UI and progress state'}
+if($current.expandedElementId -ne 'one' -or $current.item.state -ne 'checking' -or -not $current.canAdvance -or $current.researchReady){throw 'Pending research must remain optional and incomplete'}
 [void](Call 'app-script-research-element' (Args @{id='one';workId='work-a';state='confirmed-info'}))
 $integration=Call 'app-script-research' (Args @{section='integration'})
 if($integration.rows.Count -ne 1 -or $integration.rows[0].id -ne 'one'){throw 'Integration must exclude no-information elements'}
 [void](Call 'app-script-research-candidates' (Args @{candidates=@(@{id='work-a';name='確認用作品A';overview='再検索した検証用概要。実在作品ではありません。'})}))
 $after=Call 'app-script-research' (Args @{section='summary'})
-if($after.humanConfirmed -or $after.phase -ne 'identify' -or $after.canAdvance){throw 'Re-search did not release human approval'}
+if($after.humanConfirmed -or $after.phase -ne 'identify' -or -not $after.canAdvance -or $after.researchReady){throw 'Re-search must release approval without blocking navigation'}
 $pipeChecks | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $runRoot 'pipe-done.json') -Encoding UTF8
 if(-not $owned.WaitForExit(60000)){throw 'Owned probe failed to finish'}
 Get-Content -LiteralPath (Join-Path $runRoot 'stdout.txt') -Tail 8

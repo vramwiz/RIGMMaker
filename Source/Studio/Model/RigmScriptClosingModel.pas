@@ -2,15 +2,17 @@
 interface
 uses System.JSON, RigmMovieModel;
 procedure PrepareScriptClosing(Project: TRigmMovieProject);
+function ScriptClosingTitleFollowsProject(Project: TRigmMovieProject): Boolean;
+procedure SyncScriptClosingTitle(Project: TRigmMovieProject; const Title: string);
 procedure ValidateScriptClosing(Project: TRigmMovieProject);
 procedure SetScriptClosingDraft(Project: TRigmMovieProject; Draft: TJSONObject);
 procedure MaterializeScriptClosing(Project: TRigmMovieProject);
 function ScriptClosingCards(Project: TRigmMovieProject): TJSONArray;
 function ScriptClosingScene(Project: TRigmMovieProject): string;
 implementation
-uses System.SysUtils, System.Classes, System.IOUtils, System.Math, System.StrUtils, Vcl.Graphics, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, RigmJson, RigmModel, PsdJson, RigmMovieEndCards, RigmMovieComposition;
+uses System.SysUtils, System.Classes, System.IOUtils, System.Math, System.StrUtils, Vcl.Graphics, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, RigmJson, RigmModel, PsdJson, RigmMovieEndCards, RigmMovieComposition, RigmScriptThumbnailModel;
 function ScriptClosingScene(Project: TRigmMovieProject): string;
-begin Result := ''; for var V in JA(JO(Project.ScriptWizard,'casting'),'rows') do if JS(TJSONObject(V),'section')='closing' then begin var C := Project.Cue(JS(TJSONObject(V),'cueId')); if C<>nil then Exit(C.Scene); end; end;
+begin Result := ''; if not(Project.ScriptWizard.GetValue('casting') is TJSONObject) then Exit; for var V in JA(JO(Project.ScriptWizard,'casting'),'rows') do if JS(TJSONObject(V),'section')='closing' then begin var C := Project.Cue(JS(TJSONObject(V),'cueId')); if C<>nil then Exit(C.Scene); end; end;
 procedure ValidateDraft(D: TJSONObject);
 begin
   if not(D.GetValue('title') is TJSONString) or (Length(JS(D,'title'))>128) then raise Exception.Create('締め題名は128文字以内です。'); ValidateVoiceReading(JS(D,'title'));
@@ -27,13 +29,40 @@ procedure PrepareScriptClosing(Project: TRigmMovieProject);
 begin
   if Project.ScriptWizard.GetValue('closingData')=nil then begin
     var O := PsdJson.ObjectText('{"format":"RIGMMaker.ScriptClosing","schemaVersion":1,"status":"draft","draft":{"title":"","representative":"","representativeChoice":"","endChoice":"","endImage":"","endSeconds":"5","thumbnailChoice":"","thumbnailImage":"","thumbnailSeconds":"2","rect":{"x":"0.05","y":"0.08","width":"0.32","height":"0.72"},"reserved":[{"x":"0.44","y":"0.15","width":"0.25","height":"0.36"},{"x":"0.72","y":"0.15","width":"0.25","height":"0.36"},{"x":"0.65","y":"0.65","width":"0.14","height":"0.24"}]}}');
-    PsdJson.Put(JO(O,'draft'),'title',Project.Title); Project.ScriptWizard.AddPair('closingData',O);
+    PsdJson.Put(JO(O,'draft'),'title',Trim(JS(Project.ScriptWizard,'titleInput',Project.Title)));
+    O.AddPair('titleFollowsProject',TJSONBool.Create(True)); Project.ScriptWizard.AddPair('closingData',O);
   end; ValidateScriptClosing(Project);
 end;
 procedure ValidateScriptClosing(Project: TRigmMovieProject);
-begin var O := JO(Project.ScriptWizard,'closingData'); if (JS(O,'format')<>'RIGMMaker.ScriptClosing') or (JI(O,'schemaVersion')<>1) or not(O.GetValue('draft') is TJSONObject) or not MatchStr(JS(O,'status'),['draft','complete']) then raise Exception.Create('締め設定の保存形式が不正です。'); ValidateDraft(JO(O,'draft')); end;
+begin var O := JO(Project.ScriptWizard,'closingData'); if (JS(O,'format')<>'RIGMMaker.ScriptClosing') or (JI(O,'schemaVersion')<>1) or not(O.GetValue('draft') is TJSONObject) or not MatchStr(JS(O,'status'),['draft','complete']) then raise Exception.Create('締め設定の保存形式が不正です。');
+  if (O.GetValue('titleFollowsProject')<>nil) and not(O.GetValue('titleFollowsProject') is TJSONBool) then raise Exception.Create('締め題名の連動設定が不正です。');
+  ValidateDraft(JO(O,'draft')); end;
+function ScriptClosingTitleFollowsProject(Project: TRigmMovieProject): Boolean;
+begin
+  Result := False; if not(Project.ScriptWizard.GetValue('closingData') is TJSONObject) then Exit;
+  var O := JO(Project.ScriptWizard,'closingData'); ValidateScriptClosing(Project);
+  if O.GetValue('titleFollowsProject')<>nil then Exit(JB(O,'titleFollowsProject'));
+  // 旧形式では作品名と一致する題名だけを自動設定とみなす。空欄・独自見出しは保持する。
+  var Title := JS(JO(O,'draft'),'title');
+  Result := (Title<>'') and ((Title=Trim(JS(Project.ScriptWizard,'titleInput'))) or (Title=Project.Title));
+end;
+procedure SyncScriptClosingTitle(Project: TRigmMovieProject; const Title: string);
+begin
+  if not(Project.ScriptWizard.GetValue('closingData') is TJSONObject) then Exit;
+  var Follows := ScriptClosingTitleFollowsProject(Project); var O := JO(Project.ScriptWizard,'closingData');
+  PsdJson.Put(O,'titleFollowsProject',TJSONBool.Create(Follows)); if not Follows then Exit;
+  var OldTitle := JS(JO(O,'draft'),'title'); var NewTitle := Trim(Title);
+  PsdJson.Put(JO(O,'draft'),'title',NewTitle);
+  for var S in Project.Scenes do if S.Animation.GetValue('closingCard') is TJSONObject then begin
+    var Card := JO(S.Animation,'closingCard');
+    if JS(Card,'title')=OldTitle then PsdJson.Put(Card,'title',NewTitle);
+  end;
+end;
 procedure SetScriptClosingDraft(Project: TRigmMovieProject; Draft: TJSONObject);
-begin ValidateDraft(Draft); PrepareScriptClosing(Project); var O := JO(Project.ScriptWizard,'closingData'); if JO(O,'draft').ToJSON=Draft.ToJSON then Exit; PsdJson.Put(O,'draft',Draft.Clone as TJSONObject); PsdJson.Put(O,'status','draft'); end;
+begin ValidateDraft(Draft); PrepareScriptClosing(Project); var O := JO(Project.ScriptWizard,'closingData'); if JO(O,'draft').ToJSON=Draft.ToJSON then Exit;
+  if JS(JO(O,'draft'),'title')<>JS(Draft,'title') then
+    PsdJson.Put(O,'titleFollowsProject',TJSONBool.Create((JS(Draft,'title')<>'') and (JS(Draft,'title')=Trim(JS(Project.ScriptWizard,'titleInput',Project.Title)))));
+  PsdJson.Put(O,'draft',Draft.Clone as TJSONObject); PsdJson.Put(O,'status','draft'); end;
 function Number(const Value,LabelText: string): Double;
 begin if not TryStrToFloat(Value,Result,TFormatSettings.Invariant) or not Finite(Result) then raise Exception.Create(LabelText+'を数値で入力してください。'); end;
 function Rectangle(O: TJSONObject): TJSONObject;
@@ -42,12 +71,20 @@ function ScriptClosingCards(Project: TRigmMovieProject): TJSONArray;
 begin
   ValidateScriptClosing(Project); var D := JO(JO(Project.ScriptWizard,'closingData'),'draft'); Result := TJSONArray.Create;
   try
-    for var Kind in ['end','thumbnail'] do begin var Choice := JS(D,Kind+'Choice'); if not MatchStr(Choice,['none','use']) then raise Exception.Create('終了画像とサムネイルは採用/省略を明示してください。'); if Choice='none' then Continue;
+    for var Kind in ['end'] do begin var Choice := JS(D,Kind+'Choice'); if not MatchStr(Choice,['none','use']) then raise Exception.Create('終了画像は採用/省略を明示してください。'); if Choice='none' then Continue;
       var Path := JS(D,Kind+'Image'); if (Path='') or not FileExists(ResolveMoviePath(Project.FileName,Path)) then raise Exception.Create('採用する画像がありません。既存画像を選んでください。');
       var Card := TJSONObject.Create; Result.AddElement(Card); Card.AddPair('kind',Kind); Card.AddPair('image',Path); AddN(Card,'duration',Number(JS(D,Kind+'Seconds'),'表示秒数'));
       if Kind='end' then begin Card.AddPair('rect',Rectangle(JO(D,'rect'))); var A := TJSONArray.Create; Card.AddPair('reserved',A); for var V in JA(D,'reserved') do A.AddElement(Rectangle(TJSONObject(V))); end
       else Card.AddPair('rect',PsdJson.ObjectText('{"x":0,"y":0,"width":1,"height":1}'));
-    end; ValidateMovieEndCards(Result);
+    end;
+    if Project.Thumbnail.Image<>'' then Result.AddElement(ScriptThumbnailCard(Project))
+    else if JS(D,'thumbnailChoice')='use' then begin
+      // 旧作品の選択画像は保持し、第16段階で必須項目として確認し直す。
+      var Card := TJSONObject.Create; Result.AddElement(Card); Card.AddPair('kind','thumbnail');
+      Card.AddPair('image',JS(D,'thumbnailImage')); AddN(Card,'duration',Number(JS(D,'thumbnailSeconds'),'表示秒数'));
+      Card.AddPair('rect',PsdJson.ObjectText('{"x":0,"y":0,"width":1,"height":1}'));
+    end;
+    ValidateMovieEndCards(Result);
   except Result.Free; raise; end;
 end;
 procedure MaterializeScriptClosing(Project: TRigmMovieProject);
@@ -66,6 +103,7 @@ begin
   var Cards := ScriptClosingCards(Project); try
     if Choice='use' then Image(Path); for var V in Cards do Image(JS(TJSONObject(V),'image'));
     for var S in Project.Scenes do S.Animation.RemovePair('closingCard').Free;
+    if Project.ScriptWizard.GetValue('casting') is TJSONObject then
     for var V in JA(JO(Project.ScriptWizard,'casting'),'rows') do if JS(TJSONObject(V),'section')='closing' then begin
       var C := Project.Cue(JS(TJSONObject(V),'cueId')); if C=nil then Continue; var S := Project.Scene(C.Scene); if S=nil then Continue;
       var Closing := TJSONObject.Create; Closing.AddPair('title',JS(D,'title')); Closing.AddPair('representativeChoice',Choice); Closing.AddPair('image',Path); PsdJson.Put(S.Animation,'closingCard',Closing);

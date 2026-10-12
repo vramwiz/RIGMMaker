@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "data": {
+    "projectId": "{C36C2A85-DD8A-4DDE-8A7D-D5072CF41A98}",
+    "revision": 1482,
+    "closing": {
+      "format": "RIGMMaker.ScriptClosing",
+      "schemaVersion": 1,
+      "draft": {
+        "endSeconds": "5",
+        "thumbnailSeconds": "2",
+        "rect": {
+          "x": "0.05",
+          "y": "0.08",
+          "width": "0.32",
+          "height": "0.72"
+        },
+        "reserved": [
+          {
+            "x": "0.44",
+            "y": "0.15",
+            "width": "0.25",
+            "height": "0.36"
+          },
+          {
+            "x": "0.72",
+            "y": "0.15",
+            "width": "0.25",
+            "height": "0.36"
+          },
+          {
+            "x": "0.65",
+            "y": "0.65",
+            "width": "0.14",
+            "height": "0.24"
+          }
+        ],
+        "title": "隣の部屋の女騎士は、異世界人で飲み友達",
+        "representativeChoice": "none",
+        "endChoice": "none",
+        "thumbnailChoice": "none",
+        "representative": "",
+        "endImage": "",
+        "thumbnailImage": ""
+      },
+      "status": "complete"
+    },
+    "closingScene": "{15110FE5-0453-4C73-87EF-EA88E7B0F2F2}",
+    "pipes": {
+      "format": "RIGMMaker.WorkspaceConnection",
+      "schemaVersion": 1,
+      "apiVersion": 2,
+      "pid": 13364,
+      "commandPipe": "RIGMMaker.Workspace.13364.{398A9234-BF79-455C-9A11-D0E50739806F}",
+      "controlPipe": "RIGMMaker.Workspace.13364.{398A9234-BF79-455C-9A11-D0E50739806F}",
+      "dataRoot": "C:\\Users\\zan12\\Documents\\RIGMMaker",
+      "connectionFile": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Exchange\\workspace-13364.json",
+      "routing": "common-command"
+    }
+  },
+  "requestId": "374b4295-3aae-41ad-aa60-2cfbf8995a5c"
+}

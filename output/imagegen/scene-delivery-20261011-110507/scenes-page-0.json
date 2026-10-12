@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "data": {
+    "count": 14,
+    "backgroundReady": false,
+    "allApproved": false,
+    "ready": 0,
+    "pendingRequests": 0,
+    "selectedScene": "{15110FE5-0453-4C73-87EF-EA88E7B0F2F2}",
+    "state": "in-progress",
+    "projectId": "{C36C2A85-DD8A-4DDE-8A7D-D5072CF41A98}",
+    "revision": 1482,
+    "background": {
+      "id": "common-background",
+      "title": "共通背景画像",
+      "image": "",
+      "description": "",
+      "imagePrompt": "マンガの紹介用の背景、異世界から来た女騎士が男性に日本料理を勧められて美味しそうに食べる",
+      "padding": 0,
+      "imageFeedback": "",
+      "imageApproved": false,
+      "imageApprovalKey": "",
+      "imageEditEpoch": 0,
+      "displayMode": "image",
+      "animation": {},
+      "target": "common-background",
+      "optional": true,
+      "ready": false,
+      "imagePath": "",
+      "width": 1920,
+      "height": 1080,
+      "sourceCues": []
+    },
+    "rows": [
+      {
+        "id": "{BD294C65-AA21-4125-986A-EB4CC47A8EFE}",
+        "title": "オープニング",
+        "image": "",
+        "description": "",
+        "imagePrompt": "",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 2,
+        "displayMode": "none",
+        "animation": {},
+        "sceneNumber": 1,
+        "start": 0,
+        "duration": 17.248,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{B55F44B5-6320-4619-80B0-D8AD0733F3A0}",
+            "sourceText": "東北きりたんです"
+          },
+          {
+            "cueId": "{BC3880FB-A22C-4DFA-A31A-F830E98286B6}",
+            "sourceText": "以前まで投稿していた漫画紹介ですが"
+          },
+          {
+            "cueId": "{4093E9EC-D6F6-4F82-B17E-A555F730710B}",
+            "sourceText": "今後は方針を変えて"
+          },
+          {
+            "cueId": "{F615C84F-3F2F-4556-8AEE-E3B9003E40A3}",
+            "sourceText": "1日1作品以上を紹介していくように"
+          },
+          {
+            "cueId": "{F0AD5121-B781-435C-9E6C-9EFA7FD4EBF4}",
+            "sourceText": "していきたいと思います"
+          },
+          {
+            "cueId": "{3F4B6E5D-1911-44F2-B190-6F889CE909C7}",
+            "sourceText": "今回紹介する作品は"
+          },
+          {
+            "cueId": "{AB43555E-969F-4280-8F59-F136C6783B69}",
+            "sourceText": "隣の部屋の女騎士は、異世界人で飲み友達"
+          },
+          {
+            "cueId": "{CA628436-85F0-451D-B720-F795B22D93AA}",
+            "sourceText": "というマンガです"
+          }
+        ],
+        "cueCount": 8,
+        "hasMoreCues": false
+      }
+    ],
+    "nextOffset": 1,
+    "hasMore": true,
+    "preview": {
+      "current": false,
+      "error": ""
+    },
+    "pipes": {
+      "format": "RIGMMaker.WorkspaceConnection",
+      "schemaVersion": 1,
+      "apiVersion": 2,
+      "pid": 13364,
+      "commandPipe": "RIGMMaker.Workspace.13364.{398A9234-BF79-455C-9A11-D0E50739806F}",
+      "controlPipe": "RIGMMaker.Workspace.13364.{398A9234-BF79-455C-9A11-D0E50739806F}",
+      "dataRoot": "C:\\Users\\zan12\\Documents\\RIGMMaker",
+      "connectionFile": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Exchange\\workspace-13364.json",
+      "routing": "common-command"
+    }
+  },
+  "requestId": "ace81de4-6275-49f7-bfab-9d763b2d8c0f"
+}

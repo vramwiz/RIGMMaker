@@ -1,0 +1,12 @@
+{
+  "tool": "built-in imagegen",
+  "mode": "generate",
+  "sceneId": "common-background",
+  "applicationPrompt": "降り積もる雪のような　をイメージする雪景色",
+  "prompt": "Use case: illustration-story.\nAsset type: common full-frame background for the existing manga-introduction video, landscape 16:9, requested 1920×1080.\nPrimary request (Japanese app brief): 降り積もる雪のような　をイメージする雪景色\nInput image: the previous snowy title-card is a STYLE AND WINTER ATMOSPHERE REFERENCE ONLY. Create a new background-only scene, with NO title text.\nScene/backdrop: a quiet tree-lined path in deep fresh snow, softly falling snowflakes accumulating on branches, railings and a simple bench; a few warm lamps at dusk, gentle blue-white winter atmosphere, soft distant depth. Match the restrained romantic anime-painted winter landscape of the reference. Balanced wide scene, snow scenery filling the entire frame, softly detailed center suitable behind the app's character and subtitle overlays.\nConstraints: snowy landscape only, no people, no character, no title logo, no letters, no text, no book, no cup, no watermark. Snow should clearly be settling and accumulating, calm tender mood.",
+  "referenced_image_paths": [
+    "D:\\DelphiProg\\RIGMMaker\\制作支援\\学習記録\\RIGM\\20261011-soreyuki-scenes\\logo-fix\\images\\scene-02-logo.png"
+  ],
+  "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a12a3b-12c0-7a32-948c-00d9ff0dde3f\\exec-9adfcf9a-ee91-4be8-855b-625b4c785ea6.png",
+  "workspacePath": "D:\\DelphiProg\\RIGMMaker\\制作支援\\学習記録\\RIGM\\20261011-soreyuki-scenes\\background-thumbnail\\images\\common-background.png"
+}

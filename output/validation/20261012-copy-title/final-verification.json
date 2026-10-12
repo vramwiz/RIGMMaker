@@ -1,0 +1,35 @@
+{
+  "copyChecks": 76,
+  "focusedWorkflowChecks": 102,
+  "fullWorkflowChecks": 444,
+  "debugWarningCount": 13,
+  "releaseWarningCount": 13,
+  "sourceHashes": [
+    {
+      "Path": "D:\\DelphiProg\\RIGMMaker\\Source\\Studio\\Model\\RigmScriptClosingModel.pas",
+      "Hash": "22A4C0D0B98805F3C63F7D6522CD294C920516C6D08A4791D295C43B41C0867F"
+    },
+    {
+      "Path": "D:\\DelphiProg\\RIGMMaker\\Source\\Studio\\Model\\RigmScriptCopyModel.pas",
+      "Hash": "AF2411DD963160C4AF743E50569B24BA72A211069D5781C8D00B50BD67CAA3C2"
+    },
+    {
+      "Path": "D:\\DelphiProg\\RIGMMaker\\Source\\Shell\\Pages\\RigmWizardWorkspace.pas",
+      "Hash": "FB0E1E1DD9C3B776164629E2A81528374FAF2EB79E58773F9E01F96A5821D6A6"
+    },
+    {
+      "Path": "D:\\DelphiProg\\RIGMMaker\\Source\\Psd\\Validation\\ScriptCopyCheck.dpr",
+      "Hash": "21DD0EC9AA1E9D81C27FAD2E9CB8BF33D5893DC36DFB0899240D5BD637B77EE9"
+    }
+  ],
+  "deployment": {
+    "target": "D:\\DelphiProg\\RIGMMaker\\RIGMMaker-MP4.exe",
+    "sha256": "B6F229C75387B70EDA55F87A1B195F8F7B8C25E41111AAF3DBDC63D90CB34C93",
+    "aliasDeployed": true,
+    "normalExeWrittenByThisTask": false,
+    "normalExeChangedByAnotherOperation": true,
+    "normalExeCurrentSHA256": "ABC31BCF16204FE7D54D917E6C0EE6359B6B30AE3669F48CD1D53F6485861F9E",
+    "livePid": 6936,
+    "oldAliasBackup": "D:\\DelphiProg\\RIGMMaker\\output\\validation\\20261012-copy-title\\RIGMMaker-MP4-before.exe"
+  }
+}

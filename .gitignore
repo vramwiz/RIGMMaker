@@ -46,6 +46,9 @@ Release/
 Win32/
 Win64/
 
+# Third-party DLLs are packaged locally by Setup/Prepare-FFmpegRuntime.ps1.
+/Runtime/FFmpeg/*.dll
+
 .DS_Store
 
 # RIGM character packages are local assets, including sample folders.

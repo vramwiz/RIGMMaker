@@ -18,9 +18,9 @@ type
     procedure RefreshState;
   end;
 implementation
-uses System.SysUtils, System.Math, System.Types, Winapi.Windows, Winapi.CommCtrl,
+uses System.SysUtils, System.Math, System.Types, System.JSON, System.Generics.Collections, Winapi.Windows, Winapi.CommCtrl,
   Vcl.Graphics, Vcl.Themes, RigmBufferedControls, RigmJson, RigmScriptCastingModel,
-  RigmScriptScenesModel, RigmScriptSceneAssignmentModel;
+  RigmScriptScenesModel, RigmScriptSceneAssignmentModel, RigmScriptSummaryModel;
 {$R *.dfm}
 type
   TRigmSceneAssignmentList = class(TRigmBufferedListView)
@@ -104,34 +104,40 @@ procedure TRigmScriptSceneAssignmentFrame.Checked(Sender: TObject; Item: TListIt
 begin
   if FSync or (Item=nil) then Exit;
   if Item.Data=nil then begin RefreshState; Exit; end;
-  try FWorkspace.SetScriptSceneStart(Item.SubItems[3],Item.Checked);
+  try FWorkspace.SetScriptSceneStart(Item.SubItems[3],Item.Checked); RefreshState;
   except on E: Exception do begin RefreshState; FInfo.Caption := E.Message; end; end;
 end;
 procedure TRigmScriptSceneAssignmentFrame.RefreshState;
 begin
   var P := FWorkspace.ScriptDraft; if (P=nil) or (P.ScriptWizard.GetValue('scenes')=nil) then Exit;
-  var Rebuild := FList.Items.Count<>P.Cues.Count;
-  if not Rebuild then for var I := 0 to P.Cues.Count-1 do
-    if (FList.Items[I].SubItems.Count<>4) or (FList.Items[I].SubItems[3]<>P.Cues[I].Id) then begin Rebuild := True; Break; end;
+  var Indices := ScriptSceneAssignmentCueIndices(P);
+  var Rebuild := FList.Items.Count<>Length(Indices);
+  if not Rebuild then for var I := 0 to High(Indices) do
+    if (FList.Items[I].SubItems.Count<>4) or (FList.Items[I].SubItems[3]<>P.Cues[Indices[I]].Id) then begin Rebuild := True; Break; end;
   var WasSync := FSync; FSync := True; if Rebuild then FList.Items.BeginUpdate;
+  var Numbers := TDictionary<string,Integer>.Create; var Names := TDictionary<string,string>.Create;
   try
+    for var I := 0 to P.Scenes.Count-1 do Numbers.Add(P.Scenes[I].Id,I+1);
+    for var V in JA(JO(P.ScriptWizard,'casting'),'rows') do begin
+      var Row := TJSONObject(V); var Role := CastingRole(P,JI(Row,'role')); var Name := '';
+      if Role<>nil then Name := JS(Role,'name'); Names.AddOrSetValue(JS(Row,'cueId'),Name);
+    end;
     if Rebuild then FList.Items.Clear;
-    for var I := 0 to P.Cues.Count-1 do begin
-      var Cue := P.Cues[I]; var Item: TListItem;
+    for var I := 0 to High(Indices) do begin
+      var Cue := P.Cues[Indices[I]]; var Item: TListItem;
       if Rebuild then begin Item := FList.Items.Add; Item.Caption := (I+1).ToString; for var N := 0 to 3 do Item.SubItems.Add(''); Item.SubItems[3] := Cue.Id; end
       else Item := FList.Items[I];
-      var Scene := ScriptSceneNumber(P,Cue.Scene).ToString;
+      var Scene := Numbers[Cue.Scene].ToString;
       if Item.SubItems[0]<>Scene then Item.SubItems[0] := Scene;
-      var Role := ScriptCueRole(P,Cue.Id); var Name := '';
-      if CastingRole(P,Role)<>nil then Name := JS(CastingRole(P,Role),'name');
+      var Name := ''; Names.TryGetValue(Cue.Id,Name);
       if Item.SubItems[1]<>Name then Item.SubItems[1] := Name;
       if Item.SubItems[2]<>Cue.Text then Item.SubItems[2] := Cue.Text;
-      if ScriptSceneStartEditable(P,I) then Item.Data := Pointer(1) else Item.Data := nil;
-      var Start := ScriptSceneStartsAt(P,I); if Item.Checked<>Start then Item.Checked := Start;
+      if ScriptSceneStartEditable(P,Indices[I]) then Item.Data := Pointer(1) else Item.Data := nil;
+      var Start := ScriptSceneStartsAt(P,Indices[I]); if Item.Checked<>Start then Item.Checked := Start;
       if Item.Data=nil then ListView_SetItemState(FList.Handle,I,0,LVIS_STATEIMAGEMASK);
     end;
     // 最初のセリフには開始チェックを表示しない。Spaceで操作されても割当は変えない。
-    FInfo.Caption := P.Cues.Count.ToString+'セリフ / '+P.Scenes.Count.ToString+'シーン。左の工程リストで割当を保存し、シーンごとの画像・説明文へ進みます。';
-  finally if Rebuild then FList.Items.EndUpdate; FSync := WasSync; end;
+    FInfo.Caption := Length(Indices).ToString+'セリフ（総評は独立チャートのため一覧から除外）。左の工程リストで割当を保存し、シーンごとの画像・説明文へ進みます。';
+  finally Names.Free; Numbers.Free; if Rebuild then FList.Items.EndUpdate; FSync := WasSync; end;
 end;
 end.

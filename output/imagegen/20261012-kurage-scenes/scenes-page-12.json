@@ -1,0 +1,145 @@
+{
+  "count": 14,
+  "backgroundReady": true,
+  "thumbnailReady": false,
+  "thumbnailSourcesReady": false,
+  "allApproved": false,
+  "ready": 0,
+  "pendingRequests": 0,
+  "selectedScene": "{5E691476-DA47-43A5-B7BA-710255AF2212}",
+  "state": "in-progress",
+  "projectId": "{B0D28F94-242A-41D0-A527-882802487812}",
+  "revision": 915,
+  "background": {
+    "id": "common-background",
+    "title": "共通背景画像",
+    "image": "",
+    "description": "",
+    "imagePrompt": "",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 0,
+    "displayMode": "none",
+    "animation": {},
+    "target": "common-background",
+    "optional": true,
+    "ready": true,
+    "imagePath": "",
+    "width": 1920,
+    "height": 1080,
+    "sourceCues": []
+  },
+  "thumbnail": {
+    "id": "thumbnail",
+    "title": "サムネイル",
+    "image": "",
+    "description": "",
+    "imagePrompt": "これまでに作ったシーン画像を組み合わせた、動画の最後に表示するサムネイルを作成。\r\n使用中のキャラクターも必ず使い、見た目を参照素材に合わせる。\r\n「漫画」＋マンガの名前を大きく読みやすいロゴとして配置する。",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 0,
+    "displayMode": "image",
+    "animation": {},
+    "target": "thumbnail",
+    "required": true,
+    "ready": false,
+    "sourcesReady": false,
+    "duration": 10,
+    "imagePath": "",
+    "logoText": "漫画　男子校のくらげ先生"
+  },
+  "rows": [
+    {
+      "id": "{C5F3B8EF-F7F0-4DE6-ABC4-B2754176550F}",
+      "title": "総評",
+      "image": "",
+      "description": "",
+      "imagePrompt": "",
+      "padding": 0,
+      "imageFeedback": "",
+      "imageApproved": false,
+      "imageApprovalKey": "",
+      "imageEditEpoch": 0,
+      "displayMode": "image",
+      "animation": {},
+      "chart": {
+        "kind": "radar",
+        "title": "ストーリー",
+        "minimum": 0,
+        "maximum": 5,
+        "items": [
+          {
+            "label": "ストーリー",
+            "value": 3
+          },
+          {
+            "label": "キャラクター",
+            "value": 4
+          },
+          {
+            "label": "作画",
+            "value": 4
+          },
+          {
+            "label": "演出・テンポ",
+            "value": 2
+          },
+          {
+            "label": "世界観・設定",
+            "value": 2
+          }
+        ]
+      },
+      "sceneNumber": 13,
+      "start": 82.2333333333333,
+      "duration": 14.4493333333333,
+      "ready": false,
+      "imagePath": "",
+      "sourceCues": [
+        {
+          "cueId": "{9173BFB5-1732-4AA4-B90A-650CA5D65FB4}",
+          "sourceText": "このマンガのおすすめポイントとしては"
+        },
+        {
+          "cueId": "{FCBC5DB0-99CC-4FDC-A940-112C0BC0A6D3}",
+          "sourceText": "男子高校生の妄想がかなりきわどいことです"
+        },
+        {
+          "cueId": "{B6DA108B-39EE-458C-9521-DF6B6A9F6621}",
+          "sourceText": "まあ妄想の中なので何をやってもいいのですが"
+        },
+        {
+          "cueId": "{D3755238-0255-43FB-AD2F-1219D9DA1BE4}",
+          "sourceText": "電車の中などでの閲覧には注意してください"
+        },
+        {
+          "cueId": "{7B6A3029-C156-4209-AB33-485A2278EAC9}",
+          "sourceText": "投稿時点でまだ1話なので今後はどうなるかは保証できません"
+        }
+      ],
+      "cueCount": 5,
+      "hasMoreCues": false
+    }
+  ],
+  "nextOffset": 13,
+  "hasMore": true,
+  "preview": {
+    "current": false,
+    "error": ""
+  },
+  "pipes": {
+    "format": "RIGMMaker.WorkspaceConnection",
+    "schemaVersion": 1,
+    "apiVersion": 2,
+    "pid": 6936,
+    "commandPipe": "RIGMMaker.Workspace.6936.{61877B53-4826-4DBF-BCEF-0D7B52E58842}",
+    "controlPipe": "RIGMMaker.Workspace.6936.{61877B53-4826-4DBF-BCEF-0D7B52E58842}",
+    "dataRoot": "C:\\Users\\zan12\\Documents\\RIGMMaker",
+    "connectionFile": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Exchange\\workspace-6936.json",
+    "routing": "common-command"
+  }
+}

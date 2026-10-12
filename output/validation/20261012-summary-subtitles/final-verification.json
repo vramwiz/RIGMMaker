@@ -1,0 +1,52 @@
+{
+  "focusedChecks": 116,
+  "fullWorkflowChecks": 458,
+  "realSummaryRenderedFrames": 6,
+  "debugWarnings": 13,
+  "releaseWarnings": 13,
+  "liveVerification": {
+    "projectId": "{0C6B3396-4F42-46DE-8A5F-EF3A0DD84AEF}",
+    "revision": 1283,
+    "savedUnmodified": true,
+    "changedSummarySubtitles": [
+      {
+        "id": "{F96D8C39-9CB0-4970-8302-47E208B75165}",
+        "subtitle": "このマンガのおすすめポイントとしては"
+      },
+      {
+        "id": "{EF908E86-8694-47D0-B91B-9ECF64397D75}",
+        "subtitle": "ヒロインのナナがいま流行の"
+      },
+      {
+        "id": "{4219B2DC-037D-486C-8848-456FF149DDB3}",
+        "subtitle": "うすほそ体型であることです"
+      },
+      {
+        "id": "{F120394C-F44B-4D30-9479-53C012601C77}",
+        "subtitle": "おそらく日々の暮らしにも困っているタイプなのでしょう"
+      },
+      {
+        "id": "{CBBEA94B-5F6C-44B0-A85A-1A540866539F}",
+        "subtitle": "あばら骨が少し見えるぐらいのうすほそです"
+      },
+      {
+        "id": "{C1381C32-073E-4D12-AB1E-C5217BB46DF9}",
+        "subtitle": "なのでうすほそマニアな人は是非読むことをおすすめします"
+      }
+    ],
+    "all44SpokenLinesReadingsAudioAndAssignmentsUnchanged": true,
+    "allScenesImagesBackgroundThumbnailApprovalsAndClosingTitleUnchanged": true,
+    "otherProjectFieldsUnchanged": true,
+    "videoNeedsReexportForChangedSubtitles": true
+  },
+  "deployment": {
+    "target": "D:\\DelphiProg\\RIGMMaker\\RIGMMaker-MP4.exe",
+    "sha256": "9AEEEE1C593F6CA3B8CB0B108AC15018BAFD6CBD5DAA25FD2ADFE3E14EE9871B",
+    "normalExeWritten": false,
+    "normalExeRunningPids": [
+      6936
+    ],
+    "normalExeSHA256": "ABC31BCF16204FE7D54D917E6C0EE6359B6B30AE3669F48CD1D53F6485861F9E",
+    "backup": "D:\\DelphiProg\\RIGMMaker\\output\\validation\\20261012-summary-subtitles\\RIGMMaker-MP4-before.exe"
+  }
+}

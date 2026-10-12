@@ -1,0 +1,282 @@
+[
+  {
+    "request": {
+      "requestId": "{E0CD09F8-9C1D-4FCF-BE9C-388D271352A7}",
+      "sceneId": "common-background",
+      "sceneNumber": 0,
+      "fingerprint": "95051b6afca50938ad66b70cba6fdb3b51b7e9fb306222470c786bcb485d7a21",
+      "prompt": "Use case: illustration-story. One original full-color Japanese anime still for a manga introduction video, cohesive school comedy series. Landscape 16:9 target 1920x1080, opaque. Clean crisp ink outlines, gentle cel shading, warm daylight, consistent proportions and palette. All pupils fully clothed in white short-sleeved button-up uniform shirts and dark navy trousers. Everyday nonsexual school comedy. Do not copy manga panel layouts or existing cover. No watermarks, no panel borders, no captions or speech text unless explicitly requested below. Keep faces and hands in central 80%, bottom 18% visually calm for subtitles. Create a quiet common BACKGROUND for this school-manga review video, no people, no text. Pale mint Japanese high-school infirmary and school library ambiance: soft sunlit windows, subtle bookcase and curtain at outer edges, nurse desk and small plant near edges. Keep the central 70% very simple low-contrast pale cream/mint wall and soft gradient, suitable behind an inset scene illustration, narrator sprite and subtitles; no central distracting furniture. Restrained welcoming palette.",
+      "feedback": "",
+      "state": "pending",
+      "provider": "external-codex",
+      "width": 1920,
+      "height": 1080,
+      "aspectRatio": "1920:1080",
+      "target": "common-background",
+      "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+      "current": true
+    },
+    "sceneId": "common-background",
+    "key": "background"
+  },
+  {
+    "request": {
+      "requestId": "{B943CAC2-D1F1-4A83-B73D-5EFBB9B2FC88}",
+      "sceneId": "{DECDD101-AE37-4FA3-93BB-3D345F9F7882}",
+      "sceneNumber": 1,
+      "fingerprint": "ebfc6f9f871dca6bb97e34bf6c60ffe9f4b19a0820d82362b9bc99153feee1a8",
+      "prompt": "Use case: illustration-story. One original full-color Japanese anime still for a manga introduction video, cohesive school comedy series. Landscape 16:9 target 1920x1080, opaque. Clean crisp ink outlines, gentle cel shading, warm daylight, consistent proportions and palette. All pupils fully clothed in white short-sleeved button-up uniform shirts and dark navy trousers. Everyday nonsexual school comedy. Do not copy manga panel layouts or existing cover. No watermarks, no panel borders, no captions or speech text unless explicitly requested below. Keep faces and hands in central 80%, bottom 18% visually calm for subtitles. Tohoku Kiritan must match the provided reference sheet: chibi anime proportions, dark burgundy bob and ahoge, red eyes, gray/white knife-shaped side ornaments, pale pink-cream kimono jacket with black trim, green sash and burgundy obi/bow, dark purple pleated skirt, white socks and red sandals. Keep the supplied colors. One Kiritan only, not three views. Give her expressive contextual action and natural dynamic gesture, not stiff arms-down standing. Image 1 is a character identity reference only. Kiritan warmly introduces a new manga, seated sideways at a cozy school-library reading table, holding a blank-cover manga in one hand and raising the other in an inviting presenting gesture, lively smile, a slight body lean and animated sleeves. Bookcase and mint window in background. No written text anywhere.",
+      "feedback": "",
+      "state": "pending",
+      "provider": "external-codex",
+      "width": 1920,
+      "height": 1080,
+      "aspectRatio": "1920:1080",
+      "target": "scene",
+      "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+      "current": true
+    },
+    "sceneId": "{DECDD101-AE37-4FA3-93BB-3D345F9F7882}",
+    "key": "01"
+  },
+  {
+    "request": {
+      "requestId": "{08B1DB11-28E9-4AA0-A5A5-9C487F529B24}",
+      "sceneId": "{5E691476-DA47-43A5-B7BA-710255AF2212}",
+      "sceneNumber": 2,
+      "fingerprint": "11c6deb30aee9b521c923134daff8328240974a8e3d0c0831490bcdcc04c4a16",
+      "prompt": "Use case: illustration-story. One original full-color Japanese anime still for a manga introduction video, cohesive school comedy series. Landscape 16:9 target 1920x1080, opaque. Clean crisp ink outlines, gentle cel shading, warm daylight, consistent proportions and palette. All pupils fully clothed in white short-sleeved button-up uniform shirts and dark navy trousers. Everyday nonsexual school comedy. Do not copy manga panel layouts or existing cover. No watermarks, no panel borders, no captions or speech text unless explicitly requested below. Keep faces and hands in central 80%, bottom 18% visually calm for subtitles. Kurage is a 24-year-old adult female school nurse, as in the provided reference: straight chin-length dark blue-black bob, blunt bangs, violet-pink underside and tips, turquoise green eyes, white open lab coat over a buttoned charcoal-gray cardigan, dark blue denim shorts. Preserve face, hair, colors, clothing and age. Image 1 is the character/style reference. Create an original TITLE image. Kurage on the right half holding a clipboard in a composed welcoming pose, sunny school infirmary in the background, small subtle jellyfish-shaped decorative motif. In the left and center, huge perfectly readable Japanese logo with exact text 「男子校のくらげ先生」 broken into 2 or 3 balanced lines. Place the logo on a solid dark navy rounded panel/paper-shaped badge with a thick pale outline, so it strongly stands out from the background. Cream/white bold lettering with pink and turquoise accents. Title occupies about half of the image; no other text.",
+      "feedback": "",
+      "state": "pending",
+      "provider": "external-codex",
+      "width": 1920,
+      "height": 1080,
+      "aspectRatio": "1920:1080",
+      "target": "scene",
+      "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+      "current": true
+    },
+    "sceneId": "{5E691476-DA47-43A5-B7BA-710255AF2212}",
+    "key": "02"
+  },
+  {
+    "request": {
+      "requestId": "{06358AE4-B415-4030-88C1-A38C0CC58964}",
+      "sceneId": "{6461CD51-34D1-452D-B494-ABDB00201B0B}",
+      "sceneNumber": 3,
+      "fingerprint": "53b5d1be0b3a27739f6b96b6a7f65e25fed22f2ef8d4cf6e7d86b72b82747f59",
+      "prompt": "Use case: illustration-story. Create ONE new original full-color Japanese anime illustration for scene 3 of a manga-introduction video about 男子校のくらげ先生. Landscape 16:9, target 1920x1080, opaque, clean crisp linework, soft cel shading, polished humorous school-comedy look. No lettering, captions, speech bubbles, watermarks or logos.\r\nReference image 1 (official cover) and reference image 2 (official character panels) are CHARACTER IDENTITY references only, not layouts to copy. Depict Mizumaki Kurage, a 24-year-old adult female school nurse: chin-length straight dark blue-black bob with violet-pink underside/tips, blunt bangs, turquoise green eyes, calm composed expression, white open lab coat over a fully buttoned modest charcoal-gray cardigan, dark blue denim shorts, natural adult proportions. Match this identity and color palette across the whole series.\r\nScene: a bright tidy Japanese boys' high-school infirmary, pale mint walls, sunlit window, privacy curtains and a bed in soft background. Waist-up three-quarter portrait of Kurage beside the nurse desk, holding a clipboard to her side, turning toward the viewer with a small professionally kind smile. Visualize 'a healing presence in a boys school' using warm afternoon light and a few subtle flower-shaped decorative highlights. Original composition; no copied manga panels, no book-cover text. Keep all important subject details within central 80%; keep bottom 18% calm for subtitles. Friendly nonsexual everyday school atmosphere.",
+      "feedback": "",
+      "state": "pending",
+      "provider": "external-codex",
+      "width": 1920,
+      "height": 1080,
+      "aspectRatio": "1920:1080",
+      "target": "scene",
+      "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+      "current": true
+    },
+    "sceneId": "{6461CD51-34D1-452D-B494-ABDB00201B0B}",
+    "key": "03"
+  },
+  {
+    "request": {
+      "requestId": "{A993BAD9-3984-47A4-AD45-3B0D98AF4217}",
+      "sceneId": "{B6778A5E-BA99-49A0-9E7B-B04BCBF3F258}",
+      "sceneNumber": 6,
+      "fingerprint": "23e28cf16db8a4dee674a8928acad13ac14e0819e57059668cbf45c4c3e4a47a",
+      "prompt": "Use case: illustration-story. One original full-color Japanese anime still for a manga introduction video, cohesive school comedy series. Landscape 16:9 target 1920x1080, opaque. Clean crisp ink outlines, gentle cel shading, warm daylight, consistent proportions and palette. All pupils fully clothed in white short-sleeved button-up uniform shirts and dark navy trousers. Everyday nonsexual school comedy. Do not copy manga panel layouts or existing cover. No watermarks, no panel borders, no captions or speech text unless explicitly requested below. Keep faces and hands in central 80%, bottom 18% visually calm for subtitles. Kenji Zushi is a teenage male high school pupil. Match the lead pupil identity in the reference: sturdy build, short upright spiky black hair, angular expressive eyebrows, brown-black eyes, clean-shaven youthful face, white short-sleeved open-collar school shirt, dark navy trousers. Preserve this one boy consistently. Kurage is a 24-year-old adult female school nurse, as in the provided reference: straight chin-length dark blue-black bob, blunt bangs, violet-pink underside and tips, turquoise green eyes, white open lab coat over a buttoned charcoal-gray cardigan, dark blue denim shorts. Preserve face, hair, colors, clothing and age. Image 1 establishes Kurage and visual style. Image 2 (official manga page) is a CHARACTER identity reference for Kenji and white school uniforms only, not a layout to copy. Original color illustration: Kenji sits at his classroom desk resting his cheek on one hand, eyes daydreaming toward the window, slight embarrassed smile. Above him a translucent soft-edged THOUGHT CLOUD shows only a small waist-up Kurage professionally holding a clipboard with a neutral smile. A classmate behind is also distracted; classroom blackboard blurred with no writing. Clearly a boy's harmless comic daydream, teacher is not physically in classroom, fully clothed, no sexual content.",
+      "feedback": "",
+      "state": "pending",
+      "provider": "external-codex",
+      "width": 1920,
+      "height": 1080,
+      "aspectRatio": "1920:1080",
+      "target": "scene",
+      "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+      "current": true
+    },
+    "sceneId": "{B6778A5E-BA99-49A0-9E7B-B04BCBF3F258}",
+    "key": "06"
+  },
+  {
+    "request": {
+      "requestId": "{2C766D7B-2053-42D4-9ACA-E6ABB1BC4197}",
+      "sceneId": "{7A3A2780-1869-4865-8386-5C4815D0FC18}",
+      "sceneNumber": 14,
+      "fingerprint": "4286f14dafc54b7120fbcfaca9a320e0c7f4dd44e70807bd9eed702e0db540aa",
+      "prompt": "Use case: illustration-story. One original full-color Japanese anime still for a manga introduction video, cohesive school comedy series. Landscape 16:9 target 1920x1080, opaque. Clean crisp ink outlines, gentle cel shading, warm daylight, consistent proportions and palette. All pupils fully clothed in white short-sleeved button-up uniform shirts and dark navy trousers. Everyday nonsexual school comedy. Do not copy manga panel layouts or existing cover. No watermarks, no panel borders, no captions or speech text unless explicitly requested below. Keep faces and hands in central 80%, bottom 18% visually calm for subtitles. Tohoku Kiritan must match the provided reference sheet: chibi anime proportions, dark burgundy bob and ahoge, red eyes, gray/white knife-shaped side ornaments, pale pink-cream kimono jacket with black trim, green sash and burgundy obi/bow, dark purple pleated skirt, white socks and red sandals. Keep the supplied colors. One Kiritan only, not three views. Give her expressive contextual action and natural dynamic gesture, not stiff arms-down standing. Image 1 is the Kiritan identity/color reference only. Original manga-review farewell image: Kiritan at the school-library reading table turns toward viewer with a bright gentle smile and waves with her right hand, the other hand holding a manga against her chest; body leaning playfully forward, animated sleeves and bow, clearly active pose. Cozy warm mint-and-cream library, a small neat stack of manga. Full character fits naturally in wide frame, no stiff standing, no writing.",
+      "feedback": "",
+      "state": "pending",
+      "provider": "external-codex",
+      "width": 1920,
+      "height": 1080,
+      "aspectRatio": "1920:1080",
+      "target": "scene",
+      "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+      "current": true
+    },
+    "sceneId": "{7A3A2780-1869-4865-8386-5C4815D0FC18}",
+    "key": "14"
+  },
+  {
+    "request": {
+      "requestId": "{91946C96-0BBA-45E0-A87B-B019275A6C59}",
+      "sceneId": "{FCFE0264-778D-4A4B-A6F8-AB1982FAA62F}",
+      "sceneNumber": 4,
+      "fingerprint": "b7ca60497412a4cf2de5d2e3cea82a792cf49a1c374dd74c01629e89001ab62c",
+      "prompt": "毎日男子生徒がサボるために保健室へやってくる",
+      "feedback": "",
+      "state": "pending",
+      "provider": "external-codex",
+      "width": 1920,
+      "height": 1080,
+      "aspectRatio": "1920:1080",
+      "target": "scene",
+      "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+      "current": true
+    },
+    "key": "04",
+    "sceneId": "{FCFE0264-778D-4A4B-A6F8-AB1982FAA62F}"
+  },
+  {
+    "request": {
+      "requestId": "{65EF6D27-5A49-46E1-84DF-BB39C1FB3538}",
+      "sceneId": "{EBC98258-9276-4C75-A6B9-277B5C0F4D3A}",
+      "sceneNumber": 5,
+      "fingerprint": "86efb02b43247e950509a9b1ae19c624a6247656923ad273fcba7eaf11cbe50b",
+      "prompt": "男子生徒もニッコリ ",
+      "feedback": "",
+      "state": "pending",
+      "provider": "external-codex",
+      "width": 1920,
+      "height": 1080,
+      "aspectRatio": "1920:1080",
+      "target": "scene",
+      "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+      "current": true
+    },
+    "key": "05",
+    "sceneId": "{EBC98258-9276-4C75-A6B9-277B5C0F4D3A}"
+  },
+  {
+    "request": {
+      "requestId": "{FA2E12DF-1CB1-4EB8-B2D6-9241F1512DB4}",
+      "sceneId": "{B9D7BD62-7279-4EFC-93F9-261561E60B3B}",
+      "sceneNumber": 7,
+      "fingerprint": "06d32dc8e9fca0d287c6e0f558501d6610d8bb23447c86a8f2564451a39613df",
+      "prompt": "授業中ずっと先生の妄想がさらに増える",
+      "feedback": "",
+      "state": "pending",
+      "provider": "external-codex",
+      "width": 1920,
+      "height": 1080,
+      "aspectRatio": "1920:1080",
+      "target": "scene",
+      "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+      "current": true
+    },
+    "key": "07",
+    "sceneId": "{B9D7BD62-7279-4EFC-93F9-261561E60B3B}"
+  },
+  {
+    "request": {
+      "requestId": "{2724D1BC-85D4-4217-B084-CD95F3A90190}",
+      "sceneId": "{24BA32C3-5468-4FDE-8F70-8587EE10DDE2}",
+      "sceneNumber": 8,
+      "fingerprint": "d0e8c2c387ecf34f32b9a8a363e6fb9e2831b85370522bb179aef1c6bd52c0c6",
+      "prompt": "保健室に居る先生の前では何にもできません",
+      "feedback": "",
+      "state": "pending",
+      "provider": "external-codex",
+      "width": 1920,
+      "height": 1080,
+      "aspectRatio": "1920:1080",
+      "target": "scene",
+      "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+      "current": true
+    },
+    "key": "08",
+    "sceneId": "{24BA32C3-5468-4FDE-8F70-8587EE10DDE2}"
+  },
+  {
+    "request": {
+      "requestId": "{F2250FF8-1A20-478D-B75E-2778585A1CA2}",
+      "sceneId": "{39C56B9F-26CB-4D75-AC61-9D12BEA81AEB}",
+      "sceneNumber": 9,
+      "fingerprint": "0b4c02944e92d04211100af02bc7ea7a72232b22aaf21dc2a8ca077bbf8f444a",
+      "prompt": "へたれと軽く罵って生徒をやりすごす先生",
+      "feedback": "",
+      "state": "pending",
+      "provider": "external-codex",
+      "width": 1920,
+      "height": 1080,
+      "aspectRatio": "1920:1080",
+      "target": "scene",
+      "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+      "current": true
+    },
+    "key": "09",
+    "sceneId": "{39C56B9F-26CB-4D75-AC61-9D12BEA81AEB}"
+  },
+  {
+    "request": {
+      "requestId": "{73E91134-0049-4B83-AE6B-C2894E4D2279}",
+      "sceneId": "{1407B11A-51BC-4102-B860-0A231B6A4E2B}",
+      "sceneNumber": 10,
+      "fingerprint": "d72453d6d5ab2b5afc7e15fe8ba25bc56cc53509955e261f10d531522c1f2f6c",
+      "prompt": "保健室に居る先生は男子に免疫がないので本当は恥ずかしい",
+      "feedback": "",
+      "state": "pending",
+      "provider": "external-codex",
+      "width": 1920,
+      "height": 1080,
+      "aspectRatio": "1920:1080",
+      "target": "scene",
+      "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+      "current": true
+    },
+    "key": "10",
+    "sceneId": "{1407B11A-51BC-4102-B860-0A231B6A4E2B}"
+  },
+  {
+    "request": {
+      "requestId": "{11098855-58F9-436B-9712-BF2F2CDDFE57}",
+      "sceneId": "{F9DE1718-7B41-4805-ABBE-4230663CA125}",
+      "sceneNumber": 11,
+      "fingerprint": "d2ddc1f7ec31c3e30f4f3ed4661cc29f323f05f6046ac943cabe58dea186a614",
+      "prompt": "保健室に居る女先生",
+      "feedback": "",
+      "state": "pending",
+      "provider": "external-codex",
+      "width": 1920,
+      "height": 1080,
+      "aspectRatio": "1920:1080",
+      "target": "scene",
+      "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+      "current": true
+    },
+    "key": "11",
+    "sceneId": "{F9DE1718-7B41-4805-ABBE-4230663CA125}"
+  },
+  {
+    "request": {
+      "requestId": "{8DC202E1-7183-4E6E-AFDE-0A8072DE591B}",
+      "sceneId": "{C4DC125B-6EDD-485E-8B02-743F0C95CDF2}",
+      "sceneNumber": 12,
+      "fingerprint": "00fecaa7779692f17462e860bd50a6c3a126f46cd00d906c5daad7b594f28a05",
+      "prompt": "男子高校生",
+      "feedback": "",
+      "state": "pending",
+      "provider": "external-codex",
+      "width": 1920,
+      "height": 1080,
+      "aspectRatio": "1920:1080",
+      "target": "scene",
+      "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+      "current": true
+    },
+    "key": "12",
+    "sceneId": "{C4DC125B-6EDD-485E-8B02-743F0C95CDF2}"
+  }
+]

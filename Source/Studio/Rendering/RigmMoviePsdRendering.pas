@@ -11,12 +11,12 @@ implementation
 uses System.IOUtils, System.Generics.Collections, RigmCharacterCatalog, PsdAnimation, PsdJson,
   RigmJson, RigmMoviePhonemes;
 type TSourceEntry = class
-  Stamp: string; Asset: TPsdCharacterAsset;
+  Stamp: string; Asset: TPsdCharacterAsset; Expressions: TJSONObject;
   destructor Destroy; override;
 end;
 var Sources: TObjectDictionary<string,TSourceEntry>; SourceLock: TObject;
 destructor TSourceEntry.Destroy;
-begin Asset.Free; inherited; end;
+begin Expressions.Free; Asset.Free; inherited; end;
 function Source(Project: TRigmMovieProject; Character: TRigmMovieCharacter): TPsdCharacterAsset;
 begin
   var Path := ResolveMoviePath(Project.FileName,Character.FileName);
@@ -25,23 +25,35 @@ begin
   if Sources.TryGetValue(Path,Entry) and (Entry.Stamp=Stamp) then Exit(Entry.Asset);
   if Sources.Count>=8 then Sources.Clear;
   Entry := TSourceEntry.Create;
-  try Entry.Stamp := Stamp; Entry.Asset := TPsdCharacterAsset.Create(Path);
+  try Entry.Stamp := Stamp; Entry.Asset := TPsdCharacterAsset.Create(Path); Entry.Expressions := Entry.Asset.Expressions;
     Sources.AddOrSetValue(Path,Entry); Result := Entry.Asset;
   except Entry.Free; raise; end;
 end;
-function ViewState(Project: TRigmMovieProject; Character: TRigmMovieCharacter; Seconds: Double): TPsdFrameState;
+function ViewState(Project: TRigmMovieProject; Character: TRigmMovieCharacter; Seconds: Double;
+  out Variants: TJSONArray): TPsdFrameState;
 begin
-  Result := TPsdFrameState.Default; Result.Seconds := Seconds;
+  Variants := nil; Result := TPsdFrameState.Default; Result.Seconds := Seconds;
   Result.Expression := JS(Character.PsdView,'expression'); Result.Gaze := JS(Character.PsdView,'gaze','front');
   Result.NonFrontId := JS(Character.PsdView,'nonFrontId'); Result.Motion := JS(Character.PsdView,'motion','breathe');
   Result.Strength := JN(Character.PsdView,'strength',16); Result.AutoBlink := JB(Character.PsdView,'autoBlink',True);
   if not Character.RigSafe then Result.Motion := 'none';
   var Local,Start: Double; var Cue := Project.CueAt(Seconds,Local,Start);
   if (Cue=nil) or (Cue.SpeakerId<>Character.SpeakerId) then Exit;
-  var P := Character.Expressions.GetValue(Cue.Emotion) as TJSONObject;
+  var P := Character.Expressions.GetValue(Cue.VisualEmotion) as TJSONObject;
+  if P=nil then begin
+    Source(Project,Character);
+    P := Sources[ResolveMoviePath(Project.FileName,Character.FileName)].Expressions.GetValue(Cue.VisualEmotion) as TJSONObject;
+  end;
   if P=nil then P := Character.Expressions.GetValue('neutral') as TJSONObject;
   if P<>nil then begin Result.Expression := JS(P,'psdExpression',Result.Expression); Result.Variants := JA(P,'variants'); end;
-  if Cue.Acting.Variants.Count>0 then Result.Variants := Cue.Acting.Variants;
+  // 個別差分は同じグループだけを上書きし、ほかの基本表情を保持する。
+  if Result.Variants<>nil then Variants := Result.Variants.Clone as TJSONArray else Variants := TJSONArray.Create;
+  for var V in Cue.Acting.Variants do begin
+    for var I := Variants.Count-1 downto 0 do
+      if JS(TJSONObject(Variants[I]),'groupId')=JS(TJSONObject(V),'groupId') then Variants.Remove(I).Free;
+    Variants.AddElement(V.Clone as TJSONObject);
+  end;
+  Result.Variants := Variants;
   Result.AutoBlink := Result.AutoBlink and (Cue.Acting.BlinkStrength>0);
   if Cue.Motion='still' then Result.Motion := 'none';
   // 共通音素サンプラーの時刻を利用。音声が終わった後は閉じ口へ戻す。
@@ -58,20 +70,24 @@ function RenderPsdMovieCharacter(Project: TRigmMovieProject; Character: TRigmMov
   Seconds: Double; Audio: TRigmPcm; Width,Height: Integer): TBytes;
 begin
   TMonitor.Enter(SourceLock);
-  try Result := Source(Project,Character).Renderer.Frame(ViewState(Project,Character,Seconds),Width,Height);
-  finally TMonitor.Exit(SourceLock); end;
+  var Variants: TJSONArray := nil;
+  try
+    var State := ViewState(Project,Character,Seconds,Variants);
+    Result := Source(Project,Character).Renderer.Frame(State,Width,Height);
+  finally Variants.Free; TMonitor.Exit(SourceLock); end;
 end;
 function PsdMovieExpressions(const Path: string): TJSONObject;
 begin var Asset := TPsdCharacterAsset.Create(Path); try Result := Asset.Expressions; finally Asset.Free; end; end;
 procedure ValidatePsdMovieCharacter(Project: TRigmMovieProject; Character: TRigmMovieCharacter);
 begin
   TMonitor.Enter(SourceLock);
+  var Variants: TJSONArray := nil;
   try
     var Asset := Source(Project,Character); Asset.Character.Validate;
     for var Pair in Character.Expressions do for var V in JA(TJSONObject(Pair.JsonValue),'variants') do
       Asset.Character.CheckChoice(JS(TJSONObject(V),'groupId'),JS(TJSONObject(V),'partId'));
-    Asset.Renderer.Composite(ViewState(Project,Character,0));
-  finally TMonitor.Exit(SourceLock); end;
+    Asset.Renderer.Composite(ViewState(Project,Character,0,Variants));
+  finally Variants.Free; TMonitor.Exit(SourceLock); end;
 end;
 initialization
   Sources := TObjectDictionary<string,TSourceEntry>.Create([doOwnsValues]); SourceLock := TObject.Create;

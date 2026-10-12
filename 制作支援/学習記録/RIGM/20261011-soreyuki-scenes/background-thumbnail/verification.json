@@ -1,0 +1,31 @@
+{
+  "verifiedAt": "2026-10-11T19:21:15",
+  "stage": "editor",
+  "scenesStatus": "complete",
+  "allElevenScenesHumanApproved": true,
+  "allElevenSavedImageHashesMatch": true,
+  "thumbnailHumanApproved": true,
+  "thumbnailSavedHashMatches": true,
+  "savedThumbnailPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\project.assets\\34b710276a27240b71609e5a99799f6f9eeac8de2592dde7dc32c839b86ef0b1.png",
+  "endCard": [
+    {
+      "kind": "thumbnail",
+      "duration": 10,
+      "transitionSeconds": 1,
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 1,
+        "height": 1
+      },
+      "sourceFingerprint": "2ff5581ef64fffcb10599330b5831250be9072bc4283ed104923f8069aa99bcd",
+      "image": "project.assets\\34b710276a27240b71609e5a99799f6f9eeac8de2592dde7dc32c839b86ef0b1.png"
+    }
+  ],
+  "projectPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}\\project.rigmovie",
+  "projectFileLastWrite": "2026-10-11T19:19:31",
+  "userFeedback": "画像は表示されたがチェックは付かない → 何回か押していたら付いた",
+  "intermittentCheckboxIssue": "unresolved; user succeeded after repeated clicks; no software fix applied",
+  "backgroundHumanApproved": true,
+  "backgroundSavedHashMatches": true
+}

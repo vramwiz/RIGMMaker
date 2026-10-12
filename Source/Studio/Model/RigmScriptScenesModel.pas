@@ -6,6 +6,7 @@ procedure PrepareScriptScenes(Project: TRigmMovieProject; RequireVoiceConfirmati
 procedure ValidateScriptScenes(Project: TRigmMovieProject);
 procedure RequireScriptScenes(Project: TRigmMovieProject);
 procedure EditScriptScene(Project: TRigmMovieProject; const Id,Description,Prompt,Mode: string; const Position: string='');
+procedure EditScriptSceneTitle(Project: TRigmMovieProject; const Id,Title: string);
 function SceneImageInstruction(Scene: TRigmMovieScene): string; // 旧要望・修正指示を欠落なく1欄へ表示する。
 function SceneInputDisplayMode(const Prompt,Description: string): string;
 function SceneNeedsImage(Scene: TRigmMovieScene): Boolean;
@@ -16,6 +17,7 @@ procedure ApplyScriptSceneImage(Project: TRigmMovieProject; const Id,Path,Reques
 procedure SyncScriptScenesStatus(Project: TRigmMovieProject);
 function ScriptSceneReady(Project: TRigmMovieProject; Scene: TRigmMovieScene; Force: Boolean=False): Boolean;
 function ScriptScenesReady(Project: TRigmMovieProject; Force: Boolean=False): Boolean;
+function ScriptThumbnailSourcesReady(Project: TRigmMovieProject; Force: Boolean=False): Boolean;
 function ScriptSceneNumber(Project: TRigmMovieProject; const Id: string): Integer;
 function ScriptSceneStart(Project: TRigmMovieProject; const Id: string): Double;
 function ScriptSceneFingerprint(Project: TRigmMovieProject; const Id: string): string;
@@ -24,7 +26,7 @@ function RequestScriptSceneImage(Project: TRigmMovieProject; const Id: string): 
 procedure RequireSceneImageRequest(Project: TRigmMovieProject; const Id,RequestId: string);
 function ScriptScenesSummary(Project: TRigmMovieProject): TJSONObject;
 implementation
-uses System.SysUtils, System.Hash, System.Generics.Collections, RigmJson, PsdJson, RigmScriptCastingModel, RigmScriptVoiceModel, RigmScriptTextModel, RigmMovieChart, RigmMovieImageTransfer;
+uses System.SysUtils, System.Hash, System.Generics.Collections, RigmJson, PsdJson, RigmScriptCastingModel, RigmScriptVoiceModel, RigmScriptTextModel, RigmMovieChart, RigmMovieImageTransfer, RigmScriptThumbnailModel;
 function SceneImageInstruction(Scene: TRigmMovieScene): string;
 begin
   Result := Scene.ImagePrompt;
@@ -40,7 +42,11 @@ begin
   else if Description.Trim<>'' then Result := 'text';
 end;
 function SceneNeedsImage(Scene: TRigmMovieScene): Boolean;
-begin Result := (Scene.DisplayMode='both') or (Scene.DisplayMode='image'); end;
+begin
+  if Scene.Id=RigmThumbnailId then Exit(True);
+  if Scene.Id=RigmCommonBackgroundId then Exit((SceneImageInstruction(Scene).Trim<>'') or (Scene.Image<>''));
+  Result := ((Scene.DisplayMode='both') or (Scene.DisplayMode='image')) and not MovieChartEnabled(Scene.Chart);
+end;
 procedure ValidateText(const Text: string; Limit: Integer);
 begin
   if Length(Text)>Limit then raise Exception.Create('シーンの文章が長すぎます。');
@@ -67,20 +73,24 @@ begin
     for var C in Project.Cues do if not Project.AudioHeard(C) then raise Exception.Create('変更後または未再生の音声を確認してください。');
   end;
   if Project.Scenes.Count=0 then raise Exception.Create('セリフを含むシーンがありません。');
+  PrepareScriptThumbnail(Project);
   if Project.ScriptWizard.GetValue('scenes')=nil then begin
     var O := PsdJson.ObjectText('{"format":"RIGMMaker.ScriptScenes","schemaVersion":1,"requests":[]}');
-    O.AddPair('selectedScene',Project.Scenes[0].Id); Project.ScriptWizard.AddPair('scenes',O);
+    O.AddPair('selectedScene',RigmCommonBackgroundId); Project.ScriptWizard.AddPair('scenes',O);
   end;
   var O := JO(Project.ScriptWizard,'scenes'); var Changed := JS(O,'castingFingerprint')<>CastingFingerprint(Project); PsdJson.Put(O,'castingFingerprint',CastingFingerprint(Project));
-  if Project.Scene(JS(O,'selectedScene'))=nil then PsdJson.Put(O,'selectedScene',Project.Scenes[0].Id);
+  if Project.ImageTarget(JS(O,'selectedScene'))=nil then PsdJson.Put(O,'selectedScene',Project.Scenes[0].Id);
   if Changed or (Project.ScriptWizard.GetValue('scenesStatus')=nil) then PsdJson.Put(Project.ScriptWizard,'scenesStatus','in-progress'); ValidateScriptScenes(Project);
 end;
 procedure ValidateScriptScenes(Project: TRigmMovieProject);
 begin
+  var Background := Project.ImageTarget(RigmCommonBackgroundId);
+  ValidateText(Background.ImagePrompt,16004); ValidateText(Background.ImageFeedback,8000); Background.Validate;
+  ValidateText(Project.Thumbnail.ImagePrompt,16004); ValidateText(Project.Thumbnail.ImageFeedback,8000); Project.Thumbnail.Validate;
   var O := JO(Project.ScriptWizard,'scenes');
-  if (JS(O,'format')<>'RIGMMaker.ScriptScenes') or (JI(O,'schemaVersion')<>1) or (Project.Scene(JS(O,'selectedScene'))=nil) or not (O.GetValue('requests') is TJSONArray) then
+  if (JS(O,'format')<>'RIGMMaker.ScriptScenes') or (JI(O,'schemaVersion')<>1) or (Project.ImageTarget(JS(O,'selectedScene'))=nil) or not (O.GetValue('requests') is TJSONArray) then
     raise Exception.Create('シーン工程の保存状態が不正です。');
-  if JA(O,'requests').Count>2000 then raise Exception.Create('画像要求件数が不正です。');
+  if JA(O,'requests').Count>2002 then raise Exception.Create('画像要求件数が不正です。');
   for var V in JA(O,'requests') do begin
     if not (V is TJSONObject) then raise Exception.Create('画像要求の保存形式が不正です。');
     var R := TJSONObject(V);
@@ -94,8 +104,9 @@ begin
 end;
 procedure EditScriptScene(Project: TRigmMovieProject; const Id,Description,Prompt,Mode: string; const Position: string);
 begin
-  RequireScriptScenes(Project); RequireEditableScriptScene(Project,Id); var S := Project.Scene(Id);
+  RequireScriptScenes(Project); RequireEditableScriptScene(Project,Id); var S := Project.ImageTarget(Id);
   var D := NormalizeScriptText(Description); var P := NormalizeScriptText(Prompt); ValidateText(D,3000); ValidateText(P,16004);
+  if (Id=RigmThumbnailId) and ((Mode<>'image') or (D<>'')) then raise Exception.Create('サムネイルは省略できません。文字は生成する画像のロゴに含めます。');
   var O := S.Json;
   try PsdJson.Put(O,'description',D); PsdJson.Put(O,'imagePrompt',P); PsdJson.Put(O,'displayMode',Mode);
     if Position<>'' then PsdJson.Put(O,'descriptionPosition',Position);
@@ -104,40 +115,53 @@ begin
   finally O.Free; end;
   PsdJson.Put(Project.ScriptWizard,'scenesStatus','in-progress');
 end;
+procedure EditScriptSceneTitle(Project: TRigmMovieProject; const Id,Title: string);
+begin
+  RequireScriptScenes(Project); var S := Project.Scene(Id);
+  if S=nil then raise Exception.Create('名前を変更するシーンがありません。');
+  ValidateText(Title,300);
+  for var C in Title do if Ord(C)<32 then raise Exception.Create('シーン名は改行なしで入力してください。');
+  // 名前は画像要求・確定の指紋に含まれないため、確定後も変更できる。
+  S.Title := Title;
+end;
 procedure RequireEditableScriptScene(Project: TRigmMovieProject; const Id: string);
 begin
-  var S := Project.Scene(Id); if S=nil then raise Exception.Create('対象シーンがありません。');
+  var S := Project.ImageTarget(Id); if S=nil then raise Exception.Create('対象シーンがありません。');
   if S.ImageApproved then raise Exception.Create('確定済みシーンです。画像工程のチェックを明示的に外してから編集してください。');
 end;
 procedure EditScriptSceneFeedback(Project: TRigmMovieProject; const Id,Feedback: string);
 begin
   RequireScriptScenes(Project); RequireEditableScriptScene(Project,Id);
-  var Text := NormalizeScriptText(Feedback); ValidateText(Text,8000); Project.Scene(Id).ImageFeedback := Text;
+  var Text := NormalizeScriptText(Feedback); ValidateText(Text,8000); Project.ImageTarget(Id).ImageFeedback := Text;
   SyncScriptScenesStatus(Project);
 end;
 procedure SetScriptSceneApproved(Project: TRigmMovieProject; const Id: string; Value: Boolean);
 begin
-  RequireScriptScenes(Project); var S := Project.Scene(Id); if S=nil then raise Exception.Create('対象シーンがありません。');
+  RequireScriptScenes(Project); var S := Project.ImageTarget(Id); if S=nil then raise Exception.Create('対象シーンがありません。');
   if S.ImageApproved=Value then Exit;
   if S.ImageEditEpoch=MaxInt then raise Exception.Create('画像編集世代の上限です。');
   if Value and SceneNeedsImage(S) then begin
+    if (Id=RigmThumbnailId) and not ScriptThumbnailSourcesReady(Project,True) then raise Exception.Create('使用する背景・各シーンの画像を確定してから、最後にサムネイルを作成してください。');
     if S.Image='' then raise Exception.Create('画像を用意してから確定してください。');
     CheckedMovieImageHash(ResolveMoviePath(Project.FileName,S.Image),True);
   end;
   Inc(S.ImageEditEpoch); S.ImageApproved := Value; S.ImageApprovalKey := '';
   if Value then S.ImageApprovalKey := ScriptSceneFingerprint(Project,Id);
+  if (Id=RigmThumbnailId) and Value then MaterializeScriptThumbnail(Project);
   var R := ScriptSceneRequest(Project,Id); if R<>nil then PsdJson.Put(R,'state','cancelled');
   SyncScriptScenesStatus(Project);
 end;
 procedure ApplyScriptSceneImage(Project: TRigmMovieProject; const Id,Path,RequestId: string);
 begin
   RequireScriptScenes(Project); RequireEditableScriptScene(Project,Id);
+  if (Id=RigmThumbnailId) and not ScriptThumbnailSourcesReady(Project) then raise Exception.Create('各シーンの画像を確定した後、最後にサムネイルを採用してください。');
   if RequestId<>'' then RequireSceneImageRequest(Project,Id,RequestId);
   CheckedMovieImageHash(Path,True);
   // The caller copies first; this final check also protects a response started before approval.
   RequireEditableScriptScene(Project,Id);
   if RequestId<>'' then RequireSceneImageRequest(Project,Id,RequestId);
-  Project.Scene(Id).Image := Path;
+  Project.ImageTarget(Id).Image := Path;
+  if Id=RigmCommonBackgroundId then Project.ThemeBackground := Path;
   if RequestId<>'' then begin var R := ScriptSceneRequest(Project,Id); PsdJson.Put(R,'state','adopted'); PsdJson.Put(R,'adoptedFingerprint',ScriptSceneFingerprint(Project,Id)); end;
   SyncScriptScenesStatus(Project);
 end;
@@ -145,6 +169,7 @@ function ScriptSceneReady(Project: TRigmMovieProject; Scene: TRigmMovieScene; Fo
 begin
   Result := False;
   try
+    if (Scene.Id=RigmCommonBackgroundId) and not SceneNeedsImage(Scene) and not Scene.ImageApproved then Exit(True);
     if not Scene.ImageApproved then Exit;
     if SceneNeedsImage(Scene) then begin
       if Scene.Image='' then Exit;
@@ -154,22 +179,35 @@ begin
   except on E: Exception do Result := False; end;
 end;
 function ScriptScenesReady(Project: TRigmMovieProject; Force: Boolean): Boolean;
-begin Result := False; try RequireScriptScenes(Project); for var S in Project.Scenes do if not ScriptSceneReady(Project,S,Force) then Exit; Result := Project.Scenes.Count>0; except on E: Exception do Exit; end; end;
+begin
+  Result := ScriptThumbnailSourcesReady(Project,Force) and ScriptSceneReady(Project,Project.Thumbnail,Force);
+end;
+function ScriptThumbnailSourcesReady(Project: TRigmMovieProject; Force: Boolean): Boolean;
+begin
+  Result := False;
+  try
+    RequireScriptScenes(Project);
+    if not ScriptSceneReady(Project,Project.ImageTarget(RigmCommonBackgroundId),Force) then Exit;
+    for var S in Project.Scenes do if not ScriptSceneReady(Project,S,Force) then Exit;
+    Result := Project.Scenes.Count>0;
+  except on E: Exception do Exit; end;
+end;
 procedure SyncScriptScenesStatus(Project: TRigmMovieProject);
 begin
   var State := 'in-progress'; if ScriptScenesReady(Project) then State := 'complete';
   PsdJson.Put(Project.ScriptWizard,'scenesStatus',State);
 end;
 function ScriptSceneNumber(Project: TRigmMovieProject; const Id: string): Integer;
-begin var S := Project.Scene(Id); if S=nil then raise Exception.Create('対象シーンがありません。'); Result := Project.Scenes.IndexOf(S)+1; end;
+begin if Id=RigmThumbnailId then Exit(Project.Scenes.Count+1); var S := Project.ImageTarget(Id); if S=nil then raise Exception.Create('対象シーンがありません。'); Result := Project.Scenes.IndexOf(S)+1; end;
 function ScriptSceneStart(Project: TRigmMovieProject; const Id: string): Double;
-begin Result := 0; for var S in Project.Scenes do begin if S.Id=Id then Exit; Result := Result+Project.SceneDuration(S); end; raise Exception.Create('対象シーンがありません。'); end;
+begin Result := 0; if Id=RigmCommonBackgroundId then Exit; if Id=RigmThumbnailId then begin Result := Project.StoryDuration; for var V in Project.EndCards do if JS(TJSONObject(V),'kind')<>'thumbnail' then Result := Result+JN(TJSONObject(V),'duration'); Exit; end; for var S in Project.Scenes do begin if S.Id=Id then Exit; Result := Result+Project.SceneDuration(S); end; raise Exception.Create('対象シーンがありません。'); end;
 function ScriptSceneFingerprint(Project: TRigmMovieProject; const Id: string): string;
 begin
-  var S := Project.Scene(Id); if S=nil then raise Exception.Create('対象シーンがありません。'); var O := S.Json;
+  var S := Project.ImageTarget(Id); if S=nil then raise Exception.Create('対象シーンがありません。'); var O := S.Json;
   try
   // Approval itself is excluded; the edit epoch prevents approval -> unlock replay.
   for var Key in ['imageApproved','imageApprovalKey','animation','chart','padding','title'] do O.RemovePair(Key).Free;
+  if Id=RigmThumbnailId then O.AddPair('sourceFingerprint',ThumbnailSourceKey(Project));
   // 保存時に素材をproject.assetsへ移しても、同じ画像内容なら外部要求を保持する。
   if S.Image<>'' then begin var Path := ResolveMoviePath(Project.FileName,S.Image);
     if FileExists(Path) then begin try PsdJson.Put(O,'image','sha256:'+CheckedMovieImageHash(Path)); except on E: Exception do PsdJson.Put(O,'image','unreadable:'+ExpandFileName(Path)); end; end
@@ -183,8 +221,9 @@ function ScriptSceneRequest(Project: TRigmMovieProject; const Id: string): TJSON
 begin Result := nil; for var V in JA(JO(Project.ScriptWizard,'scenes'),'requests') do if JS(TJSONObject(V),'sceneId')=Id then Exit(TJSONObject(V)); end;
 function RequestScriptSceneImage(Project: TRigmMovieProject; const Id: string): TJSONObject;
 begin
-  RequireScriptScenes(Project); var S := Project.Scene(Id); if S=nil then raise Exception.Create('対象シーンがありません。');
+  RequireScriptScenes(Project); var S := Project.ImageTarget(Id); if S=nil then raise Exception.Create('対象シーンがありません。');
   RequireEditableScriptScene(Project,Id);
+  if (Id=RigmThumbnailId) and not ScriptThumbnailSourcesReady(Project) then raise Exception.Create('背景・各シーンの画像を確定してから、サムネイルを最後に要求してください。');
   var Prompt := SceneImageInstruction(S);
   if Prompt.Trim='' then raise Exception.Create('Codexへの画像指示を入力してください。');
   ValidateText(Prompt,16004);
@@ -192,17 +231,32 @@ begin
   var A := JA(JO(Project.ScriptWizard,'scenes'),'requests'); for var I := A.Count-1 downto 0 do if JS(TJSONObject(A[I]),'sceneId')=Id then A.Remove(I).Free;
   Result := TJSONObject.Create; A.AddElement(Result); Result.AddPair('requestId',PsdJson.NewId); Result.AddPair('sceneId',Id); AddN(Result,'sceneNumber',ScriptSceneNumber(Project,Id));
   Result.AddPair('fingerprint',Fingerprint); Result.AddPair('prompt',Prompt); Result.AddPair('feedback',''); Result.AddPair('state','pending'); Result.AddPair('provider','external-codex');
+  AddN(Result,'width',Project.Width); AddN(Result,'height',Project.Height);
+  Result.AddPair('aspectRatio',Project.Width.ToString+':'+Project.Height.ToString);
+  var Target := 'scene'; if Id=RigmCommonBackgroundId then Target := 'common-background';
+  if Id=RigmThumbnailId then begin Target := 'thumbnail'; Result.AddPair('sources',ThumbnailSources(Project));
+    Result.AddPair('logoText',ThumbnailLogo(Project)); AddN(Result,'duration',RigmThumbnailSeconds);
+    Result.AddPair('generationInstruction',Prompt+#13#10+Format('%d × %d ピクセル、縦横比 %d:%d。参照のシーン画像を合わせ、使用キャラを含め、「%s」を大きなロゴにしてください。',[Project.Width,Project.Height,Project.Width,Project.Height,ThumbnailLogo(Project)])); end;
+  Result.AddPair('target',Target); Result.AddPair('sizeInstruction',Format('可能なら %d × %d ピクセル、縦横比 %d:%d で生成してください。',[Project.Width,Project.Height,Project.Width,Project.Height]));
 end;
 procedure RequireSceneImageRequest(Project: TRigmMovieProject; const Id,RequestId: string);
 begin
   RequireScriptScenes(Project); RequireEditableScriptScene(Project,Id); var R := ScriptSceneRequest(Project,Id);
   if (R=nil) or (RequestId='') or (JS(R,'requestId')<>RequestId) or (JS(R,'state')<>'pending') or (JS(R,'fingerprint')<>ScriptSceneFingerprint(Project,Id)) then
     raise Exception.Create('古い画像要求です。人間の変更を保持しています。対象シーンから再要求してください。');
+  if ((R.GetValue('width')<>nil) and (JI(R,'width')<>Project.Width)) or
+    ((R.GetValue('height')<>nil) and (JI(R,'height')<>Project.Height)) then
+    raise Exception.Create('動画の解像度が変わりました。現在のサイズで画像を再要求してください。');
 end;
 function ScriptScenesSummary(Project: TRigmMovieProject): TJSONObject;
 begin
   Result := TJSONObject.Create; AddN(Result,'count',Project.Scenes.Count); var Ready := 0; var Pending := 0;
   for var S in Project.Scenes do begin if ScriptSceneReady(Project,S) then Inc(Ready); var R := ScriptSceneRequest(Project,S.Id); if (R<>nil) and (JS(R,'state')='pending') then Inc(Pending); end;
+  var BackgroundRequest := ScriptSceneRequest(Project,RigmCommonBackgroundId);
+  if (BackgroundRequest<>nil) and (JS(BackgroundRequest,'state')='pending') then Inc(Pending);
+  AddB(Result,'backgroundReady',ScriptSceneReady(Project,Project.ImageTarget(RigmCommonBackgroundId)));
+  AddB(Result,'thumbnailReady',ScriptSceneReady(Project,Project.Thumbnail)); AddB(Result,'thumbnailSourcesReady',ScriptThumbnailSourcesReady(Project));
+  var ThumbnailRequest := ScriptSceneRequest(Project,RigmThumbnailId); if (ThumbnailRequest<>nil) and (JS(ThumbnailRequest,'state')='pending') then Inc(Pending);
   AddB(Result,'allApproved',ScriptScenesReady(Project)); AddN(Result,'ready',Ready); AddN(Result,'pendingRequests',Pending); Result.AddPair('selectedScene',JS(JO(Project.ScriptWizard,'scenes'),'selectedScene')); var State := 'in-progress'; if ScriptScenesReady(Project) then State := 'complete'; Result.AddPair('state',State);
 end;
 end.

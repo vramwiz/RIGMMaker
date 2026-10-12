@@ -1,0 +1,128 @@
+PASS stable IDs expose the requested stage order
+PASS incomplete voice hides and blocks reached future stage voice-effects
+PASS incomplete voice hides and blocks reached future stage scene-assignment
+PASS incomplete voice hides and blocks reached future stage scenes
+PASS incomplete voice hides and blocks reached future stage editor
+PASS heard voice reveals the immediate confirmation destination
+PASS pending voice confirmation cannot skip effects
+PASS completed prerequisites restore every valid reached destination
+PASS missing earlier audio blocks all forward moves from effects
+PASS earlier voice stage remains reachable for repair
+PASS effects cannot bypass incomplete earlier subtitles
+PASS effects cannot bypass incomplete earlier casting
+PASS effects cannot bypass changed dialogue confirmation
+PASS incomplete assignment offers its editor and blocks the later image stage
+PASS incomplete scenes hide movie editing
+PASS completed scenes reveal movie editing
+PASS dragging allows negative coordinates without shrinking the character
+PASS resizing can exceed the canvas while retaining the aspect ratio
+PASS native placement preview begins a captured drag
+PASS native mouse drag commits the off-screen character
+PASS shared pipe command accepts a wholly off-screen placement
+PASS L-shaped layout preserves an existing off-screen placement
+PASS movie model accepts the same linked off-screen placement
+PASS save and reopen preserve the off-screen position and size
+PASS reset stays available through the character list even when its sprite is outside the preview
+PASS reset restores initial x
+PASS reset restores initial y
+PASS reset restores initial width
+PASS reset restores initial height
+PASS reset retains the selected character and mirror setting
+PASS text page has named section tabs and no obsolete toolbar confirmation
+PASS native typing and multiline paste immediately update the script model
+PASS typing does not rewrite the guide, repaint the stage list, hide the body or reposition the page
+PASS typing preserves focus and the native undo buffer without replacing memo text
+PASS repeated state notifications preserve selection, scrolling, focus and editor bounds
+PASS unchanged state notifications leave the guide, list and memo untouched
+PASS native undo remains synchronized with the script model
+PASS section tabs switch the memo while remaining in stage five and accepting external text
+PASS backward stage change hides the parent once and restores it with inactive text page hidden
+PASS forward stage change restores the initialized page inside the stage host
+PASS stage list uses buffered drawing
+PASS stage six proceeds to summary before casting creates dialogue
+PASS new summary drafts contain exactly five named rating axes
+PASS legacy summary conversion keeps the entered speech and existing ordinal scores
+PASS converting legacy axes archives every original label and score including rows beyond five
+PASS summary text accepts input immediately without an edit-mode button
+PASS typing summary text immediately updates the shared draft
+PASS missing chart values cannot be falsely confirmed
+PASS summary provides five fixed rating rows with immediately editable scores
+PASS summary fixed rating name 1
+PASS score cell opens a native editor 1
+PASS native typing persists a multi-character score without resetting the editor 1
+PASS summary fixed rating name 2
+PASS score cell opens a native editor 2
+PASS native typing persists a multi-character score without resetting the editor 2
+PASS summary fixed rating name 3
+PASS score cell opens a native editor 3
+PASS native typing persists a multi-character score without resetting the editor 3
+PASS summary fixed rating name 4
+PASS score cell opens a native editor 4
+PASS native typing persists a multi-character score without resetting the editor 4
+PASS summary fixed rating name 5
+PASS score cell opens a native editor 5
+PASS native typing persists a multi-character score without resetting the editor 5
+PASS summary confirms text and chart before any role or voice exists
+PASS closing page removes seconds and coordinate table controls
+PASS closing defers mandatory thumbnail to the final image item
+PASS unselected closing image has an explicit prompt 0
+PASS unselected closing image has an explicit prompt 1
+PASS closing image heading, choice, button and path stay readable at 96 DPI, row 0
+PASS closing image heading, choice, button and path stay readable at 96 DPI, row 1
+PASS closing speech and labeled confirmation remain usable at 96 DPI
+PASS editing visible closing fields preserves existing hidden seconds and geometry
+PASS adopting an existing closing image refreshes its visible selection representative
+PASS adopting an existing closing image refreshes its visible selection endImage
+PASS closing previews leave choices, source text and saved geometry unchanged
+PASS closing confirms image choices without casting or generated audio
+PASS new confirmation page is visible after closing
+PASS confirmation exposes all four script sections
+PASS confirmation exposes a selectable work title and copy action
+PASS confirmation reads the selected work name without modifying the script
+PASS confirmation refresh preserves title selection for copying
+PASS confirmation allows editing opening
+PASS confirmation allows editing body
+PASS confirmation allows editing summary
+PASS confirmation allows editing closing
+PASS confirmation summary edit updates both draft and casting source
+PASS fresh workspace resumes confirmation and edited closing speech
+PASS direct selection cannot bypass current script confirmation
+PASS visual face choices work independently of the VOICEVOX catalog
+PASS native face control applies a manual question expression
+PASS face editing keeps voice fingerprints, styles and casting prerequisites
+PASS casting list shows separate voice and face columns while retaining cue selection
+PASS manual face survives cue serialization
+PASS automatic punctuation expression: 本当？
+PASS automatic punctuation expression: 本当?
+PASS automatic punctuation expression: 驚いた！
+PASS automatic punctuation expression: 驚いた!
+PASS automatic punctuation expression: えっ！？
+PASS automatic punctuation expression: えっ?!
+PASS automatic punctuation expression: えっ?
+PASS automatic punctuation expression: 通常のセリフ。
+PASS manual face takes precedence over punctuation
+PASS explicit neutral remains manual after reopening a question
+PASS legacy authored emotion is preserved without a new automatic flag
+PASS legacy unconfigured dialogue gains punctuation detection
+PASS changing only the face retains heard voice approval
+PASS split dialogue retains manually chosen visual face
+PASS fine expression choices come from the actual character group
+PASS fine difference override is independent of automatic basic face
+PASS actual question asset ID is saved per dialogue
+PASS invalid face asset is rejected atomically without changing the face
+PASS project save and reopen retain automatic face plus fine overrides
+PASS fine face reset removes only explicit asset overrides
+PASS owned catalog supplies voices without touching the installed engine
+PASS entering casting saves the fingerprint of all confirmed sections
+PASS summary participates in the same casting pass as other speech
+PASS summary speech precedes closing speech
+PASS summary retains its independent chart scene
+PASS missing voice keeps the next casting stage unavailable
+PASS three assigned rows reproduce the pending casting confirmation
+PASS assigned valid voices permit human casting confirmation without silently confirming rows
+PASS only the immediate next stage is available before casting confirmation
+PASS voice selection immediately displays subtitles in the left stage list
+PASS external next still requires explicit human casting confirmation
+PASS selecting subtitles confirms every assigned casting row
+PASS left stage selection saves the confirmed casting and destination
+Exception: subtitle and note accept direct input on opening stage twelve

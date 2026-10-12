@@ -33,7 +33,7 @@ type
     FSelectedId, FCatalogKey: string;
     FLastRevision, FViewRefreshCount: Integer;
     FSeenJob, FLastError: string;
-    FSeekTick, FHistoryTick: UInt64;
+    FSeekTick, FHistoryTick, FPreparationTick: UInt64;
     FDrawnFrame, FDrawnRevision: Integer; // 表示済み画像のフレームとrevision。-1はまだ表示していない。
     FPreparationStamp, FViewedProject: string;
     FPreviewRequests: Integer;
@@ -44,6 +44,7 @@ type
     FOtherDraft     : Boolean;
     FStaticUiUpdates: Integer;
     FSavePath       : string;
+    FTimelineSelecting: Boolean; // タイムライン自身のクリック位置はセリフ先頭へ戻さない。
     FLayoutPPI      : Integer; // 初期構築とDPI変更で追跡するレイアウト尺度。0の間は配置しない。
     function GetPreviewControl: TRigmMoviePreview;
     function GetPropertyLayouts: Integer;
@@ -66,8 +67,10 @@ type
     procedure ShowOperations(Sender: TObject);
     procedure EditEnding(Sender: TObject);
     procedure DraftEdited(Sender: TObject);
+    procedure PostingEdited(Sender: TObject);
     procedure ActionClick(Sender: TObject);
     procedure SelectCue(Sender: TObject; Item: TListItem; Selected: Boolean);
+    procedure CueListClick(Sender: TObject);
     procedure SelectSpeaker(Sender: TObject);
     procedure SeekChanged(Sender: TObject);
     procedure TimelineSeek(Sender: TObject);
@@ -90,6 +93,7 @@ type
     // 完了通知を要求した累計件数を返す。同じジョブは一度だけ数える。
     procedure SetActive(Value: Boolean);
     function RequestFinish: Boolean;
+    procedure PrepareScriptReturn; // セリフの自動反映を終え、未適用入力・ジョブ・編集リースがあれば遷移を拒否する。
     procedure HandleKey(var Key: Word; Shift: TShiftState);
     function ExportNotificationRequests: Integer;
     // Windows通知の表示に成功した累計件数を返す。要求件数と区別する。
@@ -99,7 +103,7 @@ type
     property PreviewRequests: Integer read FPreviewRequests;
     property StaticUiUpdates: Integer read FStaticUiUpdates;
     property PropertyLayouts: Integer read GetPropertyLayouts;
-    // 表示中の属性ページの保存識別子を返す。dialogue/scene/acting/audio/diagnosticsのいずれか。
+    // 表示中の属性ページの保存識別子を返す。posting/scene/acting/audio/diagnosticsのいずれか。
     function PropertyPageName: string;
     // Pageへ切り替え、入力下書き・スクロール・フォーカスを保持する。未知のPageは拒否する。
     procedure SelectPropertyPage(const Page: string);
@@ -134,7 +138,15 @@ begin
   inherited Create(AOwner); Align := alClient; FSession := Session; Caption := 'RIGM Maker — 動画制作';
   Name := 'MovieStudio'+IntToHex(NativeUInt(Self),16); Width := 1380; Height := 900;
   Constraints.MinWidth := 0; Constraints.MinHeight := 0;
+  // 部品は96 DPIで構築し、Parentへ配置する際に一度だけ拡大する。
+  // 基準を明示しないとParentFont継承時のシステムDPI換算と二重になる。
+  ParentFont := False; Font.PixelsPerInch := 96; Font.IsDPIRelated := True;
   Font.Name := 'Yu Gothic UI'; Font.Size := 10; DoubleBuffered := True;
+  // 一覧の座標計算には論理Parentが必要。接続後も部品は96 DPIで構築し、最後に表示先の尺度へ合わせる。
+  var TargetPPI := 96;
+  if Embedded and (AOwner is TWinControl) then begin
+    Parent := TWinControl(AOwner); TargetPPI := Parent.CurrentPPI; ScaleForPPI(96);
+  end;
   FDrawnFrame := -1; FDrawnRevision := -1; 
   FSelectedId := FSession.ResumeCue; FPendingPreview := FSession.Project.Cues.Count>0;
   FLayoutPPI := 96;
@@ -146,6 +158,7 @@ begin
   RigmMovieMenus.PopulateMovieMenus(Menu,ActionClick); Operations.PopupMenu := Menu;
   if (Session.Project.ScriptWizard<>nil) and (Session.Project.ScriptWizard.GetValue('closingData')<>nil) then
     FUi.Toolbar.AddIcon('MovieEndingEdit','締め画像・終了区間を編集',riPreview,0,EditEnding);
+  ScaleForPPI(TargetPPI);
 end;
 procedure TRigmMovieEditorFrame.EditEnding(Sender: TObject);
 begin
@@ -192,11 +205,13 @@ begin
   Callbacks.SplitterAfterResize := SplitterAfterResize;
   Callbacks.EditingAreaResize := EditingAreaResize;
   Callbacks.SelectCue := SelectCue;
+  Callbacks.CueListClick := CueListClick;
   Callbacks.ApplicationMessage := ApplicationMessage;
   Callbacks.Tick := Tick;
   FUi.Build(Callbacks);
   FExport := TRigmMovieExportFeedback.Create(Self,FSession,FUi);
-  SelectPropertyPage('dialogue'); LayoutProperties(Self); Resize;
+  FUi.Posting.Bind(FSession,PostingEdited);
+  SelectPropertyPage('posting'); LayoutProperties(Self); Resize;
 end;
 function TRigmMovieEditorFrame.GetPreviewControl: TRigmMoviePreview;
 begin Result := FUi.Preview; end;
@@ -237,7 +252,7 @@ end;
 procedure TRigmMovieEditorFrame.SplitterBeforeResize(Sender: TObject);
 begin
   var Host := GetParentForm(Self,True); var PPI := CurrentPPI; if Host<>nil then PPI := Host.CurrentPPI;
-  if Sender=FUi.TimelineSplitter then FUi.TimelineSplitter.MinSize := MulDiv(165,PPI,96)
+  if Sender=FUi.TimelineSplitter then FUi.TimelineSplitter.MinSize := FUi.Timeline.MinimumHeightPixels+MulDiv(64,PPI,96)
   else if Sender=FUi.PropertySplitter then FUi.PropertySplitter.MinSize := MulDiv(220,PPI,96);
   FSplitterDragging := True; FUi.Pages.Paused := True;
   FUi.Preview.SetLayoutDragging(True); FUi.Timeline.SetLayoutDragging(True);
@@ -255,7 +270,8 @@ procedure TRigmMovieEditorFrame.SplitterCanResize(Sender: TObject; var NewSize: 
 begin
   if Sender=FUi.TimelineSplitter then begin
     NewSize := Max(NewSize,FUi.TimelineSplitter.MinSize);
-    Accept := Accept and (NewSize<=FUi.EditHost.ClientHeight-FUi.TimelineSplitter.Height-FUi.TimelineSplitter.MinSize);
+    var Host := GetParentForm(Self,True); var PPI := CurrentPPI; if Host<>nil then PPI := Host.CurrentPPI;
+    Accept := Accept and (NewSize<=FUi.EditHost.ClientHeight-FUi.TimelineSplitter.Height-MulDiv(165,PPI,96));
   end else if Sender=FUi.PropertySplitter then begin
     NewSize := Max(NewSize,FUi.PropertyHost.Constraints.MinWidth);
     Accept := Accept and (NewSize<=ClientWidth-FUi.PropertySplitter.Width-FUi.PropertySplitter.MinSize);
@@ -276,9 +292,12 @@ begin
     end;
     var MinimumW := MulDiv(240,PPI,96);
     if FUi.ScriptPanel.Visible then Inc(MinimumW,FUi.ScriptPanel.Width);
-    var MinimumH := Max(MulDiv(340,PPI,96),MulDiv(165,PPI,96)*2+FUi.TimelineSplitter.Height);
+    var TimelineMinimum := FUi.Timeline.MinimumHeightPixels+MulDiv(64,PPI,96);
+    var MinimumH := MulDiv(165,PPI,96)+TimelineMinimum+FUi.TimelineSplitter.Height;
     var W := Max(FUi.EditScroll.ClientWidth,MinimumW); var H := Max(FUi.EditScroll.ClientHeight,MinimumH);
     FUi.EditHost.SetBounds(-FUi.EditScroll.HorzScrollBar.Position,-FUi.EditScroll.VertScrollBar.Position,W,H);
+    FUi.Bottom.Constraints.MinHeight := TimelineMinimum;
+    FUi.Bottom.Height := EnsureRange(FUi.Bottom.Height,TimelineMinimum,H-MulDiv(165,PPI,96)-FUi.TimelineSplitter.Height);
     FUi.EditScroll.HorzScrollBar.Range := W; FUi.EditScroll.VertScrollBar.Range := H;
     LayoutTransport;
   finally FEditingLayout := False; end;
@@ -306,6 +325,14 @@ begin
     (Sender=FUi.ChartItems) or (Sender=FUi.ChartColor) then FChartDraft := True
   else if (Sender=FUi.SceneTitle) or (Sender=FUi.SceneDescription) or (Sender=FUi.LayoutChoice) then FSceneDraft := True;
   if (Sender=FUi.Dialogue) or (Sender=FUi.Subtitle) then FTextPending := True else FOnlyTextDraft := False;
+end;
+procedure TRigmMovieEditorFrame.PostingEdited(Sender: TObject);
+begin
+  // 投稿文だけの変更では、一覧・タイムライン・プレビューを再構築しない。
+  var Previous := FUi.Posting.PreviousRevision; var Current := FSession.Project.Revision;
+  if FLastRevision=Previous then FLastRevision := Current;
+  if FDrawnRevision=Previous then FDrawnRevision := Current;
+  if FDraftRevision=Previous then FDraftRevision := Current;
 end;
 function TRigmMovieEditorFrame.Command(const Name: string; Args: TJSONObject): TJSONObject;
 begin
@@ -387,6 +414,7 @@ end;
 procedure TRigmMovieEditorFrame.RefreshView;
 var Start: Double; O: TJSONObject; Catalog: TJSONArray;
 begin
+  FUi.Posting.RefreshState;
   if FDraftRevision<>0 then begin
     if FUi.ReloadDraft.Visible<>(FDraftRevision<>FSession.Project.Revision) then begin
       FUi.ReloadDraft.Visible := FDraftRevision<>FSession.Project.Revision; LayoutProperties(Self);
@@ -458,13 +486,20 @@ begin
   end;
   FSelectedId := Item.SubItems[2]; RefreshCue;
   FUi.Timeline.SelectCue(FSelectedId);
+  var Cue := FSession.Project.Cue(FSelectedId);
+  if (Cue<>nil) and (Sender=FUi.List) and not FTimelineSelecting then SeekFrame(Ceil(FSession.Project.CueStart(Cue)*Max(1,FSession.Project.Fps)));
+end;
+procedure TRigmMovieEditorFrame.CueListClick(Sender: TObject);
+begin
+  if FUi.List.Selected<>nil then SelectCue(FUi.List,FUi.List.Selected,True);
 end;
 procedure TRigmMovieEditorFrame.TimelineSelectCue(Sender: TObject);
 begin
   if FDraftRevision<>0 then begin FUi.Timeline.SelectCue(FSelectedId); Exit; end;
   for var I := 0 to FUi.List.Items.Count-1 do
     if (FUi.List.Items[I].SubItems.Count>=3) and (FUi.List.Items[I].SubItems[2]=FUi.Timeline.SelectedCueId) then begin
-      FUi.List.Items[I].Selected := True; FUi.List.Items[I].MakeVisible(False); Exit;
+      FTimelineSelecting := True;
+      try FUi.List.Items[I].Selected := True; FUi.List.Items[I].MakeVisible(False); finally FTimelineSelecting := False; end; Exit;
     end;
 end;
 procedure TRigmMovieEditorFrame.SelectSpeaker(Sender: TObject);
@@ -591,7 +626,7 @@ begin
     A := JO(O,'estimate');
     Lines.Add(Format('概算: 動画 %.1f秒 / 出力 %.0f秒 / 一時容量 %.0f MB / 空き %.0f MB',
       [JN(A,'durationSeconds'),JN(A,'exportSeconds'),JN(A,'stagingBytes')/1048576,JN(A,'freeBytes')/1048576]));
-    Lines.Add('時間・容量は素材とPCで変わる目安です。書込権限とFFmpeg起動・コーデックはこの読取診断では確認しません。');
+    Lines.Add('時間・容量は素材とPCで変わる目安です。書込権限と出力DLL・コーデックの動作はこの読取診断では確認しません。');
     if FUi.Preparation.Text<>Lines.Text then FUi.Preparation.Text := Lines.Text;
     // Refresh only catalog/asset selectors: do not overwrite pending editor text.
     if JB(J,'done',True) and (FSeenDiagnostic<>JS(J,'jobId')) then begin
@@ -713,26 +748,15 @@ begin
     var Target := FSession.Project.OutputTarget;
     if Trim(Target)='' then Target := MovieDefaultExport(FSession.Project);
     Target := ChangeFileExt(Target,'.'+Extension);
-    if FileExists(Target) then Target := ChangeFileExt(Target,'')+'-'+FormatDateTime('yyyymmdd-hhnnss',Now)+'.'+Extension;
-    var Base := ChangeFileExt(Target,''); var Index := 1;
-    while FileExists(Target) do begin Target := Base+'-'+Index.ToString+'.'+Extension; Inc(Index); end;
     ForceDirectories(ExtractFilePath(Target)); Dialog.FileName := Target;
-    Dialog.Options := [ofPathMustExist,ofEnableSizing,ofNoChangeDir];
+    Dialog.Options := [ofOverwritePrompt,ofPathMustExist,ofEnableSizing,ofNoChangeDir];
     if not Dialog.Execute then Exit;
-    Target := ChangeFileExt(ExpandFileName(Dialog.FileName),'.'+Extension);
-    if FileExists(Target) then raise ERigm.Create('同名の動画が既にあります。既存動画を残して別の名前を選んでください。');
+    Target := ExpandFileName(Dialog.FileName);
+    if not SameText(ExtractFileExt(Target),'.'+Extension) then raise ERigm.Create('選択した動画形式の拡張子で保存してください。');
     Encoder := FSession.Project.FfmpegExe;
-    if (Extension='mp4') and not FileExists(Encoder) then begin
-      var SelectEncoder := TOpenDialog.Create(Self);
-      try
-        SelectEncoder.Title := 'MP4出力に使用する既存のFFmpegを選ぶ'; SelectEncoder.Filter := 'FFmpeg (ffmpeg.exe)|ffmpeg.exe';
-        SelectEncoder.Options := [ofFileMustExist,ofPathMustExist,ofNoChangeDir];
-        if not SelectEncoder.Execute then Exit; Encoder := SelectEncoder.FileName;
-      finally SelectEncoder.Free; end;
-    end;
     FPendingPreview := False; FExport.Reset;
     A := TJSONObject.Create; A.AddPair('outputTarget',Target); A.AddPair('ffmpeg',Encoder); Run('update-project',A);
-    A := TJSONObject.Create; A.AddPair('path',Target); Reply := Command('export',A);
+    A := TJSONObject.Create; A.AddPair('path',Target); AddB(A,'overwrite',FileExists(Target)); Reply := Command('export',A);
     try FExport.BeginJob(JS(Reply,'jobId')); finally Reply.Free; end;
     FUi.ExportPanel.Visible := True; FUi.Status.Visible := False; RefreshExport;
   finally Dialog.Free; end;
@@ -789,7 +813,7 @@ begin
     end;
     FUi.Timeline.SetTime(FSession.Time);
     if GetTickCount64-FStatusTick>=200 then begin
-      FStatusTick := GetTickCount64; O := FSession.Status;
+      FStatusTick := GetTickCount64; O := FSession.TransportStatus;
       try
         Text := Format('  %.2f / %.2f 秒　%s　%s',[FSession.Time,FSession.Project.Duration,IfThen(FSession.Project.Modified,'未保存','保存済'),FSession.Project.FileName]);
         if O.GetValue('job')<>nil then begin
@@ -812,7 +836,9 @@ begin
         if (FLastError<>'') and (FUi.Status.Caption<>FLastError) then FUi.Status.Caption := FLastError;
         if FUi.Status.Visible<>(FLastError<>'') then FUi.Status.Visible := FLastError<>'';
       finally O.Free; end;
-      if not FSession.Playing and not FAudioPreparing then RefreshPreparation;
+      if not FSession.Playing and not FAudioPreparing and (GetTickCount64-FPreparationTick>=1000) then begin
+        FPreparationTick := GetTickCount64; RefreshPreparation;
+      end;
     end;
     if FSession.Playing and not FPlaying then StartPlayback;
     if not FSession.Playing and FPlaying then StopPlayback;
@@ -829,8 +855,7 @@ begin
     if FPlaying and FAudioReady then begin
       Time := FStartTime+(GetTickCount64-FTick)/1000.0;
       if Time>=FSession.Project.Duration then begin StopPlayback; Time := FSession.Project.Duration; end;
-      O := TJSONObject.Create; AddN(O,'time',Time); Run('seek',O);
-      RefreshSeek;
+      FSession.SeekTo(Time);
       FPendingPreview := True;
     end;
     if (FSavePath<>'') and not FSession.Busy then begin
@@ -842,7 +867,8 @@ begin
       (FPlaying or (GetTickCount64-FSeekTick>=80)) then begin
       FPendingPreview := False;
       if (FDrawnRevision<>FSession.Project.Revision) or (FDrawnFrame<>Floor(FSession.Time*FSession.Project.Fps)) then begin
-        Inc(FPreviewRequests); O := FSession.PreviewFrame(FSession.Time); O.Free;
+        var RenderSize := FUi.Preview.RenderSize;
+        Inc(FPreviewRequests); O := FSession.PreviewFrame(FSession.Time,RenderSize.cx,RenderSize.cy); O.Free;
       end;
     end;
     if not FSession.Playing and not FPendingPreview and not FSession.Busy and (GetTickCount64-FHistoryTick>=1000) then begin
@@ -1101,6 +1127,17 @@ function TRigmMovieEditorFrame.RequestFinish: Boolean;
 begin
   if (FDraftRevision<>0) and (MessageDlg('未適用の動画入力を破棄して終了しますか？',mtConfirmation,[mbYes,mbNo],0)<>mrYes) then Exit(False);
   Closing(Self,Result);
+end;
+procedure TRigmMovieEditorFrame.PrepareScriptReturn;
+begin
+  StopPlayback; FSession.Poll;
+  if FSession.GuiLocked then raise ERigm.Create('編集ロックを解除してから台本編集へ戻ってください。');
+  if FSession.Busy then raise ERigm.Create('動画の処理が完了するか、中止してから台本編集へ戻ってください。');
+  if FTextPending and FOnlyTextDraft and (FDraftRevision=FSession.Project.Revision) then begin
+    var A := TJSONObject.Create; A.AddPair('id',FSelectedId); A.AddPair('text',FUi.Dialogue.Text);
+    A.AddPair('subtitle',FUi.Subtitle.Text); Run('update-cue',A);
+  end;
+  if FDraftRevision<>0 then raise ERigm.Create('未適用の編集があります。右側の適用ボタンで反映してから台本編集へ戻ってください。');
 end;
 procedure TRigmMovieEditorFrame.HandleKey(var Key: Word; Shift: TShiftState);
 begin

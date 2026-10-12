@@ -2,16 +2,21 @@
 procedure TRigmWizardWorkspace.SelectScriptScene(const Id: string);
 begin
   if CurrentScriptStage<>'scenes' then raise Exception.Create('シーン工程で操作してください。'); RequireScriptScenes(FScriptDraft);
-  if FScriptDraft.Scene(Id)=nil then raise Exception.Create('シーンがありません。');
+  if FScriptDraft.ImageTarget(Id)=nil then raise Exception.Create('シーンがありません。');
   if JS(JO(FScriptDraft.ScriptWizard,'scenes'),'selectedScene')=Id then Exit;
   PsdJson.Put(JO(FScriptDraft.ScriptWizard,'scenes'),'selectedScene',Id); FScriptDraft.Changed; ScriptChanged;
 end;
 procedure TRigmWizardWorkspace.MoveScriptScene(Delta: Integer);
-begin var S := FScriptDraft.Scene(JS(JO(FScriptDraft.ScriptWizard,'scenes'),'selectedScene')); SelectScriptScene(FScriptDraft.Scenes[EnsureRange(FScriptDraft.Scenes.IndexOf(S)+Delta,0,FScriptDraft.Scenes.Count-1)].Id); end;
+begin
+  var S := FScriptDraft.ImageTarget(JS(JO(FScriptDraft.ScriptWizard,'scenes'),'selectedScene'));
+  var Current := FScriptDraft.Scenes.IndexOf(S)+1; if S=FScriptDraft.Thumbnail then Current := FScriptDraft.Scenes.Count+1;
+  var Index := EnsureRange(Current+Delta,0,FScriptDraft.Scenes.Count+1);
+  if Index=0 then SelectScriptScene(RigmCommonBackgroundId) else if Index>FScriptDraft.Scenes.Count then SelectScriptScene(RigmThumbnailId) else SelectScriptScene(FScriptDraft.Scenes[Index-1].Id);
+end;
 procedure TRigmWizardWorkspace.EditScriptScene(const Id,Description,Prompt,Mode: string; const Position: string);
 begin
   if CurrentScriptStage<>'scenes' then raise Exception.Create('シーン工程で操作してください。');
-  var S := FScriptDraft.Scene(Id); if S=nil then raise Exception.Create('シーンがありません。');
+  var S := FScriptDraft.ImageTarget(Id); if S=nil then raise Exception.Create('シーンがありません。');
   if (S.Description=NormalizeScriptText(Description)) and (S.ImagePrompt=NormalizeScriptText(Prompt)) and (S.DisplayMode=Mode) and
     ((Position='') or (S.DescriptionPosition=Position)) then Exit;
   RigmScriptScenesModel.EditScriptScene(FScriptDraft,Id,Description,Prompt,Mode,Position); FScriptDraft.Changed; ScriptChanged;
@@ -46,19 +51,30 @@ begin
   try
     for var V in Inputs do begin
       var O := V as TJSONObject; var Id := JS(O,'id');
-      RigmScriptScenesModel.EditScriptScene(P,Id,JS(O,'description'),JS(O,'prompt'),JS(O,'mode'),JS(O,'descriptionPosition'));
-      RigmScriptScenesModel.EditScriptSceneFeedback(P,Id,JS(O,'feedback'));
+      var Scene := P.ImageTarget(Id); if Scene=nil then raise Exception.Create('シーンがありません。');
+      if O.GetValue('title')<>nil then begin
+        if not (O.GetValue('title') is TJSONString) then raise Exception.Create('シーン名は文字列で指定してください。');
+        RigmScriptScenesModel.EditScriptSceneTitle(P,Id,JS(O,'title'));
+      end;
+      if (O.GetValue('mode')<>nil) and ((Scene.Description<>NormalizeScriptText(JS(O,'description'))) or
+        (Scene.ImagePrompt<>NormalizeScriptText(JS(O,'prompt'))) or (Scene.DisplayMode<>JS(O,'mode')) or
+        ((JS(O,'descriptionPosition')<>'') and (Scene.DescriptionPosition<>JS(O,'descriptionPosition')))) then
+        RigmScriptScenesModel.EditScriptScene(P,Id,JS(O,'description'),JS(O,'prompt'),JS(O,'mode'),JS(O,'descriptionPosition'));
+      if (O.GetValue('feedback')<>nil) and (Scene.ImageFeedback<>NormalizeScriptText(JS(O,'feedback'))) then
+        RigmScriptScenesModel.EditScriptSceneFeedback(P,Id,JS(O,'feedback'));
     end;
     // Publish all rows only after every value has passed model validation.
     var Old := FScriptDraft.Scenes; FScriptDraft.Scenes := P.Scenes; P.Scenes := Old;
+    var OldBackground := FScriptDraft.CommonBackground; FScriptDraft.CommonBackground := P.CommonBackground; P.CommonBackground := OldBackground;
+    var OldThumbnail := FScriptDraft.Thumbnail; FScriptDraft.Thumbnail := P.Thumbnail; P.Thumbnail := OldThumbnail;
     SyncScriptScenesStatus(FScriptDraft); FScriptDraft.Changed; ScriptChanged;
   finally P.Free; end;
 end;
 procedure TRigmWizardWorkspace.EditScriptSceneFeedback(const Id,Feedback: string);
 begin
   if CurrentScriptStage<>'scenes' then raise Exception.Create('画像工程で操作してください。');
-  if FScriptDraft.Scene(Id)=nil then raise Exception.Create('対象シーンがありません。');
-  if FScriptDraft.Scene(Id).ImageFeedback=NormalizeScriptText(Feedback) then Exit;
+  if FScriptDraft.ImageTarget(Id)=nil then raise Exception.Create('対象シーンがありません。');
+  if FScriptDraft.ImageTarget(Id).ImageFeedback=NormalizeScriptText(Feedback) then Exit;
   RigmScriptScenesModel.EditScriptSceneFeedback(FScriptDraft,Id,Feedback); FScriptDraft.Changed; ScriptChanged;
 end;
 procedure TRigmWizardWorkspace.SetScriptSceneApproved(const Id: string; Value: Boolean);
@@ -72,8 +88,14 @@ procedure TRigmWizardWorkspace.RequestUnapprovedScriptImages;
 begin
   if (CurrentScriptStage<>'scenes') or ScriptTextEditing then raise Exception.Create('入力を完了してから画像要求を作成してください。');
   RequireScriptScenes(FScriptDraft); var Count := 0;
-  for var S in FScriptDraft.Scenes do if not S.ImageApproved and (SceneImageInstruction(S).Trim<>'') then begin
-    RigmScriptScenesModel.RequestScriptSceneImage(FScriptDraft,S.Id); Inc(Count);
+  for var Index := 0 to FScriptDraft.Scenes.Count do begin
+    var S := FScriptDraft.ImageTarget(RigmCommonBackgroundId); if Index>0 then S := FScriptDraft.Scenes[Index-1];
+    if not S.ImageApproved and (SceneImageInstruction(S).Trim<>'') then begin
+      RigmScriptScenesModel.RequestScriptSceneImage(FScriptDraft,S.Id); Inc(Count);
+    end;
+  end;
+  if ScriptThumbnailSourcesReady(FScriptDraft) and not FScriptDraft.Thumbnail.ImageApproved then begin
+    RigmScriptScenesModel.RequestScriptSceneImage(FScriptDraft,RigmThumbnailId); Inc(Count);
   end;
   if Count=0 then raise Exception.Create('要望のある未確定シーンがありません。');
   FScriptDraft.Changed; ScriptChanged;
@@ -86,7 +108,8 @@ begin
   if VoiceBusy or VoicePlaying or VoiceContinuous then Exit('音声生成・再生を停止してください。');
   if Trim(JS(FScriptDraft.ScriptWizard,'titleInput'))='' then Exit('題名を入力してください。');
   if JS(FScriptDraft.ScriptWizard,'scene-assignmentStatus')<>'complete' then Exit('シーン割当を左の工程リストで保存してください。');
-  if not ScriptScenesReady(FScriptDraft) then Exit('画像を使うシーンには画像を用意し、全シーンの確定チェックを入れてください。');
+  if not ScriptThumbnailSourcesReady(FScriptDraft) then Exit('使用する共通背景・シーン画像を用意し、確定チェックを確認してください。');
+  if not ScriptSceneReady(FScriptDraft,FScriptDraft.Thumbnail) then Exit('リスト最後の必須サムネイルを作成・確定してください。元画像・タイトル変更後はサムネイルの確定を解除して作り直してください。');
   for var C in FScriptDraft.Cues do if not FScriptDraft.AudioReady(C) then Exit('音声変更を確認してください。');
   Result := CastingAdvanceReason(False);
 end;
@@ -108,7 +131,7 @@ begin
 end;
 procedure TRigmWizardWorkspace.CompleteScriptScenes;
 begin
-  RequireScriptScenes(FScriptDraft); if not ScriptScenesReady(FScriptDraft,True) then raise Exception.Create('全シーンの画像と右端の確定チェックを確認してください。');
+  RequireScriptScenes(FScriptDraft); if not ScriptScenesReady(FScriptDraft,True) then raise Exception.Create('全シーンと最後の必須サムネイルの画像・確定チェックを確認してください。');
   PsdJson.Put(FScriptDraft.ScriptWizard,'scenesStatus','complete'); FScriptDraft.Changed; ScriptChanged;
 end;
 function TRigmWizardWorkspace.ScenePreviewKey: string;
@@ -121,11 +144,13 @@ begin
   if (CurrentScriptStage<>'scenes') or ScriptTextEditing then Exit; RequireScriptScenes(FScriptDraft);
   var Key := ScenePreviewKey; if not Force and (Key=FSceneJobKey) and (FSceneJob<>nil) then Exit;
   if FSceneJob<>nil then begin FSceneJob.Cancel; FSceneRetired.Add(FSceneJob); FSceneJob := nil; end;
-  var Id := JS(JO(FScriptDraft.ScriptWizard,'scenes'),'selectedScene'); var Time := ScriptSceneStart(FScriptDraft,Id)+Min(0.05,FScriptDraft.SceneDuration(FScriptDraft.Scene(Id))/2);
+  var Id := JS(JO(FScriptDraft.ScriptWizard,'scenes'),'selectedScene'); var Time := ScriptSceneStart(FScriptDraft,Id)+Min(0.05,FScriptDraft.SceneDuration(FScriptDraft.ImageTarget(Id))/2);
+  if Id=RigmThumbnailId then Time := ScriptSceneStart(FScriptDraft,Id)+2;
   var Path := FPipe.Workspace.Resolve('Cache\ScriptScenes\'+THashSHA2.GetHashString(FScriptDraft.Id)+'\'+PsdJson.NewId+'.png',False); ForceDirectories(ExtractFilePath(Path));
   // 保存済みキャラ配置から共通合成を作るのは描画コピーだけ。台本正本を再配置しない。
   var PreviewProject := FScriptDraft.Clone;
-  try PreviewProject.EnableComposition; FSceneJob := TRigmMovieJob.Create(PreviewProject,'preview',Path,Time); finally PreviewProject.Free; end;
+  try PreviewProject.EnableComposition; if Id=RigmThumbnailId then MaterializeScriptThumbnail(PreviewProject);
+    FSceneJob := TRigmMovieJob.Create(PreviewProject,'preview',Path,Time); finally PreviewProject.Free; end;
   FSceneJobKey := Key; FSceneCollected := False; FSceneError := ''; FSceneJob.Start;
 end;
 procedure TRigmWizardWorkspace.PollScriptScenes;
@@ -149,9 +174,53 @@ begin
   if ScenePreviewKey=FSceneFrameKey then Result.AddPair('path',FScenePreviewPath); if FSceneJob<>nil then begin Result.AddPair('job',FSceneJob.Status); AddN(Result,'characterCount',FSceneJob.Project.Characters.Count); end;
 end;
 function TRigmWizardWorkspace.ReadScriptScenes(Args: TJSONObject): TJSONObject;
+  procedure AddRequest(Row: TJSONObject; const Id: string);
+  begin
+    var R := ScriptSceneRequest(FScriptDraft,Id); if R=nil then Exit;
+    var Request := R.Clone as TJSONObject; var Key := JS(R,'fingerprint');
+    try
+    if JS(R,'state')='adopted' then Key := JS(R,'adoptedFingerprint');
+    var Current := Key=ScriptSceneFingerprint(FScriptDraft,Id);
+    if JS(R,'state')='pending' then Current := Current and
+      (JI(R,'width',FScriptDraft.Width)=FScriptDraft.Width) and (JI(R,'height',FScriptDraft.Height)=FScriptDraft.Height);
+    if Current and (Id=RigmThumbnailId) and (Request.GetValue('sources') is TJSONObject) then
+      for var V in JA(JO(Request,'sources'),'characters') do begin
+        var C := TJSONObject(V); var Entry := Thumbnails.Request(JS(C,'path'));
+        AddB(C,'previewReady',(Entry<>nil) and (Entry.Width>0) and (Entry.Height>0) and (Length(Entry.Pixels)=Entry.Width*Entry.Height*4));
+        if (Entry=nil) or (Entry.Width<1) or (Entry.Height<1) or (Length(Entry.Pixels)<>Entry.Width*Entry.Height*4) then Continue;
+        var FileName := FPipe.Workspace.Resolve('Cache\ScriptThumbnailRefs\'+THashSHA2.GetHashString(JS(C,'path')+'|'+Entry.Signature)+'.png',False);
+        if not FileExists(FileName) then begin
+          ForceDirectories(ExtractFilePath(FileName)); var Png := TPngImage.CreateBlank(COLOR_RGBALPHA,8,Entry.Width,Entry.Height);
+          try
+            for var Y := 0 to Entry.Height-1 do begin
+              var Pixels := PByte(Png.Scanline[Y]); var Alpha := Png.AlphaScanline[Y];
+              for var X := 0 to Entry.Width-1 do begin
+                var Source := (Y*Entry.Width+X)*4;
+                for var Ch := 0 to 2 do Pixels[X*3+Ch] := Entry.Pixels[Source+Ch]; Alpha[X] := Entry.Pixels[Source+3];
+              end;
+            end;
+            Png.SaveToFile(FileName);
+          finally Png.Free; end;
+        end;
+        C.AddPair('previewPath',FileName);
+      end;
+    AddB(Request,'current',Current); Row.AddPair('imageRequest',Request); Request := nil;
+    finally Request.Free; end;
+  end;
 begin
   if (FScriptDraft=nil) or (JS(Args,'projectId')<>FScriptDraft.Id) or (JI(Args,'revision',-1)<>FScriptDraft.Revision) then raise Exception.Create('最新projectId/revisionでシーンを取得してください。');
   Result := ScriptScenesSummary(FScriptDraft); Result.AddPair('projectId',FScriptDraft.Id); AddN(Result,'revision',FScriptDraft.Revision);
+  var Background := FScriptDraft.ImageTarget(RigmCommonBackgroundId); var BackgroundRow := Background.Json;
+  Result.AddPair('background',BackgroundRow); BackgroundRow.AddPair('target','common-background');
+  AddB(BackgroundRow,'optional',True); AddB(BackgroundRow,'ready',ScriptSceneReady(FScriptDraft,Background));
+  BackgroundRow.AddPair('imagePath',ResolveMoviePath(FScriptDraft.FileName,Background.Image));
+  AddN(BackgroundRow,'width',FScriptDraft.Width); AddN(BackgroundRow,'height',FScriptDraft.Height);
+  BackgroundRow.AddPair('sourceCues',TJSONArray.Create); AddRequest(BackgroundRow,RigmCommonBackgroundId);
+  var Thumb := FScriptDraft.Thumbnail.Json; Result.AddPair('thumbnail',Thumb); Thumb.AddPair('target','thumbnail');
+  AddB(Thumb,'required',True); AddB(Thumb,'ready',ScriptSceneReady(FScriptDraft,FScriptDraft.Thumbnail));
+  AddB(Thumb,'sourcesReady',ScriptThumbnailSourcesReady(FScriptDraft)); AddN(Thumb,'duration',RigmThumbnailSeconds);
+  Thumb.AddPair('imagePath',ResolveMoviePath(FScriptDraft.FileName,FScriptDraft.Thumbnail.Image));
+  Thumb.AddPair('logoText',ThumbnailLogo(FScriptDraft)); AddRequest(Thumb,RigmThumbnailId);
   var A := TJSONArray.Create; Result.AddPair('rows',A); var Offset := EnsureRange(JI(Args,'offset'),0,FScriptDraft.Scenes.Count);
   while (Offset<FScriptDraft.Scenes.Count) and JB(Args,'unapprovedOnly') and FScriptDraft.Scenes[Offset].ImageApproved do Inc(Offset);
   if Offset<FScriptDraft.Scenes.Count then begin
@@ -160,7 +229,7 @@ begin
     var Cues := TJSONArray.Create; O.AddPair('sourceCues',Cues); var Count := 0;
     for var C in FScriptDraft.Cues do if C.Scene=S.Id then begin Inc(Count); if Cues.Count>=10 then Continue; var Row := TJSONObject.Create; Row.AddPair('cueId',C.Id); Row.AddPair('sourceText',C.Text); Cues.AddElement(Row); end;
     AddN(O,'cueCount',Count); AddB(O,'hasMoreCues',Count>Cues.Count);
-    var R := ScriptSceneRequest(FScriptDraft,S.Id); if R<>nil then begin var Request := R.Clone as TJSONObject; var Key := JS(R,'fingerprint'); if JS(R,'state')='adopted' then Key := JS(R,'adoptedFingerprint'); AddB(Request,'current',Key=ScriptSceneFingerprint(FScriptDraft,S.Id)); O.AddPair('imageRequest',Request); end;
+    AddRequest(O,S.Id);
   end;
   AddN(Result,'nextOffset',Offset+A.Count); AddB(Result,'hasMore',Offset+A.Count<FScriptDraft.Scenes.Count);
   Result.AddPair('preview',ScriptScenePreviewStatus);
@@ -195,22 +264,44 @@ begin
   if (CurrentScriptStage<>'summary') or not MatchStr(Choice,['none','yes']) then raise Exception.Create('総評の有無を選択してください。');
   if JS(FScriptDraft.ScriptWizard,'summaryChoice')=Choice then Exit;
   if Choice='none' then begin DisableScriptSummary(FScriptDraft); FScriptDraft.ScriptWizard.RemovePair('voiceReturnStage').Free; end;
-  PsdJson.Put(FScriptDraft.ScriptWizard,'summaryChoice',Choice); FScriptDraft.Changed; ScriptChanged;
+  PsdJson.Put(FScriptDraft.ScriptWizard,'summaryChoice',Choice); PsdJson.Put(FScriptDraft.ScriptWizard,'scriptConfirmedFingerprint',''); InvalidateScriptCasting(FScriptDraft); FScriptDraft.Changed; ScriptChanged;
+end;
+procedure TRigmWizardWorkspace.PrepareScriptDialogue(Project: TRigmMovieProject);
+begin
+  PrepareScriptText(Project);
+  // 総評なしでも入力した下書きは共有原稿に保持する。配役への採用は明示した選択で決まる。
+  if (JS(Project.ScriptWizard,'summaryChoice')<>'yes') and
+    not(Project.ScriptWizard.GetValue('summaryData') is TJSONObject) then Exit;
+  PrepareScriptSummary(Project); var Section := ScriptSection(Project,'summary');
+  if Section=nil then begin
+    Section := TJSONObject.Create; Section.AddPair('id','summary'); Section.AddPair('scope','episode');
+    Section.AddPair('text',''); JA(JO(Project.ScriptWizard,'scriptText'),'sections').AddElement(Section);
+  end;
+  PsdJson.Put(Section,'text',JS(JO(JO(Project.ScriptWizard,'summaryData'),'draft'),'text'));
 end;
 procedure TRigmWizardWorkspace.SetScriptSummaryDraft(Draft: TJSONObject);
 begin
-  if CurrentScriptStage<>'summary-edit' then raise Exception.Create('総評入力工程で操作してください。');
-  var Before := JO(FScriptDraft.ScriptWizard,'summaryData').ToJSON; RigmScriptSummaryModel.SetScriptSummaryDraft(FScriptDraft,Draft); if Before=JO(FScriptDraft.ScriptWizard,'summaryData').ToJSON then Exit; FScriptDraft.Changed; ScriptChanged;
+  if not MatchStr(CurrentScriptStage,['summary-edit','script-confirm']) then raise Exception.Create('総評入力・台本確認工程で操作してください。');
+  var Before := JO(FScriptDraft.ScriptWizard,'summaryData').ToJSON; RigmScriptSummaryModel.SetScriptSummaryDraft(FScriptDraft,Draft); if Before=JO(FScriptDraft.ScriptWizard,'summaryData').ToJSON then Exit;
+  PrepareScriptDialogue(FScriptDraft); InvalidateScriptCasting(FScriptDraft); PsdJson.Put(FScriptDraft.ScriptWizard,'scriptConfirmedFingerprint',''); FScriptDraft.Changed; ScriptChanged;
 end;
 procedure TRigmWizardWorkspace.CompleteScriptSummary;
 begin
   if (CurrentScriptStage<>'summary-edit') or ScriptTextEditing then raise Exception.Create('総評入力を完了してください。'); var Copy := FScriptDraft.Clone;
-  try MaterializeScriptSummary(Copy); finally Copy.Free; end; PsdJson.Put(JO(FScriptDraft.ScriptWizard,'summaryData'),'status','complete'); FScriptDraft.Changed; ScriptChanged;
+  try ConfirmScriptSummaryDraft(Copy); finally Copy.Free; end; PsdJson.Put(JO(FScriptDraft.ScriptWizard,'summaryData'),'status','complete'); FScriptDraft.Changed; ScriptChanged;
 end;
 function TRigmWizardWorkspace.ReadScriptSummary(Args: TJSONObject): TJSONObject;
 begin
   if (FScriptDraft=nil) or (JS(Args,'projectId')<>FScriptDraft.Id) or (JI(Args,'revision',-1)<>FScriptDraft.Revision) then raise Exception.Create('最新projectId/revisionで総評を取得してください。');
   Result := TJSONObject.Create; Result.AddPair('projectId',FScriptDraft.Id); AddN(Result,'revision',FScriptDraft.Revision); Result.AddPair('choice',JS(FScriptDraft.ScriptWizard,'summaryChoice'));
-  if FScriptDraft.ScriptWizard.GetValue('summaryData') is TJSONObject then begin var Data := JO(FScriptDraft.ScriptWizard,'summaryData').Clone as TJSONObject; for var Key in ['appliedDraft','archivedCue','archivedScene'] do Data.RemovePair(Key).Free; Result.AddPair('data',Data); end;
-  var Cue := ScriptSummaryCue(FScriptDraft); if Cue<>nil then begin var Brief := TJSONObject.Create; Brief.AddPair('cueId',Cue.Id); Brief.AddPair('sceneId',Cue.Scene); AddN(Brief,'role',ScriptCueRole(FScriptDraft,Cue.Id)); Brief.AddPair('waveFile',Cue.WaveFile); Brief.AddPair('labFile',Cue.LabFile); AddN(Brief,'audioSeconds',Cue.AudioSeconds); Result.AddPair('cue',Brief); AddB(Result,'audioReady',FScriptDraft.AudioReady(Cue)); end;
+  if FScriptDraft.ScriptWizard.GetValue('summaryData') is TJSONObject then begin var Data := JO(FScriptDraft.ScriptWizard,'summaryData').Clone as TJSONObject; for var Key in ['appliedDraft','archivedCue','archivedScene','archivedCues','archivedRows','lineMigration'] do Data.RemovePair(Key).Free; Result.AddPair('data',Data); end;
+  var Cues := TJSONArray.Create; Result.AddPair('cues',Cues); var Ready := True; var Seconds := 0.0;
+  for var Cue in FScriptDraft.Cues do if IsScriptSummaryCue(FScriptDraft,Cue) then begin
+    var Brief := TJSONObject.Create; Brief.AddPair('cueId',Cue.Id); Brief.AddPair('sceneId',Cue.Scene);
+    AddN(Brief,'role',ScriptCueRole(FScriptDraft,Cue.Id)); Brief.AddPair('waveFile',Cue.WaveFile); Brief.AddPair('labFile',Cue.LabFile);
+    AddN(Brief,'audioSeconds',Cue.AudioSeconds); AddB(Brief,'audioReady',FScriptDraft.AudioReady(Cue)); Cues.AddElement(Brief);
+    Ready := Ready and FScriptDraft.AudioReady(Cue); Seconds := Seconds+Cue.AudioSeconds;
+    if Cues.Count=1 then Result.AddPair('cue',Brief.Clone as TJSONObject); // 旧クライアントの先頭cue参照を保持する。
+  end;
+  AddN(Result,'cueCount',Cues.Count); AddN(Result,'audioSeconds',Seconds); AddB(Result,'audioReady',(Cues.Count>0) and Ready);
 end;

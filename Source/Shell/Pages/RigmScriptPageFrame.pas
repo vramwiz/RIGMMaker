@@ -22,6 +22,8 @@ uses System.Math, System.Types, Winapi.Windows;
 constructor TRigmScriptPageFrame.Create(AOwner: TComponent);
 begin
   inherited;
+  // 工程ページの子画面は非表示で組み立て、ホストへ配置・反映した後に表示する。
+  if AOwner is TRigmScriptPageFrame then Visible := False;
   ParentFont := False; Font.PixelsPerInch := 96; Font.IsDPIRelated := True;
   Font.Name := 'Yu Gothic UI'; Font.Size := 10;
   // ラジオボタン・一覧がHWNDを要求する前に接続する。以後の寸法は現在の倍率で設定する。

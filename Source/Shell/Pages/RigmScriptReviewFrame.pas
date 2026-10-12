@@ -3,7 +3,7 @@
 // 第6段階の作品特定と掘り下げ確認。旧stage=reviewを維持し、原稿は編集しない。
 interface
 uses System.Classes, System.JSON, System.Generics.Collections, RigmScriptPageFrame,
-  Vcl.Forms, Vcl.Controls, Vcl.StdCtrls, Vcl.ExtCtrls, RigmWizardWorkspace;
+  Vcl.Forms, Vcl.Controls, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.ComCtrls, RigmWizardWorkspace, RigmNicoManga;
 type
   TRigmScriptReviewFrame = class;
   TRigmResearchRow = class(TPanel)
@@ -26,6 +26,11 @@ type
     FCandidates: TListBox; FOverview: TMemo; FConfirmed: TCheckBox;
     FElements: TScrollBox; FRows: TObjectList<TRigmResearchRow>;
     FCandidateIds: TArray<string>;
+    FNicoSearch: TRigmNicoSearch; FNicoButton: TButton; FNicoLink: TLinkLabel;
+    FNicoUrl,FSearchMessage: string;
+    procedure SearchNico(Sender: TObject);
+    procedure SearchFinished(Sender: TObject);
+    procedure OpenNico(Sender: TObject; const Link: string; LinkType: TSysLinkType);
     procedure TitleChanged(Sender: TObject);
     procedure BeginInput(Sender: TObject);
     procedure EndInput(Sender: TObject);
@@ -41,7 +46,7 @@ type
     function RequestFinish: Boolean;
   end;
 implementation
-uses System.SysUtils, System.Math, Winapi.Windows, Vcl.Graphics, RigmJson, PsdJson, RigmScriptResearchModel;
+uses System.SysUtils, System.Math, Winapi.Windows, Winapi.ShellAPI, Vcl.Graphics, RigmJson, PsdJson, RigmScriptResearchModel;
 {$R *.dfm}
 constructor TRigmScriptReviewFrame.CreateForWorkspace(AOwner: TComponent; Workspace: TRigmWizardWorkspace);
 begin
@@ -60,10 +65,17 @@ begin
   FTitle.Name := 'ScriptResearchTitle'; FTitle.MaxLength := 256;
   FTitle.OnEnter := BeginInput; FTitle.OnExit := EndInput; FTitle.OnChange := TitleChanged;
   FTitle.Hint := '作品タイトル。変更すると検索結果と確認状態を解除します。'; FTitle.ShowHint := True;
+  var NicoBar := TPanel.Create(Self); NicoBar.Parent := Self; NicoBar.Align := alTop; NicoBar.Top := TitlePanel.Height;
+  NicoBar.Height := ScaleValue(36); NicoBar.BevelOuter := bvNone; NicoBar.Caption := '';
+  FNicoButton := TButton.Create(Self); FNicoButton.Parent := NicoBar; FNicoButton.Align := alLeft;
+  FNicoButton.Width := ScaleValue(190); FNicoButton.Name := 'ScriptResearchNicoSearch';
+  FNicoButton.Caption := 'ニコニコ漫画から取得'; FNicoButton.OnClick := SearchNico;
+  FNicoLink := TLinkLabel.Create(Self); FNicoLink.Parent := NicoBar; FNicoLink.Align := alClient;
+  FNicoLink.Name := 'ScriptResearchNicoUrl'; FNicoLink.AutoSize := False; FNicoLink.OnLinkClick := OpenNico;
   FGuide := TRigmScriptLabel.Create(Self); FGuide.Parent := Self; FGuide.Align := alBottom;
   FGuide.Name := 'ScriptResearchGuide'; FGuide.AutoSize := False; FGuide.WordWrap := True; FGuide.Height := ScaleValue(54);
   FIdentity := TPanel.Create(Self); FIdentity.Parent := Self; FIdentity.Align := alTop;
-  FIdentity.Top := TitlePanel.Height; FIdentity.Height := ScaleValue(218); FIdentity.BevelOuter := bvNone; FIdentity.Caption := '';
+  FIdentity.Top := TitlePanel.Height+NicoBar.Height; FIdentity.Height := ScaleValue(218); FIdentity.BevelOuter := bvNone; FIdentity.Caption := '';
   FIdentity.Padding.SetBounds(ScaleValue(8),0,ScaleValue(8),ScaleValue(6));
   FCandidates := TListBox.Create(Self); FCandidates.Parent := FIdentity; FCandidates.Align := alTop;
   FCandidates.Height := ScaleValue(78); FCandidates.Name := 'ScriptResearchCandidates'; FCandidates.OnClick := CandidateSelected;
@@ -76,7 +88,58 @@ begin
   FElements.Name := 'ScriptResearchElements'; FElements.BorderStyle := bsNone; FElements.VertScrollBar.Tracking := True; FElements.OnResize := ElementsResized;
 end;
 destructor TRigmScriptReviewFrame.Destroy;
-begin FRows.Free; inherited; end;
+begin
+  if FNicoSearch<>nil then begin
+    FNicoSearch.OnTerminate := nil; FNicoSearch.Terminate; FNicoSearch.WaitFor; FreeAndNil(FNicoSearch);
+  end;
+  FRows.Free; inherited;
+end;
+procedure TRigmScriptReviewFrame.SearchNico(Sender: TObject);
+begin
+  if (FNicoSearch<>nil) or (FWorkspace.ScriptDraft=nil) then Exit;
+  var R := ScriptResearch(FWorkspace.ScriptDraft);
+  if (R=nil) or (Trim(FTitle.Text)='') then begin FGuide.Caption := '作品タイトルを入力してください。'; Exit; end;
+  FNicoSearch := TRigmNicoSearch.Create;
+  FNicoSearch.Query := FTitle.Text; FNicoSearch.ProjectId := FWorkspace.ScriptDraft.Id;
+  FNicoSearch.ResearchId := JS(R,'researchId'); FNicoSearch.OnTerminate := SearchFinished;
+  FSearchMessage := 'ニコニコ漫画を検索しています。'; FNicoButton.Enabled := False;
+  FGuide.Caption := FSearchMessage; FNicoSearch.Start;
+end;
+procedure TRigmScriptReviewFrame.SearchFinished(Sender: TObject);
+begin
+  var Search := FNicoSearch; FNicoSearch := nil; FNicoButton.Enabled := True;
+  try
+    try
+    if (Search=nil) or (FWorkspace.ScriptDraft=nil) then Exit;
+    var R := ScriptResearch(FWorkspace.ScriptDraft);
+    if (R=nil) or (Search.ProjectId<>FWorkspace.ScriptDraft.Id) or
+      (Search.ResearchId<>JS(R,'researchId')) or (Search.Query<>JS(R,'title')) or
+      (FWorkspace.CurrentScriptStage<>'review') then begin
+      FSearchMessage := '検索中に作品・条件・工程が変わったため、結果を適用しませんでした。'; Exit;
+    end;
+    if Search.Error<>'' then begin FSearchMessage := Search.Error; Exit; end;
+    if Search.Candidates.Count=0 then begin FSearchMessage := 'ニコニコ漫画に候補がありません。既存の候補は保持しました。'; Exit; end;
+    var Args := TJSONObject.Create; var Candidates := TJSONArray.Create; Args.AddPair('candidates',Candidates);
+    try
+      for var V in JA(R,'candidates') do if not JS(TJSONObject(V),'id').StartsWith('nico-') then
+        Candidates.AddElement(V.Clone as TJSONValue);
+      for var V in Search.Candidates do Candidates.AddElement(V.Clone as TJSONValue);
+      FWorkspace.UpdateResearch('candidates',Args,True);
+      FSearchMessage := 'ニコニコ漫画から候補を取得しました。URLを開いて作品を確認してください。';
+    finally Args.Free; end;
+    except on E: Exception do FSearchMessage := E.Message; end;
+  finally
+    // OnTerminateはワーカーの終了通知中。解放は通知から戻った後に行う。
+    if Search<>nil then TThread.ForceQueue(nil,procedure begin Search.Free; end);
+    RefreshState;
+  end;
+end;
+procedure TRigmScriptReviewFrame.OpenNico(Sender: TObject; const Link: string; LinkType: TSysLinkType);
+begin
+  if NicoComicUrl(FNicoUrl) then
+    if NativeInt(ShellExecute(Handle,'open',PChar(FNicoUrl),nil,nil,SW_SHOWNORMAL))<=32 then
+      FGuide.Caption := 'ブラウザを開けませんでした。表示されたURLをコピーして確認してください。';
+end;
 procedure TRigmScriptReviewFrame.BeginInput(Sender: TObject);
 begin if not FSync then FWorkspace.BeginScriptTextEdit; end;
 procedure TRigmScriptReviewFrame.EndInput(Sender: TObject);
@@ -91,6 +154,7 @@ end;
 procedure TRigmScriptReviewFrame.TitleChanged(Sender: TObject);
 begin
   if FSync then Exit; BeginInput(Sender);
+  FSearchMessage := '';
   var Args := TJSONObject.Create; Args.AddPair('title',FTitle.Text); Apply('title',Args);
 end;
 procedure TRigmScriptReviewFrame.CandidateSelected(Sender: TObject);
@@ -127,10 +191,13 @@ begin
       if Ready then FPhase.Caption := '第2段階  掘り下げ情報の確認'
       else FPhase.Caption := '第1段階  作品の特定';
       FType.Caption := '作品タイトル  ／ 台本の種類：'+JS(Summary,'scriptTypeName');
-      var Reason := JS(Summary,'advanceBlockedReason');
+      var Reason := JS(Summary,'incompleteReason');
+      if FSearchMessage<>'' then FGuide.Caption := FSearchMessage
+      else
       if Reason='' then FGuide.Caption := 'すべての項目が確定しました。左の工程リストで次の工程へ進めます。さらに掘り下げたい場合は、Codexへの指示で項目を追加できます。'
-      else if not Ready then FGuide.Caption := 'Codex側で作品検索を指示してください。候補の概要を確認し、正しい作品だけにチェックしてください。'
+      else if not Ready then FGuide.Caption := '「ニコニコ漫画から取得」またはCodex側の指示で作品を検索してください。URLと概要を確認し、正しい作品だけにチェックしてください。'
       else FGuide.Caption := Reason;
+      if Reason<>'' then FGuide.Caption := FGuide.Caption+#13#10+'掘り下げが不要なら、左の工程リストから第7段階へ進めます。';
       FConfirmed.Checked := JB(R,'humanConfirmed');
       FConfirmed.Enabled := ResearchCandidate(R,JS(R,'selectedCandidateId'))<>nil;
       FCandidates.Visible := not Ready;
@@ -145,6 +212,9 @@ begin
         end;
       finally FCandidates.Items.EndUpdate; end;
       var Candidate := ResearchCandidate(R,JS(R,'selectedCandidateId'));
+      FNicoUrl := ''; if Candidate<>nil then FNicoUrl := JS(Candidate,'niconicoUrl');
+      if NicoComicUrl(FNicoUrl) then FNicoLink.Caption := '<a href="'+FNicoUrl+'">'+FNicoUrl+'</a>'
+      else FNicoLink.Caption := 'ニコニコ漫画の候補を選ぶと作品URLを表示します。';
       if Candidate=nil then FOverview.Text := '検索候補を選択すると作品の概要を表示します。'
       else begin
         var Text := JS(Candidate,'name')+#13#10+JS(Candidate,'identity')+#13#10+JS(Candidate,'overview');

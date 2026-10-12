@@ -9,7 +9,7 @@ function MoviePreparation(Project: TRigmMovieProject; Diagnostics,DiagnosticJob:
 function MovieExamples: TJSONArray;
 implementation
 uses System.SysUtils, System.IOUtils, System.Math, System.StrUtils, Winapi.Windows,
-  RigmJson, ArtDocument;
+  RigmJson, ArtDocument, RigmMovieMp4, RigmScriptScenesModel;
 
 function MoviePreparationKey(Project: TRigmMovieProject): string;
 begin
@@ -79,6 +79,8 @@ var Issues,Steps: TJSONArray; TotalIssues,Pending,Unselected: Integer; AudioOK,C
 begin
   Result := TJSONObject.Create; Issues := TJSONArray.Create; Steps := TJSONArray.Create;
   Result.AddPair('issues',Issues); Result.AddPair('steps',Steps); TotalIssues := 0; Pending := 0; Unselected := 0;
+  var ThumbnailOK := (Project.ScriptWizard=nil) or ScriptScenesReady(Project);
+  if not ThumbnailOK then Issue('thumbnail_required','第16段階の最後で必須サムネイルを作成・確定してください。','app-script-status','thumbnail',True);
   Target := OutputPath; if Target='' then Target := Project.OutputTarget;
   var Current := JS(Diagnostics,'key')=MoviePreparationKey(Project);
   AddB(Result,'diagnosticsCurrent',Current); Result.AddPair('diagnosticsJob',DiagnosticJob.Clone as TJSONObject);
@@ -153,12 +155,12 @@ begin
   if Target='' then Issue('output_missing','新しいAVIまたはMP4の出力先を設定してください。','movie-update-project','output',True)
   else if FileExists(Target) then begin OutputOK := False; Issue('output_exists','出力先は既に存在します。別のファイル名を使ってください。','movie-update-project','output',True); end
   else if not Mp4 and not SameText(ExtractFileExt(Target),'.avi') then begin OutputOK := False; Issue('output_format','出力拡張子は.aviまたは.mp4です。','movie-update-project','output',True); end;
-  var FfmpegOK := FileExists(Project.FfmpegExe) and SameText(ExtractFileName(Project.FfmpegExe),'ffmpeg.exe');
-  if Mp4 and not FfmpegOK then begin OutputOK := False; Issue('ffmpeg_missing','MP4には既存のffmpeg.exeを選択してください。AVIはFFmpegなしで出力できます。','movie-update-project','output',True); end;
+  var FfmpegOK := MovieMp4Available(Project.FfmpegExe);
+  if Mp4 and not FfmpegOK then begin OutputOK := False; Issue('ffmpeg_missing','MP4出力用の同梱DLLがありません。Runtime\FFmpegを確認してください。','movie-update-project','output',True); end;
   Duration := Project.Duration; EstimatedSeconds := Duration*386.265/180*(Project.Width*Project.Height/2073600.0)*(Project.Fps/30);
   if Project.EncodeProfile='balanced' then EstimatedSeconds := EstimatedSeconds*1.3;
   if Project.EncodeProfile='quality' then EstimatedSeconds := EstimatedSeconds*1.8;
-  // MP4 streams one raw frame to FFmpeg; disk staging contains only PCM audio and compressed output.
+  // 同梱DLLは圧縮MP4だけを一時出力する。外部EXE互換経路のPCMも含む保守的な容量概算。
   if Mp4 then Staging := Round(Duration*(Project.Width*Project.Height*Project.Fps*0.025+96000))
   else Staging := Round(Duration*(Project.Width*Project.Height*Project.Fps*0.06+196000));
   FreeBytes := 0;
@@ -174,8 +176,10 @@ begin
   AddN(Estimate,'exportSeconds',EstimatedSeconds); AddN(Estimate,'stagingBytes',Staging); AddN(Estimate,'freeBytes',FreeBytes);
   Estimate.AddPair('basis','historical renderer heuristic from 1080p30 fast Kiritan 180s / 386.265s; material and CPU dependent; raw streaming and quality factors unmeasured');
   if Mp4 then begin
-    Estimate.AddPair('backend','ffmpeg-raw-bgra-pipe');
-    Estimate.AddPair('stagingBasis','heuristic: 48000 Hz mono PCM plus compressed MP4; no intermediate AVI; bitrate is content dependent');
+    Estimate.AddPair('backend',MovieMp4Backend(Project.FfmpegExe));
+    if MovieMp4Backend(Project.FfmpegExe)='ffmpeg-shared-h264-aac' then
+      Estimate.AddPair('stagingBasis','conservative compressed MP4 heuristic including PCM allowance; bundled DLL writes no intermediate WAV or AVI; bitrate is content dependent')
+    else Estimate.AddPair('stagingBasis','heuristic: 48000 Hz mono PCM plus compressed MP4; no intermediate AVI; bitrate is content dependent');
   end else begin
     Estimate.AddPair('backend','legacy-mjpeg-avi');
     Estimate.AddPair('stagingBasis','heuristic: MJPEG AVI including PCM; legacy 2 GB AVI limit remains');
@@ -185,7 +189,7 @@ begin
   Step('setup','2 話者・キャラクター・素材を選ぶ','movie-diagnostics-refresh',EngineOK and (Unselected=0) and CharacterOK);
   Step('audio','3 音声を生成する','movie-audio-generate',AudioOK);
   Step('preview','4 プレビューで確認する','movie-preview',PreviewCurrent);
-  Step('export','5 新しいファイルへ出力する','movie-export',AudioOK and CharacterOK and BgmOK and OutputOK);
+  Step('export','5 新しいファイルへ出力する','movie-export',AudioOK and CharacterOK and BgmOK and OutputOK and ThumbnailOK);
   var Next := 'movie-import-script'; var Message := '自分の台本を貼り付けて取り込んでください。';
   if Project.Cues.Count>0 then begin
     Next := 'movie-diagnostics-refresh'; Message := '接続・話者・素材を診断してください。';
@@ -200,9 +204,10 @@ begin
     end else if AudioOK and CharacterOK then begin Next := 'movie-preview'; Message := '保存済み音声でプレビューと出力ができます。'; end;
     if AudioOK and CharacterOK and PreviewCurrent then begin
       if OutputOK then begin Next := 'movie-export'; Message := '準備できました。新しい出力先へ書き出せます。'; end
-      else begin Next := 'movie-update-project'; Message := '出力先・FFmpeg・空き容量の診断項目を確認してください。'; end;
+      else begin Next := 'movie-update-project'; Message := '出力先・出力機能・空き容量の診断項目を確認してください。'; end;
     end;
   end;
+  if not ThumbnailOK then begin Next := 'app-script-status'; Message := '第16段階に戻り、シーン画像とリスト最後の必須サムネイルを確定してください。'; end;
   Result.AddPair('nextAction',Next); Result.AddPair('message',Message); AddN(Result,'totalIssues',TotalIssues);
   var NextArgs := TJSONObject.Create; Result.AddPair('nextArgs',NextArgs);
   var NextCommand := Next;
@@ -216,7 +221,7 @@ begin
   AddB(Result,'nextArgsRequireUserValues',MatchText(Next,['movie-import-script','movie-update-speaker','movie-update-project','safe-acting']));
   Result.AddPair('mutationPrecondition','read latest movie-status projectId/revision before applying suggested edits');
   AddN(Result,'audioPending',Pending); AddB(Result,'canGenerateAudio',EngineOK and (Unselected=0) and (Project.Cues.Count>0));
-  AddB(Result,'canExport',AudioOK and CharacterOK and BgmOK and OutputOK); AddB(Result,'canPreview',CharacterOK and BgmOK and (Project.Cues.Count>0));
+  AddB(Result,'canExport',AudioOK and CharacterOK and BgmOK and OutputOK and ThumbnailOK); AddB(Result,'canPreview',CharacterOK and BgmOK and (Project.Cues.Count>0));
   Result.AddPair('outputPath',Target); AddB(Result,'ffmpegConfigured',FfmpegOK);
   AddB(Result,'previewCurrent',PreviewCurrent); AddB(Result,'bgmReady',BgmOK);
   AddN(Result,'bgmFadeOutEffective',Min(Project.BgmFadeOut,Project.Duration));

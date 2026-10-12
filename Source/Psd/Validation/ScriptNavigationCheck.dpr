@@ -21,7 +21,7 @@ begin
 end;
 function StateAt(const Stage,Reached: string; Advance: Boolean): TJSONObject;
 begin
-  Result := PsdJson.ObjectText('{"hasProject":true,"castingReady":true,"wizard":{"scene-assignmentStatus":"complete"}}');
+  Result := PsdJson.ObjectText('{"hasProject":true,"castingReady":true,"subtitlesReady":true,"voiceReady":true,"assignmentReady":true,"scenesReady":true,"wizard":{"scene-assignmentStatus":"complete"}}');
   AddB(Result,'canAdvance',Advance); PsdJson.Put(JO(Result,'wizard'),'stage',Stage);
   PsdJson.Put(JO(Result,'wizard'),'furthestStage',Reached);
 end;
@@ -35,10 +35,24 @@ begin
     PsdJson.Put(State,'canAdvance',TJSONBool.Create(True));
     Check(Contains(State,'characters') and not Contains(State,'layout'),'only immediate next stage unlocks');
   finally State.Free; end;
+  State := StateAt('review','review',True);
+  try
+    AddB(State,'researchReady',False);
+    Check(Contains(State,'summary') and ScriptStageAvailable(State,'summary'),'stage six offers summary choice before any research');
+    Check(not Contains(State,'subtitles') and not ScriptStageAvailable(State,'subtitles'),'optional research does not skip casting');
+  finally State.Free; end;
+  State := StateAt('casting','subtitles',False);
+  try
+    AddB(State,'researchReady',False); PsdJson.Put(State,'castingReady',TJSONBool.Create(False));
+    Check(not ScriptStageAvailable(State,'subtitles'),'casting confirmation is still required after skipping research');
+    PsdJson.Put(State,'castingReady',TJSONBool.Create(True)); PsdJson.Put(State,'canAdvance',TJSONBool.Create(True));
+    Check(ScriptStageAvailable(State,'subtitles'),'unfinished optional research does not block confirmed casting');
+  finally State.Free; end;
   State := StateAt('scene-assignment','scenes',False);
   try Check(not ScriptStageAvailable(State,'scenes'),'revisited assignment cannot bypass completion'); finally State.Free; end;
   State := StateAt('subtitles','scenes',False);
   try
+    AddB(State,'researchReady',False);
     AddB(State,'canConfirmSubtitles',True);
     Check(ScriptStageAvailable(State,'voice'),'valid subtitle input can be confirmed by selecting voice');
     Check(not ScriptStageAvailable(State,'scenes'),'subtitle confirmation cannot skip directly to scenes');
@@ -52,7 +66,7 @@ begin
   try
     Check(not Contains(State,'editor'),'unconfirmed scenes do not offer editor');
     PsdJson.Put(State,'canAdvance',TJSONBool.Create(True));
-    Check(Contains(State,'editor') and not Contains(State,'summary'),'approved scenes offer editor directly');
+    Check(Contains(State,'editor') and Contains(State,'summary'),'approved scenes offer editor and retain earlier summary choice');
     Check(ScriptStageAvailable(State,'title') and ScriptStageAvailable(State,'layout'),'reached earlier stages remain reachable');
   finally State.Free; end;
   State := StateAt('summary','summary',True);
@@ -61,9 +75,11 @@ begin
     Check(Contains(State,'closing') and not Contains(State,'summary-edit'),'legacy summary-none branch opens closing');
     PsdJson.Put(JO(State,'wizard'),'summaryChoice','yes');
     Check(Contains(State,'summary-edit') and not Contains(State,'closing'),'legacy summary-yes branch opens summary editing');
-    Check(ScriptNextStage('summary-edit',JO(State,'wizard'))='voice','summary audio returns to voice');
+    Check(ScriptNextStage('summary-edit',JO(State,'wizard'))='closing','summary proceeds to closing before casting');
     PsdJson.Put(JO(State,'wizard'),'voiceReturnStage','closing');
-    Check(ScriptNextStage('voice-effects',JO(State,'wizard'))='closing','legacy supplementary audio returns to closing');
+    Check(ScriptNextStage('voice-effects',JO(State,'wizard'))='scene-assignment','old supplementary audio metadata does not change the new order');
+    Check((ScriptNextStage('closing',JO(State,'wizard'))='script-confirm') and
+      (ScriptNextStage('script-confirm',JO(State,'wizard'))='casting'),'closing proceeds through script confirmation to casting');
   finally State.Free; end;
 end;
 procedure SceneFixture;
@@ -157,7 +173,8 @@ begin
     Capture('title-'+Ppi.ToString);
   end;
   Main.ScaleForPPI(96); Main.SetBounds(0,0,1280,840); SceneFixture;
-  Check((W.CurrentScriptStage='scenes') and (List.ItemIndex=11) and (List.Items.Count=12),'image stage highlights stage twelve and retains earlier stages');
+  Check((W.CurrentScriptStage='scenes') and (List.ItemIndex=List.Items.Count-1) and
+    (List.Items.Count=ScriptStageIndex('scenes')),'image stage highlights the final reached stage and hides unused summary input');
   var State := W.ScriptStatus;
   try Check(not Contains(State,'editor'),'real incomplete image fixture does not unlock editor'); finally State.Free; end;
   var SceneFrame: TRigmScriptScenesFrame := nil; var FirstRow: TRigmSceneImageRow := nil;

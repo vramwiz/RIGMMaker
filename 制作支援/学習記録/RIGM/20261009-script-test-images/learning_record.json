@@ -1,0 +1,207 @@
+{
+  "schemaVersion": 1,
+  "recordType": "rigm_scene_image_generation_learning",
+  "date": "2026-10-09",
+  "purpose": "開いているテスト台本の5シーンへ、セリフに合う新規画像を生成して割り当てる",
+  "userRequest": "台本のテスト　画像を割り当てて",
+  "title": "架空のアニメの話",
+  "projectId": "{31E80E70-1F15-4E59-A1D6-B8219558F973}",
+  "startRevision": 353,
+  "appliedRevision": 368,
+  "method": "built-in image_gen; five sequential generations with previous scene as visual reference",
+  "genre": {
+    "value": "日常の小さな行動を描く、柔らかいアニメ調",
+    "source": "セリフから今回のテスト用に補った画風。ユーザー確定のジャンル・シリーズ設定ではない"
+  },
+  "imageSpecificConditions": [
+    "準備だけで満足→道具をそろえる→先延ばし→5分だけ開始→自然に継続の5場面",
+    "同じ人物・服装・机・部屋と柔らかい光を直前画像から継続",
+    "1枚ずつ生成して原画像を保持し、画像欄へ要望を入力して現在の要求へ採用"
+  ],
+  "preservedInformation": [
+    "5つの固定sceneIdと、関連する14発話のID・本文",
+    "既存キャラクター配置",
+    "既存音声14件のready状態"
+  ],
+  "verification": {
+    "liveGuiScreenshot": "not_captured",
+    "pixelAndAlpha": [
+      {
+        "height": 941,
+        "sceneNumber": 1,
+        "sha256": "06639DC755F0880A81F0D477123B89258BC93F37BE17E439A9BB32DBB7DF2E0D",
+        "pngColorType": 2,
+        "width": 1672
+      },
+      {
+        "height": 941,
+        "sceneNumber": 2,
+        "sha256": "3FB45555704883A91AD595BF68D06A4CDF65F37618B58CAF1BA439EE058C52CD",
+        "pngColorType": 2,
+        "width": 1672
+      },
+      {
+        "height": 941,
+        "sceneNumber": 3,
+        "sha256": "4C96516ED2CD7D8EAA4B5168CCDB20D2C678279F7D11F32FA341C4998299FE09",
+        "pngColorType": 2,
+        "width": 1672
+      },
+      {
+        "height": 941,
+        "sceneNumber": 4,
+        "sha256": "02783DA65D4C89D83F4EBE73EBCBDB3D1D01D53553E365548DB9286C7AA456C9",
+        "pngColorType": 2,
+        "width": 1672
+      },
+      {
+        "height": 941,
+        "sceneNumber": 5,
+        "sha256": "D1B4641BB0897C67539093386562A8A21F3CE3DB44C58A453E6DBDE45452D6A6",
+        "pngColorType": 2,
+        "width": 1672
+      }
+    ],
+    "applicationImport": "5要求がadopted/currentであること、管理Imagesと生成元のSHA256一致を確認",
+    "projectSaveAndReload": "not_run",
+    "assistantVisualEvaluation": "5生成画像と最後のシーンのアプリ合成プレビューを確認",
+    "userVisualEvaluation": "not_reviewed"
+  },
+  "status": "last_image_revised_awaiting_human_confirmation_and_save",
+  "unverified": [
+    "ユーザーによる各行の確定チェック",
+    "作品保存後の再開",
+    "全シーンのGUIサムネイルの実画面確認"
+  ],
+  "artifacts": {
+    "preview": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Cache\\ScriptScenes\\2b5c1ac40ea97b30eb6bfd7c603f61f58290d27ebc928749e20c60e9d7138fc5\\{CF696B70-0856-4D51-8040-D6ACFDE34160}.png",
+    "finalImages": [
+      {
+        "sceneId": "{68F202C6-E308-4CF8-9EE7-E5B40E1373CD}",
+        "local": "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\script-test-20261009-3a2dd4c7\\scene-001.png",
+        "sceneNumber": 1,
+        "source": "C:\\Users\\zan12\\.codex\\generated_images\\01a12019-d8ab-72a1-8674-2f59b80f8809\\exec-44adf151-d9f6-45b1-b464-f68042bd3b21.png",
+        "sha256": "06639DC755F0880A81F0D477123B89258BC93F37BE17E439A9BB32DBB7DF2E0D",
+        "humanApproved": false,
+        "requestId": "{28025824-8828-4DA8-AB64-48347E1E9F15}",
+        "managed": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{31E80E70-1F15-4E59-A1D6-B8219558F973}\\Images\\06639dc755f0880a81f0d477123b89258bc93f37be17e439a9bb32dbb7df2e0d.png",
+        "width": 1672,
+        "height": 941
+      },
+      {
+        "humanApproved": false,
+        "sceneNumber": 2,
+        "local": "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\script-test-20261009-3a2dd4c7\\scene-002.png",
+        "source": "C:\\Users\\zan12\\.codex\\generated_images\\01a12019-d8ab-72a1-8674-2f59b80f8809\\exec-2232952e-51f9-44c8-8f00-e8f3243c6cde.png",
+        "requestId": "{4537F457-C527-4773-A0DC-D63300F84527}",
+        "sha256": "3FB45555704883A91AD595BF68D06A4CDF65F37618B58CAF1BA439EE058C52CD",
+        "managed": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{31E80E70-1F15-4E59-A1D6-B8219558F973}\\Images\\3fb45555704883a91ad595bf68d06a4cdf65f37618b58caf1ba439ee058c52cd.png",
+        "sceneId": "{2CD85D49-9144-48D2-9EAA-B1DB23DB331B}",
+        "width": 1672,
+        "height": 941
+      },
+      {
+        "sceneId": "{23D894AC-BEB0-4370-9D19-591CB276CB07}",
+        "sha256": "4C96516ED2CD7D8EAA4B5168CCDB20D2C678279F7D11F32FA341C4998299FE09",
+        "sceneNumber": 3,
+        "local": "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\script-test-20261009-3a2dd4c7\\scene-003.png",
+        "source": "C:\\Users\\zan12\\.codex\\generated_images\\01a12019-d8ab-72a1-8674-2f59b80f8809\\exec-81278ce8-c600-4d4f-8fca-2a186f07bb18.png",
+        "humanApproved": false,
+        "managed": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{31E80E70-1F15-4E59-A1D6-B8219558F973}\\Images\\4c96516ed2cd7d8eaa4b5168ccdb20d2c678279f7d11f32fa341c4998299fe09.png",
+        "requestId": "{4AE57A37-485E-4A8E-9401-1ED3BCD2F941}",
+        "width": 1672,
+        "height": 941
+      },
+      {
+        "managed": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{31E80E70-1F15-4E59-A1D6-B8219558F973}\\Images\\02783da65d4c89d83f4ebe73ebcbdb3d1d01d53553e365548db9286c7aa456c9.png",
+        "humanApproved": false,
+        "source": "C:\\Users\\zan12\\.codex\\generated_images\\01a12019-d8ab-72a1-8674-2f59b80f8809\\exec-531e09d0-f19d-4745-91f7-daa8b2e22e4e.png",
+        "sceneNumber": 4,
+        "local": "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\script-test-20261009-3a2dd4c7\\scene-004.png",
+        "sha256": "02783DA65D4C89D83F4EBE73EBCBDB3D1D01D53553E365548DB9286C7AA456C9",
+        "requestId": "{69E1B2B3-2D05-4865-A570-4BB6022FA12C}",
+        "sceneId": "{27FC1FF2-EABD-4CEE-8BEE-A294FC62BA7E}",
+        "width": 1672,
+        "height": 941
+      },
+      {
+        "sceneNumber": 5,
+        "source": "C:\\Users\\zan12\\.codex\\generated_images\\01a12019-d8ab-72a1-8674-2f59b80f8809\\exec-1118c90b-1bea-476a-a2af-5dc52250cdf5.png",
+        "managed": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{31E80E70-1F15-4E59-A1D6-B8219558F973}\\Images\\d1b4641bb0897c67539093386562a8a21f3ce3db44c58a453e6dbde45452d6a6.png",
+        "humanApproved": false,
+        "local": "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\script-test-20261009-3a2dd4c7\\scene-005.png",
+        "sceneId": "{2B115417-21A2-4F32-BF05-F609B4E98DD4}",
+        "sha256": "D1B4641BB0897C67539093386562A8A21F3CE3DB44C58A453E6DBDE45452D6A6",
+        "requestId": "{CFF8C4E8-7D18-4C7F-B839-53802FF2FA6F}",
+        "width": 1672,
+        "height": 941
+      }
+    ],
+    "prompts": "prompts.json",
+    "sourceScenes": "source-scenes.json",
+    "manifest": "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\script-test-20261009-3a2dd4c7\\manifest.json"
+  },
+  "corrections": [
+    {
+      "date": "2026-10-09",
+      "sceneNumber": 5,
+      "userFeedback": "最後のだけ前のシーンと似すぎているので　少し変えて",
+      "change": "前かがみで書く構図から、上体を起こしてノートを持ち上げ、小さな成果を眺める構図へ変更",
+      "method": "built-in image_gen edit",
+      "prompt": "prompt-scene-005-v2.json",
+      "image": {
+        "sceneNumber": 5,
+        "sceneId": "{2B115417-21A2-4F32-BF05-F609B4E98DD4}",
+        "requestId": "{0547044D-CE21-4873-9FDA-45B2AF0F2EB2}",
+        "source": "C:\\Users\\zan12\\.codex\\generated_images\\01a12019-d8ab-72a1-8674-2f59b80f8809\\exec-aaaa3f54-5c5f-4330-933d-9ae94bc031a7.png",
+        "local": "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\script-test-20261009-3a2dd4c7\\scene-005-v2.png",
+        "managed": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{31E80E70-1F15-4E59-A1D6-B8219558F973}\\Images\\ce11af3bfd1f6aecd23c56b211fc7397224befc112f30b6a5fac6cfe88ed686f.png",
+        "sha256": "CE11AF3BFD1F6AECD23C56B211FC7397224BEFC112F30B6A5FAC6CFE88ED686F",
+        "width": 1672,
+        "height": 941,
+        "humanApproved": false,
+        "previousImage": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{31E80E70-1F15-4E59-A1D6-B8219558F973}\\Images\\d1b4641bb0897c67539093386562a8a21f3ce3db44c58a453e6dbde45452d6a6.png",
+        "revision": 379
+      },
+      "preservation": "他の4シーンの応答全体、最後のシーンの現在の画像要望と関連セリフを照合して保持",
+      "preview": {
+        "current": false,
+        "error": "",
+        "job": {
+          "jobId": "{882B579D-C0A7-442B-9C33-E2F1D475F001}",
+          "kind": "preview",
+          "snapshotProjectId": "{31E80E70-1F15-4E59-A1D6-B8219558F973}",
+          "snapshotRevision": 368,
+          "state": "succeeded",
+          "error": "",
+          "completed": 1,
+          "total": 1,
+          "done": true,
+          "cancelRequested": false,
+          "cancelCallMs": 0,
+          "cancelWorkerMs": 0,
+          "output": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Cache\\ScriptScenes\\2b5c1ac40ea97b30eb6bfd7c603f61f58290d27ebc928749e20c60e9d7138fc5\\{CF696B70-0856-4D51-8040-D6ACFDE34160}.png",
+          "phase": "",
+          "phaseCompleted": 0,
+          "phaseTotal": 0,
+          "elapsedSeconds": 1.89,
+          "remainingSeconds": 0,
+          "remainingScope": "current phase estimate; rendering then encoding",
+          "encoderPeakPrivateBytes": 0,
+          "encoderPeakWorkingSetBytes": 0,
+          "exportStagingPeakBytes": 0,
+          "encoderProcessId": 0,
+          "encoderExited": false,
+          "cancelPolicy": "cancels active HTTP request; retry requested during cancellation queues once; export stops between frames or stops its own FFmpeg child"
+        },
+        "characterCount": 1
+      },
+      "userEvaluation": "replacement_not_reviewed",
+      "saveAndReload": "not_run"
+    }
+  ],
+  "lessons": [
+    "画風・人物・場所の連続性だけでなく、隣接シーンの構図と姿勢の違いも確認する。",
+    "開始と継続・成果の場面では、同じ机でもカメラ角度と人物の動作を変え、内容の進展が小さな表示でも伝わるようにする。"
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "data": {
+    "count": 14,
+    "backgroundReady": false,
+    "allApproved": false,
+    "ready": 14,
+    "pendingRequests": 0,
+    "selectedScene": "common-background",
+    "state": "in-progress",
+    "projectId": "{C36C2A85-DD8A-4DDE-8A7D-D5072CF41A98}",
+    "revision": 1551,
+    "background": {
+      "id": "common-background",
+      "title": "共通背景画像",
+      "image": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{C36C2A85-DD8A-4DDE-8A7D-D5072CF41A98}\\Images\\d9a58fe6d700babdc120b14cf4a2ab34934b4b6902f610162a5751f0a8209c90.png",
+      "description": "",
+      "imagePrompt": "共通背景。作品のテーマに関係しない、適度に模様がある背景。模様には自然な強弱と余白をつけ、文字やシーン画像を重ねても邪魔にならない程度にする。人物・具体的な情景・文字・ロゴは描かない。",
+      "padding": 0,
+      "imageFeedback": "",
+      "imageApproved": false,
+      "imageApprovalKey": "",
+      "imageEditEpoch": 8,
+      "displayMode": "image",
+      "animation": {},
+      "target": "common-background",
+      "optional": true,
+      "ready": false,
+      "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{C36C2A85-DD8A-4DDE-8A7D-D5072CF41A98}\\Images\\d9a58fe6d700babdc120b14cf4a2ab34934b4b6902f610162a5751f0a8209c90.png",
+      "width": 1920,
+      "height": 1080,
+      "sourceCues": [],
+      "imageRequest": {
+        "requestId": "{A24AA13E-2017-426B-B743-EB5F712AB869}",
+        "sceneId": "common-background",
+        "sceneNumber": 0,
+        "fingerprint": "23013232b9e383aa171c0ce079dc1f131356ff89562160d82efc73d5e47dc4d4",
+        "prompt": "共通背景。作品のテーマに関係しない、適度に模様がある背景。模様には自然な強弱と余白をつけ、文字やシーン画像を重ねても邪魔にならない程度にする。人物・具体的な情景・文字・ロゴは描かない。",
+        "feedback": "",
+        "provider": "external-codex",
+        "width": 1920,
+        "height": 1080,
+        "aspectRatio": "1920:1080",
+        "target": "common-background",
+        "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+        "state": "adopted",
+        "adoptedFingerprint": "0c1b301d7fddf6d010adea34b636564b21f1be319f389469b9106327cd8142a2",
+        "imageProvenance": "external-generated",
+        "current": true
+      }
+    },
+    "rows": [
+      {
+        "id": "{15110FE5-0453-4C73-87EF-EA88E7B0F2F2}",
+        "title": "〆の挨拶",
+        "image": "",
+        "description": "",
+        "imagePrompt": "",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": true,
+        "imageApprovalKey": "a960a8adf040f85ffd25ef23144b85edc41405e0ab008ad1bac3de55c003bd09",
+        "imageEditEpoch": 1,
+        "displayMode": "none",
+        "animation": {
+          "closingCard": {
+            "title": "隣の部屋の女騎士は、異世界人で飲み友達",
+            "representativeChoice": "none",
+            "image": ""
+          }
+        },
+        "sceneNumber": 14,
+        "start": 80.8266666666667,
+        "duration": 12.7013333333333,
+        "ready": true,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{D618806D-AE1A-44F8-AAF2-15A6B5AB71DC}",
+            "sourceText": "いかがでしたか？"
+          },
+          {
+            "cueId": "{BD4C7725-C71A-49F8-A653-2C3BF88AF8A5}",
+            "sourceText": "今後はこんな感じでいくつか省略して"
+          },
+          {
+            "cueId": "{C25C29F1-4C4B-4B8C-AAC0-6B990A8744BB}",
+            "sourceText": "1日1作品以上を紹介していきたいと思います"
+          },
+          {
+            "cueId": "{754A8EF5-748A-4A2C-848B-66C6AF09AC46}",
+            "sourceText": "動画に関する意見などありましたら"
+          },
+          {
+            "cueId": "{66CCD8BC-0421-4E77-9EA8-980ED41F3691}",
+            "sourceText": "コメントでお願いします"
+          },
+          {
+            "cueId": "{793D8BD9-D4EB-4089-B619-A9AC1345B752}",
+            "sourceText": "それではまたねー"
+          }
+        ],
+        "cueCount": 6,
+        "hasMoreCues": false
+      }
+    ],
+    "nextOffset": 14,
+    "hasMore": false,
+    "preview": {
+      "current": false,
+      "error": ""
+    },
+    "pipes": {
+      "format": "RIGMMaker.WorkspaceConnection",
+      "schemaVersion": 1,
+      "apiVersion": 2,
+      "pid": 13364,
+      "commandPipe": "RIGMMaker.Workspace.13364.{398A9234-BF79-455C-9A11-D0E50739806F}",
+      "controlPipe": "RIGMMaker.Workspace.13364.{398A9234-BF79-455C-9A11-D0E50739806F}",
+      "dataRoot": "C:\\Users\\zan12\\Documents\\RIGMMaker",
+      "connectionFile": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Exchange\\workspace-13364.json",
+      "routing": "common-command"
+    }
+  },
+  "requestId": "55d52d8d-a4da-443b-8697-8d789f03a9d8"
+}

@@ -21,12 +21,8 @@ end;
 procedure TRigmWizardWorkspace.CompleteScriptClosing;
 begin
   if (CurrentScriptStage<>'closing') or ScriptTextEditing or VoiceBusy then raise Exception.Create('締め入力・音声ジョブを完了してください。');
-  if ScriptClosingScene(FScriptDraft)='' then raise Exception.Create('締めのセリフがありません。台本入力で締めを書いてください。');
-  var Cast := ScriptCastingSummary(FScriptDraft); try if (JS(Cast,'state')='stale') or (JI(Cast,'pending')<>0) or (JI(Cast,'unassigned')<>0) then raise Exception.Create('配役を確認してください。'); finally Cast.Free; end;
-  if not ScriptScenesReady(FScriptDraft) then raise Exception.Create('シーンを確認してください。');
-  for var C in FScriptDraft.Cues do if not FScriptDraft.AudioReady(C) then raise Exception.Create('音声を確認してください。');
   var P := FScriptDraft.Clone;
-  try MaterializeScriptClosing(P); P.EnableComposition; ValidateCompositionMaterials(P);
+  try MaterializeScriptClosing(P);
     P.Changed; StoreScript(P,'closing');
   finally P.Free; end;
 end;
@@ -48,7 +44,10 @@ begin
   var P := FScriptDraft.Clone;
   try
     // Keep existing optional summary/closing data and cards; do not invent or overwrite human choices.
-    if not FromScenes then MaterializeScriptClosing(P);
+    if P.ScriptWizard.GetValue('closingData') is TJSONObject then begin
+      if JS(JO(P.ScriptWizard,'closingData'),'status')<>'complete' then raise Exception.Create('締め設定を確認してください。');
+      MaterializeScriptClosing(P);
+    end;
     P.EnableComposition; ValidateCompositionMaterials(P); SyncScriptScenesStatus(P);
     for var C in P.Cues do if not P.AudioReady(C) then raise Exception.Create('音声変更を確認してください。');
     P.WorkflowStage := 'preview'; PsdJson.Put(P.ScriptWizard,'stage','editor'); PsdJson.Put(P.ScriptWizard,'furthestStage','editor'); P.Changed;

@@ -42,7 +42,6 @@ begin
     end;
     if Section='summary' then Exit;
     if not MatchStr(Section,['candidates','elements','integration']) then raise Exception.Create('作品情報の読取区分が不正です。');
-    if (Section='integration') and (ResearchAdvanceReason(FScriptDraft)<>'') then raise Exception.Create(ResearchAdvanceReason(FScriptDraft));
     var Items: TJSONArray;
     if Section='candidates' then Items := JA(R,'candidates') else Items := JA(R,'elements');
     var Offset := JI(Args,'offset',0); var Limit := JI(Args,'limit',20);
@@ -50,7 +49,8 @@ begin
     var Rows := TJSONArray.Create; Result.AddPair('rows',Rows); var Position := Min(Offset,Items.Count);
     while (Position<Items.Count) and (Rows.Count<Limit) do begin
       var O := TJSONObject(Items[Position]); Inc(Position);
-      if (Section='integration') and (JS(O,'state')<>'confirmed-info') then Continue;
+      if (Section='integration') and (not ResearchWorkReady(R) or (JS(O,'state')<>'confirmed-info') or
+        (JS(O,'workId')<>JS(R,'selectedCandidateId'))) then Continue;
       var Row := TJSONObject.Create; Rows.AddElement(Row);
       for var Key in ['id','label','kind','name','state','confirmedBy','workId'] do
         if O.GetValue(Key)<>nil then Row.AddPair(Key,O.GetValue(Key).Clone as TJSONValue);

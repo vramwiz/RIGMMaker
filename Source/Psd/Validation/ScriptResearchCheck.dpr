@@ -44,6 +44,29 @@ begin
   (Review.FindComponent('ScriptResearchConfirmed') as TCheckBox).Checked := True; Application.ProcessMessages;
   Check(ResearchWorkReady(R),'GUI alone confirms selected work');
 end;
+procedure SkipResearch(const Context: string; InformationCount: Integer; ApprovedWork: Boolean);
+begin
+  var Before := R.ToJSON; var State := W.ScriptStatus;
+  try
+    Check(JB(State,'canAdvance') and not JB(State,'researchReady') and ScriptStageAvailable(State,'summary'),Context+': stage seven is available');
+    Check((Creator.FindComponent('ScriptStages') as TListBox).Items.IndexOf(ScriptStageCaption('summary'))>=0,Context+': stage seven is visible in the list');
+  finally State.Free; end;
+  var Summary := ResearchSummary(W.ScriptDraft);
+  try Check(JB(Summary,'canAdvance') and not JB(Summary,'researchReady') and (JS(Summary,'advanceBlockedReason')=''),Context+': research status separates progress from completion');
+  finally Summary.Free; end;
+  ClickScriptStage(Creator,'summary');
+  Check(W.CurrentScriptStage='summary',Context+': selecting stage seven saves and advances');
+  Check(R.ToJSON=Before,Context+': pending research and human approval remain unchanged');
+  var Integration := JO(W.ScriptDraft.ScriptWizard,'researchIntegration');
+  Check((JA(Integration,'elements').Count=InformationCount) and ((Integration.GetValue('work')<>nil)=ApprovedWork),Context+': only approved and confirmed information is passed on');
+  var Path := W.ScriptDraft.FileName; W.OpenScriptDraft(Path);
+  Check((W.CurrentScriptStage='summary') and (R.ToJSON=Before),Context+': saved destination and pending research reopen intact');
+  State := W.ScriptStatus;
+  try Check(not ScriptStageAvailable(State,'subtitles') and not JB(State,'canAdvance'),Context+': summary choice still requires a human decision');
+  finally State.Free; end;
+  ClickScriptStage(Creator,'review');
+  Check((W.CurrentScriptStage='review') and (R.ToJSON=Before),Context+': research can be resumed from the list');
+end;
 procedure Run;
 begin
   Root := ParamStr(1); if (Root='') or FileExists(TPath.Combine(Root,'result.json')) then raise Exception.Create('Fresh output root required');
@@ -83,6 +106,15 @@ begin
   Check(not JB(R,'definitionsReady') and (JA(R,'elements').Count=0),'undefined element types are not invented');
   Check((Creator.FindComponent('ScriptStages') as TListBox).ItemHeight=30,'navigation uses one line');
   Check(Review.FindComponent('ScriptReviewToolbar')=nil,'no UI prompt request control');
+  var OriginalBytes := TFile.ReadAllBytes(W.ScriptDraft.FileName); var InitialResearch := R.ToJSON;
+  try
+    TFile.WriteAllText(W.ScriptDraft.FileName,TFile.ReadAllText(W.ScriptDraft.FileName)+#13#10,TEncoding.UTF8);
+    var ExternalHash := THashSHA2.GetHashStringFromFile(W.ScriptDraft.FileName);
+    ClickScriptStage(Creator,'summary');
+    Check((W.CurrentScriptStage='review') and (R.ToJSON=InitialResearch),'failed skip save retains stage six and pending research');
+    Check(THashSHA2.GetHashStringFromFile(W.ScriptDraft.FileName)=ExternalHash,'failed skip save preserves externally changed file');
+  finally TFile.WriteAllBytes(W.ScriptDraft.FileName,OriginalBytes); end;
+  SkipResearch('untouched stage six',0,False);
   Send('definitions','{"scriptType":"anime-review","elements":[{"id":"one","label":"確認用の要素1"},{"id":"two","label":"確認用の要素2"},{"id":"three","label":"確認用の要素3"},{"id":"four","label":"確認用の要素4"},{"id":"five","label":"確認用の要素5"},{"id":"six","label":"確認用の要素6"}]}');
   (Review.FindComponent('ScriptResearchTitle') as TEdit).SetFocus;
   Send('candidates','{"candidates":[{"id":"work-a","name":"確認用作品A","overview":"検証用の概要です。実在作品の情報ではありません。","identity":"確認用作者 ／ 2026年 ／ 検証用ジャンル","sources":["https://example.com/work-a"]}]}');
@@ -92,6 +124,7 @@ begin
   Check(Review.CurrentPPI=Creator.CurrentPPI,'research frame adopts parent DPI on creation');
   Send('confirm-work','{"confirmed":true}',True);
   Send('element','{"id":"one","workId":"work-a","state":"checking"}',True);
+  SkipResearch('unapproved work candidate',0,False);
   Capture('identify-96'); ConfirmWork;
   Send('element','{"id":"one","workId":"another-work","state":"checking"}',True);
   Send('element','{"id":"one","workId":"work-a","name":"確認用名称","summary":"概要の前半\n後半","details":"検証用の詳細です。","state":"checking"}');
@@ -106,22 +139,23 @@ begin
   end;
   Main.ScaleForPPI(96); Main.SetBounds(0,0,1360,840);
   Send('element','{"id":"one","workId":"work-a","state":"confirmed-info"}');
+  SkipResearch('partially confirmed default research',1,True);
   for var Id in ['two','three','four','five','six'] do Send('element','{"id":"'+Id+'","workId":"work-a","state":"confirmed-none"}');
-  Check(ResearchAdvanceReason(W.ScriptDraft)='','information missing is completed, not an error');
+  Check(ResearchIncompleteReason(W.ScriptDraft)='','information missing is completed, not an error');
   var Integration := ResearchIntegrationData(W.ScriptDraft);
   try Check((JA(Integration,'elements').Count=1) and (JS(TJSONObject(JA(Integration,'elements')[0]),'id')='one'),'integration excludes no-information results'); finally Integration.Free; end;
   Send('add','{"id":"extra","label":"任意の追加調査"}');
-  Check(ResearchAdvanceReason(W.ScriptDraft)<>'','unfinished additional element blocks next stage');
-  var State := W.ScriptStatus;
-  try Check(not JB(State,'canAdvance'),'workspace blocks pending additional element'); finally State.Free; end;
+  Check(ResearchIncompleteReason(W.ScriptDraft)<>'','unfinished additional element remains incomplete');
+  SkipResearch('pending additional research',1,True);
   Send('element','{"id":"extra","workId":"work-a","state":"confirmed-none"}');
   var SavedResearch := R.ToJSON; W.SaveScriptDraft; var Path := W.ScriptDraft.FileName; W.OpenScriptDraft(Path);
   Check((R.ToJSON=SavedResearch) and ResearchWorkReady(R),'save and reopen retain research, human approval, and extra elements');
   Check(JS(ScriptSection(W.ScriptDraft,'body'),'text')=Body,'original opinion remains unchanged');
+  ClickScriptStage(Creator,'review');
   // Wait only for this owned probe's Named Pipe tests. Never operate on the normal app.
+  (Review.FindComponent('ScriptResearchTitle') as TEdit).SetFocus;
   var Info := W.Pipe.Info;
   try TFile.WriteAllText(TPath.Combine(Root,'ready-for-pipe.json'),Info.ToJSON,TEncoding.UTF8); finally Info.Free; end;
-  (Review.FindComponent('ScriptResearchTitle') as TEdit).SetFocus;
   Deadline := GetTickCount64+50000;
   while not FileExists(TPath.Combine(Root,'pipe-done.json')) do begin
     Application.ProcessMessages; Sleep(10); if GetTickCount64>Deadline then raise Exception.Create('Pipe tests timed out');
@@ -141,7 +175,7 @@ begin
   var CheckBox := Review.FindComponent('ScriptResearchConfirmed') as TCheckBox;
   CheckBox.Checked := False; Check(not ResearchWorkReady(R),'unchecking work releases all confirmation'); ConfirmWork;
   for var Id in ['one','two','three','four','five','six','extra'] do Send('element','{"id":"'+Id+'","workId":"work-a","state":"confirmed-none"}');
-  W.NextScriptDraft; Check(W.CurrentScriptStage='casting','confirmed research advances to existing next stage');
+  W.NextScriptDraft; Check(W.CurrentScriptStage='summary','confirmed research advances to existing next stage');
   Check(JA(JO(W.ScriptDraft.ScriptWizard,'researchIntegration'),'elements').Count=0,'next stage snapshot excludes missing information');
   Check(JS(ScriptSection(W.ScriptDraft,'body'),'text')=Body,'advancing does not rewrite human script');
   W.SetScriptStage('review');
@@ -156,11 +190,12 @@ begin
   Check((TEdit(Review.FindComponent('ScriptResearchTitle')).Text='別の作品タイトル') and (GetFocus=TEdit(Review.FindComponent('ScriptResearchTitle')).Handle),'external title update is shown even while title field retains focus');
   Check((JA(R,'candidates').Count=0) and not JB(R,'humanConfirmed'),'title edit invalidates candidates and confirmation');
   Check(JA(W.ScriptDraft.ScriptWizard,'researchArchives').Count>0,'invalidated research is preserved in archives');
-  var JumpFailed := False; try W.SetScriptStage('casting'); except on E: Exception do JumpFailed := True; end;
-  Check(JumpFailed and (W.CurrentScriptStage='review'),'reached later stage cannot bypass invalidated research');
+  SkipResearch('invalidated research',0,False);
   W.SaveScriptDraft; W.OpenScriptDraft(Path); Check(JS(R,'title')='別の作品タイトル','edited title persists on reopen');
+  ClickScriptStage(Creator,'review');
   W.SetScriptType('manga-introduction');
   Check((JS(R,'scriptType')='manga-introduction') and not JB(R,'definitionsReady') and (JA(R,'elements').Count=0),'script type change invalidates definitions without inventing new elements');
+  SkipResearch('undefined research after type change',0,False);
   W.SaveScriptDraft; W.OpenScriptDraft(Path); ValidateScriptResearch(W.ScriptDraft);
   Check(JS(ScriptSection(W.ScriptDraft,'body'),'text')=Body,'type change retains human script');
 end;

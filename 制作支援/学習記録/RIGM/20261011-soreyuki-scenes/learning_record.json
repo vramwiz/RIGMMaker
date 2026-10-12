@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "recordType": "rigm_scene_image_creation_learning",
+  "date": "2026-10-11",
+  "purpose": "ユーザーが画像工程へ進んだ台本について、セリフからお任せで11枚を生成し、起動中アプリへ採用する。",
+  "projectId": "{2218B3BD-FB0A-4F86-9BB7-9DFA93344911}",
+  "title": "それは、降り積もる雪のような。",
+  "authorization": {
+    "request": "画像のところまで進めたので　取得して送信して",
+    "clarification": "台本のセリフからお任せで生成"
+  },
+  "startingRevision": 1170,
+  "finalRevision": 1203,
+  "method": "内蔵image_gen.imagegen。1シーン1枚。前の画像を参照し、ジャンル・人物・場所・照明の連続性を保った。元PNGを変換せずworkspaceとExchangeへコピーし、現在の要求ID・SHA256・最新版revisionを照合してapp-script-adopt-scene-imageで採用。",
+  "sceneCount": 11,
+  "promptSet": "prompts.json",
+  "applicationPromptPlan": "generation-plan.json",
+  "inferredSettings": [
+    "人物の容姿（男子の黒髪、女子と母親の栗色の髪など）と喫茶店内装は、台本から補足した今回の創作上の設定。原作漫画の絵やキャラクターデザインを参照して再現したものではない。",
+    "青春恋愛漫画紹介に合わせ、繊細なアニメ調、木の茶色と琥珀色の照明、青い雪景色を一貫させた。"
+  ],
+  "requestedImageSize": {
+    "width": 1920,
+    "height": 1080
+  },
+  "actualImageSize": {
+    "width": 1672,
+    "height": 941
+  },
+  "imageBytesPreserved": true,
+  "verification": {
+    "applicationAdoption": "11枚すべてadopted、pendingRequests=0",
+    "managedImageSha256": "11枚すべて生成原本・workspace・Exchange・管理Imagesと一致",
+    "visualInspection": "各生成結果を確認。タイトル画像の日本語、人物の外見、喫茶店と学校の場面、親子の違いを確認。",
+    "sourceCues": "全11シーンで順序・cueId・sourceTextが開始時と一致",
+    "voiceState": "49行の音声生成済み・聴取確認済みの状態を維持",
+    "userVisualEvaluation": "not_reviewed",
+    "imageHumanApproval": "0/11。GUIの人間の確定操作待ち。",
+    "saveAndReload": "not_run",
+    "guiScreenshot": "not_run; パイプの行内画像参照を読み戻して検証"
+  },
+  "thumbnail": {
+    "generated": false,
+    "sourcesReady": false,
+    "reason": "使用する共通背景・通常シーンを人間が確定してから要求・生成・採用する仕様。"
+  },
+  "limitations": [
+    "生成PNGは1672×941。1920×1080指定の完全一致ではない。原本を保持し、アプリの既存の縦横比維持表示を使う。",
+    "アプリではmodified=true。画像採用は確定・作品保存とは別。",
+    "実行中の通常アプリを保持。工程移動・音声再生成・実作品の保存・人間の確定操作は実行していない。"
+  ],
+  "artifacts": {
+    "images": "images/scene-01.png ～ images/scene-11.png",
+    "verification": "verification.json",
+    "before": "before-scenes.json",
+    "after": "final-scenes.json",
+    "individualReceipts": "image-01.json ～ image-11.json"
+  },
+  "reusableRules": [
+    "初回の空欄要望は、ユーザーに生成内容を確認してから補う。",
+    "各生成は1枚ずつ。前の画像を参照して連続性を保つ。場面転換では人物の同一性と新しい環境を分けて指定。",
+    "画像採用と人間の確定と作品保存を区別する。",
+    "現在のsceneId・requestId・revision・SHA256を確認し、承認された画像は変更しない。"
+  ]
+}

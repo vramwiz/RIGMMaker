@@ -11,14 +11,16 @@ begin
   AddB(Result,'catalogReady',VoiceCatalogReady); AddN(Result,'catalogCount',FVoiceCatalog.Count); Result.AddPair('catalogUrl',FVoiceCatalogUrl);
   if FVoiceJob<>nil then Result.AddPair('job',FVoiceJob.Status);
 end;
-function TRigmWizardWorkspace.CastingAdvanceReason(RequireConnection: Boolean): string;
+function TRigmWizardWorkspace.CastingAdvanceReason(RequireConnection,RequireConfirmation: Boolean): string;
 begin
   Result := '';
   if (FScriptDraft=nil) or not (FScriptDraft.ScriptWizard.GetValue('casting') is TJSONObject) then Exit('配役工程でキャラと声を設定してください。');
   var Cast := ScriptCastingSummary(FScriptDraft);
   try
-    if (JS(Cast,'state')='stale') or (JS(JO(FScriptDraft.ScriptWizard,'casting'),'sourceFingerprint')<>ScriptFingerprint(FScriptDraft)) then Exit('前工程が変わりました。校正から配役を確認してください。');
-    if not JB(Cast,'rolesComplete') then Exit('配役工程で全セリフのキャラ番号を指定・確認してください。');
+    if (JS(Cast,'state')='stale') or (JS(JO(FScriptDraft.ScriptWizard,'casting'),'sourceFingerprint')<>ScriptFingerprint(FScriptDraft)) then Exit('前工程が変わりました。台本確認から配役へ進んで再確認してください。');
+    for var V in JA(JO(FScriptDraft.ScriptWizard,'casting'),'rows') do
+      if CastingRole(FScriptDraft,JI(TJSONObject(V),'role'))=nil then Exit('全セリフにキャラ番号を指定してください。');
+    if RequireConfirmation and not JB(Cast,'rolesComplete') then Exit('左の「字幕」を選択して現在の全配役を確認してください。');
     if not JB(Cast,'voicesComplete') then Exit('配役工程で、台本で使用するキャラの声の人物を選択してください（未設定 '+JI(Cast,'missingVoices').ToString+'人）。');
     if not RequireConnection then Exit;
     if VoiceBusy then Exit('VOICEVOXの接続・話者一覧取得が終わるまでお待ちください。');
@@ -33,6 +35,25 @@ begin
       if FindVoiceStyle(FVoiceCatalog,S.VoiceUuid,FScriptDraft.EffectiveStyle(C))=nil then Exit('セリフの感情がこの人物の一覧にありません。感情を選び直してください。');
     end;
   finally Cast.Free; end;
+end;
+procedure TRigmWizardWorkspace.CompleteCasting;
+begin
+  if (CurrentScriptStage<>'casting') or VoicePlaying or VoiceContinuous then raise Exception.Create('配役工程で音声処理を終了して確認してください。');
+  var Reason := CastingAdvanceReason(True,False); if Reason<>'' then raise Exception.Create(Reason);
+  for var V in JA(JO(FScriptDraft.ScriptWizard,'casting'),'rows') do begin
+    var Row := TJSONObject(V); if JB(Row,'confirmed') then Continue;
+    PsdJson.Put(Row,'confirmed',TJSONBool.Create(True)); PsdJson.Put(Row,'origin','human');
+  end;
+  RefreshScriptCastingStatus(FScriptDraft); FScriptDraft.Changed; ScriptChanged;
+end;
+function TRigmWizardWorkspace.VoiceAdvanceReason(RequireConfirmation: Boolean): string;
+begin
+  Result := '';
+  if (FScriptDraft=nil) or (FScriptDraft.Cues.Count=0) then Exit('音声を確認するセリフがありません。');
+  if VoiceBusy or VoicePlaying or VoiceContinuous then Exit('音声生成・再生の終了後に左の工程リストで進んでください。');
+  for var C in FScriptDraft.Cues do if not FScriptDraft.AudioReady(C) then Exit('未生成または変更後のセリフをF5で確認してください。');
+  for var C in FScriptDraft.Cues do if not FScriptDraft.AudioHeard(C) then Exit('未再生のセリフを最後まで再生してください（F5／Shift+F5）。');
+  if RequireConfirmation and (JS(FScriptDraft.ScriptWizard,'voiceStatus')<>'complete') then Exit('左の「音声エフェクト」を選択して音声を確認してください。');
 end;
 procedure TRigmWizardWorkspace.StopVoice;
 begin
@@ -65,6 +86,9 @@ begin
         if Valid then for var C in FVoiceJob.Project.Cues do begin
           if C.Id<>FVoiceTarget then Continue;
           var Target := FScriptDraft.Cue(C.Id);
+          if (Target<>nil) and (FScriptDraft.AudioFingerprint(Target)=FVoiceTargetKey) and FVoiceJob.Project.AudioReady(C) then begin
+            Target.VoiceQuery := C.VoiceQuery; Target.VoiceQueryKey := C.VoiceQueryKey;
+          end;
           if (Target<>nil) and (C.AudioKey<>FScriptDraft.AudioFingerprint(Target)) then FVoiceError := '入力が変わったため古い音声結果は採用しません。旧音声は保持しています。';
           if (Target<>nil) and FVoiceJob.Project.AudioReady(C) and (C.AudioKey=FScriptDraft.AudioFingerprint(Target)) then begin
             AcceptedAudio := True; Target.WaveFile := C.WaveFile; Target.LabFile := C.LabFile; Target.AudioSeconds := C.AudioSeconds; Target.AudioKey := C.AudioKey; Target.VoiceHeardKey := ''; RefreshScriptVoiceCompletion(FScriptDraft); FScriptDraft.Changed;
@@ -102,7 +126,7 @@ end;
 procedure TRigmWizardWorkspace.EnsureSelectedVoice;
 begin
   if not FVoiceAutoGenerationActive or (FScriptDraft=nil) or (CurrentScriptStage<>'voice') or
-    ScriptTextEditing or VoiceBusy or VoicePlaying or VoiceContinuous or not VoiceCatalogReady then Exit;
+    (FVoiceQueryNotifyAt<>0) or ScriptTextEditing or VoiceBusy or VoicePlaying or VoiceContinuous or not VoiceCatalogReady then Exit;
   var C := FScriptDraft.Cue(JS(JO(FScriptDraft.ScriptWizard,'voice'),'selectedCue'));
   if (C=nil) or FScriptDraft.AudioReady(C) or (C.SpokenText='') then Exit;
   var Key := FScriptDraft.Id+'|'+C.Id+'|'+FScriptDraft.AudioFingerprint(C);
@@ -115,8 +139,8 @@ procedure TRigmWizardWorkspace.EditVoice(const CueId,Reading: string; Settings: 
 begin
   if CurrentScriptStage<>'voice' then raise Exception.Create('音声工程で操作してください。');
   EditScriptVoice(FScriptDraft,CueId,Reading,Settings);
-  if FScriptDraft.Cue(CueId)=ScriptSummaryCue(FScriptDraft) then begin var O := JO(FScriptDraft.ScriptWizard,'summaryData'); PsdJson.Put(JO(O,'draft'),'reading',FScriptDraft.Cue(CueId).VoiceReading); PsdJson.Put(JO(O,'appliedDraft'),'reading',FScriptDraft.Cue(CueId).VoiceReading); end;
-  StopVoice; FScriptDraft.Changed; ScriptChanged;
+  SyncSummaryReading(FScriptDraft,CueId);
+  StopVoice; FScriptDraft.Changed; FVoiceQueryNotifyAt := GetTickCount64+150;
 end;
 procedure TRigmWizardWorkspace.SetVoiceEngine(const Url: string);
 begin
@@ -150,7 +174,8 @@ begin
   ValidateVoiceQuery(QueryJson); var Key := FScriptDraft.VoiceQuerySourceKey(C);
   if (C.VoiceQuery=QueryJson) and (C.VoiceQueryKey=Key) then Exit;
   StopVoice; C.VoiceQuery := QueryJson; C.VoiceQueryKey := Key;
-  PsdJson.Put(FScriptDraft.ScriptWizard,'voiceStatus','in-progress'); FScriptDraft.Changed; ScriptChanged;
+  PsdJson.Put(FScriptDraft.ScriptWizard,'voiceStatus','in-progress'); FScriptDraft.Changed;
+  FVoiceQueryNotifyAt := GetTickCount64+150;
 end;
 procedure TRigmWizardWorkspace.BindVoice(Number,StyleId: Integer; const Uuid: string);
 begin
@@ -176,15 +201,15 @@ procedure TRigmWizardWorkspace.GenerateVoice(const CueId: string; Play: Boolean;
 begin
   if (CurrentScriptStage<>'voice') or VoiceBusy then raise Exception.Create('音声ジョブの終了後に試聴してください。'); RequireCurrentVoice(FScriptDraft);
   var C := FScriptDraft.Cue(CueId); if C=nil then raise Exception.Create('選択セリフがありません。');
-  if FScriptDraft.AudioReady(C) then begin if Play then begin StopVoice; StartVoicePlayback(CueId); ScriptChanged; end; Exit; end;
+  if FScriptDraft.AudioReady(C) and (FScriptDraft.EffectiveVoiceQuery(C)<>'') then begin if Play then begin StopVoice; StartVoicePlayback(CueId); ScriptChanged; end; Exit; end;
   var S := FScriptDraft.Speaker(C.SpeakerId); var Found := False;
   if FVoiceCatalogUrl=FScriptDraft.EngineUrl then for var V in FVoiceCatalog do
     if (JI(TJSONObject(V),'styleId',-1)=FScriptDraft.EffectiveStyle(C)) and (JS(TJSONObject(V),'uuid')=S.VoiceUuid) and (S.VoiceUuid<>'') then Found := True;
   if not Found then raise Exception.Create('実一覧から選択セリフのキャラへ声を紐付けてください。');
   if not ForSequence then StopVoice else CloseVoicePlayback; FreeAndNil(FVoiceJob); FVoiceCollected := False; FVoiceError := ''; if Play then FPlayVoice := CueId;
   var O := TJSONObject.Create;
-  try O.AddPair('cueId',CueId); FVoiceJob := TRigmMovieJob.Create(FScriptDraft,'audio',TPath.Combine(ExtractFileDir(ScriptPath(FScriptDraft)),'Audio'),0,O); finally O.Free; end;
-  FVoiceTarget := CueId; FVoiceJob.Start; ScriptChanged;
+  try O.AddPair('cueId',CueId); AddB(O,'captureQuery',True); FVoiceJob := TRigmMovieJob.Create(FScriptDraft,'audio',TPath.Combine(ExtractFileDir(ScriptPath(FScriptDraft)),'Audio'),0,O); finally O.Free; end;
+  FVoiceTarget := CueId; FVoiceTargetKey := FScriptDraft.AudioFingerprint(C); FVoiceJob.Start; ScriptChanged;
 end;
 procedure TRigmWizardWorkspace.CompleteVoice;
 begin
@@ -209,7 +234,9 @@ begin
     var C := FScriptDraft.Cues[Offset]; var O := TJSONObject.Create; A.AddElement(O); O.AddPair('cueId',C.Id); O.AddPair('sourceText',C.Text); O.AddPair('reading',C.SpokenText); O.AddPair('subtitle',C.Subtitle);
     O.AddPair('query',FScriptDraft.EffectiveVoiceQuery(C));
     AddN(O,'voiceStyleId',C.VoiceStyleId); AddN(O,'effectiveStyleId',FScriptDraft.EffectiveStyle(C));
-    O.AddPair('settings',C.VoiceSettings.Clone as TJSONObject); O.AddPair('sceneId',C.Scene); AddN(O,'role',ScriptCueRole(FScriptDraft,C.Id));
+    O.AddPair('settings',FScriptDraft.EffectiveVoiceSettings(C).Clone as TJSONObject);
+    O.AddPair('settingsScope','project'); AddB(O,'commonSettingsActive',JO(FScriptDraft.ScriptWizard,'voice').GetValue('commonSettings')<>nil);
+    O.AddPair('sceneId',C.Scene); AddN(O,'role',ScriptCueRole(FScriptDraft,C.Id));
     var S := FScriptDraft.Speaker(C.SpeakerId); O.AddPair('speaker',S.Json); AddB(O,'ready',FScriptDraft.AudioReady(C)); AddB(O,'stored',FScriptDraft.HasStoredAudio(C));
     AddB(O,'heard',FScriptDraft.AudioHeard(C)); O.AddPair('audioEffect',C.AudioEffect);
     O.AddPair('waveFile',C.WaveFile); O.AddPair('labFile',C.LabFile); AddN(O,'audioSeconds',C.AudioSeconds); O.AddPair('audioKey',C.AudioKey);
