@@ -1,7 +1,7 @@
 ﻿param([Parameter(Mandatory)][string]$Command,[string]$ArgsJson='{}',[string]$ArgsFile,[string]$OutputFile)
 $ErrorActionPreference='Stop'
 [Console]::OutputEncoding=[Text.Encoding]::UTF8
-$connectionPath='C:\Users\zan12\Documents\RIGMMaker\Exchange\workspace-6936.json'
+$connectionPath='C:\Users\zan12\Documents\RIGMMaker\Exchange\workspace-28836.json'
 $connection=Get-Content -LiteralPath $connectionPath -Raw -Encoding UTF8 | ConvertFrom-Json
 $live=Get-Process -Id $connection.pid -ErrorAction Stop
 if($live.Path -ne 'D:\DelphiProg\RIGMMaker\RIGMMaker.exe'){throw 'Unexpected live app'}

@@ -1,0 +1,261 @@
+{
+  "count": 14,
+  "backgroundReady": true,
+  "thumbnailReady": false,
+  "thumbnailSourcesReady": true,
+  "allApproved": false,
+  "ready": 14,
+  "pendingRequests": 0,
+  "selectedScene": "thumbnail",
+  "state": "in-progress",
+  "projectId": "{B0D28F94-242A-41D0-A527-882802487812}",
+  "revision": 992,
+  "background": {
+    "id": "common-background",
+    "title": "共通背景画像",
+    "image": "project.assets\\3dac925ab87cfa031fa4cea5068de84447b9a0cc84c218031e6b8958e04dd37f.png",
+    "description": "",
+    "imagePrompt": "学校の保健室",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": true,
+    "imageApprovalKey": "78b8ee2e72c4a38f3ba8795159af93c9a7b19d97b14182d1d14d50fb10639bd4",
+    "imageEditEpoch": 1,
+    "displayMode": "image",
+    "animation": {},
+    "target": "common-background",
+    "optional": true,
+    "ready": true,
+    "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{B0D28F94-242A-41D0-A527-882802487812}\\project.assets\\3dac925ab87cfa031fa4cea5068de84447b9a0cc84c218031e6b8958e04dd37f.png",
+    "width": 1920,
+    "height": 1080,
+    "sourceCues": [],
+    "imageRequest": {
+      "requestId": "{E0CD09F8-9C1D-4FCF-BE9C-388D271352A7}",
+      "sceneId": "common-background",
+      "sceneNumber": 0,
+      "fingerprint": "95051b6afca50938ad66b70cba6fdb3b51b7e9fb306222470c786bcb485d7a21",
+      "prompt": "Use case: illustration-story. One original full-color Japanese anime still for a manga introduction video, cohesive school comedy series. Landscape 16:9 target 1920x1080, opaque. Clean crisp ink outlines, gentle cel shading, warm daylight, consistent proportions and palette. All pupils fully clothed in white short-sleeved button-up uniform shirts and dark navy trousers. Everyday nonsexual school comedy. Do not copy manga panel layouts or existing cover. No watermarks, no panel borders, no captions or speech text unless explicitly requested below. Keep faces and hands in central 80%, bottom 18% visually calm for subtitles. Create a quiet common BACKGROUND for this school-manga review video, no people, no text. Pale mint Japanese high-school infirmary and school library ambiance: soft sunlit windows, subtle bookcase and curtain at outer edges, nurse desk and small plant near edges. Keep the central 70% very simple low-contrast pale cream/mint wall and soft gradient, suitable behind an inset scene illustration, narrator sprite and subtitles; no central distracting furniture. Restrained welcoming palette.",
+      "feedback": "",
+      "provider": "external-codex",
+      "width": 1920,
+      "height": 1080,
+      "aspectRatio": "1920:1080",
+      "target": "common-background",
+      "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+      "adoptedFingerprint": "6703cc7fafc96820de4bcd6dc9eadcb2b35324b379e2acf9c49aa255f7cc8a6c",
+      "imageProvenance": "external-generated",
+      "state": "cancelled",
+      "current": false
+    }
+  },
+  "thumbnail": {
+    "id": "thumbnail",
+    "title": "サムネイル",
+    "image": "project.assets\\61d88ed15b36c160ad99676e610b827fe7f37baa72cffeb387e71cb025883ce4.png",
+    "description": "",
+    "imagePrompt": "これまでに作ったシーン画像を組み合わせた、動画の最後に表示するサムネイルを作成。\r\n使用中のキャラクターも必ず使い、見た目を参照素材に合わせる。\r\n「漫画」＋マンガの名前を大きく読みやすいロゴとして配置する。",
+    "padding": 0,
+    "imageFeedback": "",
+    "imageApproved": false,
+    "imageApprovalKey": "",
+    "imageEditEpoch": 0,
+    "displayMode": "image",
+    "animation": {},
+    "target": "thumbnail",
+    "required": true,
+    "ready": false,
+    "sourcesReady": true,
+    "duration": 10,
+    "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{B0D28F94-242A-41D0-A527-882802487812}\\project.assets\\61d88ed15b36c160ad99676e610b827fe7f37baa72cffeb387e71cb025883ce4.png",
+    "logoText": "漫画　男子校のくらげ先生",
+    "imageRequest": {
+      "requestId": "{6C8C2A29-A500-40DD-BCB4-A741082E49FB}",
+      "sceneId": "thumbnail",
+      "sceneNumber": 15,
+      "fingerprint": "eae704a84d1e69432918ca46c8a9e2f7908eea75165fc02e4f13b5faeb262e02",
+      "prompt": "これまでに作ったシーン画像を組み合わせた、動画の最後に表示するサムネイルを作成。\r\n使用中のキャラクターも必ず使い、見た目を参照素材に合わせる。\r\n「漫画」＋マンガの名前を大きく読みやすいロゴとして配置する。",
+      "feedback": "",
+      "provider": "external-codex",
+      "width": 1920,
+      "height": 1080,
+      "aspectRatio": "1920:1080",
+      "sources": {
+        "logo": "漫画　男子校のくらげ先生",
+        "width": 1920,
+        "height": 1080,
+        "images": [
+          {
+            "kind": "background",
+            "sceneId": "common-background",
+            "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{B0D28F94-242A-41D0-A527-882802487812}\\project.assets\\3dac925ab87cfa031fa4cea5068de84447b9a0cc84c218031e6b8958e04dd37f.png",
+            "sha256": "3dac925ab87cfa031fa4cea5068de84447b9a0cc84c218031e6b8958e04dd37f"
+          },
+          {
+            "kind": "scene",
+            "sceneId": "{DECDD101-AE37-4FA3-93BB-3D345F9F7882}",
+            "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{B0D28F94-242A-41D0-A527-882802487812}\\project.assets\\b32502963aa6ea4c8b69367eef74585ca1b3312fe79ef33346cdc21311ccc534.png",
+            "sha256": "b32502963aa6ea4c8b69367eef74585ca1b3312fe79ef33346cdc21311ccc534"
+          },
+          {
+            "kind": "scene",
+            "sceneId": "{6461CD51-34D1-452D-B494-ABDB00201B0B}",
+            "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{B0D28F94-242A-41D0-A527-882802487812}\\project.assets\\75f9d7aa9dc6fda349394bc254a84303e8c3944ccf8eb60e640a9d5ca9d164d4.png",
+            "sha256": "75f9d7aa9dc6fda349394bc254a84303e8c3944ccf8eb60e640a9d5ca9d164d4"
+          },
+          {
+            "kind": "scene",
+            "sceneId": "{FCFE0264-778D-4A4B-A6F8-AB1982FAA62F}",
+            "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{B0D28F94-242A-41D0-A527-882802487812}\\project.assets\\cb2c64c0a0cf8a4b5c4b214a1080c0c4b4f0dd8d252f66315b19f9b5e7556953.png",
+            "sha256": "cb2c64c0a0cf8a4b5c4b214a1080c0c4b4f0dd8d252f66315b19f9b5e7556953"
+          },
+          {
+            "kind": "scene",
+            "sceneId": "{EBC98258-9276-4C75-A6B9-277B5C0F4D3A}",
+            "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{B0D28F94-242A-41D0-A527-882802487812}\\project.assets\\cfc7f2a58bd41ddb316d064f7be513efef796815c831e11cb775d10eae34f731.png",
+            "sha256": "cfc7f2a58bd41ddb316d064f7be513efef796815c831e11cb775d10eae34f731"
+          },
+          {
+            "kind": "scene",
+            "sceneId": "{B6778A5E-BA99-49A0-9E7B-B04BCBF3F258}",
+            "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{B0D28F94-242A-41D0-A527-882802487812}\\project.assets\\c1765a16201680f466d2de97bf6b0a8347ff290d3aea2b63734e8854a5ab7241.png",
+            "sha256": "c1765a16201680f466d2de97bf6b0a8347ff290d3aea2b63734e8854a5ab7241"
+          },
+          {
+            "kind": "scene",
+            "sceneId": "{B9D7BD62-7279-4EFC-93F9-261561E60B3B}",
+            "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{B0D28F94-242A-41D0-A527-882802487812}\\project.assets\\326139cf2f519009c22622ce701c5479b7ebe5f22d6295d64113797c37de33bb.png",
+            "sha256": "326139cf2f519009c22622ce701c5479b7ebe5f22d6295d64113797c37de33bb"
+          },
+          {
+            "kind": "scene",
+            "sceneId": "{24BA32C3-5468-4FDE-8F70-8587EE10DDE2}",
+            "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{B0D28F94-242A-41D0-A527-882802487812}\\project.assets\\39ab73d3464b883d0d1cb3323fa0cb798f5dfa252e907ba3e2a8a323bce772f7.png",
+            "sha256": "39ab73d3464b883d0d1cb3323fa0cb798f5dfa252e907ba3e2a8a323bce772f7"
+          },
+          {
+            "kind": "scene",
+            "sceneId": "{39C56B9F-26CB-4D75-AC61-9D12BEA81AEB}",
+            "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{B0D28F94-242A-41D0-A527-882802487812}\\project.assets\\04977340537082e60ade26b6ef866e55baa74103561db46f5c586806177df871.png",
+            "sha256": "04977340537082e60ade26b6ef866e55baa74103561db46f5c586806177df871"
+          },
+          {
+            "kind": "scene",
+            "sceneId": "{1407B11A-51BC-4102-B860-0A231B6A4E2B}",
+            "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{B0D28F94-242A-41D0-A527-882802487812}\\project.assets\\bbf21ba3de6af9e99a92bb6669421dcac036730d8fe299794c4a2d0422fdce3f.png",
+            "sha256": "bbf21ba3de6af9e99a92bb6669421dcac036730d8fe299794c4a2d0422fdce3f"
+          },
+          {
+            "kind": "scene",
+            "sceneId": "{F9DE1718-7B41-4805-ABBE-4230663CA125}",
+            "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{B0D28F94-242A-41D0-A527-882802487812}\\project.assets\\22901cdd929e157bb51ed9d9a5a271aff521a857273baf2e1c2bae30ac75545c.png",
+            "sha256": "22901cdd929e157bb51ed9d9a5a271aff521a857273baf2e1c2bae30ac75545c"
+          },
+          {
+            "kind": "scene",
+            "sceneId": "{C4DC125B-6EDD-485E-8B02-743F0C95CDF2}",
+            "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{B0D28F94-242A-41D0-A527-882802487812}\\project.assets\\ede6d496d5be299a3b7eef6adece581d908807efb803950f778884f48dc307ca.png",
+            "sha256": "ede6d496d5be299a3b7eef6adece581d908807efb803950f778884f48dc307ca"
+          },
+          {
+            "kind": "scene",
+            "sceneId": "{7A3A2780-1869-4865-8386-5C4815D0FC18}",
+            "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{B0D28F94-242A-41D0-A527-882802487812}\\project.assets\\61d88ed15b36c160ad99676e610b827fe7f37baa72cffeb387e71cb025883ce4.png",
+            "sha256": "61d88ed15b36c160ad99676e610b827fe7f37baa72cffeb387e71cb025883ce4"
+          }
+        ],
+        "characters": [
+          {
+            "name": "新しいキャラクター",
+            "renderFormat": "rigm",
+            "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\RIGM\\character-904B63CF-20D7-4FB4-B8C0-11CB570949B5.rigm",
+            "sourceSignature": "12C50A27:02C1000000004696:00000000007D1DFC:01DD531395522571:01DD53139586B2E2",
+            "previewReady": true,
+            "previewPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Cache\\ScriptThumbnailRefs\\6948f4ecf5f5e75d8edb96c8a2b37b0b23d81a2a9a05bbc482204ec02e674c9a.png"
+          }
+        ]
+      },
+      "logoText": "漫画　男子校のくらげ先生",
+      "duration": 10,
+      "generationInstruction": "これまでに作ったシーン画像を組み合わせた、動画の最後に表示するサムネイルを作成。\r\n使用中のキャラクターも必ず使い、見た目を参照素材に合わせる。\r\n「漫画」＋マンガの名前を大きく読みやすいロゴとして配置する。\r\n1920 × 1080 ピクセル、縦横比 1920:1080。参照のシーン画像を合わせ、使用キャラを含め、「漫画　男子校のくらげ先生」を大きなロゴにしてください。",
+      "target": "thumbnail",
+      "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+      "state": "adopted",
+      "adoptedFingerprint": "e710ab24dd66295a46984fb7f0751cd4355985ee7a8ccca3c793866301c67a70",
+      "imageProvenance": "external-generated",
+      "current": true
+    }
+  },
+  "rows": [
+    {
+      "id": "{DECDD101-AE37-4FA3-93BB-3D345F9F7882}",
+      "title": "オープニング",
+      "image": "project.assets\\b32502963aa6ea4c8b69367eef74585ca1b3312fe79ef33346cdc21311ccc534.png",
+      "description": "",
+      "imagePrompt": "",
+      "padding": 0,
+      "imageFeedback": "",
+      "imageApproved": true,
+      "imageApprovalKey": "0b23f2c18481e91fe188ba1119e49d41d3ad7f130e4286f16c2d8672d31d4110",
+      "imageEditEpoch": 1,
+      "displayMode": "none",
+      "animation": {},
+      "sceneNumber": 1,
+      "start": 0,
+      "duration": 6.308,
+      "ready": true,
+      "imagePath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{B0D28F94-242A-41D0-A527-882802487812}\\project.assets\\b32502963aa6ea4c8b69367eef74585ca1b3312fe79ef33346cdc21311ccc534.png",
+      "sourceCues": [
+        {
+          "cueId": "{FDFA78A4-D409-4A90-BA1A-F881B9AFB930}",
+          "sourceText": "東北きりたんです"
+        },
+        {
+          "cueId": "{DC0C82A2-732A-4190-AE88-868C0747D1C0}",
+          "sourceText": "今回もニコニコ漫画から"
+        },
+        {
+          "cueId": "{2A05BB2B-53FE-4E27-A5D4-1953C8D99C9A}",
+          "sourceText": "無料で最新話まで読める作品を紹介します"
+        }
+      ],
+      "cueCount": 3,
+      "hasMoreCues": false,
+      "imageRequest": {
+        "requestId": "{B943CAC2-D1F1-4A83-B73D-5EFBB9B2FC88}",
+        "sceneId": "{DECDD101-AE37-4FA3-93BB-3D345F9F7882}",
+        "sceneNumber": 1,
+        "fingerprint": "ebfc6f9f871dca6bb97e34bf6c60ffe9f4b19a0820d82362b9bc99153feee1a8",
+        "prompt": "Use case: illustration-story. One original full-color Japanese anime still for a manga introduction video, cohesive school comedy series. Landscape 16:9 target 1920x1080, opaque. Clean crisp ink outlines, gentle cel shading, warm daylight, consistent proportions and palette. All pupils fully clothed in white short-sleeved button-up uniform shirts and dark navy trousers. Everyday nonsexual school comedy. Do not copy manga panel layouts or existing cover. No watermarks, no panel borders, no captions or speech text unless explicitly requested below. Keep faces and hands in central 80%, bottom 18% visually calm for subtitles. Tohoku Kiritan must match the provided reference sheet: chibi anime proportions, dark burgundy bob and ahoge, red eyes, gray/white knife-shaped side ornaments, pale pink-cream kimono jacket with black trim, green sash and burgundy obi/bow, dark purple pleated skirt, white socks and red sandals. Keep the supplied colors. One Kiritan only, not three views. Give her expressive contextual action and natural dynamic gesture, not stiff arms-down standing. Image 1 is a character identity reference only. Kiritan warmly introduces a new manga, seated sideways at a cozy school-library reading table, holding a blank-cover manga in one hand and raising the other in an inviting presenting gesture, lively smile, a slight body lean and animated sleeves. Bookcase and mint window in background. No written text anywhere.",
+        "feedback": "",
+        "provider": "external-codex",
+        "width": 1920,
+        "height": 1080,
+        "aspectRatio": "1920:1080",
+        "target": "scene",
+        "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+        "adoptedFingerprint": "f3658981f844b54f4f34082fdbe67b556dd7fc7f9547aceac347eb2116261054",
+        "imageProvenance": "external-generated",
+        "state": "cancelled",
+        "current": false
+      }
+    }
+  ],
+  "nextOffset": 1,
+  "hasMore": true,
+  "preview": {
+    "current": false,
+    "error": ""
+  },
+  "pipes": {
+    "format": "RIGMMaker.WorkspaceConnection",
+    "schemaVersion": 1,
+    "apiVersion": 2,
+    "pid": 28836,
+    "commandPipe": "RIGMMaker.Workspace.28836.{A98C9D2D-58D7-436C-88E0-39B3707249DB}",
+    "controlPipe": "RIGMMaker.Workspace.28836.{A98C9D2D-58D7-436C-88E0-39B3707249DB}",
+    "dataRoot": "C:\\Users\\zan12\\Documents\\RIGMMaker",
+    "connectionFile": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Exchange\\workspace-28836.json",
+    "routing": "common-command"
+  }
+}

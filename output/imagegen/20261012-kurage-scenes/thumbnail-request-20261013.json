@@ -1,0 +1,114 @@
+{
+  "requestId": "{6C8C2A29-A500-40DD-BCB4-A741082E49FB}",
+  "sceneId": "thumbnail",
+  "sceneNumber": 15,
+  "fingerprint": "eae704a84d1e69432918ca46c8a9e2f7908eea75165fc02e4f13b5faeb262e02",
+  "prompt": "これまでに作ったシーン画像を組み合わせた、動画の最後に表示するサムネイルを作成。\r\n使用中のキャラクターも必ず使い、見た目を参照素材に合わせる。\r\n「漫画」＋マンガの名前を大きく読みやすいロゴとして配置する。",
+  "feedback": "",
+  "state": "pending",
+  "provider": "external-codex",
+  "width": 1920,
+  "height": 1080,
+  "aspectRatio": "1920:1080",
+  "sources": {
+    "logo": "漫画　男子校のくらげ先生",
+    "width": 1920,
+    "height": 1080,
+    "images": [
+      {
+        "kind": "background",
+        "sceneId": "common-background",
+        "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{B0D28F94-242A-41D0-A527-882802487812}\\project.assets\\3dac925ab87cfa031fa4cea5068de84447b9a0cc84c218031e6b8958e04dd37f.png",
+        "sha256": "3dac925ab87cfa031fa4cea5068de84447b9a0cc84c218031e6b8958e04dd37f"
+      },
+      {
+        "kind": "scene",
+        "sceneId": "{DECDD101-AE37-4FA3-93BB-3D345F9F7882}",
+        "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{B0D28F94-242A-41D0-A527-882802487812}\\project.assets\\b32502963aa6ea4c8b69367eef74585ca1b3312fe79ef33346cdc21311ccc534.png",
+        "sha256": "b32502963aa6ea4c8b69367eef74585ca1b3312fe79ef33346cdc21311ccc534"
+      },
+      {
+        "kind": "scene",
+        "sceneId": "{6461CD51-34D1-452D-B494-ABDB00201B0B}",
+        "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{B0D28F94-242A-41D0-A527-882802487812}\\project.assets\\75f9d7aa9dc6fda349394bc254a84303e8c3944ccf8eb60e640a9d5ca9d164d4.png",
+        "sha256": "75f9d7aa9dc6fda349394bc254a84303e8c3944ccf8eb60e640a9d5ca9d164d4"
+      },
+      {
+        "kind": "scene",
+        "sceneId": "{FCFE0264-778D-4A4B-A6F8-AB1982FAA62F}",
+        "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{B0D28F94-242A-41D0-A527-882802487812}\\project.assets\\cb2c64c0a0cf8a4b5c4b214a1080c0c4b4f0dd8d252f66315b19f9b5e7556953.png",
+        "sha256": "cb2c64c0a0cf8a4b5c4b214a1080c0c4b4f0dd8d252f66315b19f9b5e7556953"
+      },
+      {
+        "kind": "scene",
+        "sceneId": "{EBC98258-9276-4C75-A6B9-277B5C0F4D3A}",
+        "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{B0D28F94-242A-41D0-A527-882802487812}\\project.assets\\cfc7f2a58bd41ddb316d064f7be513efef796815c831e11cb775d10eae34f731.png",
+        "sha256": "cfc7f2a58bd41ddb316d064f7be513efef796815c831e11cb775d10eae34f731"
+      },
+      {
+        "kind": "scene",
+        "sceneId": "{B6778A5E-BA99-49A0-9E7B-B04BCBF3F258}",
+        "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{B0D28F94-242A-41D0-A527-882802487812}\\project.assets\\c1765a16201680f466d2de97bf6b0a8347ff290d3aea2b63734e8854a5ab7241.png",
+        "sha256": "c1765a16201680f466d2de97bf6b0a8347ff290d3aea2b63734e8854a5ab7241"
+      },
+      {
+        "kind": "scene",
+        "sceneId": "{B9D7BD62-7279-4EFC-93F9-261561E60B3B}",
+        "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{B0D28F94-242A-41D0-A527-882802487812}\\project.assets\\326139cf2f519009c22622ce701c5479b7ebe5f22d6295d64113797c37de33bb.png",
+        "sha256": "326139cf2f519009c22622ce701c5479b7ebe5f22d6295d64113797c37de33bb"
+      },
+      {
+        "kind": "scene",
+        "sceneId": "{24BA32C3-5468-4FDE-8F70-8587EE10DDE2}",
+        "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{B0D28F94-242A-41D0-A527-882802487812}\\project.assets\\39ab73d3464b883d0d1cb3323fa0cb798f5dfa252e907ba3e2a8a323bce772f7.png",
+        "sha256": "39ab73d3464b883d0d1cb3323fa0cb798f5dfa252e907ba3e2a8a323bce772f7"
+      },
+      {
+        "kind": "scene",
+        "sceneId": "{39C56B9F-26CB-4D75-AC61-9D12BEA81AEB}",
+        "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{B0D28F94-242A-41D0-A527-882802487812}\\project.assets\\04977340537082e60ade26b6ef866e55baa74103561db46f5c586806177df871.png",
+        "sha256": "04977340537082e60ade26b6ef866e55baa74103561db46f5c586806177df871"
+      },
+      {
+        "kind": "scene",
+        "sceneId": "{1407B11A-51BC-4102-B860-0A231B6A4E2B}",
+        "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{B0D28F94-242A-41D0-A527-882802487812}\\project.assets\\bbf21ba3de6af9e99a92bb6669421dcac036730d8fe299794c4a2d0422fdce3f.png",
+        "sha256": "bbf21ba3de6af9e99a92bb6669421dcac036730d8fe299794c4a2d0422fdce3f"
+      },
+      {
+        "kind": "scene",
+        "sceneId": "{F9DE1718-7B41-4805-ABBE-4230663CA125}",
+        "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{B0D28F94-242A-41D0-A527-882802487812}\\project.assets\\22901cdd929e157bb51ed9d9a5a271aff521a857273baf2e1c2bae30ac75545c.png",
+        "sha256": "22901cdd929e157bb51ed9d9a5a271aff521a857273baf2e1c2bae30ac75545c"
+      },
+      {
+        "kind": "scene",
+        "sceneId": "{C4DC125B-6EDD-485E-8B02-743F0C95CDF2}",
+        "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{B0D28F94-242A-41D0-A527-882802487812}\\project.assets\\ede6d496d5be299a3b7eef6adece581d908807efb803950f778884f48dc307ca.png",
+        "sha256": "ede6d496d5be299a3b7eef6adece581d908807efb803950f778884f48dc307ca"
+      },
+      {
+        "kind": "scene",
+        "sceneId": "{7A3A2780-1869-4865-8386-5C4815D0FC18}",
+        "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{B0D28F94-242A-41D0-A527-882802487812}\\project.assets\\61d88ed15b36c160ad99676e610b827fe7f37baa72cffeb387e71cb025883ce4.png",
+        "sha256": "61d88ed15b36c160ad99676e610b827fe7f37baa72cffeb387e71cb025883ce4"
+      }
+    ],
+    "characters": [
+      {
+        "name": "新しいキャラクター",
+        "renderFormat": "rigm",
+        "path": "C:\\Users\\zan12\\Documents\\RIGMMaker\\RIGM\\character-904B63CF-20D7-4FB4-B8C0-11CB570949B5.rigm",
+        "sourceSignature": "12C50A27:02C1000000004696:00000000007D1DFC:01DD531395522571:01DD53139586B2E2",
+        "previewReady": true,
+        "previewPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Cache\\ScriptThumbnailRefs\\6948f4ecf5f5e75d8edb96c8a2b37b0b23d81a2a9a05bbc482204ec02e674c9a.png"
+      }
+    ]
+  },
+  "logoText": "漫画　男子校のくらげ先生",
+  "duration": 10,
+  "generationInstruction": "これまでに作ったシーン画像を組み合わせた、動画の最後に表示するサムネイルを作成。\r\n使用中のキャラクターも必ず使い、見た目を参照素材に合わせる。\r\n「漫画」＋マンガの名前を大きく読みやすいロゴとして配置する。\r\n1920 × 1080 ピクセル、縦横比 1920:1080。参照のシーン画像を合わせ、使用キャラを含め、「漫画　男子校のくらげ先生」を大きなロゴにしてください。",
+  "target": "thumbnail",
+  "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+  "current": true
+}

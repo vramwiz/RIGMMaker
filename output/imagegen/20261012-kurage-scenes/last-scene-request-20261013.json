@@ -1,0 +1,16 @@
+{
+  "requestId": "{8AD3573E-D8C3-466B-9709-39C2FC388960}",
+  "sceneId": "{7A3A2780-1869-4865-8386-5C4815D0FC18}",
+  "sceneNumber": 14,
+  "fingerprint": "ec6cc2647256491605e36b0853edb41f2216e473e434663b0c70ca967234a3ae",
+  "prompt": "ユーザーが採用したタイトルロゴ付き画像を最後に表示する。「漫画 男子校のくらげ先生」の大きなロゴ、くらげ先生・男子生徒・東北きりたん。きりたんは指さしポーズ。ロゴ背面は濃紺の図形。",
+  "feedback": "",
+  "state": "pending",
+  "provider": "external-codex",
+  "width": 1920,
+  "height": 1080,
+  "aspectRatio": "1920:1080",
+  "target": "scene",
+  "sizeInstruction": "可能なら 1920 × 1080 ピクセル、縦横比 1920:1080 で生成してください。",
+  "current": true
+}

@@ -1,0 +1,167 @@
+{
+  "projectId": "{B0D28F94-242A-41D0-A527-882802487812}",
+  "mode": "built-in-imagegen",
+  "sourceStatusRevision": 915,
+  "assets": [
+    {
+      "key": "background",
+      "filename": "common-background.png",
+      "prompt": "Use case: illustration-story. One original full-color Japanese anime still for a manga introduction video, cohesive school comedy series. Landscape 16:9 target 1920x1080, opaque. Clean crisp ink outlines, gentle cel shading, warm daylight, consistent proportions and palette. All pupils fully clothed in white short-sleeved button-up uniform shirts and dark navy trousers. Everyday nonsexual school comedy. Do not copy manga panel layouts or existing cover. No watermarks, no panel borders, no captions or speech text unless explicitly requested below. Keep faces and hands in central 80%, bottom 18% visually calm for subtitles. Create a quiet common BACKGROUND for this school-manga review video, no people, no text. Pale mint Japanese high-school infirmary and school library ambiance: soft sunlit windows, subtle bookcase and curtain at outer edges, nurse desk and small plant near edges. Keep the central 70% very simple low-contrast pale cream/mint wall and soft gradient, suitable behind an inset scene illustration, narrator sprite and subtitles; no central distracting furniture. Restrained welcoming palette.",
+      "refs": [],
+      "original": "C:\\Users\\zan12\\.codex\\generated_images\\01a12df3-e8ce-7aa3-9c6e-aaa7f2a622d3\\exec-d432ca8a-4917-4b38-8f5e-87a73a4d91e3.png",
+      "id": "common-background"
+    },
+    {
+      "key": "01",
+      "filename": "scene-01-opening.png",
+      "prompt": "Use case: illustration-story. One original full-color Japanese anime still for a manga introduction video, cohesive school comedy series. Landscape 16:9 target 1920x1080, opaque. Clean crisp ink outlines, gentle cel shading, warm daylight, consistent proportions and palette. All pupils fully clothed in white short-sleeved button-up uniform shirts and dark navy trousers. Everyday nonsexual school comedy. Do not copy manga panel layouts or existing cover. No watermarks, no panel borders, no captions or speech text unless explicitly requested below. Keep faces and hands in central 80%, bottom 18% visually calm for subtitles. Tohoku Kiritan must match the provided reference sheet: chibi anime proportions, dark burgundy bob and ahoge, red eyes, gray/white knife-shaped side ornaments, pale pink-cream kimono jacket with black trim, green sash and burgundy obi/bow, dark purple pleated skirt, white socks and red sandals. Keep the supplied colors. One Kiritan only, not three views. Give her expressive contextual action and natural dynamic gesture, not stiff arms-down standing. Image 1 is a character identity reference only. Kiritan warmly introduces a new manga, seated sideways at a cozy school-library reading table, holding a blank-cover manga in one hand and raising the other in an inviting presenting gesture, lively smile, a slight body lean and animated sleeves. Bookcase and mint window in background. No written text anywhere.",
+      "refs": [
+        "D:\\Manga\\基本テンプレート\\東北きりたん\\東北きりたん_草履あり.png"
+      ],
+      "original": "C:\\Users\\zan12\\.codex\\generated_images\\01a12df3-e8ce-7aa3-9c6e-aaa7f2a622d3\\exec-24cc88c5-7c24-42de-9025-2bd70ba7a650.png",
+      "id": "{DECDD101-AE37-4FA3-93BB-3D345F9F7882}"
+    },
+    {
+      "key": "02",
+      "filename": "scene-02-title.png",
+      "prompt": "Use case: illustration-story. One original full-color Japanese anime still for a manga introduction video, cohesive school comedy series. Landscape 16:9 target 1920x1080, opaque. Clean crisp ink outlines, gentle cel shading, warm daylight, consistent proportions and palette. All pupils fully clothed in white short-sleeved button-up uniform shirts and dark navy trousers. Everyday nonsexual school comedy. Do not copy manga panel layouts or existing cover. No watermarks, no panel borders, no captions or speech text unless explicitly requested below. Keep faces and hands in central 80%, bottom 18% visually calm for subtitles. Kurage is a 24-year-old adult female school nurse, as in the provided reference: straight chin-length dark blue-black bob, blunt bangs, violet-pink underside and tips, turquoise green eyes, white open lab coat over a buttoned charcoal-gray cardigan, dark blue denim shorts. Preserve face, hair, colors, clothing and age. Image 1 is the character/style reference. Create an original TITLE image. Kurage on the right half holding a clipboard in a composed welcoming pose, sunny school infirmary in the background, small subtle jellyfish-shaped decorative motif. In the left and center, huge perfectly readable Japanese logo with exact text 「男子校のくらげ先生」 broken into 2 or 3 balanced lines. Place the logo on a solid dark navy rounded panel/paper-shaped badge with a thick pale outline, so it strongly stands out from the background. Cream/white bold lettering with pink and turquoise accents. Title occupies about half of the image; no other text.",
+      "refs": [
+        "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\20261012-kurage-scenes\\scene-03-kurage.png"
+      ],
+      "id": "{5E691476-DA47-43A5-B7BA-710255AF2212}",
+      "original": "C:\\Users\\zan12\\.codex\\generated_images\\01a12df3-e8ce-7aa3-9c6e-aaa7f2a622d3\\exec-961a71e6-2cdd-46f7-a7f1-36c9b1a203d9.png"
+    },
+    {
+      "key": "03",
+      "filename": "scene-03-kurage.png",
+      "prompt": "Use case: illustration-story. Create ONE new original full-color Japanese anime illustration for scene 3 of a manga-introduction video about 男子校のくらげ先生. Landscape 16:9, target 1920x1080, opaque, clean crisp linework, soft cel shading, polished humorous school-comedy look. No lettering, captions, speech bubbles, watermarks or logos.\nReference image 1 (official cover) and reference image 2 (official character panels) are CHARACTER IDENTITY references only, not layouts to copy. Depict Mizumaki Kurage, a 24-year-old adult female school nurse: chin-length straight dark blue-black bob with violet-pink underside/tips, blunt bangs, turquoise green eyes, calm composed expression, white open lab coat over a fully buttoned modest charcoal-gray cardigan, dark blue denim shorts, natural adult proportions. Match this identity and color palette across the whole series.\nScene: a bright tidy Japanese boys' high-school infirmary, pale mint walls, sunlit window, privacy curtains and a bed in soft background. Waist-up three-quarter portrait of Kurage beside the nurse desk, holding a clipboard to her side, turning toward the viewer with a small professionally kind smile. Visualize 'a healing presence in a boys school' using warm afternoon light and a few subtle flower-shaped decorative highlights. Original composition; no copied manga panels, no book-cover text. Keep all important subject details within central 80%; keep bottom 18% calm for subtitles. Friendly nonsexual everyday school atmosphere.",
+      "refs": [
+        "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\20261012-kurage-scenes\\references\\official-cover.jpg",
+        "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\20261012-kurage-scenes\\references\\official-character-panel.jpg"
+      ],
+      "original": "C:\\Users\\zan12\\.codex\\generated_images\\01a12df3-e8ce-7aa3-9c6e-aaa7f2a622d3\\exec-afaf42ac-747b-4be4-a795-b4bceb1d8e56.png",
+      "id": "{6461CD51-34D1-452D-B494-ABDB00201B0B}"
+    },
+    {
+      "key": "04",
+      "filename": "scene-04-sent-back.png",
+      "prompt": "Use case: illustration-story. One original full-color Japanese anime still for a manga introduction video, cohesive school comedy series. Landscape 16:9 target 1920x1080, opaque. Clean crisp ink outlines, gentle cel shading, warm daylight, consistent proportions and palette. All pupils fully clothed in white short-sleeved button-up uniform shirts and dark navy trousers. Everyday nonsexual school comedy. Do not copy manga panel layouts or existing cover. No watermarks, no panel borders, no captions or speech text unless explicitly requested below. Keep faces and hands in central 80%, bottom 18% visually calm for subtitles. Kurage is a 24-year-old adult female school nurse, as in the provided reference: straight chin-length dark blue-black bob, blunt bangs, violet-pink underside and tips, turquoise green eyes, white open lab coat over a buttoned charcoal-gray cardigan, dark blue denim shorts. Preserve face, hair, colors, clothing and age. Image 1 is Kurage identity and series style reference. At the infirmary doorway Kurage calmly points outward with one hand, clipboard tucked under the other arm, gently stern professional look, sending two sheepish male students back to class after spotting their fake illness. The pupils rub the backs of their heads and shuffle out, humorous sweat drops. No Kenji required; pupils can be supporting characters. Wide eye-level shot, clear hand gestures, maintain appropriate teacher-pupil distance.",
+      "refs": [
+        "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\20261012-kurage-scenes\\scene-03-kurage.png"
+      ],
+      "id": "{FCFE0264-778D-4A4B-A6F8-AB1982FAA62F}",
+      "original": "C:\\Users\\zan12\\.codex\\generated_images\\01a12df3-e8ce-7aa3-9c6e-aaa7f2a622d3\\exec-bb8376a5-55eb-4ccc-aaa7-83459ead2f31.png",
+      "uiPrompt": "毎日男子生徒がサボるために保健室へやってくる",
+      "expectedDisplayMode": "image"
+    },
+    {
+      "key": "05",
+      "filename": "scene-05-boys-smile.png",
+      "prompt": "Use case: illustration-story. One original full-color Japanese anime still for a manga introduction video, cohesive school comedy series. Landscape 16:9 target 1920x1080, opaque. Clean crisp ink outlines, gentle cel shading, warm daylight, consistent proportions and palette. All pupils fully clothed in white short-sleeved button-up uniform shirts and dark navy trousers. Everyday nonsexual school comedy. Do not copy manga panel layouts or existing cover. No watermarks, no panel borders, no captions or speech text unless explicitly requested below. Keep faces and hands in central 80%, bottom 18% visually calm for subtitles. Kenji Zushi is a teenage male high school pupil. Match the lead pupil identity in the reference: sturdy build, short upright spiky black hair, angular expressive eyebrows, brown-black eyes, clean-shaven youthful face, white short-sleeved open-collar school shirt, dark navy trousers. Preserve this one boy consistently. Image 1 is the Kenji face/uniform and overall style reference; reference 2 shows Kurage. Kenji and two male classmates in a school corridor smile in exaggerated delighted embarrassment after being sent back to class. Kenji closest to camera has a determined mischievous grin and one loosely clenched fist near his chest; a distant infirmary doorway behind them hints where they came from. Energetic humorous reactions, normal youthful clean-shaven faces, no romantic physical contact, no text.",
+      "refs": [
+        "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\20261012-kurage-scenes\\scene-06-kenji.png",
+        "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\20261012-kurage-scenes\\scene-03-kurage.png"
+      ],
+      "id": "{EBC98258-9276-4C75-A6B9-277B5C0F4D3A}",
+      "uiPrompt": "男子生徒もニッコリ ",
+      "expectedDisplayMode": "image",
+      "original": "C:\\Users\\zan12\\.codex\\generated_images\\01a12df3-e8ce-7aa3-9c6e-aaa7f2a622d3\\exec-9969a0fd-31f1-4e55-a5e9-10ea12ddcc51.png"
+    },
+    {
+      "key": "06",
+      "filename": "scene-06-kenji.png",
+      "prompt": "Use case: illustration-story. One original full-color Japanese anime still for a manga introduction video, cohesive school comedy series. Landscape 16:9 target 1920x1080, opaque. Clean crisp ink outlines, gentle cel shading, warm daylight, consistent proportions and palette. All pupils fully clothed in white short-sleeved button-up uniform shirts and dark navy trousers. Everyday nonsexual school comedy. Do not copy manga panel layouts or existing cover. No watermarks, no panel borders, no captions or speech text unless explicitly requested below. Keep faces and hands in central 80%, bottom 18% visually calm for subtitles. Kenji Zushi is a teenage male high school pupil. Match the lead pupil identity in the reference: sturdy build, short upright spiky black hair, angular expressive eyebrows, brown-black eyes, clean-shaven youthful face, white short-sleeved open-collar school shirt, dark navy trousers. Preserve this one boy consistently. Kurage is a 24-year-old adult female school nurse, as in the provided reference: straight chin-length dark blue-black bob, blunt bangs, violet-pink underside and tips, turquoise green eyes, white open lab coat over a buttoned charcoal-gray cardigan, dark blue denim shorts. Preserve face, hair, colors, clothing and age. Image 1 establishes Kurage and visual style. Image 2 (official manga page) is a CHARACTER identity reference for Kenji and white school uniforms only, not a layout to copy. Original color illustration: Kenji sits at his classroom desk resting his cheek on one hand, eyes daydreaming toward the window, slight embarrassed smile. Above him a translucent soft-edged THOUGHT CLOUD shows only a small waist-up Kurage professionally holding a clipboard with a neutral smile. A classmate behind is also distracted; classroom blackboard blurred with no writing. Clearly a boy's harmless comic daydream, teacher is not physically in classroom, fully clothed, no sexual content.",
+      "refs": [
+        "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\20261012-kurage-scenes\\scene-03-kurage.png",
+        "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\20261012-kurage-scenes\\references\\official-story-page.jpg"
+      ],
+      "original": "C:\\Users\\zan12\\.codex\\generated_images\\01a12df3-e8ce-7aa3-9c6e-aaa7f2a622d3\\exec-2ea61b37-51d5-4798-9a46-5f549cfa98d2.png",
+      "id": "{B6778A5E-BA99-49A0-9E7B-B04BCBF3F258}"
+    },
+    {
+      "key": "07",
+      "filename": "scene-07-to-infirmary.png",
+      "prompt": "Use case: illustration-story. One original full-color Japanese anime still for a manga introduction video, cohesive school comedy series. Landscape 16:9 target 1920x1080, opaque. Clean crisp ink outlines, gentle cel shading, warm daylight, consistent proportions and palette. All pupils fully clothed in white short-sleeved button-up uniform shirts and dark navy trousers. Everyday nonsexual school comedy. Do not copy manga panel layouts or existing cover. No watermarks, no panel borders, no captions or speech text unless explicitly requested below. Keep faces and hands in central 80%, bottom 18% visually calm for subtitles. Kenji Zushi is a teenage male high school pupil. Match the lead pupil identity in the reference: sturdy build, short upright spiky black hair, angular expressive eyebrows, brown-black eyes, clean-shaven youthful face, white short-sleeved open-collar school shirt, dark navy trousers. Preserve this one boy consistently. Kurage is a 24-year-old adult female school nurse, as in the provided reference: straight chin-length dark blue-black bob, blunt bangs, violet-pink underside and tips, turquoise green eyes, white open lab coat over a buttoned charcoal-gray cardigan, dark blue denim shorts. Preserve face, hair, colors, clothing and age. Image 1 locks Kenji identity and series style; image 2 locks Kurage. One original color scene of Kenji at his CLASSROOM DESK, his imagination growing increasingly busy, flustered rosy cheeks, a mildly overwhelmed comedic face, elbows on desk. Above and behind him float THREE soft-edged translucent thought clouds, each a different harmless fully clothed professional portrait of the same adult Kurage: smiling with clipboard, offering a folded towel, and looking calmly over glasses-free eyes. This is entirely imaginary, teacher is not actually present, no physical teacher-student contact, no sexual content. Two classmates also daydream in background with abstract swirls. A comic crescendo of distraction, no speech text.",
+      "refs": [
+        "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\20261012-kurage-scenes\\scene-06-kenji.png",
+        "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\20261012-kurage-scenes\\scene-03-kurage.png"
+      ],
+      "id": "{B9D7BD62-7279-4EFC-93F9-261561E60B3B}",
+      "uiPrompt": "授業中ずっと先生の妄想がさらに増える",
+      "expectedDisplayMode": "image",
+      "original": "C:\\Users\\zan12\\.codex\\generated_images\\01a12df3-e8ce-7aa3-9c6e-aaa7f2a622d3\\exec-fe0f09b5-de5a-44ca-889e-8f200d292d89.png"
+    },
+    {
+      "key": "08",
+      "filename": "scene-08-frozen.png",
+      "prompt": "Use case: illustration-story. One original full-color Japanese anime still for a manga introduction video, cohesive school comedy series. Landscape 16:9 target 1920x1080, opaque. Clean crisp ink outlines, gentle cel shading, warm daylight, consistent proportions and palette. All pupils fully clothed in white short-sleeved button-up uniform shirts and dark navy trousers. Everyday nonsexual school comedy. Do not copy manga panel layouts or existing cover. No watermarks, no panel borders, no captions or speech text unless explicitly requested below. Keep faces and hands in central 80%, bottom 18% visually calm for subtitles. Kenji Zushi is a teenage male high school pupil. Match the lead pupil identity in the reference: sturdy build, short upright spiky black hair, angular expressive eyebrows, brown-black eyes, clean-shaven youthful face, white short-sleeved open-collar school shirt, dark navy trousers. Preserve this one boy consistently. Kurage is a 24-year-old adult female school nurse, as in the provided reference: straight chin-length dark blue-black bob, blunt bangs, violet-pink underside and tips, turquoise green eyes, white open lab coat over a buttoned charcoal-gray cardigan, dark blue denim shorts. Preserve face, hair, colors, clothing and age. Image 1 Kenji identity/style; image 2 Kurage identity and infirmary reference. Kenji stands awkwardly just inside the infirmary door, tissue lowered in his hand, shoulders stiff and face bright red, unable to speak. Kurage seated behind the desk turns her head toward him with a calm questioning expression, holding a pen. Clear respectful distance and ordinary school nurse consultation. Humorous contrast between his flustered posture and her professional composure, no touching, no romance, no text.",
+      "refs": [
+        "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\20261012-kurage-scenes\\scene-06-kenji.png",
+        "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\20261012-kurage-scenes\\scene-03-kurage.png"
+      ],
+      "id": "{24BA32C3-5468-4FDE-8F70-8587EE10DDE2}",
+      "uiPrompt": "保健室に居る先生の前では何にもできません",
+      "expectedDisplayMode": "image",
+      "original": "C:\\Users\\zan12\\.codex\\generated_images\\01a12df3-e8ce-7aa3-9c6e-aaa7f2a622d3\\exec-f94e1e58-e3e4-46ed-a29e-948fbf8db81f.png"
+    },
+    {
+      "key": "09",
+      "filename": "scene-09-strategy.png",
+      "prompt": "Use case: illustration-story. One original full-color Japanese anime still for a manga introduction video, cohesive school comedy series. Landscape 16:9 target 1920x1080, opaque. Clean crisp ink outlines, gentle cel shading, warm daylight, consistent proportions and palette. All pupils fully clothed in white short-sleeved button-up uniform shirts and dark navy trousers. Everyday nonsexual school comedy. Do not copy manga panel layouts or existing cover. No watermarks, no panel borders, no captions or speech text unless explicitly requested below. Keep faces and hands in central 80%, bottom 18% visually calm for subtitles. Kenji Zushi is a teenage male high school pupil. Match the lead pupil identity in the reference: sturdy build, short upright spiky black hair, angular expressive eyebrows, brown-black eyes, clean-shaven youthful face, white short-sleeved open-collar school shirt, dark navy trousers. Preserve this one boy consistently. Kurage is a 24-year-old adult female school nurse, as in the provided reference: straight chin-length dark blue-black bob, blunt bangs, violet-pink underside and tips, turquoise green eyes, white open lab coat over a buttoned charcoal-gray cardigan, dark blue denim shorts. Preserve face, hair, colors, clothing and age. Image 1 Kenji identity/style; image 2 Kurage identity. Original school comedy illustration in infirmary: Kurage is foreground at her desk, a mildly teasing unimpressed sideways smile and one palm raised in a calm dismissive gesture as she sends a sheepish Kenji back to class. Kenji at the doorway looks embarrassed and scratches his cheek, eyes lowered; tiny comic sweat drops. Teacher professional distance and posture, ordinary nurse-pupil conversation, no touch or reciprocal romance, no text or speech bubbles. Focus on her matter-of-fact reaction.",
+      "refs": [
+        "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\20261012-kurage-scenes\\scene-06-kenji.png",
+        "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\20261012-kurage-scenes\\scene-03-kurage.png"
+      ],
+      "id": "{39C56B9F-26CB-4D75-AC61-9D12BEA81AEB}",
+      "uiPrompt": "へたれと軽く罵って生徒をやりすごす先生",
+      "expectedDisplayMode": "image",
+      "original": "C:\\Users\\zan12\\.codex\\generated_images\\01a12df3-e8ce-7aa3-9c6e-aaa7f2a622d3\\exec-ea73213d-966b-460f-8906-9fe035b0104a.png"
+    },
+    {
+      "key": "10",
+      "filename": "scene-10-secret-shyness.png",
+      "prompt": "Use case: illustration-story. One original full-color Japanese anime still for a manga introduction video, cohesive school comedy series. Landscape 16:9 target 1920x1080, opaque. Clean crisp ink outlines, gentle cel shading, warm daylight, consistent proportions and palette. All pupils fully clothed in white short-sleeved button-up uniform shirts and dark navy trousers. Everyday nonsexual school comedy. Do not copy manga panel layouts or existing cover. No watermarks, no panel borders, no captions or speech text unless explicitly requested below. Keep faces and hands in central 80%, bottom 18% visually calm for subtitles. Kurage is a 24-year-old adult female school nurse, as in the provided reference: straight chin-length dark blue-black bob, blunt bangs, violet-pink underside and tips, turquoise green eyes, white open lab coat over a buttoned charcoal-gray cardigan, dark blue denim shorts. Preserve face, hair, colors, clothing and age. Image 1 is Kurage identity/style and infirmary reference. Kurage is ALONE in the infirmary after the pupil has left, her professional facade finally slipping: seated at her desk, blushing, shoulders curled slightly, one hand against her cheek and the other looking down at her clipboard, worried self-conscious eyes. No other people. Warm intimate but entirely nonsexual portrait of an adult who regrets being too curt; preserve fully buttoned gray cardigan, white lab coat and exact hair/eye palette. Original medium shot, no text.",
+      "refs": [
+        "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\20261012-kurage-scenes\\scene-03-kurage.png"
+      ],
+      "id": "{1407B11A-51BC-4102-B860-0A231B6A4E2B}",
+      "original": "C:\\Users\\zan12\\.codex\\generated_images\\01a12df3-e8ce-7aa3-9c6e-aaa7f2a622d3\\exec-955f8e35-a9fd-40ec-aa67-bf51dc2ceb49.png",
+      "uiPrompt": "保健室に居る先生は男子に免疫がないので本当は恥ずかしい",
+      "expectedDisplayMode": "image"
+    },
+    {
+      "key": "11",
+      "filename": "scene-11-mizumaki.png",
+      "prompt": "Use case: illustration-story. One original full-color Japanese anime still for a manga introduction video, cohesive school comedy series. Landscape 16:9 target 1920x1080, opaque. Clean crisp ink outlines, gentle cel shading, warm daylight, consistent proportions and palette. All pupils fully clothed in white short-sleeved button-up uniform shirts and dark navy trousers. Everyday nonsexual school comedy. Do not copy manga panel layouts or existing cover. No watermarks, no panel borders, no captions or speech text unless explicitly requested below. Keep faces and hands in central 80%, bottom 18% visually calm for subtitles. Kurage is a 24-year-old adult female school nurse, as in the provided reference: straight chin-length dark blue-black bob, blunt bangs, violet-pink underside and tips, turquoise green eyes, white open lab coat over a buttoned charcoal-gray cardigan, dark blue denim shorts. Preserve face, hair, colors, clothing and age. Image 1 is Kurage identity/style. Original adult character introduction portrait of 24-year-old school nurse Mizumaki Kurage. Waist-up, moving beside an infirmary window while carrying a neatly folded towel and first-aid supplies, professionally composed soft smile but slight shy flush. Natural active pose with a slight turn of the shoulders and fluttering lab coat, quiet school background, subtle jellyfish-like circular decorations. No text, no caption, no sexualization.",
+      "refs": [
+        "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\20261012-kurage-scenes\\scene-03-kurage.png"
+      ],
+      "id": "{F9DE1718-7B41-4805-ABBE-4230663CA125}",
+      "uiPrompt": "保健室に居る女先生",
+      "expectedDisplayMode": "image",
+      "original": "C:\\Users\\zan12\\.codex\\generated_images\\01a12df3-e8ce-7aa3-9c6e-aaa7f2a622d3\\exec-0be351a7-fb65-42f9-9ab0-54470b71f7c8.png"
+    },
+    {
+      "key": "12",
+      "filename": "scene-12-kenji-contrast.png",
+      "prompt": "Use case: illustration-story. One original full-color Japanese anime still for a manga introduction video, cohesive school comedy series. Landscape 16:9 target 1920x1080, opaque. Clean crisp ink outlines, gentle cel shading, warm daylight, consistent proportions and palette. All pupils fully clothed in white short-sleeved button-up uniform shirts and dark navy trousers. Everyday nonsexual school comedy. Do not copy manga panel layouts or existing cover. No watermarks, no panel borders, no captions or speech text unless explicitly requested below. Keep faces and hands in central 80%, bottom 18% visually calm for subtitles. Kenji Zushi is a teenage male high school pupil. Match the lead pupil identity in the reference: sturdy build, short upright spiky black hair, angular expressive eyebrows, brown-black eyes, clean-shaven youthful face, white short-sleeved open-collar school shirt, dark navy trousers. Preserve this one boy consistently. Image 1 is Kenji face/uniform and series style reference. Original teenage male character-introduction illustration of Kenji Zushi only, in a sunlit Japanese school corridor near classroom doors, waist-up. He wears the same white short-sleeved open-collar uniform shirt, dark trousers and shoulder school bag; short upright black spiky hair, thick angular brows, brown eyes. Lively optimistic grin and a small determined fist near his chest, energetic everyday schoolboy personality, fully clothed and nonsexual. No nurse in this scene, no written text.",
+      "refs": [
+        "D:\\DelphiProg\\RIGMMaker\\output\\imagegen\\20261012-kurage-scenes\\scene-06-kenji.png"
+      ],
+      "id": "{C4DC125B-6EDD-485E-8B02-743F0C95CDF2}",
+      "uiPrompt": "男子高校生",
+      "expectedDisplayMode": "image",
+      "original": "C:\\Users\\zan12\\.codex\\generated_images\\01a12df3-e8ce-7aa3-9c6e-aaa7f2a622d3\\exec-5270e09e-aaa1-4524-a914-92cc7ed89fce.png"
+    },
+    {
+      "key": "14",
+      "filename": "scene-14-closing.png",
+      "prompt": "Use case: illustration-story. One original full-color Japanese anime still for a manga introduction video, cohesive school comedy series. Landscape 16:9 target 1920x1080, opaque. Clean crisp ink outlines, gentle cel shading, warm daylight, consistent proportions and palette. All pupils fully clothed in white short-sleeved button-up uniform shirts and dark navy trousers. Everyday nonsexual school comedy. Do not copy manga panel layouts or existing cover. No watermarks, no panel borders, no captions or speech text unless explicitly requested below. Keep faces and hands in central 80%, bottom 18% visually calm for subtitles. Tohoku Kiritan must match the provided reference sheet: chibi anime proportions, dark burgundy bob and ahoge, red eyes, gray/white knife-shaped side ornaments, pale pink-cream kimono jacket with black trim, green sash and burgundy obi/bow, dark purple pleated skirt, white socks and red sandals. Keep the supplied colors. One Kiritan only, not three views. Give her expressive contextual action and natural dynamic gesture, not stiff arms-down standing. Image 1 is the Kiritan identity/color reference only. Original manga-review farewell image: Kiritan at the school-library reading table turns toward viewer with a bright gentle smile and waves with her right hand, the other hand holding a manga against her chest; body leaning playfully forward, animated sleeves and bow, clearly active pose. Cozy warm mint-and-cream library, a small neat stack of manga. Full character fits naturally in wide frame, no stiff standing, no writing.",
+      "refs": [
+        "D:\\Manga\\基本テンプレート\\東北きりたん\\東北きりたん_草履あり.png"
+      ],
+      "id": "{7A3A2780-1869-4865-8386-5C4815D0FC18}",
+      "original": "C:\\Users\\zan12\\.codex\\generated_images\\01a12df3-e8ce-7aa3-9c6e-aaa7f2a622d3\\exec-f41e37f4-d986-497b-8af7-2bec73ab8fb1.png"
+    }
+  ]
+}

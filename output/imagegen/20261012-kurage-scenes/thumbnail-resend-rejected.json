@@ -1,0 +1,8 @@
+{
+  "revision": 965,
+  "error": "{\"code\":\"command_failed\",\"message\":\"背景・各シーンの画像を確定してから、サムネイルを最後に要求してください。\"}",
+  "projectId": "{B0D28F94-242A-41D0-A527-882802487812}",
+  "command": "app-script-request-scene-image",
+  "at": "2026-10-12T20:44:21.8357796+09:00",
+  "sceneId": "thumbnail"
+}

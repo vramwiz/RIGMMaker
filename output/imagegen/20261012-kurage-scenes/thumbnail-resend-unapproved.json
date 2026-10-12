@@ -1,0 +1,62 @@
+[
+  {
+    "sceneNumber": 4,
+    "title": "男子生徒がサボるために",
+    "displayMode": "image",
+    "hasImage": true
+  },
+  {
+    "sceneNumber": 5,
+    "title": "男子生徒もニッコリ ",
+    "displayMode": "image",
+    "hasImage": true
+  },
+  {
+    "sceneNumber": 7,
+    "title": "かなり高度な妄想シーン",
+    "displayMode": "image",
+    "hasImage": true
+  },
+  {
+    "sceneNumber": 8,
+    "title": "何にもできません",
+    "displayMode": "image",
+    "hasImage": true
+  },
+  {
+    "sceneNumber": 9,
+    "title": "生徒をやりすごす先生",
+    "displayMode": "image",
+    "hasImage": true
+  },
+  {
+    "sceneNumber": 10,
+    "title": "本当は恥ずかしい",
+    "displayMode": "image",
+    "hasImage": true
+  },
+  {
+    "sceneNumber": 11,
+    "title": "保健室に居る女先生",
+    "displayMode": "image",
+    "hasImage": true
+  },
+  {
+    "sceneNumber": 12,
+    "title": "男子高校生",
+    "displayMode": "image",
+    "hasImage": true
+  },
+  {
+    "sceneNumber": 13,
+    "title": "総評",
+    "displayMode": "image",
+    "hasImage": false
+  },
+  {
+    "sceneNumber": 14,
+    "title": "最後に",
+    "displayMode": "none",
+    "hasImage": false
+  }
+]

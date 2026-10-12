@@ -24,6 +24,7 @@
 | 共通背景・必須サムネイルと動画編集への移動 | 内蔵imagegenで作成・採用後、ユーザーが確定して動画編集へ移動。保存資産を照合。サムネイルのチェックが一度で反映されない症状は未修正 | [雪景色と最終サムネイル](RIGM/20261011-soreyuki-scenes/background-thumbnail/learning_record.json) |
 | 漫画紹介の人物を統一したシーン画像・背景・最後のロゴサムネイル | 全44行を先に読み、内蔵imagegenで全11シーン・背景・サムネイルを作成・パイプ採用・保存。原本・管理コピー・保存資産のSHAを照合。後続の色・ロゴ修正後、背景・通常シーン・サムネイルの人間確定を確認 | [異世界「嘘」ガイド](RIGM/20261012-isekai-uso-scenes/learning_record.json)、[背景・総評・サムネイル](RIGM/20261012-isekai-uso-scenes/additional/learning_record.json) |
 | サムネイルのきりたんの色・ロゴの視認性 | 原画を参照して色を修正し、ロゴ背面へ濃色パネルを追加して採用・保存。ユーザーが画像を採用。次回は棒立ちにせず、場面に合う表情・ポーズを付ける制作ルールへ更新 | [きりたんの差し替えとロゴ背面](RIGM/20261012-isekai-uso-scenes/additional/thumbnail-fix/learning_record.json) |
+| 男子校のくらげ先生のシーン画像と共通背景 | 全44行を先読みし、公式参照と人物基準画像で統一。10シーンと背景を採用・保存後、10/13にロゴ画像を最終発話シーン「最後に」へ送信・保存。全通常シーンと背景の人間確定後、専用サムネイル欄にも送信・保存。字幕・音声・通常シーン・確定状態の保持と画像SHA一致を確認。サムネイル自体のチェックは未確定 | [男子校のくらげ先生](RIGM/20261012-kurage-scenes/learning_record.json)、[サムネイル生成](RIGM/20261012-kurage-scenes/thumbnail_learning_record.json)、[最終シーンへ送信](RIGM/20261012-kurage-scenes/last_scene_delivery_20261013.json)、[専用サムネイル欄へ送信](RIGM/20261012-kurage-scenes/thumbnail_delivery_20261013.json) |
 
 原画の両目の髪除去、両眉・口の周囲透明化の成功は、各 [目](AIArtToPSD/Sample/eyes_no_hair_20261001/README.md)・[眉](AIArtToPSD/Sample/brows_only_20261001/README.md)・[口](AIArtToPSD/Sample/mouth_only_20261001/README.md) の制作記録にも保存されている。
 過去の失敗・途中結果も原文の評価とともに保持した。制作時の一般ルールは [RIGM 用パーツ分解](../制作手順/パーツ分解.md) と [差分作成](../制作手順/差分作成.md) を使う。
