@@ -1,8 +1,0 @@
-Use case: illustration-story
-Asset type: character introduction illustration, Japanese manga video, 16:9 landscape, target 1920x1080.
-Primary request: 女騎士。
-References: image 1 provides the previous scene's cozy apartment, warm evening light and manga/anime rendering. Image 2 provides the exact established identity of Maribel: adult woman in her early twenties, long blonde hair with side braid and blue ribbon, blue eyes, blue undersuit, intricate practical silver plate armor with subtle gold details. Preserve that identity.
-Scene: a dignified but approachable portrait of Maribel standing comfortably in the same modern Japanese apartment, one relaxed gauntleted hand resting near the belt of her sheathed sword, friendly confident smile. Her polished armor contrasts charmingly with the modest domestic setting.
-Composition: waist-up to mid-thigh three-quarter portrait, face clearly visible, clean silhouette, balanced wide composition with soft interior detail. Only Maribel, no dining action.
-Style: polished full-color manga/anime illustration, clean precise linework, soft cel shading, warm lighting consistent with prior scenes.
-Constraints: fully covered practical armor, no other characters, no food close-up, no text, captions, labels, speech bubbles, logos or watermark.

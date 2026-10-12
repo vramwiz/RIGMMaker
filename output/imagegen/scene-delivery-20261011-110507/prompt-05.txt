@@ -1,8 +1,0 @@
-Use case: illustration-story
-Asset type: appetizing food scene for a Japanese manga introduction, landscape 16:9, target 1920x1080.
-Primary request: おにぎりとだし巻き玉子と味噌汁。
-Reference image 1: continuity reference for the warm wooden dining table, handmade Japanese ceramics, golden evening lighting and polished full-color manga/anime food rendering. Create a NEW close-up food still life; do not include the people.
-Food: a carefully arranged plate of triangular onigiri rice balls, short nori seaweed wraps, individual rice grains visible; a small rectangular ceramic plate of sliced Japanese dashimaki tamago with soft layered golden egg; a dark lacquer bowl of gently steaming miso soup with tofu, wakame and chopped green onion. Wooden chopsticks neatly beside the dishes. Accurate everyday Japanese home cooking, fresh and delicious.
-Composition: slightly elevated three-quarter close-up of the complete meal on the same wooden table, all three requested dishes clearly recognizable and unobscured, subtle softly blurred apartment background.
-Style: warm full-color gourmet manga/anime illustration, clean linework, soft cel shading, painterly detailed food textures, not a photograph.
-Constraints: no people or hands, no extra main dishes, no alcohol, no text, labels, logos, captions or watermark.

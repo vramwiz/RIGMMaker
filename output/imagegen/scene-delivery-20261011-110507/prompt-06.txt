@@ -1,8 +1,0 @@
-Use case: illustration-story
-Asset type: gourmet food scene for Japanese manga introduction, landscape 16:9, target 1920x1080.
-Primary request: とん平焼きとビール。
-Reference image 1: continue the previous food scene's wooden table, dark woven placemat, handmade Japanese ceramics, warm evening apartment light and clean full-color manga/anime rendering. Create a NEW still life with only the newly requested food and drink.
-Food: authentic Japanese tonpeiyaki, a soft golden egg omelet wrapped around sauteed pork and shredded cabbage, on a ceramic plate. One cut opening clearly shows the pork and cabbage filling. Rich brown tonkatsu-style sauce and thin mayonnaise zigzags on top, a sprinkle of green aonori and fine bonito flakes, steam rising. Beside it a clear glass of amber beer with a creamy white foam head and cold condensation.
-Composition: inviting three-quarter close-up, the complete omelet plate and beer glass both fully visible, simple cozy dining background with soft blur.
-Style: polished full-color gourmet manga/anime illustration, clean linework and softly shaded richly detailed appetizing textures; consistent with previous scene, not a photograph.
-Constraints: no rice balls or miso soup in this scene, no people or hands, no readable labels, text, logos, captions or watermark.

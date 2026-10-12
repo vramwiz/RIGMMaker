@@ -9,6 +9,12 @@
 - 起動プロジェクトはRIGMMaker.dpr、現在のメインフォームはSource/Shell/RigmWizardMainForm.pas。
 - キャラクターは.rigm、動画作品は.rigmovieとして管理する。形式と編集仕様は[RIGM仕様](RIGM仕様.md)と[編集仕様](RIGM_Maker_編集仕様.md)を参照する。
 
+## Gitの管理対象
+
+GitHubへ同期するのはソース、ビルド設定、文書、再利用する制作手順・学習記録とする。画像・音声・動画、`.rigm`・`.rigmovie`と付属素材は、`Sample`・`サンプル`配下も含めて`.gitignore`で除外する。
+
+`output/`の生成・検証結果、`制作支援/制作物/`の作業データ、ビルド生成物、端末固有の`VoicevoxEngine.ini`もローカルで管理する。ビルドに必要な`RIGMMaker.res`とFFmpegのライセンス文書・manifestはGitへ残す。既に追跡されている不要なファイルは`git rm --cached`で追跡だけを解除し、ローカルの実ファイルを保持する。
+
 ## 制作とデータ
 
 Codexの指示とGUIの調整は共通のモデル・処理を使う。対象は固定IDで識別し、現在のprojectId・revision・要求IDを取得してから適用する。過去の要求・パーツID・接続情報を新しい作品へ再送しない。

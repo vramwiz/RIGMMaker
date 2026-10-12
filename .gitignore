@@ -1,31 +1,72 @@
-# Images outside sample folders are local assets.
-*.png
-*.jpg
-*.jpeg
-*.jpe
-*.jfif
-*.bmp
-*.dib
-*.gif
-*.webp
-*.ico
-*.svg
-*.tif
-*.tiff
-*.avif
-*.heic
-*.heif
-*.tga
-*.psd
-*.psb
-!**/[Ss]ample*/**
-!**/サンプル*/**
+# Media are local assets, including Sample and サンプル folders.
+# Match mixed-case extensions on every platform.
+*.[pP][nN][gG]
+*.[jJ][pP][gG]
+*.[jJ][pP][eE][gG]
+*.[jJ][pP][eE]
+*.[jJ][fF][iI][fF]
+*.[bB][mM][pP]
+*.[dD][iI][bB]
+*.[gG][iI][fF]
+*.[wW][eE][bB][pP]
+*.[iI][cC][oO]
+*.[sS][vV][gG]
+*.[tT][iI][fF]
+*.[tT][iI][fF][fF]
+*.[aA][vV][iI][fF]
+*.[hH][eE][iI][cC]
+*.[hH][eE][iI][fF]
+*.[tT][gG][aA]
+*.[pP][sS][dD]
+*.[pP][sS][bB]
+*.[xX][cC][fF]
+*.[kK][rR][aA]
+*.[wW][aA][vV]
+*.[mM][pP]3
+*.[oO][gG][gG]
+*.[oO][gG][aA]
+*.[fF][lL][aA][cC]
+*.[mM]4[aA]
+*.[aA][aA][cC]
+*.[wW][mM][aA]
+*.[oO][pP][uU][sS]
+*.[aA][iI][fF]
+*.[aA][iI][fF][fF]
+*.[lL][aA][bB]
+*.[mM][pP]4
+*.[mM]4[vV]
+*.[mM][oO][vV]
+*.[aA][vV][iI]
+*.[mM][kK][vV]
+*.[wW][eE][bB][mM]
+*.[wW][mM][vV]
+*.[mM][pP][eE][gG]
+*.[mM][pP][gG]
+
+# Character/movie projects, their embedded assets and cached thumbnails.
+*.[rR][iI][gG][mM]
+*.[rR][iI][gG][mM][oO][vV][iI][eE]
+*.assets/
+*.[tT][hH][uU][mM][bB]
+*.rigmovie.lock
+
+# Downloaded or packaged binary artifacts.
+*.[zZ][iI][pP]
+*.7z
+*.[rR][aA][rR]
+*.[tT][aA][rR]
+*.[gG][zZ]
 
 # Experimental projects, production trials, and runtime caches.
 /Tests/
 /RIGMMaker/
 /制作成果/
 /制作素材/
+/output/
+/制作支援/制作物/
+
+# Machine-specific VOICEVOX executable path.
+/VoicevoxEngine.ini
 
 # Delphi build and editor artifacts (including sample builds).
 *.~*
@@ -40,6 +81,20 @@ __recovery/
 *.map
 *.tds
 *.dsk
+*.dll
+*.bpl
+*.dcp
+*.obj
+*.lib
+*.pdb
+*.drc
+*.res
+# The application icon/version resource is required by RIGMMaker.dpr.
+!/RIGMMaker.res
+
+__pycache__/
+*.pyc
+*.pyo
 
 Debug/
 Release/
@@ -47,9 +102,6 @@ Win32/
 Win64/
 
 # Third-party DLLs are packaged locally by Setup/Prepare-FFmpegRuntime.ps1.
-/Runtime/FFmpeg/*.dll
+# Keep Runtime/FFmpeg license notices and its manifest under version control.
 
 .DS_Store
-
-# RIGM character packages are local assets, including sample folders.
-*.[rR][iI][gG][mM]

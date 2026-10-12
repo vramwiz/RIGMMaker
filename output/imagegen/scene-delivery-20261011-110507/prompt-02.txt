@@ -1,8 +1,0 @@
-Use case: illustration-story
-Asset type: 16:9 landscape scene for a Japanese manga introduction, target 1920x1080.
-Primary request: 女騎士マリベルが異世界からマンションにやってくる。
-References: image 1 establishes the previous scene's modern Japanese apartment, warm lighting and illustration style; image 2 establishes Maribel's exact adult face, blonde braided long hair, blue eyes, blue undersuit and silver armor. Use these as continuity references, create a NEW scene.
-Scene: the apartment entrance and corridor at evening. Adult knight Maribel, early twenties, has just stepped from a softly glowing blue magical doorway into an ordinary Japanese apartment. She looks curiously around, slightly weary after an adventure, carrying a sheathed sword at her side. Her armor remains practical, fully covered and undamaged. Through the blue threshold a distant green fantasy landscape is faintly visible.
-Composition: three-quarter full-body environmental shot, emphasize the surprising meeting of a normal apartment and a fantasy knight; face clear, doorway understandable, no other people.
-Style: polished full-color manga/anime illustration, clean linework, soft cel shading, detailed domestic setting, warm and welcoming rather than ominous.
-Constraints: no writing, title, captions, speech bubbles, logos, watermark or gore.
