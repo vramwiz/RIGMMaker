@@ -4,6 +4,10 @@ RIGMキャラクターの編集と、台本・音声・字幕・シーン画像�
 
 [基本事項・ビルド](note-basics.md) ／ [課題の詳細](note-tasks.md) ／ [開発履歴](note-history.md)
 
+## 今後の方針
+
+今回確認した「アプリのボタン操作で専用Codexを起動し、入力内容をパイプで送り、生成結果や画像の保存先を受信する」機能を利用して、今後は制作工程の複数段階でAI操作を行えるようにする。対象の段階・操作内容・導入順序は今後決め、段階ごとに検証して本編へ組み込む。現時点では独立テストで画像生成・受信・表示まで確認済みで、本編への組込みは未実施。[検証結果とテストプロジェクト](Source/Diagnostics/CodexPipeProbe/README.md)を参照する。
+
 ## 対応すべき課題
 
 | 課題 | 状態 |
@@ -32,6 +36,7 @@ RIGMキャラクターの編集と、台本・音声・字幕・シーン画像�
 | 投稿用タイトル・概要・親作品とコピー | [投稿欄・初期値・保存](Source/Studio/Views/Editor/MOVIE-POSTING-20261011.md) |
 | MP4単体出力・同梱DLL | [配置・エンコード・検証](Source/Studio/Output/MP4-RUNTIME-20261010.md) |
 | パイプ通信 | [パイプ手順](制作支援/パイプ/README.md) |
+| ボタンからCodexを起動する独立テスト | [1フォーム・2送信ボタン・画像生成/受信/表示の結果](Source/Diagnostics/CodexPipeProbe/README.md) |
 | 台本制作の画面・工程移動・VOICEVOX調整・動画からの復帰 | [工程リスト・入力とちらつき抑制・設定・保存・復帰](Source/Shell/Pages/SCRIPT-NAVIGATION-20261009.md) |
 | 台本一覧から本文を除いてコピー | [コピー対象・操作・保存](Source/Shell/Pages/SCRIPT-COPY-20261012.md) |
 | 作品情報・掘り下げ確認 | [第6段階の画面・通信・保存](Source/Shell/Pages/SCRIPT-RESEARCH-20261009.md) |

@@ -1740,3 +1740,25 @@ VOICEVOXのアクセント位置変更は従来どおりqueryを即時保存し�
 画像・音声・動画と制作プロジェクトをSample・サンプル配下も含めてGitから除外し、拡張子の大文字小文字にも対応した。output/の生成・検証結果、制作支援/制作物/の作業データ、端末固有のVoicevoxEngine.ini、ビルド生成物も同期対象外とする。既存の不要な追跡959ファイルはgit rm --cachedで追跡だけを解除し、ローカルの実ファイルを保持した。ソース、文書、再利用する制作手順・学習記録、ビルドに必要なRIGMMaker.res、FFmpegのライセンス文書・manifestは維持する。
 
 除外する素材と残すソース・資料の35条件を検証し、追跡解除対象959ファイルについて整理前後のSHA-256一致を確認した。追跡対象は1716から757ファイルになった。アプリのコード・実行ファイル・作品データを変更しないため、製品ビルドは行わない。GitHubは通常のコミット・pushで整理し、過去のコミット履歴は保持する。開始時の追跡一覧・ハッシュと検証結果はローカルのoutput/maintenance/20261013-git-cleanupへ保持する。
+
+## 2026-10-13 ボタン操作によるCodex発火の独立テスト
+
+ユーザー指定により本編へ組み込まず、Source/Diagnostics/CodexPipeProbeへ独立したDelphi VCLプロジェクトを追加した。既存検証プロジェクトは本編のモデル・画面への依存が大きいため再利用しなかった。フォーム1つ、入力TEdit、専用Codex/既存Codexの2送信ボタン、出力TEditと状態・ログパスを置いた。通常起動で自動送信はしない。
+
+専用ボタンはcodex app-server --listen stdio://を起動し、Windowsの標準入出力パイプでinitialize、initialized、thread/start、turn/startを送信する。実モデルから日本語「パイプ接続成功」を受信し、別入力「海辺の図書館」を含む一文でも往復成功した。最終版も同じボタンのClickを使い、turn/completedのcompleted、空でない最終回答、出力TEditの実文字列、フォーム数1を確認した。固定回答による模擬処理ではない。既存のChatGPTログインを使用し、APIキーやユーザー設定は変更していない。
+
+既存ボタンはこの端末のCLI 0.162.0-alpha.17.2に含まれるapp-server proxyを使い、標準の制御ソケットへ接続を試す。os error 10050で終了し、初期化応答・セッション作成・プロンプト送信には到達しなかった。既存デスクトップチャットの自動発火には成功しておらず、アプリの停止や全ての接続方式が不可能だと断定しない。公式ディープリンクは入力欄の準備だけで自動送信しない。本編の名前付き待受パイプとは、呼出方向・接続先・プロトコルを区別する。
+
+専用dprojをRAD Studio 37の環境でMSBuildし、Win64 Debug/Releaseとも警告0・エラー0。git diff --checkと追加ソースの末尾空白確認を実施。本編のコード・dproj・EXE・実作品は変更しないため本編の再ビルド・配置は行わない。画面に対する物理マウス操作は未実施。途中の描画取得試行はネイティブ子コントロールを正しく取得できず、画像を表示検証の成功証拠には使わなかった。最終コードから画像取得機能は外した。
+
+実行ファイルは現在の作業ルートのWin64/CodexPipeProbe/Release/CodexPipeProbe.exe。使い方・接続の限界・再実行手順は[テストプロジェクトのREADME](Source/Diagnostics/CodexPipeProbe/README.md)。結果JSON・生成APIスキーマはoutput/validation/20261013-codex-pipe、ビルドログ・通信ログはWin64/CodexPipeProbe以下にローカル保持しGitには含めない。現在のこのチャットへ再帰送信したり、他の既存チャットを変更したりはしていない。
+
+## 2026-10-13 専用Codexの画像生成・パイプ受信・PaintBox表示を確認
+
+独立テストの出力TEditを画像表示TPaintBoxへ変更した。入力TEditの文を専用Codexのturn/startへ送り、内蔵画像生成ツールの正式なimageGeneration完了通知を受信する。savedPathがある場合は生成画像を今回の実行フォルダへコピーし、保存先がなくBase64データが返る場合は復号する。フォームがPNG/JPEG/BMPを読み込み、縦横比を保ってPaintBoxで表示する。生成完了・turn正常完了・画像受信・復号・表示中のPaintイベントまでを成功条件とし、文章回答だけでは成功にしない。本編へは組み込まない。
+
+同じ送信ボタンのClickから「青い空と海辺の小さな図書館。絵本風のイラスト。文字は入れない。」を実際の専用Codexへ送信した。内蔵ツールが1536×1024、3,330,788バイトのPNGを生成し、正式通知の保存先からコピー、読込、PaintBox描画に成功。フォーム数1、TEdit入力、TPaintBox出力、success/transportSuccess/imageGenerated/imageLoaded/imagePainted/windowVisibleがすべてtrue。生成元と受信コピーのSHA256はd806d7329109f82f5a36f6e6ee0d3748ca7b4475334fbf5f2815c2844475b7ceで一致した。共通描画関数のプレビューPNGを目視し、海・青空・図書館の表示を確認。画面全体のスクリーンショットや物理マウス操作による確認とは区別する。親チャットで代わりに生成した画像や模擬画像を成功証拠にしていない。
+
+画像通知に4,441,052文字のBase64が含まれるため、通信の1行上限を4MBから64MBへ変更した。画像データ本体はログから省き、生成状態・保存先・ID・データ長を残す。画像生成の待機上限は10分。確認用一時セッションのimage_generation機能を有効にし、既存のChatGPTログインを使用する。ユーザー設定やAPIキー、既存作品は変更しない。
+
+途中ビルドではSHA256関数のオーバーロードとWindows/VCLのTBitmap名の衝突を修正した。最終の専用dprojによるWin64 Debug/Releaseは警告0・エラー0。git diff --checkと追加ソースの末尾空白を確認。本編のコード・プロジェクト・EXEの変更や再ビルドは行わない。使い方と確認範囲はSource/Diagnostics/CodexPipeProbe/README.md。証跡はoutput/validation/20261013-codex-pipe/image-generation-result.json、同.preview.png、各実行フォルダのprotocol.logとreceived-image.png。生成物はすべてGit同期対象外に保持する。
