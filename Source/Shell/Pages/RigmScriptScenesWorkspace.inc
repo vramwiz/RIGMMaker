@@ -184,26 +184,7 @@ function TRigmWizardWorkspace.ReadScriptScenes(Args: TJSONObject): TJSONObject;
     if JS(R,'state')='pending' then Current := Current and
       (JI(R,'width',FScriptDraft.Width)=FScriptDraft.Width) and (JI(R,'height',FScriptDraft.Height)=FScriptDraft.Height);
     if Current and (Id=RigmThumbnailId) and (Request.GetValue('sources') is TJSONObject) then
-      for var V in JA(JO(Request,'sources'),'characters') do begin
-        var C := TJSONObject(V); var Entry := Thumbnails.Request(JS(C,'path'));
-        AddB(C,'previewReady',(Entry<>nil) and (Entry.Width>0) and (Entry.Height>0) and (Length(Entry.Pixels)=Entry.Width*Entry.Height*4));
-        if (Entry=nil) or (Entry.Width<1) or (Entry.Height<1) or (Length(Entry.Pixels)<>Entry.Width*Entry.Height*4) then Continue;
-        var FileName := FPipe.Workspace.Resolve('Cache\ScriptThumbnailRefs\'+THashSHA2.GetHashString(JS(C,'path')+'|'+Entry.Signature)+'.png',False);
-        if not FileExists(FileName) then begin
-          ForceDirectories(ExtractFilePath(FileName)); var Png := TPngImage.CreateBlank(COLOR_RGBALPHA,8,Entry.Width,Entry.Height);
-          try
-            for var Y := 0 to Entry.Height-1 do begin
-              var Pixels := PByte(Png.Scanline[Y]); var Alpha := Png.AlphaScanline[Y];
-              for var X := 0 to Entry.Width-1 do begin
-                var Source := (Y*Entry.Width+X)*4;
-                for var Ch := 0 to 2 do Pixels[X*3+Ch] := Entry.Pixels[Source+Ch]; Alpha[X] := Entry.Pixels[Source+3];
-              end;
-            end;
-            Png.SaveToFile(FileName);
-          finally Png.Free; end;
-        end;
-        C.AddPair('previewPath',FileName);
-      end;
+      AddScriptImageCharacterPreviews(JO(Request,'sources'));
     AddB(Request,'current',Current); Row.AddPair('imageRequest',Request); Request := nil;
     finally Request.Free; end;
   end;

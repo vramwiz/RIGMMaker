@@ -18,6 +18,11 @@ type
     FFace: TComboBox; FFacePanel: TPanel; FFaceDetails: TScrollBox; FFaceToggle: TButton;
     FFaceAssets: TJSONObject; // 所有。Workspaceの素材キャッシュから複製する。
     FFaceDetailKey: string;
+    FExpressionAiButton,FExpressionAiCancel: TButton;
+    FExpressionAiPanel: TPanel; FExpressionAiStatus: TLabel; FExpressionAiProgress: TProgressBar;
+    procedure StartExpressionAi(Sender: TObject);
+    procedure CancelExpressionAi(Sender: TObject);
+    procedure RefreshExpressionAi;
     procedure FaceChanged(Sender: TObject);
     procedure FacePartChanged(Sender: TObject);
     procedure ToggleFaceDetails(Sender: TObject);
@@ -168,6 +173,22 @@ begin
   FFace := TComboBox.Create(Self); FFace.Parent := FFacePanel; FFace.Align := alClient; FFace.Style := csDropDownList;
   FFace.Name := 'ScriptCastingFace'; FFace.OnChange := FaceChanged; FFace.Items.Add('自動（セリフから判定）');
   for var LabelText in MovieEmotionLabels do FFace.Items.Add(LabelText);
+  FExpressionAiPanel := TPanel.Create(Self); FExpressionAiPanel.Parent := Self; FExpressionAiPanel.Align := alTop;
+  FExpressionAiPanel.BevelOuter := bvNone; FExpressionAiPanel.Caption := ''; FExpressionAiPanel.Height := ScaleValue(48);
+  FExpressionAiPanel.Top := FFacePanel.Top+FFacePanel.Height;
+  FExpressionAiButton := TButton.Create(Self); FExpressionAiButton.Parent := FExpressionAiPanel; FExpressionAiButton.Align := alLeft;
+  FExpressionAiButton.Width := ScaleValue(260); FExpressionAiButton.Caption := 'AIで全セリフの表情を設定';
+  FExpressionAiButton.Name := 'ScriptCastingExpressionAi'; FExpressionAiButton.OnClick := StartExpressionAi;
+  FExpressionAiCancel := TButton.Create(Self); FExpressionAiCancel.Parent := FExpressionAiPanel; FExpressionAiCancel.Align := alRight;
+  FExpressionAiCancel.Width := ScaleValue(80); FExpressionAiCancel.Caption := '中止'; FExpressionAiCancel.Visible := False;
+  FExpressionAiCancel.Name := 'ScriptCastingExpressionAiCancel'; FExpressionAiCancel.OnClick := CancelExpressionAi;
+  FExpressionAiProgress := TProgressBar.Create(Self); FExpressionAiProgress.Parent := FExpressionAiPanel;
+  FExpressionAiProgress.Align := alRight; FExpressionAiProgress.Width := ScaleValue(90);
+  FExpressionAiProgress.Style := pbstMarquee; FExpressionAiProgress.MarqueeInterval := 40; FExpressionAiProgress.Visible := False;
+  FExpressionAiProgress.Name := 'ScriptCastingExpressionAiProgress';
+  FExpressionAiStatus := TRigmScriptLabel.Create(Self); FExpressionAiStatus.Parent := FExpressionAiPanel;
+  FExpressionAiStatus.Align := alClient; FExpressionAiStatus.AutoSize := False; FExpressionAiStatus.WordWrap := True;
+  FExpressionAiStatus.Layout := tlCenter; FExpressionAiStatus.Name := 'ScriptCastingExpressionAiStatus';
   FGuide := TRigmScriptLabel.Create(Self); FGuide.Parent := Self; FGuide.Align := alBottom; FGuide.AutoSize := False;
   FGuide.WordWrap := True; FGuide.Height := ScaleValue(76); FGuide.Name := 'ScriptCastingGuide';
   var Detail := TPanel.Create(Self); Detail.Parent := Self; Detail.Align := alBottom; Detail.Height := ScaleValue(174); Detail.Caption := ''; Detail.BevelOuter := bvNone;
@@ -445,7 +466,7 @@ begin
         end;
       end;
       if (Rebuild or SelectionChanged) and (FList.Selected<>nil) then FList.Selected.MakeVisible(False);
-      FSelectedCue := JS(Cast,'selectedCue'); RefreshVoiceBindings; RefreshFace;
+      FSelectedCue := JS(Cast,'selectedCue'); RefreshVoiceBindings; RefreshFace; RefreshExpressionAi;
       var Summary := ScriptCastingSummary(FWorkspace.ScriptDraft);
       try
         var Guide := '↑↓：セリフ移動 / 1～9：キャラを指定して次へ / Enter：現在の配役を確認して次へ。'+#13#10+
@@ -461,4 +482,23 @@ begin
 end;
 procedure TRigmScriptCastingFrame.SetActive(Value: Boolean);
 begin FConnection.SetActive(Value); if Value then RefreshState; end;
+procedure TRigmScriptCastingFrame.StartExpressionAi(Sender: TObject);
+begin
+  try if RequestFinish then FWorkspace.StartExpressionAi;
+  except on E: Exception do begin RefreshState; FExpressionAiStatus.Caption := E.Message; Exit; end; end;
+  RefreshState;
+end;
+procedure TRigmScriptCastingFrame.CancelExpressionAi(Sender: TObject);
+begin FWorkspace.CancelExpressionAi; RefreshState; end;
+procedure TRigmScriptCastingFrame.RefreshExpressionAi;
+begin
+  var Busy := FWorkspace.ExpressionAiBusy;
+  FExpressionAiButton.Enabled := not Busy and (FList.Items.Count>0);
+  FExpressionAiCancel.Visible := Busy; FExpressionAiProgress.Visible := Busy;
+  if Busy then FExpressionAiProgress.Style := pbstMarquee else FExpressionAiProgress.Style := pbstNormal;
+  FExpressionAiStatus.Caption := FWorkspace.ExpressionAiMessage;
+  if FExpressionAiStatus.Caption='' then FExpressionAiStatus.Caption := '映像の表情だけを一括設定します。声・音声は保持します。';
+  FExpressionAiStatus.Hint := FExpressionAiStatus.Caption; FExpressionAiStatus.ShowHint := True;
+  FFace.Enabled := not Busy and (FWorkspace.ScriptDraft.Cue(FSelectedCue)<>nil); FFaceDetails.Enabled := not Busy;
+end;
 end.

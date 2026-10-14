@@ -3,7 +3,7 @@
 // 台本/動画ページ共通の既存Session所有者。UIを作らず、ページより長く生存する。
 interface
 uses System.Classes, System.SysUtils, System.JSON, System.Generics.Collections, Vcl.ExtCtrls,
-  RigmMovieSession, RigmMovieModel, RigmPageNavigation, RigmWizardPipe, ArtPipeProtocol, RigmThumbnailCache, RigmMovieJobs, RigmMovieImageTransfer, Vcl.Graphics;
+  RigmMovieSession, RigmMovieModel, RigmPageNavigation, RigmWizardPipe, ArtPipeProtocol, RigmThumbnailCache, RigmMovieJobs, RigmMovieImageTransfer, Vcl.Graphics, RigmCodexClient, RigmScriptAiExpressions;
 type
   TRigmWizardWorkspace = class(TComponent)
   private
@@ -31,6 +31,16 @@ type
     FScriptTransfers: TRigmImageTransfers; FSceneContracts: TObjectDictionary<string,TJSONObject>;
     FSceneJob: TRigmMovieJob; FSceneCollected: Boolean; FSceneRetired: TObjectList<TRigmMovieJob>;
     FSceneBitmap: TBitmap; FSceneJobKey,FSceneFrameKey,FScenePreviewPath,FSceneError: string;
+    FExpressionAiJob: TRigmCodexJob; FExpressionAiRequest: TJSONObject; // 所有。画面より長く生存する一括判定。
+    FExpressionAiProjectId,FExpressionAiMessage,FExpressionAiLog,FExpressionAiCancel: string;
+    FImageAiJob: TRigmCodexJob; FImageAiTargets: TJSONArray; FImageAiRequest: TJSONObject;
+    FImageAiProjectId,FImageAiMessage,FImageAiLog,FImageAiCancel: string;
+    FImageAiIndex,FImageAiCompleted: Integer; FImageAiPreparedAt: UInt64;
+    procedure PollExpressionAi;
+    procedure PollSceneImageAi;
+    procedure PrepareSceneImageAi;
+    procedure AddScriptImageCharacterPreviews(Sources: TJSONObject);
+    procedure FinishSceneImageAi(const Message: string);
     function GetScriptTextEditing: Boolean;
     procedure PollScriptScenes;
     function ScenePreviewKey: string;
@@ -103,6 +113,11 @@ type
     procedure SetVoiceState(const CueId: string; StyleId: Integer);
     function CastingExpressionAssets(const CueId: string): TJSONObject; // 借用。素材更新時に再取得。
     procedure SetExpression(const CueId,Expression: string; Variants: TJSONArray=nil);
+    procedure StartExpressionAi; // 全配役セリフを1回のAI要求にまとめ、非同期で判定する。
+    procedure CancelExpressionAi;
+    function ExpressionAiBusy: Boolean;
+    function ExpressionAiMessage: string;
+    property ExpressionAiLogPath: string read FExpressionAiLog;
     procedure SaveCharacterVoice(Number: Integer);
     procedure GenerateVoice(const CueId: string; Play: Boolean; ForSequence: Boolean=False);
     procedure StartVoiceContinuous(const CueId: string);
@@ -132,6 +147,11 @@ type
     procedure EditScriptScene(const Id,Description,Prompt,Mode: string; const Position: string='');
     procedure AdoptScriptSceneImage(const Id,Path: string);
     procedure RequestScriptSceneImage(const Id: string);
+    procedure StartSceneImageAi(const Id: string=''); // 空IDは要望のある未確定画像を順に生成。
+    procedure CancelSceneImageAi;
+    function SceneImageAiBusy: Boolean;
+    function SceneImageAiMessage: string;
+    property SceneImageAiLogPath: string read FImageAiLog;
     procedure CancelScriptSceneImage(const Id: string);
     procedure UpdateScriptSceneInputs(Inputs: TJSONArray);
     procedure SetScriptSceneApproved(const Id: string; Value: Boolean); // GUI checkbox only; pipes cannot unlock.
@@ -192,7 +212,7 @@ type
 implementation
 uses RigmScriptCopyModel, RigmVoiceEffects, RigmVoiceEffectSettings, System.IOUtils, System.Math, System.DateUtils, System.StrUtils, Winapi.Windows, RigmJson, RigmAppSettings, PsdSession,
   PsdCharacter, PsdJson, PsdPackage, PsdProduction, RigmEditor, PsdImport, RigmStorage,
-  System.Hash, ArtDocument, PsdWorkspace, RigmCharacterCatalog, RigmMovieLayout, RigmScriptPlacementModel, RigmScriptNavigationModel, RigmScriptTextModel, RigmScriptReviewModel, RigmScriptResearchModel, RigmScriptCastingModel, RigmScriptSubtitleModel, RigmScriptVoiceModel, RigmScriptVoiceSelection, System.SyncObjs, Winapi.MMSystem, RigmScriptScenesModel, RigmScriptSceneAssignmentModel, RigmScriptSummaryModel, RigmScriptClosingModel, RigmMovieCompositor, RigmMovieWorkspace, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, RigmScriptTypes, RigmScriptConfirmationModel, RigmScriptThumbnailModel;
+  System.Hash, ArtDocument, PsdWorkspace, RigmCharacterCatalog, RigmMovieLayout, RigmScriptPlacementModel, RigmScriptNavigationModel, RigmScriptTextModel, RigmScriptReviewModel, RigmScriptResearchModel, RigmScriptCastingModel, RigmScriptSubtitleModel, RigmScriptVoiceModel, RigmScriptVoiceSelection, System.SyncObjs, Winapi.MMSystem, RigmScriptScenesModel, RigmScriptSceneAssignmentModel, RigmScriptSummaryModel, RigmScriptClosingModel, RigmMovieCompositor, RigmMovieWorkspace, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, RigmScriptTypes, RigmScriptConfirmationModel, RigmScriptThumbnailModel, RigmScriptAiImages;
 constructor TRigmWizardWorkspace.Create(AOwner: TComponent);
 begin
   inherited; FSessions := TObjectList<TRigmMovieSession>.Create(True);
@@ -202,7 +222,7 @@ begin
   FTimer := TTimer.Create(Self); FTimer.Interval := 150; FTimer.OnTimer := Poll;
 end;
 destructor TRigmWizardWorkspace.Destroy;
-begin FTimer.Enabled := False; StopVoice; FSceneJob.Free; FSceneRetired.Free; FSceneBitmap.Free; FSceneContracts.Free; FScriptTransfers.Free; FVoiceJob.Free; FVoiceBindings.Free; FVoiceCatalog.Free; FExpressionAssets.Free; FThumbnails.Free; FPipe.Free; FScriptSavedHashes.Free; FScriptDrafts.Free; FSessions.Free; inherited; end;
+begin FTimer.Enabled := False; FImageAiJob.Free; FImageAiTargets.Free; FImageAiRequest.Free; FExpressionAiJob.Free; FExpressionAiRequest.Free; StopVoice; FSceneJob.Free; FSceneRetired.Free; FSceneBitmap.Free; FSceneContracts.Free; FScriptTransfers.Free; FVoiceJob.Free; FVoiceBindings.Free; FVoiceCatalog.Free; FExpressionAssets.Free; FThumbnails.Free; FPipe.Free; FScriptSavedHashes.Free; FScriptDrafts.Free; FSessions.Free; inherited; end;
 procedure TRigmWizardWorkspace.StartPipe(const Root: string);
 begin if FPipe=nil then FPipe := TRigmWizardPipe.Create(Root,Command); end;
 function TRigmWizardWorkspace.Command(const Name: string; Args: TJSONObject): TJSONObject;
@@ -1460,11 +1480,15 @@ begin
 end;
 procedure TRigmWizardWorkspace.Poll(Sender: TObject);
 begin
+  PollExpressionAi;
+  PollSceneImageAi;
   if (FVoiceQueryNotifyAt<>0) and (GetTickCount64>=FVoiceQueryNotifyAt) then ScriptChanged;
   if (FSceneAssignmentNotifyAt<>0) and (GetTickCount64>=FSceneAssignmentNotifyAt) then ScriptChanged;
   PollScriptVoice; PollVoicePlayback; EnsureSelectedVoice; PollScriptScenes;
   for var Session in FSessions do if Session.Busy then Session.Poll;
 end;
+{$I RigmWizardExpressionAi.inc}
+{$I RigmWizardImageAi.inc}
 function TRigmWizardWorkspace.ActiveSession: TRigmMovieSession;
 begin if FActive=nil then NewWork; Result := FActive; end;
 procedure TRigmWizardWorkspace.NewWork;

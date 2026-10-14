@@ -114,6 +114,9 @@
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
         <DCCReference Include="Source\Shell\RigmWizardMainForm.pas"/>
+        <DCCReference Include="Source\Integrations\RigmCodexClient.pas"/>
+        <DCCReference Include="Source\Studio\Model\RigmScriptAiExpressions.pas"/>
+        <DCCReference Include="Source\Studio\Model\RigmScriptAiImages.pas"/>
         <DCCReference Include="Source\Studio\Model\RigmScriptResearchModel.pas"/>
         <DCCReference Include="Source\Studio\Rendering\RigmMovieText.pas"/>
         <DCCReference Include="Source\Studio\Model\RigmMoviePosting.pas"/>

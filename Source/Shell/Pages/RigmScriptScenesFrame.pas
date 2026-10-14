@@ -3,7 +3,7 @@
 interface
 uses System.Classes, System.Generics.Collections, RigmScriptPageFrame, Vcl.Forms,
   Vcl.Controls, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Graphics, RigmWizardWorkspace,
-  RigmIconToolbar, RigmScriptTextFrame, RigmBufferedControls;
+  RigmIconToolbar, RigmScriptTextFrame, RigmBufferedControls, Vcl.ComCtrls;
 type
   TRigmScriptScenesFrame = class;
   TRigmSceneImageRow = class(TRigmBufferedPanel)
@@ -31,6 +31,12 @@ type
     FToolbar: TRigmIconToolbar;
     FHeader: TPanel;
     FHeaders: TArray<TLabel>;
+    FImageAiPanel: TPanel; FImageAiSelected,FImageAiAll,FImageAiCancel: TButton;
+    FImageAiStatus: TLabel; FImageAiProgress: TProgressBar;
+    procedure GenerateSelected(Sender: TObject);
+    procedure GenerateAll(Sender: TObject);
+    procedure StopGeneration(Sender: TObject);
+    procedure RefreshImageAi;
     procedure LayoutRows;
     procedure LayoutChanged(Sender: TObject);
     procedure Changed(Sender: TObject);
@@ -107,9 +113,27 @@ begin
   if AOwner is TWinControl then Parent := TWinControl(AOwner);
   FToolbar := TRigmIconToolbar.Create(Self); FToolbar.Parent := Self; FToolbar.Align := alTop; FToolbar.Name := 'ScriptScenesToolbar';
   FToolbar.AddIcon('ScriptSceneDone','シーン名・要望・補足文の入力を反映（Ctrl+Enter / Esc）。確定チェックとは別です',riSave,0,Done);
-  FToolbar.AddIcon('ScriptSceneRequest','未確定シーンの画像要求を準備。要望入力後、Codexへ作業を指示してください',riRefresh,0,RequestImage);
+  FToolbar.AddIcon('ScriptSceneRequest','外部操作用の画像要求だけを準備。自動生成には下の「画像を生成」ボタンを使います',riRefresh,0,RequestImage);
   FToolbar.AddIcon('ScriptSceneAdopt','選択行へ既存ローカル画像をコピーして採用',riOpen,0,Adopt);
   FToolbar.AddIcon('ScriptSceneCancel','選択行の画像要求を取り消す',riDelete,0,CancelImage);
+  FImageAiPanel := TPanel.Create(Self); FImageAiPanel.Parent := Self; FImageAiPanel.Align := alTop;
+  FImageAiPanel.Top := FToolbar.Top+FToolbar.Height; FImageAiPanel.Height := ScaleValue(64);
+  FImageAiPanel.BevelOuter := bvNone; FImageAiPanel.Caption := '';
+  FImageAiStatus := TRigmScriptLabel.Create(Self); FImageAiStatus.Parent := FImageAiPanel;
+  FImageAiStatus.Align := alBottom; FImageAiStatus.Height := ScaleValue(28); FImageAiStatus.AutoSize := False;
+  FImageAiStatus.WordWrap := True; FImageAiStatus.Layout := tlCenter; FImageAiStatus.Name := 'ScriptSceneAiStatus';
+  FImageAiSelected := TButton.Create(Self); FImageAiSelected.Parent := FImageAiPanel; FImageAiSelected.Align := alLeft;
+  FImageAiSelected.Width := ScaleValue(210); FImageAiSelected.Caption := '選択行の画像を生成';
+  FImageAiSelected.Name := 'ScriptSceneAiSelected'; FImageAiSelected.OnClick := GenerateSelected;
+  FImageAiAll := TButton.Create(Self); FImageAiAll.Parent := FImageAiPanel; FImageAiAll.Align := alLeft;
+  FImageAiAll.Left := FImageAiSelected.Width; FImageAiAll.Width := ScaleValue(230);
+  FImageAiAll.Caption := '未確定画像を順に生成'; FImageAiAll.Name := 'ScriptSceneAiAll'; FImageAiAll.OnClick := GenerateAll;
+  FImageAiCancel := TButton.Create(Self); FImageAiCancel.Parent := FImageAiPanel; FImageAiCancel.Align := alRight;
+  FImageAiCancel.Width := ScaleValue(80); FImageAiCancel.Caption := '中止'; FImageAiCancel.Name := 'ScriptSceneAiCancel';
+  FImageAiCancel.Visible := False; FImageAiCancel.OnClick := StopGeneration;
+  FImageAiProgress := TProgressBar.Create(Self); FImageAiProgress.Parent := FImageAiPanel; FImageAiProgress.Align := alRight;
+  FImageAiProgress.Width := ScaleValue(120); FImageAiProgress.Style := pbstMarquee; FImageAiProgress.MarqueeInterval := 40;
+  FImageAiProgress.Visible := False; FImageAiProgress.Name := 'ScriptSceneAiProgress';
   FGuide := TRigmScriptLabel.Create(Self); FGuide.Parent := Self; FGuide.Align := alBottom; FGuide.AutoSize := False; FGuide.WordWrap := True;
   FGuide.Height := ScaleValue(32); FGuide.Name := 'ScriptSceneGuide';
   FDialogue := TRigmBufferedPanel.Create(Self); FDialogue.Parent := Self; FDialogue.BevelOuter := bvNone;
@@ -255,6 +279,30 @@ procedure TRigmScriptScenesFrame.RequestImage(Sender: TObject);
 begin if not RequestFinish then Exit; try FWorkspace.RequestUnapprovedScriptImages; except on E: Exception do FGuide.Caption := E.Message; end; end;
 procedure TRigmScriptScenesFrame.CancelImage(Sender: TObject);
 begin if not RequestFinish then Exit; try FWorkspace.CancelScriptSceneImage(SelectedId); except on E: Exception do FGuide.Caption := E.Message; end; end;
+procedure TRigmScriptScenesFrame.GenerateSelected(Sender: TObject);
+begin
+  if not RequestFinish then Exit;
+  try FWorkspace.StartSceneImageAi(SelectedId); RefreshState;
+  except on E: Exception do begin RefreshState; FImageAiStatus.Caption := E.Message; end; end;
+end;
+procedure TRigmScriptScenesFrame.GenerateAll(Sender: TObject);
+begin
+  if not RequestFinish then Exit;
+  try FWorkspace.StartSceneImageAi; RefreshState;
+  except on E: Exception do begin RefreshState; FImageAiStatus.Caption := E.Message; end; end;
+end;
+procedure TRigmScriptScenesFrame.StopGeneration(Sender: TObject);
+begin FWorkspace.CancelSceneImageAi; RefreshState; end;
+procedure TRigmScriptScenesFrame.RefreshImageAi;
+begin
+  var Busy := FWorkspace.SceneImageAiBusy;
+  FImageAiSelected.Enabled := not Busy; FImageAiAll.Enabled := not Busy;
+  FImageAiCancel.Visible := Busy; FImageAiProgress.Visible := Busy;
+  if Busy then FImageAiProgress.Style := pbstMarquee else FImageAiProgress.Style := pbstNormal;
+  FImageAiStatus.Caption := FWorkspace.SceneImageAiMessage;
+  if FImageAiStatus.Caption='' then FImageAiStatus.Caption := '要望を入力して生成します。画像を確認した後、各行の「確定」をチェックしてください。';
+  FImageAiStatus.Hint := FImageAiStatus.Caption; FImageAiStatus.ShowHint := True;
+end;
 procedure TRigmScriptScenesFrame.RefreshState;
 begin
   if FSync then Exit; var P := FWorkspace.ScriptDraft; if (P=nil) or (P.ScriptWizard.GetValue('scenes')=nil) then Exit;
@@ -291,10 +339,12 @@ begin
         if Row.Description.Text<>Description then Row.Description.Text := Description;
         for var M := 0 to High(Positions) do if Positions[M]=S.DescriptionPosition then Row.Position.ItemIndex := M;
       end;
-      Row.Prompt.ReadOnly := S.ImageApproved; Row.Description.ReadOnly := IsBackground or IsThumbnail or S.ImageApproved;
-      Row.Position.Visible := not IsBackground and not IsThumbnail; Row.Position.Enabled := not S.ImageApproved;
+      var Busy := FWorkspace.SceneImageAiBusy;
+      Row.SceneName.ReadOnly := Busy;
+      Row.Prompt.ReadOnly := S.ImageApproved or Busy; Row.Description.ReadOnly := IsBackground or IsThumbnail or S.ImageApproved or Busy;
+      Row.Position.Visible := not IsBackground and not IsThumbnail; Row.Position.Enabled := not S.ImageApproved and not Busy;
       Row.Approved.Checked := S.ImageApproved;
-      Row.Approved.Enabled := not IsBackground or SceneNeedsImage(S) or S.ImageApproved;
+      Row.Approved.Enabled := (not IsBackground or SceneNeedsImage(S) or S.ImageApproved) and not Busy;
       var Stamp := ''; var Path := ResolveMoviePath(P.FileName,S.Image);
       try
         Row.Picture.Hint := ''; Row.Picture.ShowHint := False;
@@ -306,6 +356,7 @@ begin
       if not IsBackground and not IsThumbnail and ScriptSceneReady(P,S) then Inc(Ready);
     end;
     RefreshDialogue;
+    RefreshImageAi;
     if not FEditing then begin
       var State := '未確定'; if ScriptSceneReady(P,P.Thumbnail) then State := '確定済み';
       FGuide.Caption := Format('シーン確定 %d / %d。共通背景は任意。最後に必須サムネイルを作成・確定して動画編集へ（%s）。',[Ready,P.Scenes.Count,State]);
