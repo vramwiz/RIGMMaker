@@ -6,17 +6,13 @@
 
 ## 起動
 
-リポジトリのルートでPowerShell 7から実行する。
+通常は`RIGMMaker.exe`をそのまま起動する。引数は不要。Dotsがホスト上で起動操作できる場合、次の起動器も引数なしで同じ通常EXEを起動する。
 
 ```powershell
-# 既存Codex用。従来の接続情報・メッセージ形式を維持する。
-& ./制作支援/パイプ/Start-RigmCommunication.ps1 -Mode codex
-
-# Dots用。通常のCodex用パイプは作らない。
-& ./制作支援/パイプ/Start-RigmCommunication.ps1 -Mode dots
+& ./制作支援/パイプ/Start-RigmCommunication.ps1
 ```
 
-起動器の既定EXEは `Win64/RigmCommunication/Release/RIGMMaker.exe`。既存の通常EXEと別に提供する本編の統合版であり、1フォームの診断アプリではない。直接起動する場合も同じEXEへ `--communication-mode codex` または `--communication-mode dots` を渡す。省略時はcodex。ウィンドウのタイトルにも選択方式を表示する。
+起動器の既定EXEはプロジェクト直下の通常版 `RIGMMaker.exe`。2026-10-16以降は、このEXEを引数なしで通常起動するだけでDots用JSONLパイプを開く。特別な起動ファイルや起動引数を利用者へ要求しない。Codexからもこのパイプで同じ共通命令を使用できる。旧Codex受信方式が必要な場合だけ `--communication-mode codex` で互換モードを指定できる。ウィンドウのタイトルにも選択方式を表示する。
 
 方式はその起動中固定。切り替える際は作品を保存して終了し、反対の方式で起動する。起動器は既存プロセスを強制終了しない。別インスタンスで同じ作品を同時操作する仕組みは今回の対象にしない。
 

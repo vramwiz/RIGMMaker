@@ -12,7 +12,8 @@ var Initialized: Boolean; Selected: TRigmCommunicationMode;
 function RigmCommunicationMode: TRigmCommunicationMode;
 begin
   if not Initialized then begin
-    Selected := rcCodex;
+    // 通常起動でDotsとCodexの両クライアントが使える共通JSONLパイプを開く。
+    Selected := rcDots;
     for var I := 1 to ParamCount do begin
       var Value := '';
       if ParamStr(I).StartsWith('--communication-mode=') then Value := ParamStr(I).Substring(21)

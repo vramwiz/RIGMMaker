@@ -4,13 +4,8 @@
   "implementation": "実装状況.md",
   "inputTemplate": "書式/台本入力.txt",
   "sample": "台本/通し試験.txt",
-  "executable": "D:/DelphiProg/MyApp/RIGMMaker/Win64/RigmAutomation/Release/RIGMMaker.exe",
-  "launchArguments": [
-    "--communication-mode",
-    "dots",
-    "--data-root",
-    "D:/Users/take6/RIGMMaker"
-  ],
+  "executable": "D:/DelphiProg/MyApp/RIGMMaker/RIGMMaker.exe",
+  "launchArguments": [],
   "start": {
     "args": {
       "text": "<full input text>"
@@ -68,7 +63,10 @@
   "startup": {
     "doNotLaunchTwice": true,
     "hostExecutionRequired": true,
-    "doNotHardcodePipeNameOrToken": true
+    "doNotHardcodePipeNameOrToken": true,
+    "normalStartOpensDotsPipe": true,
+    "requiresSpecialArguments": false,
+    "instruction": "Use the normally launched RIGMMaker.exe and its current Dots connection. Do not ask the user to launch with extra communication arguments or a special launcher."
   },
   "restartResumeSupported": false
 }

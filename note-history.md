@@ -1856,3 +1856,15 @@ Low/変動SID対応、同一ユーザー照合、接続トークン、再送キ�
 Win64 Debug/Releaseは本編dprojと同じ検索パスでコンパイル成功。各既存警告13、新規0、エラー0。Debug/Releaseで同じBuildCacheを順に再利用し、検証用のFFmpeg複製は作成していない。通常アプリが終了し、開始時EXEのハッシュが一致することを確認して `D:/DelphiProg/MyApp/RIGMMaker/RIGMMaker.exe` へ修正版Releaseを反映。自動制作用ReleaseともSHA256一致。通常EXEの起動・Dots ping・app-statusを隔離設定で確認した。
 
 検証ソースは `Source/Diagnostics/DotsCodexProbe/ThumbnailColorCheck.dpr`、結果は `output/validation/20261015-thumbnail-colour-final/result.json`。修正後の参照は `D:/Users/take6/RIGMMaker/Cache/ScriptThumbnailRefs/979f7888ccc74fd98801bdd75f08bba4805198ba6048d94f1b4161474ea89f6c.png`。既に青い参照から生成された画像は画素変換では直らないため、確定を外して画像生成をやり直す必要がある。今回AI画像の再生成や実作品の採用画像・MP4の変更は行っていない。
+## 2026-10-16 Dots用起動方法の整理
+
+引数なしの通常起動はCodex受信モードであり、Dots用には`--communication-mode dots`が必要。毎回引数を手入力せずに済むよう、通常EXEをDotsモードで起動する `Dotsで起動.cmd` を追加した。通信の既定値・同時待受け禁止・プロセス中の方式固定は変更していない。切替時は保存して既存アプリを終了してから起動する。
+
+`Start-RigmCommunication.ps1`の既定EXEが容量整理で削除済みの`Win64/RigmCommunication/Release/RIGMMaker.exe`を参照していたため、プロジェクト直下の通常版へ修正。Dots用機械読取仕様も同じ通常EXEを指すよう更新した。起動権限・ホスト上の実行機能がDots側にない場合は、利用者が起動ファイルで起動する。Dotsの機能を確認せずリモート起動できるとは扱わない。
+## 2026-10-16 通常起動でDots接続を可能に変更
+
+利用者の意図は「引数を隠した専用起動ファイル」ではなく、通常EXEの引数なし起動でDotsから使えることだった。RigmCommunicationの既定値をDotsのJSONL受信へ変更し、既存Codexのメッセージパイプは明示的な互換モードで保持。CodexからもDots用パイプを操作できるため、同時待受けには変更していない。起動器の既定もDotsへ統一した。
+
+通常EXEへ修正版を反映し、一切の引数を渡さずに起動してDots接続情報の出力、ping、app-status、日本語echo、Dotsパイプ1本だけの待受けを確認した。Debug/Releaseコンパイル成功（既存警告各13、新規0）。明示的な旧Codex／Dots双方の互換・編集・中止等の90項目も成功。検証専用プロセスのみ終了した。
+
+Dotsへ渡すnote・機械読取JSON・本編通信仕様・旧診断資料の入口を更新し、利用者へ特殊な引数や専用起動ファイルを要求しないルールを明記。自動制作JSONのlaunchArgumentsは空配列。証跡は `output/validation/20261016-default-dots/result.json` と `20261016-mode-compatibility/result.json`。通常EXEと自動制作Releaseを更新済み。

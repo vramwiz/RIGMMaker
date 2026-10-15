@@ -6,7 +6,7 @@
   "sender": "Send-RigmDotsCommand.ps1",
   "selection": {
     "argument": "--communication-mode codex|dots",
-    "default": "codex",
+    "default": "dots",
     "fixedForProcessLifetime": true,
     "onlySelectedTransportListens": true,
     "dotsDisablesLegacyWorkspaceCharacterAndPsdListeners": true,

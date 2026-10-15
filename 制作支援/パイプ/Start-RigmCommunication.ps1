@@ -1,12 +1,12 @@
 ﻿param(
-    [ValidateSet('codex','dots')][string]$Mode='codex',
+    [ValidateSet('codex','dots')][string]$Mode='dots',
     [string]$Exe,
     [string]$DataRoot,
     [string]$SettingsDirectory
 )
 $ErrorActionPreference='Stop'
 $repo=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..'))
-if(-not $Exe){$Exe=Join-Path $repo 'Win64\RigmCommunication\Release\RIGMMaker.exe'}
+if(-not $Exe){$Exe=Join-Path $repo 'RIGMMaker.exe'}
 $Exe=[IO.Path]::GetFullPath($Exe)
 if(-not(Test-Path -LiteralPath $Exe)){throw ('EXE not found: '+$Exe)}
 $arguments='--communication-mode '+$Mode
