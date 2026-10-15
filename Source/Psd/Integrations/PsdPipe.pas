@@ -24,6 +24,7 @@ type
     destructor Destroy; override;
   end;
 implementation
+uses RigmCommunication;
 const WM_PSD_REQUEST = WM_USER + 271;
 constructor TPsdPipeWorker.Create(const Name: string; Window: HWND);
 begin inherited Create(True); FName := Name; FWindow := Window; FReady := CreateEvent(nil, False, False, nil); end;
@@ -51,7 +52,9 @@ begin
 end;
 constructor TPsdPipeEndpoint.Create(const Name: string; Handler: TPsdPipeRequest);
 begin
-  inherited Create; FHandler := Handler; FWindow := AllocateHWnd(WindowProc);
+  inherited Create; FHandler := Handler;
+  if not RigmCodexPipesEnabled then Exit;
+  FWindow := AllocateHWnd(WindowProc);
   FWorker := TPsdPipeWorker.Create(Name, FWindow); FWorker.Start;
 end;
 destructor TPsdPipeEndpoint.Destroy;

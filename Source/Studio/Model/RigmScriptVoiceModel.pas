@@ -10,10 +10,18 @@ function EditScriptVoiceSettings(Project: TRigmMovieProject; Cue: TRigmMovieCue;
 function ScriptVoiceSummary(Project: TRigmMovieProject): TJSONObject;
 function RefreshScriptVoiceCompletion(Project: TRigmMovieProject): Boolean;
 function MarkScriptVoiceHeard(Project: TRigmMovieProject; const CueId,AudioKey: string): Boolean;
+function ScriptVoiceAccepted(Project: TRigmMovieProject; Cue: TRigmMovieCue): Boolean;
 procedure PrepareScriptVoiceEffects(Project: TRigmMovieProject);
 procedure ValidateScriptVoiceEffects(Project: TRigmMovieProject);
 implementation
 uses System.SysUtils, System.StrUtils, RigmJson, PsdJson, RigmScriptTextModel, RigmScriptCastingModel, RigmScriptReviewModel;
+function ScriptVoiceAccepted(Project: TRigmMovieProject; Cue: TRigmMovieCue): Boolean;
+begin
+  Result := Project.AudioHeard(Cue);
+  if not Result and (Project.ScriptWizard<>nil) and
+    (Project.ScriptWizard.GetValue('automation') is TJSONObject) then
+    Result := JB(JO(Project.ScriptWizard,'automation'),'acceptGeneratedVoice') and Project.AudioReady(Cue);
+end;
 procedure RequireCurrentVoice(Project: TRigmMovieProject);
 begin
   if (Project=nil) or (Project.ScriptWizard=nil) or (Project.ScriptWizard.GetValue('casting')=nil) then raise Exception.Create('配役を準備してください。');
@@ -94,7 +102,7 @@ function RefreshScriptVoiceCompletion(Project: TRigmMovieProject): Boolean;
 begin
   Result := False; if (Project=nil) or (Project.ScriptWizard=nil) or (Project.ScriptWizard.GetValue('voice')=nil) then Exit;
   var Complete := Project.Cues.Count>0;
-  for var C in Project.Cues do Complete := Complete and Project.AudioHeard(C);
+  for var C in Project.Cues do Complete := Complete and ScriptVoiceAccepted(Project,C);
   var State := 'in-progress'; if Complete then State := 'complete';
   Result := JS(Project.ScriptWizard,'voiceStatus')<>State;
   if Result then PsdJson.Put(Project.ScriptWizard,'voiceStatus',State);

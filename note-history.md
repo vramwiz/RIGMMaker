@@ -1798,3 +1798,61 @@ RigmCodexClientへ独立テストで成功したnative imageGenerationの受信�
 本編Win64 Debug／Releaseをdprojと同じ検索パスでdcc64コンパイルし、両方ともエラー0・既存警告13件・追加警告0件。既存FFmpeg配布物がこの環境にないため、DeployFFmpegRuntimeを含むMSBuild全体の成功は主張しない。BOM・CRLF・文書リンクとgit diff --checkを確認する。通常アプリの終了と開始時EXEのハッシュ一致を確認し、D:\DelphiProg\MyApp\RIGMMaker\RIGMMaker.exeへ最新Releaseを配置した。配置後SHA256はA10EFCCAFE9B59FE19AD407E2BB23635F45DAF2204C1617C90EFF7F9282ED7EE。旧EXE・resは証跡内preservedへ保持し、res・ユーザー設定は変更していない。
 
 操作と通信・確認範囲は[第16段階のAI画像生成](Source/Shell/Pages/SCRIPT-AI-IMAGES-20261014.md)へ保存した。開発ノート・基本事項・画像工程・Codex連携ガイドを更新し、画像要求UIの課題を対応済みとして記録した。生成画像・ログ・検証JSON・EXEはGit同期対象外。
+## 2026-10-15 Dots / Codex通信の独立試験
+
+Source/Diagnostics/DotsCodexProbeへ、本編とは別の1フォームVCLプロジェクトを追加。Dots側には別途問い合わせる方針に従い、同一PC・同一Windowsユーザー向けの名前付きパイプJSONL仕様、機械可読情報、要求JSON Schema、JSON例、問い合わせ文を同梱した。PowerShell 7の送信器と再実行用テストも用意した。
+
+テキスト疎通・保存、非同期Codexジョブの開始／取得／中止、画像Base64送受信、画像入力と生成を実装。専用コピーの通信ユニットでcodex app-server APIを使用し、本編の通信部品や現在のチャットは変更しない。任意コマンド実行・ネットワーク公開・リモート起動は実装せず、Dots側の回答を受けて決める。
+
+Win64 Debug／Releaseの専用dprojは警告0・エラー0。最終オフライン30項目、実Codexテキスト・画像入力を含む32項目、実画像生成を含む27項目が成功。生成画像は1254×1254 PNG、1,101,415 bytesで、パイプ返却のSHA256一致を確認した。実Codex試験後の要求キャッシュ上限・型検査追加は再ビルドと最終オフライン試験で確認。証跡はoutput/validation/20261015-dots-probe。Dots本体・リモート経路は未検証。本編EXE・作品・ユーザー設定は変更していない。
+
+入口は[独立試験README](Source/Diagnostics/DotsCodexProbe/README.md)、詳細は[検証記録](Source/Diagnostics/DotsCodexProbe/VALIDATION.md)。
+
+## 2026-10-15 本編へCodex / Dotsの排他的な受信経路を組込み
+
+利用者から、Dots本体でテキスト往復・画像生成と取得・SHA256一致・18要求エラーなしの成功報告を受けた。これを基に本編へDots専用JSONL入口を追加し、--communication-mode codex|dotsで起動中の方式を固定。既存Codexのメッセージパイプと接続形式を維持し、Dotsモードではworkspace・旧キャラ・PSDの既存受信パイプを待受けず、専用1本から共通Workspace/Sessionへ振り分ける。
+
+Low/変動SID対応、同一ユーザー照合、接続トークン、再送キャッシュを独立試験から引き継いだ。画像の一時配置・取得は本編の内容検査を再利用し、作品採用・revision/要求ID検査・人間の確定・通常保存は既存処理へ委譲する。AI表情/画像の開始・状態・中止を共通命令へ追加し、両AIジョブも同時開始しない。
+
+本編dprojと同じ検索パスでDebug/Releaseをコンパイル成功。既存警告13件・通信追加箇所の警告0件・エラー0件。Runtime/FFmpegのDLLが揃っていないため、配置を含むMSBuild全体とMP4機能は今回未確認。統合EXEはWin64/RigmCommunication/<構成>/RIGMMaker.exe、通常EXEは保持した。
+
+本編の隔離データ・設定でDebug版42項目、Release版44項目成功。既存Codexでの台本作成・題名変更・保存・版検査、Dotsでの同じ処理・再送・画像往復・認証拒否・実Low AppContainerのSID変更を確認した。キャラ/PSD画面を開いた後もOSのパイプ一覧で方式の排他を確認した。別の実行では検証用AppContainerクライアントも新規コンパイルし、過去の成果物に依存せず同じ44項目が成功した。証跡はoutput/validation/20261015-dots-integration。AI命令の工程/作品照合と状態取得は確認したが、この統合試験から実モデルへの生成指示は行っていない。Dots本体による本編の追試は今後行う。
+
+[本編の起動・仕様と操作資料](制作支援/パイプ/Dots連携.md)、[機械可読情報](制作支援/パイプ/Dots連携.json)、Send-RigmDotsCommand.ps1とStart-RigmCommunication.ps1を追加。画像の生成物・コンパイル結果・試験データはGit同期対象外に保持する。
+
+## 2026-10-15 自動制作の受付・事前検査を実装し、実行環境不足で停止
+
+利用者の実装・ビルド・起動・Dots用パイプでの完成確認指示、および躓いた場合の停止許可に基づき着手した。書式検査、固定5項目、種類別コピー元検索、FFmpeg存在検査、事前検査ジョブと連番付き段階応答を追加。現行のコピー以降を無理に進めず、まず実データで必要条件を確認した。
+
+本編をWin64/RigmAutomationへDebug/Releaseともコンパイル成功。各エラー0・既存警告13件・追加警告0件。ReleaseをDotsモード、現在の既定データルートD:/Users/take6/RIGMMaker、隔離設定で起動し、CodexからDots用パイプへ送信。入力・非同期受付・通知・不足一覧・元台本保持の23項目が成功したが、制作状態はblocked。Projectsの段階式台本2件がいずれも種類未設定で漫画用コピー元なし、EXE隣のFFmpeg DLL5本が不足した。旧台本を推測分類せず、元台本2件のSHA256一致・新台本未作成を確認して検査用プロセスだけを終了した。
+
+ここで停止したため、台本コピー以降の自動制作、確認条件の自動化、MP4と投稿テキストの完成処理は未実装・未検証。受付成功や事前検査の成功を制作完了とはしていない。既存Codex/Dots通信の回帰44項目は成功。通常EXE・元台本・VOICEVOX設定は変更していない。再開条件・API・証跡は[自動制作の実装状況](自動制作/実装状況.md)を参照。
+
+## 2026-10-15 Dots自動制作のコピー元確認・FFmpeg復元
+
+`app-auto-source-check`を追加。コピー元一覧のprojectIdを指定し、候補可否・種類別最新の自動選択・GUIと同じコピー処理のメモリ上検証・除外理由をパイプへ返す。台本の保存・新規作成・画面切替は行わない。実データの「Dotsのテスト」は構造上コピー可能だがキャラクター選択が入力中で除外。選択キャラ0、レイアウト未設定のため、既定設定を推測して埋めずに停止した。
+
+ユーザー指定の `D:/DelphiProg/test/VW_Media_Output/Win64/Release` から必要DLL5個を復元。既存マニフェストのSHA256と全て一致。Win64 Debug/Releaseの本編MSBuild・DLL配置成功（既存警告各13、追加0）。既存通常EXEは保持し `Win64/RigmAutomation` に出力。MP4基盤76項目＋DLL欠落3項目、実データDots事前検査36項目、両パイプ統合64項目が成功。元台本3件のSHA256と件数を保持。DLL不足は解消し、現在の停止理由は入力中ではないコピー元なし。全自動制作・通しのMP4完成は未実装／未確認。[実装状況](自動制作/実装状況.md)に命令・証跡・停止理由を追記した。
+## 2026-10-15 完成済み「Dotsのテスト」をコピー元として確認
+
+利用者が最後まで進めて保存した同台本をDots用パイプから再確認。editor／complete／漫画紹介となり、最新コピー元に自動選択された。個別検査はeligible／selected／copyValidatedすべてtrue、saved=false。キャラ1件・themeレイアウト・保存済み配役の四国めたん／ノーマルを確認。事前検査36項目が成功、ready／issues空／DLL欠落なし。元台本3件のSHA256と件数を保持。コピー元の停止条件は解消したが、自動制作全工程はまだ実装していない。証跡は `output/validation/20261015-automation/preflight-03/`。[実装状況](自動制作/実装状況.md)を更新した。
+## 2026-10-15 Dots用パイプからの全自動制作を実装・通し確認
+
+`app-auto-start`・`app-auto-status`・`app-auto-cancel`を追加。GUIと共通のコピー・工程遷移から配役／AI表情、VOICEVOX生成、入力シーンの区切りと総評チャート、背景→各画像→実キャラ参照サムネイル、MP4、投稿用TXTまで実行する。段階通知・SHA256・元台本情報をジョブ単位で保存。通常台本の試聴条件を維持し、自動制作だけは現在の本文に一致する生成音声を試聴なしで採用する。人間が聞いたというキーは記録しない。画像は整合性検査後に自動採用・保存する。
+
+最初の試験は共通背景の名前変更で停止したため、背景と通常シーンの更新処理を修正した。2回目は「Dotsのテスト」をコピーし、途中の確認操作なしで音声7件・画像6枚・MP4・TXTが完成。1920×1080／30fps／25.519秒、全766フレームとAAC音声を復号し、本文・字幕・読み上げ一致と通常台本の試聴条件維持を44項目で確認した。開始前の台本4件のSHA256を保持。完成作品IDは `{916EF199-834D-492F-B2FA-00CF3EB21ACD}`。MP4とTXTは同作品フォルダのExports。
+
+最終Win64 Debug/ReleaseのMSBuildと同梱DLL配置に成功。警告は各既存13件、新規0、エラー0。EXEは `Win64/RigmAutomation/{Debug,Release}/RIGMMaker.exe`、既存通常配布EXEは保持。既存Codex用／Dots用の回帰・開始・二重開始拒否・編集中命令拒否・中止・元データ保護90項目が成功。実Low AppContainer接続も確認。失敗・中止のコピーは以後の候補から除外し、生成物は消さない。
+
+[入力ルール](自動制作/note.md)、[機械読取仕様](自動制作/パイプ仕様.json)、[起動・指示・検証詳細](自動制作/実装状況.md)を更新。通し試験の原稿は `自動制作/台本/通し試験.txt`。証跡は `output/validation/20261015-automation/production-02/`、`production-02-decode/`、`transport-production-final/`。検証はCodexからDots仕様のパイプを使って実施した。実際のDotsアクティビティによる開始、ホスト実行機能を必要とするリモート起動、再起動後の自動再開は未確認／未実装として区別する。
+## 2026-10-15 キャラ参照PNGの赤青反転を修正
+
+サムネイルのキャラが青くなる原因は、画像生成モデルへ渡す参照PNGの画素順の不一致。`TRigmThumbnailEntry.Pixels`はstraight-alpha RGBA8だが、`TPngImage.Scanline`はBGRのため、RigmWizardImageAi.incで先頭3バイトをそのまま書くと赤と青が反転した。既存のキャラ一覧や配置表示は別途正しく変換しており、今回はAIへ渡す参照だけが誤っていた。
+
+参照PNG生成を`TRigmThumbnailCache.ReferencePng`へ集約し、既存の`ArtPng.WriteRgbaPng`を使用。GUI画像生成と外部パイプへの参照返却は共通の修正を使う。キーに`RGBA-PNG.v2`を加え、同じキャラの古い色違いPNGを自動で再利用しない。PNGは一時ファイルから原子的に配置し、繰り返し要求では同じ正しいキャッシュを返す。元キャラや既存の生成画像を書き換えない。
+
+実キャラ（blonde-android-20261005.psdchar）の旧PNGは270×480のうち33,169画素で色が異なり、髪が水色・目が黄色になっていた。修正後は全RGBA画素がキャラキャッシュと一致し、髪が金色・目が青色へ戻った。赤／緑／青・髪／肌色・半透明／透明の独立PNG画素検査、相対／絶対パス、旧キャッシュ回避、再読込・PNG再利用、原本SHA256維持の計12項目に成功。
+
+Win64 Debug/Releaseは本編dprojと同じ検索パスでコンパイル成功。各既存警告13、新規0、エラー0。Debug/Releaseで同じBuildCacheを順に再利用し、検証用のFFmpeg複製は作成していない。通常アプリが終了し、開始時EXEのハッシュが一致することを確認して `D:/DelphiProg/MyApp/RIGMMaker/RIGMMaker.exe` へ修正版Releaseを反映。自動制作用ReleaseともSHA256一致。通常EXEの起動・Dots ping・app-statusを隔離設定で確認した。
+
+検証ソースは `Source/Diagnostics/DotsCodexProbe/ThumbnailColorCheck.dpr`、結果は `output/validation/20261015-thumbnail-colour-final/result.json`。修正後の参照は `D:/Users/take6/RIGMMaker/Cache/ScriptThumbnailRefs/979f7888ccc74fd98801bdd75f08bba4805198ba6048d94f1b4161474ea89f6c.png`。既に青い参照から生成された画像は画素変換では直らないため、確定を外して画像生成をやり直す必要がある。今回AI画像の再生成や実作品の採用画像・MP4の変更は行っていない。

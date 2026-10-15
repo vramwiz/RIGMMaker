@@ -2,23 +2,9 @@
 procedure TRigmWizardWorkspace.AddScriptImageCharacterPreviews(Sources: TJSONObject);
 begin
   for var V in JA(Sources,'characters') do begin
-    var C := TJSONObject(V); var Entry := Thumbnails.Request(JS(C,'path'));
-    AddB(C,'previewReady',(Entry<>nil) and (Entry.Width>0) and (Entry.Height>0) and (Length(Entry.Pixels)=Entry.Width*Entry.Height*4));
-    if not JB(C,'previewReady') then Continue;
-    var FileName := FPipe.Workspace.Resolve('Cache\ScriptThumbnailRefs\'+THashSHA2.GetHashString(JS(C,'path')+'|'+Entry.Signature)+'.png',False);
-    if not FileExists(FileName) then begin
-      ForceDirectories(ExtractFilePath(FileName)); var Png := TPngImage.CreateBlank(COLOR_RGBALPHA,8,Entry.Width,Entry.Height);
-      try
-        for var Y := 0 to Entry.Height-1 do begin
-          var Pixels := PByte(Png.Scanline[Y]); var Alpha := Png.AlphaScanline[Y];
-          for var X := 0 to Entry.Width-1 do begin
-            var Source := (Y*Entry.Width+X)*4;
-            for var Ch := 0 to 2 do Pixels[X*3+Ch] := Entry.Pixels[Source+Ch]; Alpha[X] := Entry.Pixels[Source+3];
-          end;
-        end;
-        Png.SaveToFile(FileName);
-      finally Png.Free; end;
-    end;
+    var C := TJSONObject(V); var FileName := Thumbnails.ReferencePng(JS(C,'path'));
+    AddB(C,'previewReady',FileName<>'');
+    if FileName='' then Continue;
     PsdJson.Put(C,'previewPath',FileName);
   end;
 end;
@@ -32,9 +18,11 @@ end;
 procedure TRigmWizardWorkspace.StartSceneImageAi(const Id: string);
 begin
   if SceneImageAiBusy then raise Exception.Create('画像生成は処理中です。');
+  if ExpressionAiBusy then raise Exception.Create('表情設定の終了を待ってください。');
   if (FScriptDraft=nil) or (CurrentScriptStage<>'scenes') or (FPipe=nil) then raise Exception.Create('画像工程で作品を開いてください。');
   FImageAiTargets := RigmScriptAiImages.SceneImageAiTargets(FScriptDraft,Id);
   FImageAiProjectId := FScriptDraft.Id; FImageAiIndex := 0; FImageAiCompleted := 0;
+  FImageAiSucceeded := False;
   FImageAiCancel := ''; FImageAiLog := ''; FImageAiMessage := '画像生成を準備しています';
   // 要求作成とワーカー起動はPollで行い、最初に処理中UIを描画する。
   ScriptChanged;
@@ -142,6 +130,7 @@ begin
     try DeliverScriptSceneImage(Args); finally Args.Free; end;
     Inc(FImageAiCompleted); Inc(FImageAiIndex); FreeAndNil(FImageAiJob); FreeAndNil(FImageAiRequest);
     if FImageAiIndex>=FImageAiTargets.Count then begin
+      FImageAiSucceeded := True;
       FinishSceneImageAi(Format('%d枚の画像を取得しました。表示を確認し、各行の「確定」をチェックしてください。',[FImageAiCompleted])); Exit;
     end;
     FImageAiMessage := Format('%d枚受信済み。次の画像を準備しています',[FImageAiCompleted]); ScriptChanged;

@@ -1,0 +1,30 @@
+{
+  "protocol": "dots-codex-probe/1",
+  "instructions": [
+    "Each request is serialized as one UTF-8 JSON line and sent over a new connection.",
+    "Replace <jobId> and <imageId> with IDs returned by this running instance.",
+    "Replace <raw-base64-of-image-bytes> with the actual PNG/JPEG/BMP bytes encoded as Base64.",
+    "Send polling requests with a new id every time."
+  ],
+  "requests": [
+    {"version": 1, "id": "ping-001", "command": "ping", "args": {}},
+    {"version": 1, "id": "echo-001", "command": "echo", "args": {"text": "Dotsからこんにちは。\n2行目です。😀"}},
+    {"version": 1, "id": "save-001", "command": "text.save", "args": {"text": "クライアントへ配置するテキスト"}},
+    {"version": 1, "id": "text-001", "command": "codex.start", "args": {"mode": "text", "text": "短い日本語で挨拶してください"}},
+    {"version": 1, "id": "poll-001", "command": "job.get", "args": {"jobId": "<jobId>"}},
+    {"version": 1, "id": "poll-002", "command": "job.get", "args": {"jobId": "<jobId>"}},
+    {"version": 1, "id": "cancel-001", "command": "job.cancel", "args": {"jobId": "<jobId>"}},
+    {"version": 1, "id": "upload-001", "command": "image.put", "args": {"base64": "<raw-base64-of-image-bytes>"}},
+    {"version": 1, "id": "download-001", "command": "image.get", "args": {"imageId": "<imageId>"}},
+    {"version": 1, "id": "vision-001", "command": "codex.start", "args": {"mode": "text", "text": "この画像の内容を説明してください", "imageId": "<imageId>"}},
+    {"version": 1, "id": "generate-001", "command": "codex.start", "args": {"mode": "image", "text": "白背景に青い球体のシンプルなイラストを1枚。文字なし。"}},
+    {"version": 1, "id": "status-001", "command": "status", "args": {}}
+  ],
+  "responses": [
+    {"version": 1, "id": "ping-001", "ok": true, "data": {"protocol": "dots-codex-probe/1", "message": "pong"}},
+    {"version": 1, "id": "echo-001", "ok": true, "data": {"text": "Dotsからこんにちは。\n2行目です。😀"}},
+    {"version": 1, "id": "text-001", "ok": true, "data": {"jobId": "<jobId>", "mode": "text", "state": "running", "stage": "準備中", "logPath": "<client log path>"}},
+    {"version": 1, "id": "poll-002", "ok": true, "data": {"jobId": "<jobId>", "mode": "text", "state": "completed", "text": "こんにちは。", "logPath": "<client log path>"}},
+    {"version": 1, "id": "another-start", "ok": false, "error": {"code": "busy", "message": "busy: 実行中です"}}
+  ]
+}

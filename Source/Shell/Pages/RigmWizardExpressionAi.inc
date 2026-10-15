@@ -9,6 +9,7 @@ end;
 procedure TRigmWizardWorkspace.StartExpressionAi;
 begin
   if ExpressionAiBusy then raise Exception.Create('AIの表情設定は処理中です。');
+  if SceneImageAiBusy then raise Exception.Create('画像生成の終了を待ってください。');
   if (FScriptDraft=nil) or (CurrentScriptStage<>'casting') then raise Exception.Create('配役工程でAIの表情設定を実行してください。');
   if FPipe=nil then raise Exception.Create('台本の保存先が準備されていません。');
   var Request := RigmScriptAiExpressions.CreateExpressionRequest(FScriptDraft);
@@ -20,6 +21,7 @@ begin
     FExpressionAiRequest := Request; Request := nil;
     FExpressionAiProjectId := FScriptDraft.Id; FExpressionAiCancel := '';
     FExpressionAiLog := FExpressionAiJob.LogPath;
+    FExpressionAiSucceeded := False;
     FExpressionAiMessage := JA(FExpressionAiRequest,'cues').Count.ToString+'件の表情をAIにまとめて依頼しています';
     FExpressionAiJob.BeginRun;
   except
@@ -56,6 +58,7 @@ begin
       try
         if not (Value is TJSONObject) then raise Exception.Create('AIの判定結果がJSONオブジェクトではありません。');
         var Count := RigmScriptAiExpressions.ApplyExpressionResponse(FScriptDraft,FExpressionAiRequest,TJSONObject(Value));
+        FExpressionAiSucceeded := True;
         if Count>0 then FScriptDraft.Changed;
         FExpressionAiMessage := '全'+JA(FExpressionAiRequest,'cues').Count.ToString+'件の判定が完了しました。'+
           Count.ToString+'件の表情を設定しました。';

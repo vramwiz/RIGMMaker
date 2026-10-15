@@ -1,0 +1,133 @@
+﻿{
+  "protocol": "rigm-maker-dots/1",
+  "application": "RIGM Maker production application",
+  "documentation": "Dots連携.md",
+  "launcher": "Start-RigmCommunication.ps1 -Mode dots",
+  "sender": "Send-RigmDotsCommand.ps1",
+  "selection": {
+    "argument": "--communication-mode codex|dots",
+    "default": "codex",
+    "fixedForProcessLifetime": true,
+    "onlySelectedTransportListens": true,
+    "dotsDisablesLegacyWorkspaceCharacterAndPsdListeners": true,
+    "sharedCommandHandler": true
+  },
+  "discovery": {
+    "location": "<dataRoot>/Exchange/dots-<PID>-<GUID>.json",
+    "format": "RIGMMaker.DotsConnection",
+    "protocol": "rigm-maker-dots/1",
+    "endpointField": "pipeName",
+    "tokenField": "accessToken"
+  },
+  "transport": {
+    "type": "windows-named-pipe",
+    "mode": "byte",
+    "encoding": "UTF-8 without BOM",
+    "delimiterHex": "0A",
+    "maxFrameBytesIncludingLF": 8388608,
+    "requestsPerConnection": 1,
+    "clientClosesAfterResponse": true,
+    "operationTimeoutMs": 15000,
+    "sameWindowsUserRequired": true,
+    "lowIntegrityAppContainerSupported": true,
+    "fixedAppContainerSidRequired": false,
+    "remoteClientsAllowed": false
+  },
+  "requestExample": {
+    "version": 1,
+    "id": "<new unique request id>",
+    "accessToken": "<from this process discovery>",
+    "command": "app-script-status",
+    "args": {}
+  },
+  "successExample": {
+    "version": 1,
+    "id": "<same request id>",
+    "ok": true,
+    "data": {}
+  },
+  "failureExample": {
+    "version": 1,
+    "id": "<same request id>",
+    "ok": false,
+    "error": {
+      "code": "unauthorized",
+      "message": "unauthorized"
+    }
+  },
+  "sharedCommands": {
+    "querySchema": "schema",
+    "workspacePrefix": "app-",
+    "moviePrefix": "movie-",
+    "legacyCharacterPrefix": "legacy-",
+    "psdCharacterPrefix": "psd-",
+    "preserveProjectRevisionAndRequestChecks": true,
+    "doNotAutoCorrectStaleRevision": true,
+    "humanImageApprovalRequired": true,
+    "humanImageApprovalScope": "Normal individual image commands only. app-auto-start automatically accepts validated generated images."
+  },
+  "aiCommands": [
+    "app-script-ai-status",
+    "app-script-ai-expressions-start",
+    "app-script-ai-expressions-cancel",
+    "app-script-ai-images-start",
+    "app-script-ai-images-cancel"
+  ],
+  "automationPreflight": {
+    "rules": "../../自動制作/note.md",
+    "implementationStatus": "../../自動制作/実装状況.md",
+    "sources": {
+      "command": "app-auto-sources",
+      "args": {
+        "scriptType": "manga-introduction|anime-review"
+      }
+    },
+    "sourceCheck": {
+      "command": "app-auto-source-check",
+      "args": {
+        "scriptType": "manga-introduction|anime-review",
+        "projectId": "from sources.candidates or sources.excluded"
+      },
+      "fields": {
+        "found": "listed project exists",
+        "eligible": "passes candidate rules and copy validation",
+        "selected": "latest eligible project for this type",
+        "copyValidated": "same GUI copy routine validated in memory",
+        "saved": false
+      },
+      "doesNotOverrideInProgressExclusion": true,
+      "doesNotCreateOrSaveProject": true,
+      "copyValidationDoesNotGuaranteeProductionReadiness": true
+    },
+    "validate": "app-auto-validate: text",
+    "check": "app-auto-check: text; preflight only",
+    "status": "app-auto-status: jobId, afterSequence",
+    "productionExecutionImplemented": true,
+    "productionRules": "../../自動制作/パイプ仕様.json",
+    "start": "app-auto-start: text; production through MP4 and posting TXT",
+    "cancel": "app-auto-cancel: jobId"
+  },
+  "transportCommands": [
+    "ping",
+    "echo",
+    "image.put",
+    "image.get"
+  ],
+  "images": {
+    "uploadArgs": [
+      "base64"
+    ],
+    "downloadArgs": [
+      "imageId"
+    ],
+    "formats": [
+      "png",
+      "jpeg",
+      "bmp"
+    ],
+    "maxSingleImageBytes": 4194304,
+    "productionContentValidation": true,
+    "adoption": "Use existing app-script-adopt-scene-image or image-transfer-adopt with current projectId/revision/sceneId/requestId/sha256.",
+    "uploadDoesNotApproveOrSaveProject": true
+  }
+}

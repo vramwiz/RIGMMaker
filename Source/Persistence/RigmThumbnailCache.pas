@@ -43,11 +43,12 @@ type
     function Request(const Path: string): TRigmThumbnailEntry; // 借用。nilはバックグラウンド処理中。
     function Stats: TJSONObject;
     function CachePath(const Path: string): string;
+    function ReferencePng(const Path: string): string; // RGBA原画から作る透過PNG。未準備なら空。
   end;
 function CharacterSourceSignature(const Path: string): string;
 implementation
 uses Winapi.Windows, Winapi.ActiveX, System.IOUtils, System.Hash, System.StrUtils,
-  RigmCharacterCatalog, RigmStorage, RigmJson, PsdJson, PsdPackage, PsdCharacter, PsdAnimation, PsdProduction;
+  RigmCharacterCatalog, RigmStorage, RigmJson, PsdJson, PsdPackage, PsdCharacter, PsdAnimation, PsdProduction, ArtPng;
 type
   TSourceBasicInfo = record
     CreationTime,LastAccessTime,LastWriteTime,ChangeTime: Int64;
@@ -128,6 +129,23 @@ begin
 end;
 function TRigmThumbnailCache.CachePath(const Path: string): string;
 begin Result := FWorkspace.Resolve('Cache\CharacterThumbnails\v1\'+KeyFor(FWorkspace.Resolve(Path))+'.thumb',False); end;
+function TRigmThumbnailCache.ReferencePng(const Path: string): string;
+begin
+  Result := ''; var FullPath := FWorkspace.Resolve(Path); var Entry := Request(FullPath);
+  if (Entry=nil) or (Entry.Width<1) or (Entry.Height<1) or
+    (Length(Entry.Pixels)<>Int64(Entry.Width)*Entry.Height*4) then Exit;
+  // v1はRGBAをTPngImageのBGR走査行へ直接書き、赤と青を反転していた。
+  // 出力方式をキーへ含め、修正前のPNGを元素材が同じでも再利用しない。
+  var FileName := FWorkspace.Resolve('Cache\ScriptThumbnailRefs\'+
+    THashSHA2.GetHashString('RGBA-PNG.v2|'+KeyFor(FullPath)+'|'+Entry.Signature)+'.png',False);
+  if not FileExists(FileName) then begin
+    ForceDirectories(ExtractFilePath(FileName));
+    var Pending := FileName+'.'+PsdJson.NewId+'.pending';
+    WriteRgbaPng(Pending,Entry.Width,Entry.Height,Entry.Pixels);
+    if not MoveFileEx(PChar(Pending),PChar(FileName),MOVEFILE_REPLACE_EXISTING or MOVEFILE_WRITE_THROUGH) then RaiseLastOSError;
+  end;
+  Result := FileName;
+end;
 function TRigmThumbnailCache.LoadDisk(const Path,Signature,Key: string): TRigmThumbnailEntry;
 begin
   Result := nil; var FileName := FWorkspace.Resolve('Cache\CharacterThumbnails\v1\'+Key+'.thumb',False);

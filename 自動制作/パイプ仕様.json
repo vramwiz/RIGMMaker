@@ -1,0 +1,74 @@
+﻿{
+  "protocol": "rigm-maker-dots/1",
+  "documentation": "note.md",
+  "implementation": "実装状況.md",
+  "inputTemplate": "書式/台本入力.txt",
+  "sample": "台本/通し試験.txt",
+  "executable": "D:/DelphiProg/MyApp/RIGMMaker/Win64/RigmAutomation/Release/RIGMMaker.exe",
+  "launchArguments": [
+    "--communication-mode",
+    "dots",
+    "--data-root",
+    "D:/Users/take6/RIGMMaker"
+  ],
+  "start": {
+    "args": {
+      "text": "<full input text>"
+    },
+    "command": "app-auto-start"
+  },
+  "status": {
+    "pollIntervalSeconds": 2,
+    "newTransportRequestIdEveryPoll": true,
+    "command": "app-auto-status",
+    "args": {
+      "afterSequence": 0,
+      "jobId": "<accepted jobId>"
+    }
+  },
+  "cancel": {
+    "args": {
+      "jobId": "<accepted jobId>"
+    },
+    "command": "app-auto-cancel"
+  },
+  "completion": {
+    "state": "completed",
+    "productionCompleted": true,
+    "requiredArtifacts": [
+      "videoPath",
+      "textPath"
+    ]
+  },
+  "terminalStates": [
+    "completed",
+    "failed",
+    "cancelled"
+  ],
+  "sourceRules": {
+    "preserveOriginal": true,
+    "separateTypes": [
+      "manga-introduction",
+      "anime-review"
+    ],
+    "exclude": [
+      "in-progress",
+      "currently editing",
+      "unclassified",
+      "unfinished automation"
+    ],
+    "latestBy": "saved updatedAt"
+  },
+  "confirmation": {
+    "waitForListening": false,
+    "checkGeneratedAudioAndImages": true,
+    "waitForImageApproval": false,
+    "dialogueEqualsSubtitlesAndSpokenText": true
+  },
+  "startup": {
+    "doNotLaunchTwice": true,
+    "hostExecutionRequired": true,
+    "doNotHardcodePipeNameOrToken": true
+  },
+  "restartResumeSupported": false
+}

@@ -36,7 +36,23 @@ type
     FImageAiJob: TRigmCodexJob; FImageAiTargets: TJSONArray; FImageAiRequest: TJSONObject;
     FImageAiProjectId,FImageAiMessage,FImageAiLog,FImageAiCancel: string;
     FImageAiIndex,FImageAiCompleted: Integer; FImageAiPreparedAt: UInt64;
+    FAutomationCheck: TJSONObject; FAutomationCheckPhase: Integer;
+    FAutomationRun: TJSONObject; FAutomationSource: TRigmMovieProject;
+    FAutomationRunPhase,FAutomationCueIndex: Integer;
+    FAutomationImageId,FAutomationFolder,FAutomationExportId: string;
+    FAutomationStarted: UInt64;
+    FExpressionAiSucceeded,FImageAiSucceeded: Boolean;
+    function AutomationRunCommand(const Name: string; Args: TJSONObject): TJSONObject;
+    procedure AutomationRunEvent(const Stage,State,Message: string);
+    procedure PollAutomationRun;
+    function AutomationBodyScene(Offset: Integer): Integer;
+    function AutomationSources(const ScriptType: string): TJSONObject;
+    function AutomationSourceCheck(const ScriptType, ProjectId: string): TJSONObject;
+    function AutomationCommand(const Name: string; Args: TJSONObject): TJSONObject;
+    procedure AutomationCheckEvent(const Stage,State,Message: string);
+    procedure PollAutomationCheck;
     procedure PollExpressionAi;
+    function AiCommand(const Name: string; Args: TJSONObject): TJSONObject;
     procedure PollSceneImageAi;
     procedure PrepareSceneImageAi;
     procedure AddScriptImageCharacterPreviews(Sources: TJSONObject);
@@ -210,9 +226,9 @@ type
     property OnMovieSessionClosing: TNotifyEvent read FOnMovieSessionClosing write FOnMovieSessionClosing;
   end;
 implementation
-uses RigmScriptCopyModel, RigmVoiceEffects, RigmVoiceEffectSettings, System.IOUtils, System.Math, System.DateUtils, System.StrUtils, Winapi.Windows, RigmJson, RigmAppSettings, PsdSession,
+uses RigmScriptCopyModel, RigmVoiceEffects, RigmVoiceEffectSettings, RigmAutomationInput, RigmFFmpegApi, System.IOUtils, System.Math, System.DateUtils, System.StrUtils, Winapi.Windows, RigmJson, RigmAppSettings, PsdSession,
   PsdCharacter, PsdJson, PsdPackage, PsdProduction, RigmEditor, PsdImport, RigmStorage,
-  System.Hash, ArtDocument, PsdWorkspace, RigmCharacterCatalog, RigmMovieLayout, RigmScriptPlacementModel, RigmScriptNavigationModel, RigmScriptTextModel, RigmScriptReviewModel, RigmScriptResearchModel, RigmScriptCastingModel, RigmScriptSubtitleModel, RigmScriptVoiceModel, RigmScriptVoiceSelection, System.SyncObjs, Winapi.MMSystem, RigmScriptScenesModel, RigmScriptSceneAssignmentModel, RigmScriptSummaryModel, RigmScriptClosingModel, RigmMovieCompositor, RigmMovieWorkspace, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, RigmScriptTypes, RigmScriptConfirmationModel, RigmScriptThumbnailModel, RigmScriptAiImages;
+  RigmMovieComposition, RigmMovieChart, RigmMoviePosting, System.Hash, ArtDocument, PsdWorkspace, RigmCharacterCatalog, RigmMovieLayout, RigmScriptPlacementModel, RigmScriptNavigationModel, RigmScriptTextModel, RigmScriptReviewModel, RigmScriptResearchModel, RigmScriptCastingModel, RigmScriptSubtitleModel, RigmScriptVoiceModel, RigmScriptVoiceSelection, System.SyncObjs, Winapi.MMSystem, RigmScriptScenesModel, RigmScriptSceneAssignmentModel, RigmScriptSummaryModel, RigmScriptClosingModel, RigmMovieCompositor, RigmMovieWorkspace, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, RigmScriptTypes, RigmScriptConfirmationModel, RigmScriptThumbnailModel, RigmScriptAiImages;
 constructor TRigmWizardWorkspace.Create(AOwner: TComponent);
 begin
   inherited; FSessions := TObjectList<TRigmMovieSession>.Create(True);
@@ -222,11 +238,14 @@ begin
   FTimer := TTimer.Create(Self); FTimer.Interval := 150; FTimer.OnTimer := Poll;
 end;
 destructor TRigmWizardWorkspace.Destroy;
-begin FTimer.Enabled := False; FImageAiJob.Free; FImageAiTargets.Free; FImageAiRequest.Free; FExpressionAiJob.Free; FExpressionAiRequest.Free; StopVoice; FSceneJob.Free; FSceneRetired.Free; FSceneBitmap.Free; FSceneContracts.Free; FScriptTransfers.Free; FVoiceJob.Free; FVoiceBindings.Free; FVoiceCatalog.Free; FExpressionAssets.Free; FThumbnails.Free; FPipe.Free; FScriptSavedHashes.Free; FScriptDrafts.Free; FSessions.Free; inherited; end;
+begin FTimer.Enabled := False; FAutomationCheck.Free; FImageAiJob.Free; FImageAiTargets.Free; FImageAiRequest.Free; FExpressionAiJob.Free; FExpressionAiRequest.Free; StopVoice; FSceneJob.Free; FSceneRetired.Free; FSceneBitmap.Free; FSceneContracts.Free; FScriptTransfers.Free; FVoiceJob.Free; FVoiceBindings.Free; FVoiceCatalog.Free; FExpressionAssets.Free; FThumbnails.Free; FPipe.Free; FScriptSavedHashes.Free; FScriptDrafts.Free; FSessions.Free; FAutomationSource.Free; FAutomationRun.Free; inherited; end;
 procedure TRigmWizardWorkspace.StartPipe(const Root: string);
 begin if FPipe=nil then FPipe := TRigmWizardPipe.Create(Root,Command); end;
 function TRigmWizardWorkspace.Command(const Name: string; Args: TJSONObject): TJSONObject;
 begin
+  if (FAutomationRunPhase<>0) and not Name.StartsWith('app-auto-') and
+    not MatchStr(Name,['app-status','app-script-status','status','schema','movie-status','movie-job-status']) then
+    raise Exception.Create('自動制作中です。app-auto-statusで状態を取得し、変更前にapp-auto-cancelで中止してください。');
   if Name.StartsWith('app-') then Result := ExecuteWorkspace(Name.Substring(4),Args)
   else if Name.StartsWith('movie-') then begin
     if (Name='movie-open-ui') or (Name='movie-play') then RequestMovie(Self);
@@ -238,6 +257,8 @@ begin
 end;
 function TRigmWizardWorkspace.ExecuteWorkspace(const Name: string; Args: TJSONObject): TJSONObject;
 begin
+  if Name.StartsWith('auto-') then Exit(AutomationCommand(Name.Substring(5),Args));
+  if Name.StartsWith('script-ai-') then Exit(AiCommand(Name,Args));
   if (FPlacementEditing or ScriptTextEditing) and MatchText(Name,['script-new','script-open','script-copy']) then
     raise Exception.Create('GUIで入力・配置を操作中です。操作完了後に再取得してください。');
   if Name='script-status' then Exit(ScriptStatus);
@@ -372,6 +393,16 @@ begin
   if Name='schema' then begin
     Result := PsdJson.ObjectText('{"workspaceCommandPrefix":"app-","movieCommandPrefix":"movie-","psdCommandPrefix":"psd-","workspace":{"status":{},"library":{},"switch-page":{"page":"home|preview|create|characters|scripts|character-edit","propertyPage":"optional"},"open-work":{"path":".rigmovie"},"edit-character":{"path":".psdchar|.psd|.rigm"},"register-character":{"path":"file within dataRoot","name":"optional"}}}');
     var ScriptSchema := PsdJson.ObjectText('{"script-status":{},"script-list":{"offset":0,"limit":50},"script-new":{},"script-open":{"path":"Projects/<UID>/project.rigmovie"},"script-set-title":{"projectId":"from script-status","revision":"from script-status","title":"<=128 characters"},"script-save":{"projectId":"from script-status","revision":"from script-status"}}');
+    ScriptSchema.AddPair('script-ai-status',TJSONObject.Create);
+    ScriptSchema.AddPair('auto-validate',PsdJson.ObjectText('{"text":"user script in the automation input format; read only"}'));
+    ScriptSchema.AddPair('auto-sources',PsdJson.ObjectText('{"scriptType":"manga-introduction|anime-review; read only"}'));
+    ScriptSchema.AddPair('auto-source-check',PsdJson.ObjectText('{"scriptType":"manga-introduction|anime-review","projectId":"from auto-sources; read-only eligibility and in-memory copy validation"}'));
+    ScriptSchema.AddPair('auto-check',PsdJson.ObjectText('{"text":"validated input; preflight only; does not start production"}'));
+    ScriptSchema.AddPair('auto-start',PsdJson.ObjectText('{"text":"input format; copies latest source and runs through MP4 and posting text asynchronously"}'));
+    ScriptSchema.AddPair('auto-cancel',PsdJson.ObjectText('{"jobId":"from auto-start; preserves generated files"}'));
+    ScriptSchema.AddPair('auto-status',PsdJson.ObjectText('{"jobId":"from auto-check","afterSequence":"optional nonnegative event cursor"}'));
+    for var AiName in ['script-ai-expressions-start','script-ai-expressions-cancel','script-ai-images-start','script-ai-images-cancel'] do
+      ScriptSchema.AddPair(AiName,PsdJson.ObjectText('{"projectId":"from script-status","revision":"from script-status","sceneId":"optional for images-start; empty means all eligible unapproved scenes"}'));
     ScriptSchema.AddPair('script-character-library',TJSONObject.Create);
     ScriptSchema.AddPair('script-copy',PsdJson.ObjectText('{"path":"Projects/<UID>/project.rigmovie; saved wizard script only"}'));
     ScriptSchema.AddPair('script-set-type',PsdJson.ObjectText('{"projectId":"from script-status","revision":"from script-status","scriptType":"ID from scriptTypes; empty clears classification"}'));
@@ -1057,7 +1088,7 @@ begin
     if Next='voice' then PrepareScriptVoice(Snapshot);
     if Next='voice-effects' then begin
       if JS(Snapshot.ScriptWizard,'voiceStatus')<>'complete' then raise Exception.Create('全セリフの音声を最後まで再生してください。');
-      for var C in Snapshot.Cues do if not Snapshot.AudioHeard(C) then raise Exception.Create('未再生または変更後のセリフを最後まで再生してください。');
+      for var C in Snapshot.Cues do if not ScriptVoiceAccepted(Snapshot,C) then raise Exception.Create('未再生または変更後のセリフを最後まで再生してください。');
       PrepareScriptVoiceEffects(Snapshot);
     end;
     if Next='summary-edit' then PrepareScriptSummary(Snapshot);
@@ -1465,6 +1496,8 @@ begin
           if P.ScriptWizard<>nil then begin
             if JS(P.ScriptWizard,'stage')<>'editor' then CheckScript(P); if not SameText(Paths[I],ScriptPath(P)) then raise Exception.Create('UIDと保存先が一致しません。');
             PsdJson.Put(Entry,'kind','wizard'); Entry.AddPair('stage',JS(P.ScriptWizard,'stage'));
+            if P.ScriptWizard.GetValue('automation') is TJSONObject then
+              Entry.AddPair('automationState',JS(JO(P.ScriptWizard,'automation'),'state','incomplete'));
             var StateKey := 'titleStatus'; if JS(P.ScriptWizard,'stage')='characters' then StateKey := 'charactersStatus';
             if JS(P.ScriptWizard,'stage')='layout' then StateKey := 'layoutStatus';
             if JS(P.ScriptWizard,'stage')='placement' then StateKey := 'placementStatus';
@@ -1480,14 +1513,19 @@ begin
 end;
 procedure TRigmWizardWorkspace.Poll(Sender: TObject);
 begin
+  PollAutomationCheck;
   PollExpressionAi;
   PollSceneImageAi;
   if (FVoiceQueryNotifyAt<>0) and (GetTickCount64>=FVoiceQueryNotifyAt) then ScriptChanged;
   if (FSceneAssignmentNotifyAt<>0) and (GetTickCount64>=FSceneAssignmentNotifyAt) then ScriptChanged;
   PollScriptVoice; PollVoicePlayback; EnsureSelectedVoice; PollScriptScenes;
   for var Session in FSessions do if Session.Busy then Session.Poll;
+  PollAutomationRun;
 end;
 {$I RigmWizardExpressionAi.inc}
+{$I RigmWizardAiCommands.inc}
+{$I RigmWizardAutomation.inc}
+{$I RigmWizardAutomationRun.inc}
 {$I RigmWizardImageAi.inc}
 function TRigmWizardWorkspace.ActiveSession: TRigmMovieSession;
 begin if FActive=nil then NewWork; Result := FActive; end;

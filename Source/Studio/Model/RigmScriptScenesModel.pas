@@ -70,7 +70,7 @@ begin
   if RequireVoiceConfirmation then begin
     RequireCurrentVoice(Project);
     if JS(Project.ScriptWizard,'voiceStatus')<>'complete' then raise Exception.Create('全セリフの音声を最後まで再生してから進んでください。');
-    for var C in Project.Cues do if not Project.AudioHeard(C) then raise Exception.Create('変更後または未再生の音声を確認してください。');
+    for var C in Project.Cues do if not ScriptVoiceAccepted(Project,C) then raise Exception.Create('変更後または未再生の音声を確認してください。');
   end;
   if Project.Scenes.Count=0 then raise Exception.Create('セリフを含むシーンがありません。');
   PrepareScriptThumbnail(Project);

@@ -52,7 +52,7 @@ begin
   if (FScriptDraft=nil) or (FScriptDraft.Cues.Count=0) then Exit('音声を確認するセリフがありません。');
   if VoiceBusy or VoicePlaying or VoiceContinuous then Exit('音声生成・再生の終了後に左の工程リストで進んでください。');
   for var C in FScriptDraft.Cues do if not FScriptDraft.AudioReady(C) then Exit('未生成または変更後のセリフをF5で確認してください。');
-  for var C in FScriptDraft.Cues do if not FScriptDraft.AudioHeard(C) then Exit('未再生のセリフを最後まで再生してください（F5／Shift+F5）。');
+  for var C in FScriptDraft.Cues do if not ScriptVoiceAccepted(FScriptDraft,C) then Exit('未再生のセリフを最後まで再生してください（F5／Shift+F5）。');
   if RequireConfirmation and (JS(FScriptDraft.ScriptWizard,'voiceStatus')<>'complete') then Exit('左の「音声エフェクト」を選択して音声を確認してください。');
 end;
 procedure TRigmWizardWorkspace.StopVoice;
@@ -215,7 +215,7 @@ procedure TRigmWizardWorkspace.CompleteVoice;
 begin
   EndScriptTextEdit; RequireCurrentVoice(FScriptDraft);
   if VoiceBusy or VoicePlaying or VoiceContinuous then raise Exception.Create('音声生成・再生の終了後に確認してください。');
-  for var C in FScriptDraft.Cues do if not FScriptDraft.AudioHeard(C) then raise Exception.Create('未再生または変更後のセリフを最後まで再生してください（F5／Shift+F5）。');
+  for var C in FScriptDraft.Cues do if not ScriptVoiceAccepted(FScriptDraft,C) then raise Exception.Create('未再生または変更後のセリフを最後まで再生してください（F5／Shift+F5）。');
   PsdJson.Put(FScriptDraft.ScriptWizard,'voiceStatus','complete'); FScriptDraft.Changed; ScriptChanged;
 end;
 function TRigmWizardWorkspace.VoiceStatus: TJSONObject;

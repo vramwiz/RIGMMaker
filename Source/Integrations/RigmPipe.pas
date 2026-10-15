@@ -59,7 +59,7 @@ type
   end;
 
 implementation
-uses System.IOUtils, RigmJson;
+uses System.IOUtils, RigmJson, RigmCommunication;
 
 const WM_RIGM_REQUEST = WM_USER + 171;
       WM_RIGM_SENT = WM_USER + 172;
@@ -102,7 +102,9 @@ end;
 
 constructor TRigmPipeEndpoint.Create(const Name: string; Handler: TRigmPipeRequest; OnSent: TNotifyEvent);
 begin
-  inherited Create; FOnRequest := Handler; FOnSent := OnSent; FWindow := AllocateHWnd(WindowProc);
+  inherited Create; FOnRequest := Handler; FOnSent := OnSent;
+  if not RigmCodexPipesEnabled then Exit;
+  FWindow := AllocateHWnd(WindowProc);
   FWorker := TRigmPipeWorker.Create(Name, FWindow); FWorker.Start;
 end;
 
@@ -163,6 +165,8 @@ end;
 
 function TRigmPipeHub.Info: TJSONObject;
 begin
+  if not RigmCodexPipesEnabled then Exit(TJSONObject.Create.AddPair('communicationMode','dots')
+    .AddPair('enabled',TJSONBool.Create(False)).AddPair('commandPipe','').AddPair('controlPipe','').AddPair('pagePipe',''));
   Result := TJSONObject.Create; Result.AddPair('controlPipe', FControlName);
   Result.AddPair('commandPipe', FControlName); Result.AddPair('routing', 'common-command'); AddN(Result, 'apiVersion', 2);
   if FActivePage = FEditor.Document.LastPage then Result.AddPair('pagePipe', FPageName)
@@ -174,6 +178,7 @@ end;
 procedure TRigmPipeHub.WriteConnection;
 var O: TJSONObject;
 begin
+  if not RigmCodexPipesEnabled then Exit;
   O := Info;
   try
     AddN(O, 'schemaVersion', 1); AddN(O, 'pid', GetCurrentProcessId);

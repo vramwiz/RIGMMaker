@@ -63,3 +63,9 @@ Codex実行ファイルとログインの要件は[AI表情の通信設定](SCRI
 & ./Source/Psd/Validation/Run-AiImagesCheck.ps1 -OutDir "$PWD/output/validation/ai-images-new"
 & ./Source/Psd/Validation/Run-AiImagesCheck.ps1 -OutDir "$PWD/output/validation/ai-images-live-new" -Live
 ```
+
+## キャラ参照の色とキャッシュ（2026-10-15）
+
+参照は `TRigmThumbnailCache.ReferencePng` が、キャラのstraight-alpha RGBAから既存の `ArtPng.WriteRgbaPng` を通して生成する。VCL PNGの走査行はBGRのため、RGBA配列のRGB部分を直接コピーしない。旧処理の赤青反転を避けるため、参照PNGのキーに `RGBA-PNG.v2` を含める。GUIの生成と外部への画像要求は同じ参照を使用し、RGBA・透明度を保つ。
+
+既存の生成済み画像の色は自動で書き換えない。青い参照で作られたサムネイルは、確定を外して再生成する。原キャラの描き直しや色変更は不要。

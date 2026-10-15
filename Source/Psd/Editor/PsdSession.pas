@@ -41,13 +41,13 @@ type
   end;
 
 implementation
-uses System.IOUtils, Winapi.Windows, ArtDocument, ArtPng, PsdJson, PsdImport, PsdPackage, PsdProduction;
+uses System.IOUtils, Winapi.Windows, ArtDocument, ArtPng, PsdJson, PsdImport, PsdPackage, PsdProduction, RigmCommunication;
 
 constructor TPsdSession.Create(const Root: string; StartPipe: Boolean);
 begin
   inherited Create; FId := NewId; FState := TPsdFrameState.Default;
   FWorkspace := TPsdWorkspace.Create(Root); FWorkspace.Initialize; FTrack := TPsdPhonemeTrack.Create;
-  if StartPipe then begin
+  if StartPipe and RigmCodexPipesEnabled then begin
     FPipeName := 'RIGMMaker.Psd.' + GetCurrentProcessId.ToString + '.' + FId;
     FConnection := FWorkspace.Resolve('Exchange\psd-' + GetCurrentProcessId.ToString + '-' + FId + '.json', False);
     FProtocol := TArtPipeProtocol.Create(Command); FEndpoint := TPsdPipeEndpoint.Create(FPipeName, Receive);

@@ -33,7 +33,7 @@ type
 var RigmWizardMain: TRigmWizardMainForm;
 implementation
 uses System.SysUtils, System.Math, Winapi.Windows, Vcl.Dialogs, RigmAppSettings, RigmCharacterEditPage, RigmMovieWorkspaceFrame,
-  RigmHomeFrame, RigmCharacterManagerFrame, RigmScriptManagerFrame, RigmScriptCreatorFrame;
+  RigmHomeFrame, RigmCharacterManagerFrame, RigmScriptManagerFrame, RigmScriptCreatorFrame, RigmCommunication;
 constructor TRigmWizardMainForm.Create(AOwner: TComponent);
 begin
   inherited CreateScaledNew(AOwner,96);
@@ -41,6 +41,7 @@ begin
   // 未関連のフォントはTFont.AssignでシステムDPIに再換算され、後の拡大と二重になる。
   Font.PixelsPerInch := 96; Font.IsDPIRelated := True;
   var TargetPPI := Monitor.PixelsPerInch; Caption := 'RIGM Maker'; Width := 1280; Height := 840;
+  Caption := Caption + ' [通信: ' + RigmCommunicationName + ']';
   // CreateNewは通常のメインフォーム生成フラグを通らないため、タスクバー表示を明示する。
   ShowInTaskBar := True; Icon.Assign(Application.Icon);
   Position := poScreenCenter; Font.Name := 'Yu Gothic UI'; Font.Size := 10; OnCloseQuery := Closing;

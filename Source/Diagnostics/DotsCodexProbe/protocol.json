@@ -1,0 +1,78 @@
+{
+  "protocol": "dots-codex-probe/1",
+  "purpose": "Dots-to-client-to-Codex interoperability test",
+  "documents": ["README.md", "PROTOCOL.md", "DOTS-QUESTION.md", "examples.json", "request.schema.json"],
+  "client": {
+    "project": "DotsCodexProbe.dproj",
+    "executableFromRepository": "Win64/DotsCodexProbe/Release/DotsCodexProbe.exe",
+    "launchArguments": ["--state-dir", "<new absolute directory on client>"],
+    "discoveryFile": "<state-dir>/connection.json",
+    "defaultStateDirectory": "%LOCALAPPDATA%/RIGMMaker/DotsCodexProbe/<PID>-<GUID>",
+    "codexAutoStartsAtLaunch": false
+  },
+  "transport": {
+    "type": "windows-named-pipe",
+    "address": "\\\\.\\pipe\\<connection.pipeName>",
+    "direction": "duplex",
+    "mode": "byte",
+    "scope": "same Windows PC and same user SID",
+    "encoding": "UTF-8 without BOM",
+    "terminatorHex": "0A",
+    "maxFrameBytesIncludingLF": 8388608,
+    "requestsPerConnection": 1,
+    "responsesPerConnection": 1,
+    "clientClosesAfterResponse": true,
+    "operationTimeoutMs": 15000,
+    "supportsPushEvents": false
+  },
+  "request": {
+    "version": 1,
+    "idType": "string",
+    "idMinLength": 1,
+    "idMaxLength": 128,
+    "argsType": "object",
+    "accessToken": "When discovery.requiresAccessToken=true, send discovery.accessToken as a top-level string on every request.",
+    "pollWithNewId": true,
+    "retryWithSameIdAndIdenticalBody": true,
+    "replayCacheMaxEntries": 256,
+    "replayCacheMaxResponseCharacters": 16777216,
+    "replaySurvivesRestart": false
+  },
+  "commands": [
+    {"command": "ping", "requiredArgs": []},
+    {"command": "status", "requiredArgs": []},
+    {"command": "echo", "requiredArgs": ["text"]},
+    {"command": "text.save", "requiredArgs": ["text"]},
+    {"command": "codex.start", "requiredArgs": ["mode", "text"], "optionalArgs": ["imageId"], "mode": ["text", "image"]},
+    {"command": "job.get", "requiredArgs": ["jobId"]},
+    {"command": "job.cancel", "requiredArgs": ["jobId"]},
+    {"command": "image.put", "requiredArgs": ["base64"]},
+    {"command": "image.get", "requiredArgs": ["imageId"]}
+  ],
+  "jobs": {
+    "states": ["running", "completed", "failed", "cancelled"],
+    "maxConcurrent": 1,
+    "maxPerLaunch": 128,
+    "textDeadlineMs": 300000,
+    "imageDeadlineMs": 600000,
+    "rpcResponseDeadlineMs": 30000,
+    "codexSession": "new dedicated ephemeral app-server session per job"
+  },
+  "images": {
+    "formats": ["png", "jpeg", "bmp"],
+    "maxBytes": 4194304,
+    "maxWidth": 8192,
+    "maxHeight": 8192,
+    "maxPixels": 16777216,
+    "base64": "raw, no data URL prefix; responses have no line breaks",
+    "hash": "SHA256 of stored bytes, lowercase hex"
+  },
+  "notImplemented": [
+    "Dots-side runtime or connection",
+    "network listener or remote launcher",
+    "sending to the currently open Codex desktop chat",
+    "arbitrary destination paths or arbitrary command execution",
+    "resuming jobs after restart",
+    "chunked image transfer"
+  ]
+}

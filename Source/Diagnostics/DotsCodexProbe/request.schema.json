@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Dots Codex Probe v1 request",
+  "type": "object",
+  "required": ["version", "id", "command", "args"],
+  "properties": {
+    "version": {"const": 1},
+    "id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "accessToken": {"type": "string", "description": "Required when connection.json has requiresAccessToken=true. Use that file's accessToken."},
+    "command": {"enum": ["ping", "status", "echo", "text.save", "codex.start", "job.get", "job.cancel", "image.put", "image.get"]},
+    "args": {"type": "object"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"command": {"enum": ["echo", "text.save"]}}},
+      "then": {"properties": {"args": {"required": ["text"], "properties": {"text": {"type": "string"}}}}}
+    },
+    {
+      "if": {"properties": {"command": {"const": "codex.start"}}},
+      "then": {"properties": {"args": {
+        "required": ["mode", "text"],
+        "properties": {
+          "mode": {"enum": ["text", "image"]},
+          "text": {"type": "string", "minLength": 1, "maxLength": 32000, "pattern": "\\S"},
+          "imageId": {"type": "string"}
+        }
+      }}}
+    },
+    {
+      "if": {"properties": {"command": {"enum": ["job.get", "job.cancel"]}}},
+      "then": {"properties": {"args": {"required": ["jobId"], "properties": {"jobId": {"type": "string", "minLength": 1}}}}}
+    },
+    {
+      "if": {"properties": {"command": {"const": "image.put"}}},
+      "then": {"properties": {"args": {"required": ["base64"], "properties": {"base64": {"type": "string", "minLength": 1, "maxLength": 5592408, "contentEncoding": "base64"}}}}}
+    },
+    {
+      "if": {"properties": {"command": {"const": "image.get"}}},
+      "then": {"properties": {"args": {"required": ["imageId"], "properties": {"imageId": {"type": "string", "minLength": 1}}}}}
+    }
+  ]
+}

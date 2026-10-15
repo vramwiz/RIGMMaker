@@ -508,7 +508,7 @@ begin
     for var V in JA(Cast,'rows') do begin
       var O := TJSONObject(V); var C := Project.Cue(JS(O,'cueId'));
       if (C=nil) or Seen.ContainsKey(C.Id) or (Project.Scene(C.Scene)=nil) or
-        not MatchText(JS(O,'origin'),['unassigned','single-default','ai','human']) then raise Exception.Create('配役セリフの形式が不正です。');
+        not MatchText(JS(O,'origin'),['unassigned','single-default','ai','human','automation']) then raise Exception.Create('配役セリフの形式が不正です。');
       Seen.Add(C.Id,True);
       if JS(Cast,'state')<>'stale' then begin
         var S := ScriptSection(Project,JS(O,'section')); if S=nil then raise Exception.Create('セリフの台本区分がありません。');

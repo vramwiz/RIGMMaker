@@ -1,10 +1,11 @@
 ﻿unit RigmWizardPipe;
 interface
-uses System.SysUtils, System.JSON, RigmPipe, ArtPipeProtocol, PsdWorkspace;
+uses System.SysUtils, System.JSON, RigmPipe, ArtPipeProtocol, PsdWorkspace, RigmDotsEndpoint;
 type
   TRigmWizardPipe = class
   private
     FEndpoint: TRigmPipeEndpoint; FProtocol: TArtPipeProtocol;
+    FDots: TRigmDotsEndpoint;
     FWorkspace: TPsdWorkspace; FName,FConnection: string;
     procedure Receive(const Request: string; out Response: string);
   public
@@ -14,10 +15,15 @@ type
     property Workspace: TPsdWorkspace read FWorkspace;
   end;
 implementation
-uses System.Classes, System.IOUtils, Winapi.Windows, PsdJson;
+uses System.Classes, System.IOUtils, Winapi.Windows, PsdJson, RigmCommunication;
 constructor TRigmWizardPipe.Create(const Root: string; Handler: TArtCommandHandler);
 begin
   inherited Create; FWorkspace := TPsdWorkspace.Create(Root); FWorkspace.Initialize;
+  if RigmCommunicationMode=rcDots then begin
+    FDots := TRigmDotsEndpoint.Create(FWorkspace.Root,Handler);
+    FConnection := FDots.ConnectionFile;
+    Exit;
+  end;
   FName := 'RIGMMaker.Workspace.'+GetCurrentProcessId.ToString+'.'+NewId;
   FConnection := FWorkspace.Resolve('Exchange\workspace-'+GetCurrentProcessId.ToString+'.json',False);
   FProtocol := TArtPipeProtocol.Create(Handler); FEndpoint := TRigmPipeEndpoint.Create(FName,Receive);
@@ -26,7 +32,7 @@ begin
 end;
 destructor TRigmWizardPipe.Destroy;
 begin
-  FEndpoint.Free; FProtocol.Free;
+  FreeAndNil(FDots); FEndpoint.Free; FProtocol.Free;
   if (FWorkspace<>nil) and FileExists(FConnection) then begin
     var Job := FWorkspace.BeginJob;
     try
@@ -50,10 +56,12 @@ begin
 end;
 function TRigmWizardPipe.Info: TJSONObject;
 begin
+  if FDots<>nil then Exit(FDots.Info);
   Result := TJSONObject.Create; Result.AddPair('format','RIGMMaker.WorkspaceConnection');
   Result.AddPair('schemaVersion',TJSONNumber.Create(1)); Result.AddPair('apiVersion',TJSONNumber.Create(2));
   Result.AddPair('pid',TJSONNumber.Create(GetCurrentProcessId)); Result.AddPair('commandPipe',FName);
   Result.AddPair('controlPipe',FName); Result.AddPair('dataRoot',FWorkspace.Root);
   Result.AddPair('connectionFile',FConnection); Result.AddPair('routing','common-command');
+  Result.AddPair('communicationMode','codex'); Result.AddPair('dotsPipeEnabled',TJSONBool.Create(False));
 end;
 end.
