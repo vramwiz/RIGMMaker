@@ -47,6 +47,7 @@ Dotsとのテキスト・画像通信の成功を基に、[本編のCodex／Dots
 | ボタンからCodexを起動する独立テスト | [画像生成・受信・表示の使い方と連続処理の方針](Codex連携_画像生成と受信の使い方.md)、[テストの技術詳細](Source/Diagnostics/CodexPipeProbe/README.md) |
 | 台本制作の画面・工程移動・VOICEVOX調整・動画からの復帰 | [工程リスト・入力とちらつき抑制・設定・保存・復帰](Source/Shell/Pages/SCRIPT-NAVIGATION-20261009.md) |
 | 台本一覧から本文を除いてコピー | [コピー対象・操作・保存](Source/Shell/Pages/SCRIPT-COPY-20261012.md) |
+| コピーした台本へのテキスト一括入力 | [操作・書式](台本入力/使い方.md)、[テンプレート](台本入力/テンプレート.txt)、[記入例](台本入力/記入例.txt) |
 | 作品情報・掘り下げ確認 | [第6段階の画面・通信・保存](Source/Shell/Pages/SCRIPT-RESEARCH-20261009.md) |
 | キャラ配置・画面外からの復帰 | [第4段階のはみ出し・初期座標とサイズ](Source/Shell/Pages/SCRIPT-PLACEMENT-20261010.md) |
 | 配役の声・映像表情・待機表示 | [選択欄・自動表情・個別差分](Source/Shell/Pages/SCRIPT-CASTING-20261009.md) |

@@ -3,11 +3,11 @@
 // 自動制作の入力書式を検査する。作品・音声・画像は作成せず、不足をまとめて返す。
 interface
 uses System.JSON;
-function ValidateAutomationInput(const Text: string): TJSONObject; // 呼出側所有。valid/issues/dataを返す。
+function ValidateAutomationInput(const Text: string; IncludeSharedSections: Boolean=False): TJSONObject; // 呼出側所有。valid/issues/dataを返す。
 implementation
 uses System.SysUtils, System.Classes, System.Generics.Collections, System.Math,
   RigmScriptSummaryModel;
-function ValidateAutomationInput(const Text: string): TJSONObject;
+function ValidateAutomationInput(const Text: string; IncludeSharedSections: Boolean): TJSONObject;
 var Lines: TStringList; Data,Summary,Scene: TJSONObject; Issues,Scenes,Items: TJSONArray;
   Seen: TDictionary<string,Boolean>; Section: string; InBody: Boolean;
   function S(O: TJSONObject; const Key: string): string;
@@ -18,6 +18,13 @@ var Lines: TStringList; Data,Summary,Scene: TJSONObject; Issues,Scenes,Items: TJ
   begin Issues.AddElement(TJSONObject.Create.AddPair('field',Field).AddPair('line',TJSONNumber.Create(Line)).AddPair('message',Message)); end;
   procedure Required(O: TJSONObject; const Key,Field: string);
   begin if S(O,Key).Trim='' then Issue(Field,'未記入です。'); end;
+  function BodyTarget: TJSONObject;
+  begin
+    Result := Scene;
+    if Section='summary' then Result := Summary
+    else if (Section='opening') or (Section='closing') or (Section='posting') then
+      Result := TJSONObject(Data.GetValue(Section));
+  end;
 begin
   Result := TJSONObject.Create; Issues := TJSONArray.Create; Result.AddPair('issues',Issues);
   Data := TJSONObject.Create; Result.AddPair('data',Data);
@@ -34,7 +41,12 @@ begin
         var Raw := Lines[I]; var Line := Raw.Trim;
         if Line.StartsWith('*') then begin
           var Name := Line.Substring(1).Trim; InBody := False;
-          if Name='背景' then begin
+          if IncludeSharedSections and ((Name='前段') or (Name='締め') or (Name='投稿情報')) then begin
+            if Name='前段' then Section := 'opening' else if Name='締め' then Section := 'closing' else Section := 'posting';
+            if Seen.ContainsKey(Section) then Issue(Section,'区分が重複しています。',I+1)
+            else begin Data.AddPair(Section,TJSONObject.Create); Seen.Add(Section,True); end;
+            Scene := nil;
+          end else if Name='背景' then begin
             if Seen.ContainsKey('background') then Issue('background','背景が重複しています。',I+1);
             Seen.AddOrSetValue('background',True); Section := 'background'; Scene := nil;
           end else if Name='総評' then begin
@@ -47,7 +59,7 @@ begin
           Continue;
         end;
         if InBody then begin
-          var Target := Scene; if Section='summary' then Target := Summary;
+          var Target := BodyTarget;
           var Body := S(Target,'body');
           if Seen.ContainsKey(Section+'-body-'+Scenes.Count.ToString) then Body := Body+#13#10;
           SetText(Target,'body',Body+Raw); Seen.AddOrSetValue(Section+'-body-'+Scenes.Count.ToString,True);
@@ -70,16 +82,20 @@ begin
           else Issue(Key,'不明な入力項目です。',I+1);
         end else if Section='background' then begin
           if Key='画像' then SetText(Data,'backgroundPrompt',Value) else Issue(Key,'背景には「画像：」のみ指定できます。',I+1);
-        end else if (Key='本文') and ((Section='scene') or (Section='summary')) then begin
+        end else if ((Key='本文') and ((Section='scene') or (Section='summary') or
+          (Section='opening') or (Section='closing'))) or ((Key='概要') and (Section='posting')) then begin
           InBody := True;
           if Value<>'' then begin
-            if Section='summary' then SetText(Summary,'body',Value) else SetText(Scene,'body',Value);
+            SetText(BodyTarget,'body',Value);
             Seen.AddOrSetValue(Section+'-body-'+Scenes.Count.ToString,True);
           end;
-        end else if Section='scene' then begin
-          if Key='画像' then SetText(Scene,'imagePrompt',Value)
-          else if Key='表示' then SetText(Scene,'displayText',Value)
+        end else if (Section='scene') or (Section='opening') or (Section='closing') then begin
+          if Key='画像' then SetText(BodyTarget,'imagePrompt',Value)
+          else if Key='表示' then SetText(BodyTarget,'displayText',Value)
           else Issue(Key,'シーンでは画像・表示・本文を指定してください。',I+1);
+        end else if Section='posting' then begin
+          if Key='タイトル' then SetText(BodyTarget,'title',Value)
+          else Issue(Key,'投稿情報ではタイトル・概要を指定してください。',I+1);
         end else if Section='summary' then begin
           var Found := False;
           for var Axis in ScriptSummaryAxisNames do if Key=Axis then begin
@@ -94,6 +110,21 @@ begin
       end;
       Required(Data,'title','title'); Required(Data,'scriptType','scriptType');
       if Length(S(Data,'title'))>128 then Issue('title','作品名は128文字以内です。');
+      if Length(S(Data,'workUrl'))>4000 then Issue('workUrl','作品URLは4000文字以内です。');
+      var TotalBody := 0;
+      for var V in Scenes do Inc(TotalBody,Length(S(TJSONObject(V),'body'))+2);
+      if TotalBody>100000 then Issue('scenes','本題の本文合計は100000文字以内です。');
+      for var Key in ['opening','closing'] do if Data.GetValue(Key) is TJSONObject then begin
+        var O := TJSONObject(Data.GetValue(Key));
+        if Length(S(O,'body'))>100000 then Issue(Key+'.body','本文は100000文字以内です。');
+        if Length(S(O,'imagePrompt'))>16004 then Issue(Key+'.image','画像指示は16004文字以内です。');
+        if Length(S(O,'displayText'))>3000 then Issue(Key+'.display','表示テキストは3000文字以内です。');
+      end;
+      if Data.GetValue('posting') is TJSONObject then begin
+        var O := TJSONObject(Data.GetValue('posting'));
+        if Length(S(O,'title'))>1000 then Issue('posting.title','投稿タイトルは1000文字以内です。');
+        if Length(S(O,'body'))>20000 then Issue('posting.body','概要は20000文字以内です。');
+      end;
       Required(Data,'backgroundPrompt','background.image');
       if Scenes.Count=0 then Issue('scenes','通常シーンがありません。');
       for var I := 0 to Scenes.Count-1 do begin

@@ -95,6 +95,8 @@ type
     procedure CopyScriptDraft(const Path: string);
     procedure OpenScriptDraft(const Path: string);
     procedure SetScriptTitle(const Value: string);
+    function ImportScriptText(const Text: string; const SourceName: string=''): TJSONObject;
+    function ImportScriptFile(const FileName: string): TJSONObject;
     procedure SetScriptType(const Value: string); // 固定ID。GUIとパイプの共通更新。
     procedure SetScriptStage(const Value: string);
     procedure SetScriptCharacters(Paths: TJSONArray);
@@ -226,7 +228,7 @@ type
     property OnMovieSessionClosing: TNotifyEvent read FOnMovieSessionClosing write FOnMovieSessionClosing;
   end;
 implementation
-uses RigmScriptCopyModel, RigmVoiceEffects, RigmVoiceEffectSettings, RigmAutomationInput, RigmFFmpegApi, System.IOUtils, System.Math, System.DateUtils, System.StrUtils, Winapi.Windows, RigmJson, RigmAppSettings, PsdSession,
+uses RigmScriptTextImport, RigmScriptCopyModel, RigmVoiceEffects, RigmVoiceEffectSettings, RigmAutomationInput, RigmFFmpegApi, System.IOUtils, System.Math, System.DateUtils, System.StrUtils, Winapi.Windows, RigmJson, RigmAppSettings, PsdSession,
   PsdCharacter, PsdJson, PsdPackage, PsdProduction, RigmEditor, PsdImport, RigmStorage,
   RigmMovieComposition, RigmMovieChart, RigmMoviePosting, System.Hash, ArtDocument, PsdWorkspace, RigmCharacterCatalog, RigmMovieLayout, RigmScriptPlacementModel, RigmScriptNavigationModel, RigmScriptTextModel, RigmScriptReviewModel, RigmScriptResearchModel, RigmScriptCastingModel, RigmScriptSubtitleModel, RigmScriptVoiceModel, RigmScriptVoiceSelection, System.SyncObjs, Winapi.MMSystem, RigmScriptScenesModel, RigmScriptSceneAssignmentModel, RigmScriptSummaryModel, RigmScriptClosingModel, RigmMovieCompositor, RigmMovieWorkspace, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, RigmScriptTypes, RigmScriptConfirmationModel, RigmScriptThumbnailModel, RigmScriptAiImages;
 constructor TRigmWizardWorkspace.Create(AOwner: TComponent);
@@ -278,6 +280,11 @@ begin
   if Name='script-scene-assignment' then Exit(ReadScriptSceneAssignment(Args));
   if Name.StartsWith('script-image-transfer-') then Exit(ExecuteScriptImageTransfer(Name.Substring(7),Args));
   if Name='script-new' then begin NewScriptDraft; if Assigned(FOnNavigate) then FOnNavigate(Self,apScriptCreate,''); Exit(ScriptStatus); end;
+  if Name='script-import-text' then begin
+    if (FScriptDraft=nil) or (JS(Args,'projectId')<>FScriptDraft.Id) or (JI(Args,'revision',-1)<>FScriptDraft.Revision) then
+      raise Exception.Create('現在のprojectId/revisionを指定してください。');
+    Exit(ImportScriptText(JS(Args,'text')));
+  end;
   if Name='script-copy' then begin CopyScriptDraft(FPipe.Workspace.Resolve(JS(Args,'path'))); if Assigned(FOnNavigate) then FOnNavigate(Self,apScriptCreate,''); Exit(ScriptStatus); end;
   if Name='script-open' then begin OpenWork(FPipe.Workspace.Resolve(JS(Args,'path'))); Exit(ScriptStatus); end;
   if MatchText(Name,['script-set-title','script-set-type','script-save','script-set-stage','script-set-characters','script-set-layout','script-next','script-set-placement','script-select-placement','script-set-text','script-select-section','script-research-title',
@@ -405,6 +412,7 @@ begin
       ScriptSchema.AddPair(AiName,PsdJson.ObjectText('{"projectId":"from script-status","revision":"from script-status","sceneId":"optional for images-start; empty means all eligible unapproved scenes"}'));
     ScriptSchema.AddPair('script-character-library',TJSONObject.Create);
     ScriptSchema.AddPair('script-copy',PsdJson.ObjectText('{"path":"Projects/<UID>/project.rigmovie; saved wizard script only"}'));
+    ScriptSchema.AddPair('script-import-text',PsdJson.ObjectText('{"projectId":"from script-status","revision":"from script-status","text":"first-stage input template; input only, no production"}'));
     ScriptSchema.AddPair('script-set-type',PsdJson.ObjectText('{"projectId":"from script-status","revision":"from script-status","scriptType":"ID from scriptTypes; empty clears classification"}'));
     ScriptSchema.AddPair('scriptTypes',ScriptTypesJson);
     ScriptSchema.AddPair('script-set-stage',PsdJson.ObjectText('{"projectId":"from script-status","revision":"from script-status","stage":"title|characters|layout|placement|text|review|casting|subtitles (backward only)"}'));
@@ -769,6 +777,28 @@ begin
   PsdJson.Put(FScriptDraft.ScriptWizard,'titleInput',Value); PsdJson.Put(FScriptDraft.ScriptWizard,'titleStatus','in-progress');
   FScriptDraft.Changed; ScriptChanged;
 end;
+function TRigmWizardWorkspace.ImportScriptFile(const FileName: string): TJSONObject;
+begin Result := ImportScriptText(ReadScriptTextInputFile(FileName),FileName); end;
+function TRigmWizardWorkspace.ImportScriptText(const Text,SourceName: string): TJSONObject;
+begin
+  if (FScriptDraft=nil) or (CurrentScriptStage<>'title') then raise Exception.Create('第1段階で台本テキストを読み込んでください。');
+  if VoiceBusy or ExpressionAiBusy or SceneImageAiBusy or FPlacementEditing or (FAutomationRunPhase<>0) or (FAutomationCheckPhase<>0) then
+    raise Exception.Create('実行中の処理を終了してから読み込んでください。');
+  var Input := ValidateAutomationInput(Text,True);
+  if not JB(Input,'valid') then begin Input.AddPair('message','読み込めませんでした。不足・不正を修正してください。台本は変更していません。'); Exit(Input); end;
+  try
+    var Snapshot := FScriptDraft.Clone;
+    try
+      ApplyScriptTextInput(Snapshot,JO(Input,'data'),SourceName);
+      PrepareScriptDialogue(Snapshot); PrepareScriptCasting(Snapshot); RestoreStoredCastingVoices(Snapshot);
+      PrepareScriptScenes(Snapshot,False); ApplyImportedSceneInputs(Snapshot);
+      StoreScript(Snapshot,'title');
+    finally Snapshot.Free; end;
+    Result := TJSONObject.Create.AddPair('valid',TJSONBool.Create(True)).AddPair('imported',TJSONBool.Create(True))
+      .AddPair('sceneCount',TJSONNumber.Create(JA(JO(Input,'data'),'scenes').Count))
+      .AddPair('message','台本・セリフ・シーンを自動作成して保存しました。第1段階のまま、通常の工程を続けられます。音声・画像生成は開始していません。');
+  finally Input.Free; end;
+end;
 procedure TRigmWizardWorkspace.SetScriptType(const Value: string);
 begin
   if FScriptDraft=nil then raise Exception.Create('台本を新規作成または再開してください。');
@@ -989,6 +1019,7 @@ begin
   FScriptDraft.Layout := Snapshot.Layout; FScriptDraft.LDirection := Snapshot.LDirection;
   FScriptDraft.BackgroundColor := Snapshot.BackgroundColor; FScriptDraft.WorkflowStage := Snapshot.WorkflowStage;
   FScriptDraft.ScriptWizard.Free; FScriptDraft.ScriptWizard := Snapshot.ScriptWizard.Clone as TJSONObject;
+  var OldPosting := FScriptDraft.Posting; FScriptDraft.Posting := Snapshot.Posting; Snapshot.Posting := OldPosting;
   var OldCues := FScriptDraft.Cues; FScriptDraft.Cues := Snapshot.Cues; Snapshot.Cues := OldCues;
   var OldScenes := FScriptDraft.Scenes; FScriptDraft.Scenes := Snapshot.Scenes; Snapshot.Scenes := OldScenes;
   var OldSpeakers := FScriptDraft.Speakers; FScriptDraft.Speakers := Snapshot.Speakers; Snapshot.Speakers := OldSpeakers;
@@ -1083,6 +1114,9 @@ begin
       if JS(Snapshot.ScriptWizard,'summaryChoice')='yes' then ConfirmScriptSummaryDraft(Snapshot);
       PrepareScriptDialogue(Snapshot); PsdJson.Put(Snapshot.ScriptWizard,'scriptConfirmedFingerprint',ScriptFingerprint(Snapshot));
       PrepareScriptCasting(Snapshot); RestoreStoredCastingVoices(Snapshot);
+      if Snapshot.ScriptWizard.GetValue('textImport') is TJSONObject then begin
+        PrepareScriptScenes(Snapshot,False); ApplyImportedSceneInputs(Snapshot);
+      end;
     end;
     if Next='subtitles' then PrepareScriptSubtitles(Snapshot);
     if Next='voice' then PrepareScriptVoice(Snapshot);
@@ -1104,7 +1138,7 @@ begin
       if JS(JO(Snapshot.ScriptWizard,'closingData'),'status')<>'complete' then raise Exception.Create('締め設定の確認完了を押してください。');
       PrepareScriptDialogue(Snapshot);
     end;
-    if Next='scene-assignment' then PrepareScriptScenes(Snapshot,Stage<>'voice-effects');
+    if Next='scene-assignment' then begin PrepareScriptScenes(Snapshot,Stage<>'voice-effects'); ApplyImportedSceneInputs(Snapshot); end;
     if Next='scenes' then begin ValidateScriptSceneAssignment(Snapshot); PrepareScriptThumbnail(Snapshot); PsdJson.Put(Snapshot.ScriptWizard,'scene-assignmentStatus','complete'); end;
     if Next='summary' then begin
       PsdJson.Put(Snapshot.ScriptWizard,'researchIntegration',ResearchIntegrationData(Snapshot));
