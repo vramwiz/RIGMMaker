@@ -42,7 +42,7 @@ begin
   var Cue := W.ScriptDraft.Cues[0]; var Other := W.ScriptDraft.Cues[1];
   W.SelectSubtitle(Cue.Id);
   Check(not Editor.ReadOnly and not Note.ReadOnly,'subtitle and note accept direct input on opening stage twelve');
-  Check(Voice.ReadOnly,'subtitle editing keeps the voice text read only');
+  Check(not Voice.ReadOnly and (NormalizeScriptText(Voice.Text)=Cue.VoiceReading),'subtitle stage exposes an independent editable reading');
   var Original := Cue.Subtitle; var OriginalNote := Cue.SubtitleNote;
   var OtherText := Other.Subtitle; var OtherNote := Other.SubtitleNote;
   var Raw := ScriptFingerprint(W.ScriptDraft); var Audio := W.ScriptDraft.AudioFingerprint(Cue); var Scene := Cue.Scene;
@@ -67,6 +67,21 @@ begin
     Check(Cue.SubtitleNote=NormalizeScriptText(Note.Text),'note accepts native input without a separate editing mode');
     Check((ScriptFingerprint(W.ScriptDraft)=Raw) and (W.ScriptDraft.AudioFingerprint(Cue)=Audio) and (Cue.Scene=Scene),
       'direct subtitle edits preserve manuscript audio fingerprint and scene');
+    var OriginalReading := Cue.VoiceReading; var Display := Cue.Subtitle;
+    var ReadingSpy := TRigmDisplaySpy.Create(Voice);
+    try
+      Voice.SetFocus; Voice.SelectAll;
+      var Reading := 'あゆむがかげろうこうこうへむかいます。';
+      SendMessage(Voice.Handle,EM_REPLACESEL,1,LPARAM(PChar(Reading)));
+      Check((Cue.VoiceReading=Reading) and (Cue.Subtitle=Display) and (ScriptFingerprint(W.ScriptDraft)=Raw),
+        'native reading input changes synthesis text independently of subtitle and manuscript');
+      Voice.SelStart := 2; Voice.SelLength := 3; ReadingSpy.Reset;
+      for var I := 1 to 10 do W.OnScriptChanged(W);
+      Check((Voice.SelStart=2) and (Voice.SelLength=3) and (ReadingSpy.TextResets=0),
+        'reading state notifications retain local text selection and caret');
+      Voice.Text := OriginalReading;
+      Check(W.ScriptDraft.AudioFingerprint(Cue)=Audio,'clearing reading restores original synthesis text');
+    finally ReadingSpy.Free; end;
     W.SelectSubtitle(Other.Id);
     Check(not Editor.ReadOnly and not Note.ReadOnly and (Editor.Text=OtherText),
       'selecting another subtitle immediately opens writable subtitle and note fields');
@@ -85,9 +100,9 @@ begin
     Check(Page.RequestFinish and (Page.InputError=''),'correcting invalid note permits saving again');
     var Cast := JO(W.ScriptDraft.ScriptWizard,'casting'); var State := JS(Cast,'state');
     PsdJson.Put(Cast,'state','stale'); Page.RefreshState;
-    Check(Editor.ReadOnly and Note.ReadOnly,'obsolete casting keeps subtitle edits disabled with its prerequisite reason');
+    Check(Editor.ReadOnly and Note.ReadOnly and Voice.ReadOnly,'obsolete casting keeps subtitle and reading edits disabled with its prerequisite reason');
     PsdJson.Put(Cast,'state',State); Page.RefreshState;
-    Check(not Editor.ReadOnly and not Note.ReadOnly,'restoring current casting restores direct input');
+    Check(not Editor.ReadOnly and not Note.ReadOnly and not Voice.ReadOnly,'restoring current casting restores subtitle and reading input');
     Editor.Text := OtherText; Note.Text := OtherNote;
     W.SelectSubtitle(Cue.Id); Editor.Text := Original; Note.Text := OriginalNote;
     Check(Page.RequestFinish,'subtitle fixture restores its original display text');

@@ -343,7 +343,11 @@ begin
       Row.SceneName.ReadOnly := Busy;
       Row.Prompt.ReadOnly := S.ImageApproved or Busy; Row.Description.ReadOnly := IsBackground or IsThumbnail or S.ImageApproved or Busy;
       Row.Position.Visible := not IsBackground and not IsThumbnail; Row.Position.Enabled := not S.ImageApproved and not Busy;
-      Row.Approved.Checked := S.ImageApproved;
+      var CurrentApproval := ScriptSceneReady(P,S);
+      Row.Approved.Checked := S.ImageApproved and CurrentApproval;
+      Row.Approved.Caption := '確定';
+      if S.ImageApproved and not CurrentApproval then Row.Approved.Caption := '再確認';
+      Row.Approved.Hint := ScriptSceneReadinessReason(P,S); Row.Approved.ShowHint := Row.Approved.Hint<>'';
       Row.Approved.Enabled := (not IsBackground or SceneNeedsImage(S) or S.ImageApproved) and not Busy;
       var Stamp := ''; var Path := ResolveMoviePath(P.FileName,S.Image);
       try

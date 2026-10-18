@@ -1,0 +1,228 @@
+﻿{
+  "format": "RIGMMaker.ImageProductionLearning",
+  "date": "2026-10-17",
+  "title": "雑用係として宿で働きはじめた錬金術師、看板娘たちと一緒に暮らすことになった",
+  "workUrl": "https://manga.nicovideo.jp/comic/84974",
+  "projectId": "{6E9994F8-9862-485B-96A8-E54D812899CE}",
+  "mode": "built-in image_gen",
+  "userRequest": "画像を生成して送信。人物はちびキャラ、センシティブな表現を避ける。",
+  "inputs": {
+    "officialReference": "https://comic-walker.com/detail/KC_020042_S/episodes/KC_0200420000300011_E?episodeType=latest",
+    "officialKeyvisual": "https://cdn.comic-walker.com/integration/cdpf/resources/020042/2298f058-8214-45cb-ad77-735d7613a4f6.jpg",
+    "script": "開いている台本の全11シーン・46セリフをパイプから取得。画像要望のある本編9件と背景を生成。冒頭は共通背景を利用、総評は既存チャートを保持。",
+    "referenceDirectory": "output/production/20261017-inn-alchemist-chibi/References",
+    "characterReference": "アプリの現行サムネイル要求が公開した東北きりたんの透過PNGを使用。"
+  },
+  "decisions": [
+    "三姉妹は公式キービジュアルの赤・紺・ピンクの髪色と髪型を参照し、襟元を閉じた長袖の作業着とエプロンへ変更。",
+    "人物は約2.5頭身を指示。身体を強調しない小さな体型、日常の仕事・歓待・団らんを中心に描く。",
+    "ロジーの顔・配色は原画照合未実施。台本要望の抽象的な人物表現を基にした創作デザインで、公式容姿の再現と扱わない。",
+    "宿の木材・クリーム色の壁・屋根・装飾、錬金術の青緑と金の光を参照画像で継続。",
+    "サムネイルはユーザーが背景と本編を確定し、sourcesReady=trueになってから要求・生成。",
+    "サムネイルの東北きりたんは原画の髪・目・着物・帯の色を保持し、指差す案内ポーズへ変更。"
+  ],
+  "artifacts": [
+    {
+      "key": "00-common-background",
+      "sceneId": "common-background",
+      "generatedPath": "C:/Users/zan12/.codex/generated_images/01a143c2-7487-77c2-b84c-515fcbeab6eb/exec-5f470f32-b277-439c-8a89-3f1d587ded18.png",
+      "prompt": "Use case: illustration-story. Asset: shared background for a Japanese manga introduction video, landscape 16:9, preferably 1920x1080. Create a beautiful softly painted miniature fantasy wooden inn interior, cream plaster walls, honey brown exposed beams, subtle light oak grain, warm morning sunlight through windows. Quiet nostalgic countryside inn, plants at edges, faint bottles and wooden shelves near the far sides, cozy welcoming atmosphere. Broad unobstructed light cream center for on-screen narrator and overlays, low contrast and sparse decoration. Polished Japanese storybook anime background, fine clean outlines, soft colors, chibi-compatible miniature proportions. No characters, no text, no logo, no speech balloons, no watermark. The entire image is a single wide background, no panels."
+    },
+    {
+      "key": "01-chores-and-alchemy",
+      "sceneId": "{752509B5-F197-45BC-80FE-EA1AAF4EE11F}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-81ada4a7-4489-4662-ab11-3d9dbb364cf7.png",
+      "prompt": "Use case: illustration-story. Asset: scene 1 for manga introduction video, one wide 16:9 illustration, preferably 1920x1080. Use the reference only for the same honey oak and cream fantasy inn architecture, storybook anime brushwork, warm inviting morning light. Inside the old wooden countryside inn, foreground broom, mop, bucket and cleaning cloth beside small alchemical glassware and a mortar, a few bottles on shelves glowing mysteriously soft turquoise and gold in the background. Express the playful contrast between everyday chores and legendary alchemy through the objects. Strong clear readable composition, miniature/chibi-scale world, gently rounded shapes, clean fine outlines and polished soft cel shading, no characters, no text, no logo, no watermarks, no panels. Calm family-friendly cozy fantasy."
+    },
+    {
+      "key": "02-inn-exterior",
+      "sceneId": "{5A20B5CA-A09F-46B6-A749-325E6FB7DAD8}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-604d7a2e-6736-46c0-a772-9f1e3e6804a6.png",
+      "prompt": "Use case: illustration-story. Asset: second manga introduction scene. One polished wide 16:9 anime storybook illustration, preferably 1920x1080. Match the warm honey oak, cream plaster, miniature/chibi scale architecture and fine painting of the reference inn interior, now show the OUTSIDE of that inn, a cozy old two-story half-timbered countryside inn with a steep terracotta roof, carved wooden front door, diamond-pane windows, flower boxes, climbing ivy, carefully tended flowerbed and a wooden bench next to the cobblestone approach. Rich green rolling rural surroundings, tranquil blue sky, soft morning sunlight, hospitable welcoming feeling. Main inn centered and fully visible in a wide establishing view; no modern objects, no letters anywhere, no readable signs, no logo, no watermark, no people. No collage or panels."
+    },
+    {
+      "key": "03-secret-alchemist",
+      "sceneId": "{2245A772-7CF9-4B73-80C9-F90004A719DF}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-1d2fa570-4c13-4c8f-bead-7e302bbf34da.png",
+      "prompt": "Use case: illustration-story. Wide 16:9 single Japanese anime storybook illustration for a manga introduction, preferably 1920x1080. Reference establishes the same old honey-oak and cream countryside inn. Show its kitchen workbench: a fully clothed chibi boy alchemist, about 2.5 heads tall with a large round head and tiny body, in modest long-sleeved high-neck work tunic, simple apron, full-length trousers and boots. Side profile deliberately in gentle silhouette, hair a dark shadow and facial detail understated, no claim of exact canonical face. He quietly holds up a small turquoise glowing flask, pondering it with a humble focused expression. Wooden shelves, herbs, pots, cleaning brush and everyday cooking tools nearby. Warm window light and soft magical reflections on wooden workbench, cute wholesome fantasy mood. Clothing loose and practical. Large readable subject, polished small-character design with soft anime cel shading, detailed cozy environment. No text, no logo, no panels, no watermark."
+    },
+    {
+      "key": "04-helpful-alchemy",
+      "sceneId": "{364EF059-E565-475A-A21B-EAEC82204277}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-67ee5a20-bce3-4c98-8294-720a4d1d611d.png",
+      "prompt": "Use case: illustration-story. Asset: manga introduction scene showing hidden mastery helping an inn. One landscape 16:9 image, preferably 1920x1080. Match reference warm oak inn, cream walls, painterly anime storybook look and turquoise-and-gold magical palette. Close view of a rustic workbench filled with worn everyday kitchen tools: an old metal kettle, bent spoon, wooden bucket, folded cloth, small alchemical glass bottles and brass instruments. A gentle cloud of tiny golden sparks wraps around a visibly worn kettle and mended handle, showing careful helpful magic. Only the small rounded chibi alchemist's hands and high-neck long-sleeved work-tunic cuffs enter from the right edge; no full person, no detailed face. The tools and delicate glowing bottles are the focus, honest everyday craftsmanship, soft amber sunlight, wonderfully cozy and wholesome, high readability. No weapons, no scary elements, no text, no logo, no panels, no watermark."
+    },
+    {
+      "key": "05-stormy-night",
+      "sceneId": "{71415ED7-492E-4B4E-B04B-ABE2A4811DF5}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-a5478da2-c7e6-4286-b3b4-d0bb5e246344.png",
+      "prompt": "Use case: illustration-story. Single wide 16:9 Japanese anime storybook scene, preferably 1920x1080. This scene is a comical misfortune in the same pastoral fantasy world as the reference inn. Nighttime countryside during a strong rainstorm: a separate tiny ramshackle wooden hut, much smaller and poorer than the inn, is blown apart by a swirling gust. Its old plank walls have mostly fallen away, a small roof section and a few rounded wooden boards tumbling into the wind; a simple wooden stool remains on the hut floor. Slanted rain streaks and a distant zigzag of lightning in blue-violet clouds, muddy country path and bending grass. Miniature toy-like proportions and expressive curved wind motion, playful disaster rather than horror, clear composition. No people, no injuries, no blood, no violence, no text, no logo, no watermark, no panels. Keep warm-storybook rendering despite cool storm light."
+    },
+    {
+      "key": "06-welcome-to-the-inn",
+      "sceneId": "{6EA389ED-A268-4CE0-B814-AA056C9CAB84}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-40f4369c-fa2b-452e-85ba-45f5a81c7ecc.png",
+      "prompt": "Use case: illustration-story. Asset: wholesome manga introduction scene, single landscape 16:9 preferably 1920x1080. First reference defines the SAME boy alchemist, honey-oak inn interior, warm light and palette. Second reference is ONLY for the THREE sisters' hair colors and hairstyles, never reproduce the original exposed-neckline outfits or title text. Red-haired eldest with long flowing red hair, dark-navy-haired middle sister with straight bangs and white hair ribbons, pink-haired youngest with long pink hair and headband. Redesign ALL four people into very cute 2.5-head-tall super-deformed chibi characters: huge rounded heads, tiny unaccentuated bodies, short arms and legs. ALL wear fully closed high-neck long-sleeved loose everyday work clothes; sisters wear ankle-length dresses, opaque tights and sensible shoes, cream aprons, respective muted mustard, navy and pink accents. No exposed shoulders, no chest contours, no short skirts. Warm inn common room: boy seen from behind in foreground, surprised and relieved, facing three sisters welcoming him to stay. Eldest reaches out with an open inviting hand, middle folds her arms looking bashful but kind, youngest relaxed on a wooden chair smiling. Wooden table and tea cups, room after the storm with soft sunshine. Friendly respectful spacing, expressive wholesome friendship and hospitality. Clean anime chibi character lines and softly painted detailed background. No romantic intimacy, no suggestive posing, no lettering, no logo, no panels, no watermark."
+    },
+    {
+      "key": "07-three-sisters",
+      "sceneId": "{4792FAFC-78BC-49DB-8C8B-9C3AE44E2E61}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-cb34774f-f307-4203-9c06-e8f92a0bfeb7.png",
+      "prompt": "Use case: illustration-story. One landscape 16:9 illustration, preferably 1920x1080, no panels. Continue EXACTLY the THREE cute chibi sisters from the reference: red-haired eldest with mustard-yellow high-neck long-sleeved full-length dress and cream apron; navy-haired middle sister with straight bangs and white hair ribbon, navy high-neck long-sleeved full-length dress and cream apron; pink-haired youngest with long pink hair and headband, pink high-neck long-sleeved long dress and cream apron. All have huge round heads, tiny short-limbed unaccentuated bodies, opaque tights and sensible boots, around 2.5 heads tall. Bright old timber inn dining room matching honey oak, cream walls and blue-white embroidered table linen from reference. Only the three sisters in this image: left red-haired eldest smiling warmly and welcoming with an open hand; center navy-haired middle sister mildly pouting with arms folded and gaze to the side, endearingly shy; right pink-haired youngest sitting comfortably on a wooden chair holding a tea cup, relaxed cheerful sleepy smile. Show each fully and distinctly in an airy balanced group composition with cute expressive faces, friendly everyday tone, clean polished anime character shading and softly detailed storybook backdrop. No low necklines, no bare shoulders, no body emphasis, no suggestive pose, no romance or physical intimacy. No boy, no additional people, no text, no logo, no watermark."
+    },
+    {
+      "key": "08-evening-together",
+      "sceneId": "{8044311B-BE5C-4ADF-9ED2-FC6E09F4FCE8}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-e05ddeb5-92a5-4841-acd0-e459b068d261.png",
+      "prompt": "Use case: illustration-story. Asset: manga introduction scene about everyday warmth and gratitude, one landscape 16:9 illustration preferably 1920x1080. First reference fixes the exact architecture of the same cozy two-story oak-and-cream countryside inn, terracotta roof, flower boxes and cobblestones. Second reference fixes the three tiny chibi sisters in modest full-coverage yellow, navy and pink work dresses and cream aprons; third reference fixes the tiny brown-haired boy in cream tunic and apron. Now evening at sunset, wider quiet exterior view from garden. Warm amber light pours from a large open dining-room window; THROUGH the window clearly see only four small chibi figures sitting around one wooden supper table: boy and the three sisters enjoying a simple meal together, soft silhouettes with recognizable respective hair colors, friendly relaxed poses. The building and garden remain the main subject, not a close-up. Foreground blank hanging wooden inn sign, flowerbeds, wooden bench, pastel peach sky and warm windows. Wholesome found-family hospitality, cozy miniature fairy-tale mood, fine anime storybook painting. Keep all figures fully clothed with high-neck long-sleeved outfits, no body emphasis, no intimacy. No visible lettering anywhere, no logo, no speech balloons, no watermark, no collage."
+    },
+    {
+      "key": "09-peaceful-country-road",
+      "sceneId": "{8242421E-71A3-4B46-98FA-59AA62ACB8A4}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-b2365808-fa8f-4e11-a4df-b1b8e40f89f4.png",
+      "prompt": "Use case: illustration-story. Final recommendation scene for a Japanese manga introduction video. One landscape 16:9 polished storybook anime illustration preferably 1920x1080. Use the reference to retain the exact same honey-oak and cream two-story countryside inn with terracotta gables, ivy and flower boxes, but change viewpoint to a distant wide view at the far end of a winding green country path. Peaceful late-morning blue sky with fluffy clouds, flower-filled garden, shady wooden bench beneath a leafy tree in foreground, sun-dappled cobblestones leading to the inn, rolling green hills, simple wooden fence. Miniature chibi-world proportions, appealing soft rounded silhouettes, detailed fine brushwork and warm light, a gentle invitation to relax in this cozy fantasy world. No people at all, no silhouettes in windows, no readable signs, no text, no lettering, no logo, no watermark, no panels."
+    },
+    {
+      "key": "10-thumbnail",
+      "sceneId": "thumbnail",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-1a822424-3fbf-4e17-8a4b-e250a3ae3bda.png",
+      "prompt": "Use case: ads-marketing. Asset: final thumbnail/end-card for a Japanese manga introduction video, one finished wide 16:9 image preferably 1920x1080. Use the five reference images by role: 1 countryside inn architecture/background; 2 exact three chibi sisters and their modest full-coverage work dresses (red hair/yellow dress, navy hair/navy dress, pink hair/pink dress); 3 exact little brown-haired alchemist boy, cream high-neck tunic and apron; 4 original narrator Tohoku Kiritan, preserve her dark wine-brown bob hair, red eyes, white hair ornaments and white/pale-pink kimono with burgundy obi, convert to cute 2.5-head chibi and put her on the right foreground pointing cheerfully toward the title, dynamic friendly guide pose; 5 glowing turquoise and gold everyday alchemy props. Combine them into a coherent attractive warm fantasy inn scene, no comic panels. Inn and magical bottles in background, small boy and three sisters grouped along the lower left/center, all fully clothed in high-neck long-sleeved work outfits, opaque skirts/tights, tiny unaccentuated bodies. Kiritan on right in a properly closed modest kimono. Main feature is a LARGE exquisitely legible Japanese title logo occupying upper-left and center, with a deep dark-brown opaque decorative wooden/plaque backing for strong contrast, warm cream and gold letter outlines, accent turquoise on alchemy words, ruby accent on sisters words, careful polished typesetting. EXACT Japanese text, omit no words, add no slogans. Put small genre badge '漫画' above. Title on four large lines:\n雑用係として宿で働きはじめた\n錬金術師、\n看板娘たちと一緒に\n暮らすことになった\nThese four lines together must reproduce the full title exactly. Keep text clear, crisp, correctly spelled, not hidden by hair or props; leave comfortable outer margins. Warm hospitable morning light, polished soft anime/storybook render, playful cute miniature proportions throughout. Family-friendly everyday hospitality and useful magic. No suggestive posing, no exposed shoulders or low necklines, no anatomy emphasis, no physical intimacy, no watermark, no additional text or author names."
+    }
+  ],
+  "verification": {
+    "projectId": "{6E9994F8-9862-485B-96A8-E54D812899CE}",
+    "revision": 216,
+    "saved": true,
+    "cueCount": 46,
+    "cueJsonUnchanged": true,
+    "voiceReady": 46,
+    "voiceHeard": 46,
+    "imagesSent": 11,
+    "thumbnailSourcesReady": true,
+    "thumbnailApproved": false,
+    "canAdvance": false,
+    "images": [
+      {
+        "approved": true,
+        "sha256": "f3d257d40c322a1acd6ec7c028bc33a1e4bcbcf7b15e8215abc9b05c6750d467",
+        "bytes": 2216236,
+        "key": "00-common-background",
+        "width": 1672,
+        "height": 941,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{6E9994F8-9862-485B-96A8-E54D812899CE}\\project.assets\\f3d257d40c322a1acd6ec7c028bc33a1e4bcbcf7b15e8215abc9b05c6750d467.png",
+        "sceneId": "common-background"
+      },
+      {
+        "approved": true,
+        "sha256": "16a377da8eb3718b5aa02846d24364c2d026090861cb9996adf46aec5d2ee608",
+        "bytes": 2443723,
+        "key": "01-chores-and-alchemy",
+        "width": 1672,
+        "height": 941,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{6E9994F8-9862-485B-96A8-E54D812899CE}\\project.assets\\16a377da8eb3718b5aa02846d24364c2d026090861cb9996adf46aec5d2ee608.png",
+        "sceneId": "{752509B5-F197-45BC-80FE-EA1AAF4EE11F}"
+      },
+      {
+        "approved": true,
+        "sha256": "4306d8e2988fc4384905c06d7142c26086a86bcade59f163702e4e8907cdf1d4",
+        "bytes": 3027352,
+        "key": "02-inn-exterior",
+        "width": 1672,
+        "height": 941,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{6E9994F8-9862-485B-96A8-E54D812899CE}\\project.assets\\4306d8e2988fc4384905c06d7142c26086a86bcade59f163702e4e8907cdf1d4.png",
+        "sceneId": "{5A20B5CA-A09F-46B6-A749-325E6FB7DAD8}"
+      },
+      {
+        "approved": true,
+        "sha256": "0adb0a806be67d030a426ca5df84b56d3de3113b35ce7f508274b0583d74e4c5",
+        "bytes": 2469607,
+        "key": "03-secret-alchemist",
+        "width": 1672,
+        "height": 941,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{6E9994F8-9862-485B-96A8-E54D812899CE}\\project.assets\\0adb0a806be67d030a426ca5df84b56d3de3113b35ce7f508274b0583d74e4c5.png",
+        "sceneId": "{2245A772-7CF9-4B73-80C9-F90004A719DF}"
+      },
+      {
+        "approved": true,
+        "sha256": "657925770d1a9957cf8749543286e3c03f480fd902c160bafd07d3405a384d27",
+        "bytes": 2545679,
+        "key": "04-helpful-alchemy",
+        "width": 1672,
+        "height": 941,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{6E9994F8-9862-485B-96A8-E54D812899CE}\\project.assets\\657925770d1a9957cf8749543286e3c03f480fd902c160bafd07d3405a384d27.png",
+        "sceneId": "{364EF059-E565-475A-A21B-EAEC82204277}"
+      },
+      {
+        "approved": true,
+        "sha256": "23939960654df0d7b18242d62ba4238b7783e6c06266b537eb2c7c433f0c537e",
+        "bytes": 3241380,
+        "key": "05-stormy-night",
+        "width": 1672,
+        "height": 941,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{6E9994F8-9862-485B-96A8-E54D812899CE}\\project.assets\\23939960654df0d7b18242d62ba4238b7783e6c06266b537eb2c7c433f0c537e.png",
+        "sceneId": "{71415ED7-492E-4B4E-B04B-ABE2A4811DF5}"
+      },
+      {
+        "approved": true,
+        "sha256": "28ab2eadec94d0c3b5c4fdba09f7cd80cb295f0220662d8dcdfc3a11a4bb6898",
+        "bytes": 2531553,
+        "key": "06-welcome-to-the-inn",
+        "width": 1672,
+        "height": 941,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{6E9994F8-9862-485B-96A8-E54D812899CE}\\project.assets\\28ab2eadec94d0c3b5c4fdba09f7cd80cb295f0220662d8dcdfc3a11a4bb6898.png",
+        "sceneId": "{6EA389ED-A268-4CE0-B814-AA056C9CAB84}"
+      },
+      {
+        "approved": true,
+        "sha256": "daf04ec78dce165baa20e487448a0b836d8410f167ff045eb933cbcaf57bab61",
+        "bytes": 2709080,
+        "key": "07-three-sisters",
+        "width": 1672,
+        "height": 941,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{6E9994F8-9862-485B-96A8-E54D812899CE}\\project.assets\\daf04ec78dce165baa20e487448a0b836d8410f167ff045eb933cbcaf57bab61.png",
+        "sceneId": "{4792FAFC-78BC-49DB-8C8B-9C3AE44E2E61}"
+      },
+      {
+        "approved": true,
+        "sha256": "8a32a08cb3498de162364f9f4a859069b7a5dfd76e74d43361bd096bf9556a34",
+        "bytes": 2996860,
+        "key": "08-evening-together",
+        "width": 1672,
+        "height": 941,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{6E9994F8-9862-485B-96A8-E54D812899CE}\\project.assets\\8a32a08cb3498de162364f9f4a859069b7a5dfd76e74d43361bd096bf9556a34.png",
+        "sceneId": "{8044311B-BE5C-4ADF-9ED2-FC6E09F4FCE8}"
+      },
+      {
+        "approved": true,
+        "sha256": "612c4ab556fdd422761190349d00ef5a8ac186025c9d5f531efdeac90cbbb40a",
+        "bytes": 3096639,
+        "key": "09-peaceful-country-road",
+        "width": 1672,
+        "height": 941,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{6E9994F8-9862-485B-96A8-E54D812899CE}\\project.assets\\612c4ab556fdd422761190349d00ef5a8ac186025c9d5f531efdeac90cbbb40a.png",
+        "sceneId": "{8242421E-71A3-4B46-98FA-59AA62ACB8A4}"
+      },
+      {
+        "approved": false,
+        "sha256": "2c2c506b23da412b2aa3c98b53bd1d301a02f550282fb4b42cdfa07d3a74f571",
+        "bytes": 3131134,
+        "key": "10-thumbnail",
+        "width": 1672,
+        "height": 941,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{6E9994F8-9862-485B-96A8-E54D812899CE}\\project.assets\\2c2c506b23da412b2aa3c98b53bd1d301a02f550282fb4b42cdfa07d3a74f571.png",
+        "sceneId": "thumbnail"
+      }
+    ]
+  },
+  "visualReview": {
+    "limits": "画像は創作イラスト。原作コマの正確な再現ではない。動画出力・保存再開後のGUI表示は未検証。",
+    "method": "各生成結果を表示して目視",
+    "result": "人物のちびキャラ表現、衣装の露出抑制、人数、シーン構図、サムネイルの全文タイトルと東北きりたんを確認。"
+  },
+  "humanReview": {
+    "backgroundAndScenes": "ユーザーが確定チェックを入れたと回答。アプリ側で全11シーンreadyおよびthumbnail.sourcesReady=trueを確認。",
+    "thumbnail": "送信・保存済み。最終確定チェック待ち。",
+    "completionFeedback": "2026-10-17、ユーザーから「うまくいった」と成功報告を受けた。サムネイルの送信時点の未確定記録は当時の状態として保持する。"
+  },
+  "evidenceDirectory": "output/production/20261017-inn-alchemist-chibi"
+}

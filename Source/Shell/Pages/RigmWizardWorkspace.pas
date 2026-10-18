@@ -116,6 +116,8 @@ type
     procedure SelectSubtitle(const CueId: string); // 表示対象を共通正本に保持する。
     procedure MoveSubtitle(Delta: Integer);
     procedure EditSubtitle(const CueId,Text,Note: string); // 字幕・メモのみ更新する。
+    procedure EditSubtitleDialogue(const CueId,Text,Reading,Note: string);
+    function ApplyReadingCorrections(const ProjectId: string; Revision: Integer; Entries, Selected: TJSONArray): Integer;
     procedure SetSubtitleBreak(const CueId: string; Offset: Integer);
     procedure MoveSubtitleBreak(const CueId: string; Delta, DefaultOffset: Integer);
     procedure CompleteSubtitles; // 人の入力完了。音声準備とは区別する。
@@ -228,7 +230,7 @@ type
     property OnMovieSessionClosing: TNotifyEvent read FOnMovieSessionClosing write FOnMovieSessionClosing;
   end;
 implementation
-uses RigmScriptTextImport, RigmScriptCopyModel, RigmVoiceEffects, RigmVoiceEffectSettings, RigmAutomationInput, RigmFFmpegApi, System.IOUtils, System.Math, System.DateUtils, System.StrUtils, Winapi.Windows, RigmJson, RigmAppSettings, PsdSession,
+uses RigmScriptReadingModel, RigmScriptTextImport, RigmScriptCopyModel, RigmVoiceEffects, RigmVoiceEffectSettings, RigmAutomationInput, RigmFFmpegApi, System.IOUtils, System.Math, System.DateUtils, System.StrUtils, Winapi.Windows, RigmJson, RigmAppSettings, PsdSession,
   PsdCharacter, PsdJson, PsdPackage, PsdProduction, RigmEditor, PsdImport, RigmStorage,
   RigmMovieComposition, RigmMovieChart, RigmMoviePosting, System.Hash, ArtDocument, PsdWorkspace, RigmCharacterCatalog, RigmMovieLayout, RigmScriptPlacementModel, RigmScriptNavigationModel, RigmScriptTextModel, RigmScriptReviewModel, RigmScriptResearchModel, RigmScriptCastingModel, RigmScriptSubtitleModel, RigmScriptVoiceModel, RigmScriptVoiceSelection, System.SyncObjs, Winapi.MMSystem, RigmScriptScenesModel, RigmScriptSceneAssignmentModel, RigmScriptSummaryModel, RigmScriptClosingModel, RigmMovieCompositor, RigmMovieWorkspace, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, RigmScriptTypes, RigmScriptConfirmationModel, RigmScriptThumbnailModel, RigmScriptAiImages;
 constructor TRigmWizardWorkspace.Create(AOwner: TComponent);
@@ -355,7 +357,10 @@ begin
     else if Name='script-select-subtitle' then SelectSubtitle(JS(Args,'cueId'))
     else if Name='script-edit-subtitle' then begin
       var Cue := FScriptDraft.Cue(JS(Args,'cueId')); if Cue=nil then raise Exception.Create('字幕のセリフがありません。');
-      EditSubtitle(Cue.Id,JS(Args,'subtitle'),JS(Args,'note',Cue.SubtitleNote));
+      if Args.GetValue('reading')<>nil then begin
+        if not (Args.GetValue('reading') is TJSONString) then raise Exception.Create('readingは文字列で指定してください。');
+        EditSubtitleDialogue(Cue.Id,JS(Args,'subtitle'),JS(Args,'reading'),JS(Args,'note',Cue.SubtitleNote));
+      end else EditSubtitle(Cue.Id,JS(Args,'subtitle'),JS(Args,'note',Cue.SubtitleNote));
     end
     else if Name='script-set-subtitle-break' then SetSubtitleBreak(JS(Args,'cueId'),JI(Args,'offset',-1))
     else if Name='script-request-casting' then RequestCasting
@@ -629,6 +634,9 @@ begin
     (JS(Project.ScriptWizard,'updatedAt')='') or ((Project.ScriptWizard.GetValue('casting')=nil) and ((Project.Cues.Count<>0) or (Project.Scenes.Count<>0))) then
     raise Exception.Create('台本工程の状態が不正です。元ファイルは変更しません。');
   UpgradeScriptFlow(Project); Project.BindCharacterPlacements;
+  if Project.ScriptWizard.GetValue('readingDictionary')<>nil then begin
+    var Dictionary := ScriptReadingDictionary(Project); Dictionary.Free;
+  end;
   ValidateScriptType(Project);
   for var C in Project.Characters do if (C.PlacementRef='') or (Project.Placement(C.PlacementRef)=nil) then
     raise Exception.Create('台本工程のキャラは共通配置への参照が必要です。');
@@ -1216,10 +1224,48 @@ begin
   if CurrentScriptStage<>'subtitles' then raise Exception.Create('字幕工程で操作してください。');
   RigmScriptSubtitleModel.SetSubtitleBreak(FScriptDraft,CueId,Offset); SyncSummarySubtitle(FScriptDraft,CueId); FScriptDraft.Changed; ScriptChanged;
 end;
+procedure TRigmWizardWorkspace.EditSubtitleDialogue(const CueId,Text,Reading,Note: string);
+begin
+  if CurrentScriptStage<>'subtitles' then raise Exception.Create('字幕工程で操作してください。');
+  var C := FScriptDraft.Cue(CueId); if C=nil then raise Exception.Create('編集対象のセリフがありません。');
+  var Previous := C.SpokenText;
+  if IsScriptSummaryCue(FScriptDraft,C) then begin
+    var Subtitles := ''; var Readings := ''; var Count := 0;
+    for var Other in FScriptDraft.Cues do if IsScriptSummaryCue(FScriptDraft,Other) then begin
+      var Subtitle := Other.Subtitle; var Spoken := Other.SpokenText;
+      if Other=C then begin
+        Subtitle := NormalizeScriptText(Text); Spoken := NormalizeScriptText(Reading);
+        if Spoken='' then Spoken := C.Text;
+      end;
+      if Count>0 then begin Subtitles := Subtitles+#13#10; Readings := Readings+#13#10; end;
+      Subtitles := Subtitles+Subtitle; Readings := Readings+Spoken; Inc(Count);
+    end;
+    ValidateSubtitleText(Subtitles,3000); ValidateVoiceReading(Readings);
+  end;
+  RigmScriptSubtitleModel.EditSubtitleDialogue(FScriptDraft,CueId,Text,Reading,Note);
+  SyncSummarySubtitle(FScriptDraft,CueId); SyncSummaryReading(FScriptDraft,CueId);
+  if Previous<>C.SpokenText then StopVoice;
+  FScriptDraft.Changed; ScriptChanged;
+end;
 procedure TRigmWizardWorkspace.MoveSubtitleBreak(const CueId: string; Delta, DefaultOffset: Integer);
 begin
   if CurrentScriptStage<>'subtitles' then Exit;
   RigmScriptSubtitleModel.MoveSubtitleBreak(FScriptDraft,CueId,Delta,DefaultOffset); SyncSummarySubtitle(FScriptDraft,CueId); FScriptDraft.Changed; ScriptChanged;
+end;
+function TRigmWizardWorkspace.ApplyReadingCorrections(const ProjectId: string; Revision: Integer; Entries, Selected: TJSONArray): Integer;
+begin
+  if (FScriptDraft=nil) or (FScriptDraft.Id<>ProjectId) or (FScriptDraft.Revision<>Revision) then
+    raise Exception.Create('台本が更新されました。読みの確認画面を開き直してください。');
+  if not MatchStr(CurrentScriptStage,['subtitles','voice']) then raise Exception.Create('字幕または音声調整で読みを確認してください。');
+  if VoiceBusy or VoiceContinuous or ExpressionAiBusy or SceneImageAiBusy or ScriptTextEditing or FPlacementEditing or
+    (FAutomationRunPhase<>0) or (FAutomationCheckPhase<>0) then
+    raise Exception.Create('入力や実行中の処理を完了してから読みを確認してください。');
+  RequireCurrentVoice(FScriptDraft); StopVoice;
+  var Snapshot := FScriptDraft.Clone;
+  try
+    Result := ApplyScriptReadingCorrections(Snapshot,Entries,Selected);
+    Snapshot.Changed; StoreScript(Snapshot,CurrentScriptStage);
+  finally Snapshot.Free; end;
 end;
 procedure TRigmWizardWorkspace.CompleteSubtitles;
 begin
@@ -1234,7 +1280,9 @@ begin
   var A := TJSONArray.Create; Result.AddPair('rows',A); var Offset := EnsureRange(JI(Args,'offset'),0,FScriptDraft.Cues.Count);
   if Offset<FScriptDraft.Cues.Count then begin
     var C := FScriptDraft.Cues[Offset]; var O := TJSONObject.Create; A.AddElement(O);
-    O.AddPair('cueId',C.Id); O.AddPair('subtitle',C.Subtitle); O.AddPair('voiceText',C.Text); O.AddPair('note',C.SubtitleNote); O.AddPair('sceneId',C.Scene);
+    O.AddPair('cueId',C.Id); O.AddPair('subtitle',C.Subtitle); O.AddPair('voiceText',C.Text);
+    O.AddPair('reading',C.VoiceReading); O.AddPair('spokenText',C.SpokenText);
+    O.AddPair('note',C.SubtitleNote); O.AddPair('sceneId',C.Scene);
     var RoleNumber := ScriptCueRole(FScriptDraft,C.Id); AddN(O,'role',RoleNumber); O.AddPair('character',JS(CastingRole(FScriptDraft,RoleNumber),'name')); AddN(O,'breakOffset',C.Subtitle.IndexOf(#13#10));
   end;
   AddN(Result,'nextOffset',Offset+A.Count); AddB(Result,'hasMore',Offset+A.Count<FScriptDraft.Cues.Count);

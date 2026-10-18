@@ -165,7 +165,8 @@ begin
       if Current.OutputTarget='' then Directory := TPath.Combine(TPath.GetDocumentsPath,'RIGMMaker\Movies');
       var Ext := ExtractFileExt(Current.OutputTarget);
       if Ext='' then begin Ext := '.avi'; if MovieMp4Available(P.FfmpegExe) then Ext := '.mp4'; end;
-      Target := TPath.Combine(Directory,'production-'+THashSHA2.GetHashString(RequestKey).Substring(0,24)+Ext);
+      if SameText(Ext,'.mp4') then Target := TPath.Combine(Directory,MovieExportName(P.Title)+Ext)
+      else Target := TPath.Combine(Directory,'production-'+THashSHA2.GetHashString(RequestKey).Substring(0,24)+Ext);
     end;
     P.OutputTarget := ResolveMoviePath(Current.FileName,Target);
     P.Validate; Result := P; P := nil;

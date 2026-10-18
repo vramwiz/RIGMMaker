@@ -215,6 +215,8 @@ begin
           PsdJson.Put(CastingRow(FScriptDraft,C.Id),'origin','automation');
           C.Subtitle := C.Text; C.VoiceReading := C.Text;
         end;
+        var DialogueIds := TJSONArray.Create;
+        try ApplyImportedDialogueInputs(FScriptDraft,Data,DialogueIds); finally DialogueIds.Free; end;
         var Reason := CastingAdvanceReason; if Reason<>'' then raise Exception.Create(Reason);
         StartExpressionAi; FAutomationRunPhase := 4;
       end;
@@ -222,9 +224,9 @@ begin
         if ExpressionAiBusy then Exit;
         if not FExpressionAiSucceeded then raise Exception.Create(FExpressionAiMessage);
         AutomationRunEvent('expressions','completed',FExpressionAiMessage); Advance;
-        for var C in FScriptDraft.Cues do EditSubtitle(C.Id,C.Text,'');
+        for var C in FScriptDraft.Cues do EditSubtitle(C.Id,C.Subtitle,'');
         CompleteSubtitles; Advance; FAutomationRunPhase := 5;
-        AutomationRunEvent('voice','started','本文と同じ字幕・読み上げ文から音声を生成します。');
+        AutomationRunEvent('voice','started','セリフごとに指定された読み上げ文から音声を生成します。');
       end;
       5: begin
         if VoiceBusy then Exit;
@@ -292,7 +294,7 @@ begin
       9: begin
         if (FActive=nil) or (FActive.Project.Id<>JS(FAutomationRun,'projectId')) then raise Exception.Create('動画編集への引渡し先が一致しません。');
         var Folder := TPath.Combine(ExtractFileDir(FActive.Project.FileName),'Exports'); ForceDirectories(Folder);
-        var Video := TPath.Combine(Folder,'video-'+JS(FAutomationRun,'jobId')+'.mp4');
+        var Video := TPath.Combine(Folder,MovieExportName(FActive.Project.Title)+'.mp4');
         PsdJson.Put(FAutomationRun,'videoPath',Video);
         var O := MovieCommand('export',TJSONObject.Create.AddPair('path',Video));
         try FAutomationExportId := JS(O,'jobId',JS(O,'id')); finally O.Free; end;

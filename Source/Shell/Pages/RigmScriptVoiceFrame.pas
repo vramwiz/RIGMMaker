@@ -26,6 +26,7 @@ type
     procedure Changed(Sender: TObject);
     procedure Complete(Sender: TObject);
     procedure Ready(Sender: TObject);
+    procedure CheckReadings(Sender: TObject);
     procedure StateChanged(Sender: TObject);
     procedure Preview(Sender: TObject);
     procedure Cancel(Sender: TObject);
@@ -41,7 +42,7 @@ type
   end;
 implementation
 uses System.SysUtils, System.JSON, System.Generics.Collections, System.Types, Vcl.Graphics, Vcl.Themes,
-  SerifVoicevoxAudioSettings, Winapi.Windows, Winapi.CommCtrl, RigmJson, RigmMovieModel, RigmScriptCastingModel, RigmScriptVoiceSelection;
+  SerifVoicevoxAudioSettings, Winapi.Windows, Winapi.CommCtrl, RigmJson, RigmMovieModel, RigmScriptCastingModel, RigmScriptVoiceSelection, RigmScriptReadingDialog;
 {$R *.dfm}
 type
   TRigmVoiceListView = class(TRigmBufferedListView)
@@ -118,6 +119,8 @@ begin
   var StateRow := TRigmBufferedPanel.Create(Self); StateRow.Parent := Body; StateRow.Align := alTop; StateRow.Height := ScaleValue(34); StateRow.Caption := ''; StateRow.BevelOuter := bvNone;
   var StateLabel := TRigmScriptLabel.Create(Self); StateLabel.Parent := StateRow; StateLabel.Align := alLeft; StateLabel.Width := ScaleValue(150); StateLabel.AutoSize := False; StateLabel.Caption := '感情'; StateLabel.Name := 'ScriptVoiceEmotionLabel';
   FState := TComboBox.Create(Self); FState.Parent := StateRow; FState.Align := alClient; FState.Style := csDropDownList; FState.Name := 'ScriptVoiceState'; FState.OnChange := StateChanged;
+  var ReadingButton := TButton.Create(Self); ReadingButton.Parent := StateRow; ReadingButton.Align := alRight;
+  ReadingButton.Width := ScaleValue(160); ReadingButton.Caption := '読みを確認'; ReadingButton.Name := 'ScriptVoiceCheckReading'; ReadingButton.OnClick := CheckReadings;
   FSettings := TFrameSerifVoicevoxSettings.Create(Self); FSettings.Parent := Body; FSettings.Align := alClient; FSettings.Name := 'ScriptVoiceDetails'; FSettings.UseAdjustmentOnly;
   FSettings.OnQueryReady := QueryReady; FSettings.OnAudioChange := Changed; FSettings.OnAccentChange := QueryChanged; FSettings.OnError := QueryError; FSettings.OnPreview := Preview;
   FSettings.OnContinuous := Continuous;
@@ -194,6 +197,12 @@ begin
   if FActive=Value then Exit;
   if not Value and FActive then begin FWorkspace.StopVoice; FSettings.ShowRow('','',-1,TSerifVoicevoxAudioValues.Defaults,'',''); FShownSource := ''; FShownAudio := ''; end;
   FActive := Value; FEditing := Value; FConnection.SetActive(Value); FWorkspace.SetVoiceAutoGeneration(False);
+end;
+procedure TRigmScriptVoiceFrame.CheckReadings(Sender: TObject);
+begin
+  if not RequestFinish then Exit;
+  try ShowScriptReadingCheck(Self,FWorkspace);
+  except on E: Exception do FGuide.Caption := E.Message; end;
 end;
 procedure TRigmScriptVoiceFrame.ShowDetails;
 begin

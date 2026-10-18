@@ -104,7 +104,7 @@ function ResolveMoviePath(const BaseFile, Path: string): string;
 
 implementation
 
-uses System.IOUtils, System.Math, System.StrUtils, System.Hash, Winapi.Windows, RigmJson, RigmMovieOutput, RigmMovieEndCards, RigmMovieTransitions, RigmVoiceEffectSettings, RigmAudioFilePaths, RigmMoviePosting;
+uses System.IOUtils, System.Math, System.StrUtils, System.Hash, Winapi.Windows, RigmJson, RigmMovieOutput, RigmMovieEndCards, RigmMovieTransitions, RigmVoiceEffectSettings, RigmAudioFilePaths, RigmMoviePosting, RigmScriptSummaryFields;
 
 constructor TRigmMovieSpeaker.Create;
 begin inherited; Id := 'narrator'; Name := 'ナレーター'; StyleId := -1; Speed := 1; Intonation := 1; Volume := 1; end;
@@ -714,6 +714,8 @@ begin
     try
       Result.FileName := ExpandFileName(FileName);
       Result.OutputTarget := ResolveMoviePath(Result.FileName,Result.OutputTarget);
+      if RestoreScriptSummarySubtitles(Result) then Result.Changed;
+      if RestoreScriptSummaryReadings(Result) then Result.Changed;
     except Result.Free; raise; end;
   finally O.Free; end;
 end;

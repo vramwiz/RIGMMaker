@@ -1,6 +1,6 @@
 ﻿unit RigmScriptSubtitleModel;
 
-// 表示字幕とメモのみを既存セリフ正本へ反映する。原稿・音声・配役は変更しない。
+// 字幕と読みを独立して編集する。元原稿と配役は保持する。
 interface
 uses System.JSON, RigmMovieModel;
 procedure ValidateSubtitleText(const Text: string; Limit: Integer = 3000);
@@ -8,6 +8,7 @@ procedure PrepareScriptSubtitles(Project: TRigmMovieProject); // 配役確認後
 procedure SelectSubtitle(Project: TRigmMovieProject; const CueId: string); // 選択を保存する。
 procedure MoveSubtitle(Project: TRigmMovieProject; Delta: Integer); // 発話順で選択する。
 procedure EditSubtitle(Project: TRigmMovieProject; const CueId, Text, Note: string); // 表示文とメモを原子的に更新する。
+procedure EditSubtitleDialogue(Project: TRigmMovieProject; const CueId, Text, Reading, Note: string);
 procedure SetSubtitleBreak(Project: TRigmMovieProject; const CueId: string; Offset: Integer); // 最初の改行だけを0始まりUTF16位置へ移す。
 procedure MoveSubtitleBreak(Project: TRigmMovieProject; const CueId: string; Delta, DefaultOffset: Integer); // 左右で1文字動かす。
 function ScriptSubtitleSummary(Project: TRigmMovieProject): TJSONObject; // 呼出側所有、長文なし。
@@ -58,6 +59,18 @@ begin
   var Cue := Project.Cue(CueId); if Cue=nil then raise Exception.Create('字幕のセリフがありません。');
   var Value := NormalizeScriptText(Text); var Memo := NormalizeScriptText(Note); ValidateSubtitleText(Value,3000); ValidateSubtitleText(Memo,2048);
   Cue.Subtitle := Value; Cue.SubtitleNote := Memo; PsdJson.Put(Project.ScriptWizard,'subtitlesStatus','in-progress');
+end;
+procedure EditSubtitleDialogue(Project: TRigmMovieProject; const CueId, Text, Reading, Note: string);
+begin
+  // 全項目を検査してから変更する。読みの入力エラー時も字幕だけを先に変えない。
+  var Value := NormalizeScriptText(Reading); ValidateVoiceReading(Value);
+  EditSubtitle(Project,CueId,Text,Note);
+  var C := Project.Cue(CueId); var Previous := C.SpokenText; C.VoiceReading := Value;
+  if C.SpokenText<>Previous then begin
+    C.VoiceQuery := ''; C.VoiceQueryKey := ''; C.AudioKey := '';
+    C.VoiceHeardKey := ''; C.EffectAudioKey := '';
+    PsdJson.Put(Project.ScriptWizard,'voiceStatus','in-progress');
+  end;
 end;
 function WithoutFirstBreak(const Text: string; out Position: Integer): string;
 begin Position := Text.IndexOf(#13#10); Result := Text; if Position>=0 then Result := Text.Remove(Position,2); end;

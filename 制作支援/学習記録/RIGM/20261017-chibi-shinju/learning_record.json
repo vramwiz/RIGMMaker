@@ -1,0 +1,152 @@
+﻿{
+  "schemaVersion": 1,
+  "recordType": "rigm_scene_image_creation_learning",
+  "date": "2026-10-17",
+  "title": "ちび神獣たちのお世話係始めました　～世界樹の森でもふもふスローライフ！～",
+  "projectId": "{D384EFCC-C30A-4384-8DC1-B516E0CB7A0C}",
+  "userRequest": "台本データを作成し、画像待ちのアプリへ画像を作成して送信する。",
+  "method": "内蔵image_genで生成。Send-RigmDotsCommand.ps1から現在の要求を作成・照合し、adopt-scene-imageとscript-saveで保存。GUIの画像確定は人間が操作。",
+  "sources": [
+    "https://manga.nicovideo.jp/comic/85572",
+    "https://comic-walker.com/detail/KC_020418_S/episodes/KC_0204180000200011_E",
+    "https://gcnovels.jp/book/1812"
+  ],
+  "scriptFile": "V:/DelphiProg/RIGMMaker/台本入力/ちび神獣たちのお世話係始めました.txt",
+  "scriptMethod": "同作品の台本と調整済み音声がすでにアプリにあったため、それを保持。通常8シーンと総評の現在の字幕・読みを再取込用テキストへ出力し、アプリのapp-auto-validateでvalid=trueを確認。",
+  "promptSet": "V:/DelphiProg/RIGMMaker/output/production/20261017-chibi-shinju/assets.json",
+  "workspaceImages": "V:/DelphiProg/RIGMMaker/output/production/20261017-chibi-shinju/Images",
+  "reusableRules": [
+    "共通背景は淡い緑とクリーム、中央を空ける。通常場面は金色の光と緑豊かな世界樹の森で統一。",
+    "人物の要望は後ろ姿・シルエット。公式の詳細な人物デザインを推測して再現したとは扱わない。",
+    "生成した雛・森を次の生成の参照に渡し、色と生き物を継続する。",
+    "サムネイルの東北きりたんはアプリの現在のキャラ参照PNGを使用し、案内する表情・身振りへ変える。正式要求でも同一のpreviewPathを確認。",
+    "作業中、利用者が冒頭を「オープニング」「画像なし」「確定済み」へ変更した。生成済みの冒頭案を採用せず利用者の設定を保持。",
+    "背景・通常シーンの画像確定後のみサムネイル要求を作成。人間の確定チェックをパイプやファイル編集で代行しない。"
+  ],
+  "unusedDraft": "00-opening.png（利用者が画像なしを確定したため未送信）",
+  "deliveries": [
+    {
+      "key": "00-common-background",
+      "sceneId": "common-background",
+      "requestId": "{5BC7F6BB-1A90-4200-88FA-24C3F8DB715F}",
+      "sha256": "26e75f89fe019ab6b52795fbcdb4cb71d249c3a75ffefe41df2a42eb65899a99",
+      "workspaceImage": "V:\\DelphiProg\\RIGMMaker\\output\\production\\20261017-chibi-shinju\\Images\\00-common-background.png",
+      "managedImage": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{D384EFCC-C30A-4384-8DC1-B516E0CB7A0C}\\Images\\26e75f89fe019ab6b52795fbcdb4cb71d249c3a75ffefe41df2a42eb65899a99.png",
+      "approved": false,
+      "saved": true
+    },
+    {
+      "key": "01-isekai-childcare",
+      "sceneId": "{47DBF900-4F23-4557-8A89-126D1B64FB65}",
+      "requestId": "{7F28F6ED-7C9C-4271-A4EC-F776F2EEB468}",
+      "sha256": "26e0354b35d3cb3566aa12f7ebecf06fc3843882b8ec46825b16e32106f542c9",
+      "workspaceImage": "V:\\DelphiProg\\RIGMMaker\\output\\production\\20261017-chibi-shinju\\Images\\01-isekai-childcare.png",
+      "managedImage": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{D384EFCC-C30A-4384-8DC1-B516E0CB7A0C}\\Images\\26e0354b35d3cb3566aa12f7ebecf06fc3843882b8ec46825b16e32106f542c9.png",
+      "approved": false,
+      "saved": true
+    },
+    {
+      "key": "02-world-tree",
+      "sceneId": "{A5ECAF96-AA6E-433B-AE04-CDFFADA9282E}",
+      "requestId": "{BB0C1AC2-C1BE-4E8C-B0BC-FF1D9B661633}",
+      "sha256": "9b0f8c04d6bc55b58b857a503a58c7bddfff81b03f87c4c65bfb7613b0cf090e",
+      "workspaceImage": "V:\\DelphiProg\\RIGMMaker\\output\\production\\20261017-chibi-shinju\\Images\\02-world-tree.png",
+      "managedImage": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{D384EFCC-C30A-4384-8DC1-B516E0CB7A0C}\\Images\\9b0f8c04d6bc55b58b857a503a58c7bddfff81b03f87c4c65bfb7613b0cf090e.png",
+      "approved": false,
+      "saved": true
+    },
+    {
+      "key": "03-awakening",
+      "sceneId": "{7548D793-16D7-4A3E-8E39-C2DF1BD16F33}",
+      "requestId": "{0C9CA5AC-9D8E-4D73-9392-953C5FA0EB5F}",
+      "sha256": "17edd0eb2ff51836567e0e56d8acede7930a79ff099ba9ac887db7ea2aa02c96",
+      "workspaceImage": "V:\\DelphiProg\\RIGMMaker\\output\\production\\20261017-chibi-shinju\\Images\\03-awakening.png",
+      "managedImage": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{D384EFCC-C30A-4384-8DC1-B516E0CB7A0C}\\Images\\17edd0eb2ff51836567e0e56d8acede7930a79ff099ba9ac887db7ea2aa02c96.png",
+      "approved": false,
+      "saved": true
+    },
+    {
+      "key": "04-phoenix-flight",
+      "sceneId": "{81580218-82E9-4EF4-B64F-CE86AA8E1CA7}",
+      "requestId": "{5DA625FF-9B24-48C1-B056-118E56BCA629}",
+      "sha256": "7ae3ae20dfdd00a3e31bacacf3986966fed9afe72f6cab2836a1ad33adf1b92a",
+      "workspaceImage": "V:\\DelphiProg\\RIGMMaker\\output\\production\\20261017-chibi-shinju\\Images\\04-phoenix-flight.png",
+      "managedImage": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{D384EFCC-C30A-4384-8DC1-B516E0CB7A0C}\\Images\\7ae3ae20dfdd00a3e31bacacf3986966fed9afe72f6cab2836a1ad33adf1b92a.png",
+      "approved": false,
+      "saved": true
+    },
+    {
+      "key": "05-childcare-skill",
+      "sceneId": "{2164A2C9-E27F-4DD2-ACC5-BBA5CF2923B2}",
+      "requestId": "{4142FA45-25A5-4164-A5F4-40659FD3FFF6}",
+      "sha256": "c7c89cfa6b20544ff1ea258ad1691643db780f2578a543c9aecfe6b5562a7ee2",
+      "workspaceImage": "V:\\DelphiProg\\RIGMMaker\\output\\production\\20261017-chibi-shinju\\Images\\05-childcare-skill.png",
+      "managedImage": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{D384EFCC-C30A-4384-8DC1-B516E0CB7A0C}\\Images\\c7c89cfa6b20544ff1ea258ad1691643db780f2578a543c9aecfe6b5562a7ee2.png",
+      "approved": false,
+      "saved": true
+    },
+    {
+      "key": "06-more-baby-beasts",
+      "sceneId": "{EC5328F2-EE00-4598-B61F-16A5034F8AD9}",
+      "requestId": "{3159E9FB-6878-472B-B981-F6BA9FE4E902}",
+      "sha256": "1d9730c267296ed8ba7dab89d727b601571b6bf033274ad3a81de43def254775",
+      "workspaceImage": "V:\\DelphiProg\\RIGMMaker\\output\\production\\20261017-chibi-shinju\\Images\\06-more-baby-beasts.png",
+      "managedImage": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{D384EFCC-C30A-4384-8DC1-B516E0CB7A0C}\\Images\\1d9730c267296ed8ba7dab89d727b601571b6bf033274ad3a81de43def254775.png",
+      "approved": false,
+      "saved": true
+    },
+    {
+      "key": "07-world-tree-nap",
+      "sceneId": "{C953F0DF-D262-4FDD-B347-294EB8029F90}",
+      "requestId": "{3AA63809-DA89-4954-900F-B965B07E467D}",
+      "sha256": "72cc1ef5c6cc04e69cc53fc0063ffd4d69d0d66e1e7bd175fd842119dae028c2",
+      "workspaceImage": "V:\\DelphiProg\\RIGMMaker\\output\\production\\20261017-chibi-shinju\\Images\\07-world-tree-nap.png",
+      "managedImage": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{D384EFCC-C30A-4384-8DC1-B516E0CB7A0C}\\Images\\72cc1ef5c6cc04e69cc53fc0063ffd4d69d0d66e1e7bd175fd842119dae028c2.png",
+      "approved": false,
+      "saved": true
+    },
+    {
+      "key": "08-sunset-rest",
+      "sceneId": "{7E1F6D99-AD1D-4D2B-B1E9-1571EF3BFE0C}",
+      "requestId": "{09DDA991-E933-4F09-A34F-037DFC136582}",
+      "sha256": "b8b3d43b3b782808d307dff61800e5a504486993dd74da39d0c67102f2f48f85",
+      "workspaceImage": "V:\\DelphiProg\\RIGMMaker\\output\\production\\20261017-chibi-shinju\\Images\\08-sunset-rest.png",
+      "managedImage": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{D384EFCC-C30A-4384-8DC1-B516E0CB7A0C}\\Images\\b8b3d43b3b782808d307dff61800e5a504486993dd74da39d0c67102f2f48f85.png",
+      "approved": false,
+      "saved": true
+    },
+    {
+      "key": "09-thumbnail",
+      "sceneId": "thumbnail",
+      "requestId": "{64F542A5-76F7-46AF-BFD2-7E0277F14F13}",
+      "sha256": "881cd6636367ff5fc5aaf209c3c22ac0bb74ceaf8041a3237e2431aca36077d8",
+      "workspaceImage": "V:\\DelphiProg\\RIGMMaker\\output\\production\\20261017-chibi-shinju\\Images\\09-thumbnail.png",
+      "managedImage": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{D384EFCC-C30A-4384-8DC1-B516E0CB7A0C}\\Images\\881cd6636367ff5fc5aaf209c3c22ac0bb74ceaf8041a3237e2431aca36077d8.png",
+      "approved": false,
+      "saved": true
+    }
+  ],
+  "verification": {
+    "projectId": "{D384EFCC-C30A-4384-8DC1-B516E0CB7A0C}",
+    "revision": 418,
+    "saved": true,
+    "deliveredImages": 10,
+    "savedImageHashesChecked": 10,
+    "cueCount": 41,
+    "cuesIncludingAudioAndAccentsUnchanged": true,
+    "normalSceneCount": 10,
+    "normalScenesReady": 10,
+    "backgroundReady": true,
+    "thumbnailSourcesReady": true,
+    "thumbnailImagePresent": true,
+    "thumbnailApproved": false,
+    "thumbnailRequestState": "adopted",
+    "thumbnailRequestCurrent": true,
+    "openingMode": "none",
+    "openingApproved": true
+  },
+  "limitations": [
+    "原作漫画のコマや公式人物の忠実な再現ではなく、アプリに入力済みの要望に沿った情景イラスト。",
+    "サムネイルの最後の確定チェックは利用者が行う。MP4出力は今回行っていない。"
+  ]
+}

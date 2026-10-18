@@ -473,10 +473,31 @@ procedure TSerifVoicevoxAccentPaintControl.EnsureCells;
 begin
   if (FCellsPpi=CurrentPPI) and (Length(FCells)=Length(FMoras)) then Exit;
   SetLength(FCells,Length(FMoras)); FCellsPpi := CurrentPPI; Canvas.Font.Assign(Font);
+  var Widths: TArray<Integer>; SetLength(Widths,Length(FMoras));
+  for var I := 0 to High(FMoras) do
+    Widths[I] := Max(AccentScale(MORA_CELL_MIN_WIDTH,CurrentPPI),Canvas.TextWidth(FMoras[I].Text)+AccentScale(MORA_CELL_TEXT_PADDING,CurrentPPI));
+  // 未解析の読みは句全体で表示する。文字数が増えた分だけ列を広げ、音高欄と同じ座標を使う。
+  var First := 0;
+  while First<Length(FMoras) do begin
+    var Last := First; var Width := Widths[First];
+    while (Last<High(FMoras)) and (FMoras[Last+1].PhraseIndex=FMoras[First].PhraseIndex) do begin
+      Inc(Last); Inc(Width,Widths[Last]);
+    end;
+    var Phrase := FMoras[First].PhraseIndex;
+    if (Phrase<Length(FPendingReadings)) and (FPendingReadings[Phrase]<>'') then begin
+      var Extra := Max(0,Canvas.TextWidth(FPendingReadings[Phrase])+AccentScale(MORA_CELL_TEXT_PADDING,CurrentPPI)-Width);
+      var Count := Last-First+1;
+      for var I := First to Last do begin
+        Inc(Widths[I],Extra div Count);
+        if I-First<Extra mod Count then Inc(Widths[I]);
+      end;
+    end;
+    First := Last+1;
+  end;
   var X := AccentScale(10,CurrentPPI);
   for var I := 0 to High(FMoras) do begin
     if FMoras[I].PhraseStart and (I>0) then Inc(X,AccentScale(12,CurrentPPI));
-    var W := Max(AccentScale(MORA_CELL_MIN_WIDTH,CurrentPPI),Canvas.TextWidth(FMoras[I].Text)+AccentScale(MORA_CELL_TEXT_PADDING,CurrentPPI));
+    var W := Widths[I];
     FCells[I] := Rect(X,0,X+W,AccentScale(104,CurrentPPI)); Inc(X,W);
   end;
 end;
@@ -523,28 +544,17 @@ end;
 
 function TSerifVoicevoxAccentPaintControl.PhraseBounds(
   const PhraseIndex: Integer): TRect;
-var
-  CellWidth: Integer;
-  I: Integer;
-  LeftPos: Integer;
 begin
   Result := Rect(0, 0, 0, 0);
-  LeftPos := AccentScale(10, CurrentPPI);
-  Canvas.Font.Assign(Font);
-  for I := 0 to High(FMoras) do
+  EnsureCells;
+  for var I := 0 to High(FMoras) do
   begin
-    if FMoras[I].PhraseStart and (I > 0) then
-      Inc(LeftPos, AccentScale(12, CurrentPPI));
-    CellWidth := Max(AccentScale(MORA_CELL_MIN_WIDTH, CurrentPPI),
-      Canvas.TextWidth(FMoras[I].Text) +
-      AccentScale(MORA_CELL_TEXT_PADDING, CurrentPPI));
     if FMoras[I].PhraseIndex = PhraseIndex then
     begin
-      if IsRectEmpty(Result) then Result := Rect(LeftPos,
+      if IsRectEmpty(Result) then Result := Rect(FCells[I].Left,
         AccentScale(75, CurrentPPI), 0, AccentScale(101, CurrentPPI));
-      Result.Right := LeftPos + CellWidth;
+      Result.Right := FCells[I].Right;
     end;
-    Inc(LeftPos, CellWidth);
   end;
 end;
 
@@ -675,6 +685,7 @@ begin
   Canvas.FillRect(ClientRect);
   if Length(FMoras) = 0 then Exit;
 
+  EnsureCells;
   Canvas.Font.Assign(Font);
   // 高・低の2段と各モーラの中心を先にガイド描画し、アクセント線を読みやすくする。
   Canvas.Pen.Style := psSolid;
@@ -682,20 +693,14 @@ begin
   Canvas.Pen.Width := Max(1, AccentScale(1, CurrentPPI));
   GuideLeft := -1;
   GuideRight := -1;
-  X := AccentScale(10, CurrentPPI);
   for I := 0 to High(FMoras) do
   begin
-    if FMoras[I].PhraseStart and (I > 0) then
-      Inc(X, AccentScale(12, CurrentPPI));
-    CellWidth := Max(AccentScale(MORA_CELL_MIN_WIDTH, CurrentPPI),
-      Canvas.TextWidth(FMoras[I].Text) +
-      AccentScale(MORA_CELL_TEXT_PADDING, CurrentPPI));
+    X := FCells[I].Left; CellWidth := FCells[I].Width;
     CenterX := X + (CellWidth div 2);
     if GuideLeft < 0 then GuideLeft := CenterX;
     GuideRight := CenterX;
     Canvas.MoveTo(CenterX, AccentScale(HIGH_Y, CurrentPPI));
     Canvas.LineTo(CenterX, AccentScale(LOW_Y, CurrentPPI));
-    Inc(X, CellWidth);
   end;
 
   Canvas.Pen.Color := RGB(120, 120, 120);
@@ -710,17 +715,12 @@ begin
 
   Canvas.Pen.Color := RGB(156, 176, 162);
   Canvas.Pen.Width := Max(1, AccentScale(2, CurrentPPI));
-  X := AccentScale(10, CurrentPPI);
   PreviousX := 0;
   PreviousY := 0;
   // 先に接続線をすべて描き、後段のノードで線の端を覆う。
   for I := 0 to High(FMoras) do
   begin
-    if FMoras[I].PhraseStart and (I > 0) then
-      Inc(X, AccentScale(12, CurrentPPI));
-    CellWidth := Max(AccentScale(MORA_CELL_MIN_WIDTH, CurrentPPI),
-      Canvas.TextWidth(FMoras[I].Text) +
-      AccentScale(MORA_CELL_TEXT_PADDING, CurrentPPI));
+    X := FCells[I].Left; CellWidth := FCells[I].Width;
     CenterX := X + (CellWidth div 2);
     if FMoras[I].High then CurrentY := AccentScale(HIGH_Y, CurrentPPI)
     else CurrentY := AccentScale(LOW_Y, CurrentPPI);
@@ -732,7 +732,6 @@ begin
     end;
     PreviousX := CenterX;
     PreviousY := CurrentY;
-    Inc(X, CellWidth);
   end;
 
   if (FHoverBoundary >= 0) and (FHoverBoundary < High(FMoras)) and
@@ -758,14 +757,9 @@ begin
   end;
 
   // 線の上へノードと文字を描くことで、円内へ入り込んだ線を見えなくする。
-  X := AccentScale(10, CurrentPPI);
   for I := 0 to High(FMoras) do
   begin
-    if FMoras[I].PhraseStart and (I > 0) then
-      Inc(X, AccentScale(12, CurrentPPI));
-    CellWidth := Max(AccentScale(MORA_CELL_MIN_WIDTH, CurrentPPI),
-      Canvas.TextWidth(FMoras[I].Text) +
-      AccentScale(MORA_CELL_TEXT_PADDING, CurrentPPI));
+    X := FCells[I].Left; CellWidth := FCells[I].Width;
     CenterX := X + (CellWidth div 2);
     if FMoras[I].High then CurrentY := AccentScale(HIGH_Y, CurrentPPI)
     else CurrentY := AccentScale(LOW_Y, CurrentPPI);
@@ -782,11 +776,22 @@ begin
     Canvas.Font.Color := A2SCPanelText;
     TextRect := Rect(X, AccentScale(TEXT_Y, CurrentPPI), X + CellWidth,
       ClientHeight);
-    DrawText(Canvas.Handle, PChar(FMoras[I].Text), Length(FMoras[I].Text),
-      TextRect, DT_CENTER or DT_TOP or DT_SINGLELINE or DT_NOPREFIX);
+    if (FMoras[I].PhraseIndex>=Length(FPendingReadings)) or
+      (FPendingReadings[FMoras[I].PhraseIndex]='') then
+      DrawText(Canvas.Handle, PChar(FMoras[I].Text), Length(FMoras[I].Text),
+        TextRect, DT_CENTER or DT_TOP or DT_SINGLELINE or DT_NOPREFIX);
     Canvas.Brush.Style := bsSolid;
-    Inc(X, CellWidth);
   end;
+
+  // 再生時の解析を待つ間も、編集を確定した読みを古いモーラ表記に代えて表示する。
+  Canvas.Brush.Style := bsClear; Canvas.Font.Color := A2SCPanelText;
+  for I := 0 to High(FPendingReadings) do if FPendingReadings[I]<>'' then begin
+    TextRect := PhraseBounds(I); TextRect.Top := AccentScale(TEXT_Y,CurrentPPI);
+    TextRect.Bottom := ClientHeight;
+    DrawText(Canvas.Handle,PChar(FPendingReadings[I]),Length(FPendingReadings[I]),
+      TextRect,DT_LEFT or DT_TOP or DT_SINGLELINE or DT_NOPREFIX);
+  end;
+  Canvas.Brush.Style := bsSolid;
 
   if (FHoverBoundary >= 0) and (FHoverBoundary < High(FMoras)) and
     GetMoraCenter(FHoverBoundary, P1) and

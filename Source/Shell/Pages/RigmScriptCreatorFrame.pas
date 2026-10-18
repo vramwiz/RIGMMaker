@@ -17,11 +17,13 @@ type
     FLayout: TRigmScriptLayoutFrame; FActive: Boolean;
     FTitleBody,FStageHost: TScrollBox; FCharactersBody: TPanel; FCharacters: TListView; FImages: TImageList;
     FTitleContent: TPanel; FTitleLayout,FStageLayout: Boolean; FShownStage,FShownProject,FHighlightedStage: string;
-    FImportActions: TPanel; FImportText,FSaveTemplate: TButton;
+    FImportActions: TPanel; FImportText,FImportClipboard,FSaveTemplate: TButton;
     FCatalog: TJSONObject; FCatalogProject: string; FCharactersGuide: TLabel;
     FLoader: TRigmThumbnailList;
     FCreator: TRigmMovieCreator; // 旧コードの明示利用用。通常は生成・表示しない。
     procedure ImportTextFile(Sender: TObject);
+    procedure ImportClipboardText(Sender: TObject);
+    procedure ShowImportResult(Reply: TJSONObject);
     procedure SaveInputTemplate(Sender: TObject);
     procedure SummaryChoiceChanged(Sender: TObject);
     procedure SelectStage(Sender: TObject);
@@ -55,7 +57,7 @@ type
 implementation
 uses System.SysUtils, System.IOUtils, System.Math, Vcl.Graphics, Vcl.Themes, Winapi.Windows, Winapi.Messages, Winapi.CommCtrl,
   RigmJson, RigmCharacterCatalog, PsdJson, RigmScriptPlacementModel, RigmScriptTypes, RigmScriptNavigationModel,
-  Vcl.Dialogs, RigmScriptTextImport;
+  Vcl.Dialogs, Vcl.Clipbrd, RigmScriptTextImport;
 {$R *.dfm}
 type
   TRigmStageListBox = class(TListBox)
@@ -139,15 +141,18 @@ begin
   Guide.AutoSize := False; Guide.Height := ScaleValue(94); Guide.WordWrap := True;
   Guide.Name := 'ScriptTitleGuide';
   Guide.Caption := '台本の種類と題名を入力し、左の工程リストでキャラ選択を選んでください。'+#13#10+
-    'コピー直後なら、台本テキストからセリフ・総評・シーン分け・画像指示を自動設定できます。'+#13#10+
+    'コピー直後なら、ファイルやクリップボードの台本テキストからセリフ・総評・シーン分け・画像指示を自動設定できます。'+#13#10+
     '読み込みでは生成を開始しません。以降は通常どおり工程を進めてください。';
   FImportActions := TRigmBufferedPanel.Create(Self); FImportActions.Parent := Body; FImportActions.Align := alTop;
   FImportActions.Name := 'ScriptTextImportActions'; FImportActions.Caption := ''; FImportActions.BevelOuter := bvNone;
   FImportActions.Height := ScaleValue(40);
-  FImportText := TButton.Create(Self); FImportText.Parent := FImportActions; FImportText.Align := alLeft;
+  FImportText := TButton.Create(Self); FImportText.Parent := FImportActions;
   FImportText.Width := ScaleValue(220); FImportText.Caption := '台本テキストを読み込む';
   FImportText.Name := 'ScriptImportText'; FImportText.OnClick := ImportTextFile;
-  FSaveTemplate := TButton.Create(Self); FSaveTemplate.Parent := FImportActions; FSaveTemplate.Align := alLeft;
+  FImportClipboard := TButton.Create(Self); FImportClipboard.Parent := FImportActions;
+  FImportClipboard.Caption := 'クリップボードから読み込む'; FImportClipboard.Name := 'ScriptImportClipboard';
+  FImportClipboard.OnClick := ImportClipboardText;
+  FSaveTemplate := TButton.Create(Self); FSaveTemplate.Parent := FImportActions;
   FSaveTemplate.Left := FImportText.Width; FSaveTemplate.Width := ScaleValue(220);
   FSaveTemplate.Caption := '入力用テンプレートを保存'; FSaveTemplate.Name := 'ScriptSaveInputTemplate';
   FSaveTemplate.OnClick := SaveInputTemplate;
@@ -262,6 +267,16 @@ begin
   try
     FTitleContent.Width := FTitleBody.ClientWidth;
     FTitleContent.Realign;
+    if (FImportClipboard<>nil) and (FSaveTemplate<>nil) then begin
+      var Available := Max(1,FImportActions.ClientWidth);
+      var ButtonWidth := Min(ScaleValue(220),Available); var Gap := ScaleValue(8);
+      var ButtonHeight := ScaleValue(36); var X := 0; var Y := 0;
+      for var Button in TArray<TButton>.Create(FImportText,FImportClipboard,FSaveTemplate) do begin
+        if (X>0) and (X+ButtonWidth>Available) then begin X := 0; Inc(Y,ButtonHeight+Gap); end;
+        Button.SetBounds(X,Y,ButtonWidth,ButtonHeight); Inc(X,ButtonWidth+Gap);
+      end;
+      FImportActions.Height := Y+ButtonHeight+ScaleValue(4);
+    end;
     var Total := FTitleContent.Padding.Top+FTitleContent.Padding.Bottom;
     for var I := 0 to FTitleContent.ControlCount-1 do Inc(Total,FTitleContent.Controls[I].Height);
     FTitleContent.Height := Total;
@@ -404,10 +419,12 @@ begin
     if not JB(State,'hasProject') then FProgress.Caption := '台本管理から新規作成してください。'
     else if JS(JO(State,'wizard'),'titleStatus')='complete' then FProgress.Caption := '題名：確認済み（第1段階）'
     else FProgress.Caption := '題名：未確認（第1段階）';
+    FImportText.Enabled := False; FImportClipboard.Enabled := False;
     if FWorkspace.ScriptDraft<>nil then begin
       var W := FWorkspace.ScriptDraft.ScriptWizard;
       FImportText.Enabled := (Stage='title') and ((JS(W,'furthestStage')='') or (JS(W,'furthestStage')='title')) and
         ((FWorkspace.ScriptDraft.Cues.Count=0) or (W.GetValue('textImport') is TJSONObject));
+      FImportClipboard.Enabled := FImportText.Enabled;
       if W.GetValue('textImport') is TJSONObject then begin
         var Info := JO(W,'textImport');
         FProgress.Caption := '読み込み済み：'+JS(Info,'sourceName')+'（'+JA(JO(Info,'data'),'scenes').Count.ToString+'シーン）';
@@ -456,28 +473,45 @@ begin
     if not Dialog.Execute then Exit;
     try
       var Reply := FWorkspace.ImportScriptFile(Dialog.FileName);
-      try
-        if JB(Reply,'valid') then begin FStatus.Caption := JS(Reply,'message'); Exit; end;
-        var Form := TForm.CreateNew(Self);
-        try
-          Form.Caption := '台本テキストの不足・不正'; Form.Position := poOwnerFormCenter;
-          Form.Width := ScaleValue(720); Form.Height := ScaleValue(460);
-          var Memo := TMemo.Create(Form); Memo.Parent := Form; Memo.Align := alClient;
-          Memo.ReadOnly := True; Memo.ScrollBars := ssBoth; Memo.WordWrap := False;
-          Memo.Lines.Add('台本は変更していません。次の項目を修正して読み込み直してください。'); Memo.Lines.Add('');
-          for var V in JA(Reply,'issues') do begin
-            var Issue := TJSONObject(V); var At := '';
-            if JI(Issue,'line')>0 then At := JI(Issue,'line').ToString+'行目 ';
-            Memo.Lines.Add(At+JS(Issue,'field')+'：'+JS(Issue,'message'));
-          end;
-          var Close := TButton.Create(Form); Close.Parent := Form; Close.Align := alBottom;
-          Close.Caption := '閉じる'; Close.Height := ScaleValue(36); Close.ModalResult := mrOk; Close.Cancel := True;
-          Form.ShowModal;
-        finally Form.Free; end;
-        FStatus.Caption := JS(Reply,'message');
+      try ShowImportResult(Reply);
       finally Reply.Free; end;
     except on E: Exception do FStatus.Caption := E.Message; end;
   finally Dialog.Free; end;
+end;
+procedure TRigmScriptCreatorFrame.ImportClipboardText(Sender: TObject);
+begin
+  try
+    if not (Clipboard.HasFormat(CF_UNICODETEXT) or Clipboard.HasFormat(CF_TEXT)) then begin
+      FStatus.Caption := 'クリップボードに台本テキストをコピーしてから読み込んでください。'; Exit;
+    end;
+    var Text := Clipboard.AsText;
+    if Text.Replace(#$3000,'').Trim='' then begin
+      FStatus.Caption := 'クリップボードのテキストが空です。台本テキストをコピーしてください。'; Exit;
+    end;
+    var Reply := FWorkspace.ImportScriptText(Text,'クリップボード');
+    try ShowImportResult(Reply); finally Reply.Free; end;
+  except on E: Exception do FStatus.Caption := 'クリップボードから読み込めません。'+E.Message; end;
+end;
+procedure TRigmScriptCreatorFrame.ShowImportResult(Reply: TJSONObject);
+begin
+  if JB(Reply,'valid') then begin FStatus.Caption := JS(Reply,'message'); Exit; end;
+  var Form := TForm.CreateNew(Self);
+  try
+    Form.Caption := '台本テキストの不足・不正'; Form.Position := poOwnerFormCenter;
+    Form.Width := ScaleValue(720); Form.Height := ScaleValue(460);
+    var Memo := TMemo.Create(Form); Memo.Parent := Form; Memo.Align := alClient;
+    Memo.ReadOnly := True; Memo.ScrollBars := ssBoth; Memo.WordWrap := False;
+    Memo.Lines.Add('台本は変更していません。次の項目を修正して読み込み直してください。'); Memo.Lines.Add('');
+    for var V in JA(Reply,'issues') do begin
+      var Issue := TJSONObject(V); var At := '';
+      if JI(Issue,'line')>0 then At := JI(Issue,'line').ToString+'行目 ';
+      Memo.Lines.Add(At+JS(Issue,'field')+'：'+JS(Issue,'message'));
+    end;
+    var Close := TButton.Create(Form); Close.Parent := Form; Close.Align := alBottom;
+    Close.Caption := '閉じる'; Close.Height := ScaleValue(36); Close.ModalResult := mrOk; Close.Cancel := True;
+    Form.ShowModal;
+  finally Form.Free; end;
+  FStatus.Caption := JS(Reply,'message');
 end;
 procedure TRigmScriptCreatorFrame.SaveInputTemplate(Sender: TObject);
 begin
@@ -488,7 +522,7 @@ begin
     Dialog.Options := [ofOverwritePrompt,ofPathMustExist,ofEnableSizing];
     if not Dialog.Execute then Exit;
     try TFile.WriteAllText(Dialog.FileName,ScriptTextInputTemplate,TEncoding.UTF8);
-      FStatus.Caption := 'テンプレートを保存しました。記入後に「台本テキストを読み込む」で読み込めます。';
+      FStatus.Caption := 'テンプレートを保存しました。記入後にファイルまたはクリップボードから読み込めます。';
     except on E: Exception do FStatus.Caption := E.Message; end;
   finally Dialog.Free; end;
 end;

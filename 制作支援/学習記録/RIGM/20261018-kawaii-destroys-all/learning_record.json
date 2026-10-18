@@ -1,0 +1,730 @@
+﻿{
+  "format": "RIGMMaker.ImageProductionLearning",
+  "date": "2026-10-18",
+  "title": "可愛いはすべてを破壊する",
+  "author": "相崎うたう",
+  "workUrl": "https://manga.nicovideo.jp/comic/78559",
+  "officialContextUrl": "https://www.dokidokivisual.com/magazine/kirara-max/2026/09/13521/",
+  "officialPreviewUrl": "https://saas.actibookone.com/content/detail?param=eyJjb250ZW50TnVtIjo3NjA1NzF9&detailFlg=0&pNo=1",
+  "projectId": "{F2BB73EE-7C69-427C-8EA8-3C4D793E657D}",
+  "mode": "built-in image_gen",
+  "userRequest": "画像生成して送信。キャラの等身を低く、かわいくする。",
+  "inputs": {
+    "scenes": [
+      {
+        "id": "{8101B7DD-552D-4BF3-914C-DEC52644337E}",
+        "title": "opening 1",
+        "image": "",
+        "description": "",
+        "imagePrompt": "",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 0,
+        "animation": {},
+        "sceneNumber": 1,
+        "start": 0,
+        "duration": 6.12666666666667,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{7B2C6376-BAF8-4F2A-BD5C-D4C6621D12D7}",
+            "sourceText": "東北きりたんです"
+          },
+          {
+            "cueId": "{FE467328-E392-470A-B0E9-E52ACAB86B49}",
+            "sourceText": "今回もニコニコ漫画から"
+          },
+          {
+            "cueId": "{561C2F4E-EF2C-4D2A-B3F7-1D751943E9FE}",
+            "sourceText": "無料で最新話まで読める作品を紹介します"
+          }
+        ],
+        "cueCount": 3,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{98A6E5F0-D8B8-47EA-BA84-7D85C724264F}",
+        "title": "可愛さで学級崩壊！？",
+        "image": "",
+        "description": "可愛さは最強の破壊兵器！？",
+        "imagePrompt": "横長16:9。少し荒れた雰囲気の高校の教室。不機嫌そうな女子生徒たちが机に座り、入口には明るい笑顔の小柄な女子生徒のシルエット。教室の暗い雰囲気と転校生を包む柔らかな光の対比を強調するコミカルな構図。文字なし。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 1,
+        "animation": {},
+        "sceneNumber": 2,
+        "start": 6.12666666666667,
+        "duration": 19.1306666666667,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{9D0757C2-FCD0-4D95-83E1-7C225896A955}",
+            "sourceText": "皆さん、可愛いだけでクラスの空気を変えることはできると思いますか？"
+          },
+          {
+            "cueId": "{6B876BF8-F167-492F-B8B7-5D7C16E80AEA}",
+            "sourceText": "暴力でも説教でもなく、ただひたすら可愛い。それだけで問題児たちを次々と撃破！"
+          },
+          {
+            "cueId": "{15726BF5-2545-4EF0-A807-C0E637A89751}",
+            "sourceText": "そんな、とんでもない女の子が主人公の漫画があるんです。"
+          },
+          {
+            "cueId": "{7D4F67B8-5B7D-4F5C-8884-E4A4F1DC120E}",
+            "sourceText": "今回ご紹介するのは、相崎うたう先生の『可愛いはすべてを破壊する』です！"
+          }
+        ],
+        "cueCount": 4,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{DBF9CCB9-3992-4EA7-9B77-5578193B2C05}",
+        "title": "作品紹介",
+        "image": "",
+        "description": "問題児だらけの2年C組",
+        "imagePrompt": "横長16:9。日本の高校の教室。乱雑に置かれた椅子や机、黒板、窓から差し込む明るい日差し。画面中央には転校生を迎えるために空けられた席。少し騒がしい学園コメディを感じさせる風景。人物や文字なし。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 2,
+        "animation": {},
+        "sceneNumber": 3,
+        "start": 25.2573333333333,
+        "duration": 17.7546666666667,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{00D00BE5-24D7-4784-8255-10ABC7527155}",
+            "sourceText": "本作は、まんがタイムきららMAXで連載されている学園4コマコメディです。"
+          },
+          {
+            "cueId": "{5489902B-9228-40AB-9070-03A460454FC7}",
+            "sourceText": "舞台は、問題児たちが集まり、学級崩壊状態になってしまった2年C組。"
+          },
+          {
+            "cueId": "{1E3B0B32-D4AC-4481-96A7-DCCF39080AA6}",
+            "sourceText": "そんなクラスに、一人の転校生がやってきます。"
+          },
+          {
+            "cueId": "{8589B8F0-1298-41C9-AE0B-B461068B4148}",
+            "sourceText": "彼女の名前は雛川ひよ。まさに規格外の可愛さを持つ女の子です。"
+          }
+        ],
+        "cueCount": 4,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{AEE9D66D-0A15-44F7-81AA-1149910F42B8}",
+        "title": "天然すぎる転校生",
+        "image": "",
+        "description": "天然少女・雛川ひよ",
+        "imagePrompt": "横長16:9。明るい高校の教室。小柄な女子生徒が教室の入口で元気に挨拶している。表情は無邪気な笑顔。背景には驚いた様子のクラスメイトたちのシルエット。柔らかな光とキラキラした演出で天真爛漫な雰囲気を強調。文字なし。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 2,
+        "animation": {},
+        "sceneNumber": 4,
+        "start": 43.012,
+        "duration": 18.7466666666667,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{1086D22C-D580-4BDD-A235-D122B5FF472C}",
+            "sourceText": "ひよは長い間病院で暮らしていたため、学校生活は今回が初めて。"
+          },
+          {
+            "cueId": "{0C63448D-DD3A-40D7-A5FC-4E7B4E324349}",
+            "sourceText": "そのため、普通の高校生なら気づくようなことにも、ちょっと鈍感なんです。"
+          },
+          {
+            "cueId": "{D3B1F6C4-16AD-41CE-86D7-6761E70AB064}",
+            "sourceText": "クラスメイトに威嚇されても、嫌味を言われても、相手の意図にまったく気づきません！"
+          },
+          {
+            "cueId": "{9DB83A72-91C4-4EFD-91C9-B55C8B366910}",
+            "sourceText": "しかも、ひよはいつでも天真爛漫。悪意なんてどこ吹く風です。"
+          }
+        ],
+        "cueCount": 4,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{AA5110DC-B742-4DE3-AE4A-0716062E6522}",
+        "title": "問題児たちが次々陥落！",
+        "image": "",
+        "description": "攻撃がまったく通じない！？",
+        "imagePrompt": "横長16:9。高校の教室で、不良風の女子生徒が照れたように顔をそらし、目の前では小柄な転校生が無邪気な笑顔を向けている。周囲の生徒たちは驚いた表情。可愛さに圧倒される瞬間をコミカルな集中線や花びらで表現。文字なし。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 2,
+        "animation": {},
+        "sceneNumber": 5,
+        "start": 61.7586666666667,
+        "duration": 19.1413333333333,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{2AC3C466-9D4A-4213-A641-C990C73238DB}",
+            "sourceText": "そんなひよを待ち受けていたのは、ひと癖もふた癖もあるクラスメイトたち。"
+          },
+          {
+            "cueId": "{E3584448-5BD1-424D-B789-219C54365940}",
+            "sourceText": "ところが相手がどれだけ強気に出ても、ひよにはまったく通用しません。"
+          },
+          {
+            "cueId": "{6DDD3631-490A-4051-AD7D-6F71F900E774}",
+            "sourceText": "それどころか、予想外の可愛らしい反応で、逆に相手の心を撃ち抜いてしまうんです！"
+          },
+          {
+            "cueId": "{BE3D4A45-6896-4EAE-B62D-76123437DCEC}",
+            "sourceText": "喧嘩を売ったつもりが、気づけば相手のファンになっている。なんという理不尽な強さでしょう！"
+          }
+        ],
+        "cueCount": 4,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{A42A3DF8-06D0-49F7-AA00-A7023AEECEC5}",
+        "title": "孤高の少女にも接近！",
+        "image": "",
+        "description": "孤高の少女も破壊対象！？",
+        "imagePrompt": "横長16:9。静かな教室の窓際。真面目で物静かな雰囲気の女子生徒が一人で本を読んでいる。そこへ明るい女子生徒が笑顔で近づく。窓から柔らかな日差しが入り、二人の対照的な性格を表現する構図。文字なし。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 2,
+        "animation": {},
+        "sceneNumber": 6,
+        "start": 80.9,
+        "duration": 20.4213333333333,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{DA827C77-FDD5-4C19-9586-DDBF33FA072A}",
+            "sourceText": "クラスには、周囲と距離を置いている小石倉こと子という少女もいます。"
+          },
+          {
+            "cueId": "{09CB8CA1-3D54-45EA-8ABB-67A7FE536542}",
+            "sourceText": "そんな彼女にも、ひよは興味津々。遠慮なく仲良くなろうと近づいていきます。"
+          },
+          {
+            "cueId": "{F7933A4A-5BB7-4CE9-A943-B600629E7A9A}",
+            "sourceText": "一人でいたい少女と、仲良くなりたい天然少女。この組み合わせだけでも面白そうですよね。"
+          },
+          {
+            "cueId": "{799CC071-49DF-4FD9-A45B-D15548953349}",
+            "sourceText": "ひよのまっすぐな言動が、周囲の人間関係を少しずつ変えていくところにも注目です。"
+          }
+        ],
+        "cueCount": 4,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{454974C8-C5D7-48F8-BBC6-01525B366E72}",
+        "title": "可愛さで壊れる人間関係",
+        "image": "",
+        "description": "崩壊したクラスに意外な変化",
+        "imagePrompt": "横長16:9。学校の中庭で、四人の女子高校生が一緒に昼食を楽しんでいる。中央の明るい少女が楽しそうに話し、周囲の三人は照れたり困惑したりと異なる反応を見せている。柔らかな午後の日差しと温かな学園コメディの雰囲気。文字なし。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 2,
+        "animation": {},
+        "sceneNumber": 7,
+        "start": 101.321333333333,
+        "duration": 19.184,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{433EEACE-FE0A-49BD-A1E5-3629A37723EB}",
+            "sourceText": "本作の面白さは、可愛さによって人間関係が変化していくところです。"
+          },
+          {
+            "cueId": "{311BE3AC-080C-458C-A8E1-7B36788827E4}",
+            "sourceText": "今まで接点のなかったクラスメイトたちも、ひよをきっかけに交流するようになります。"
+          },
+          {
+            "cueId": "{39177C0F-664B-4E98-A0D6-570C2C107772}",
+            "sourceText": "本人に誰かを変えようという意図はなく、ただ仲良くなりたいだけ。"
+          },
+          {
+            "cueId": "{B224D64C-7981-43E0-95D4-99EFB559FDBC}",
+            "sourceText": "それなのに、周囲の人々が勝手に振り回されていく。この温度差が笑いにつながっています。"
+          }
+        ],
+        "cueCount": 4,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{DC72EAD2-D085-46DD-AC65-B241C6FB215A}",
+        "title": "先生まで破壊される！？",
+        "image": "",
+        "description": "ついには先生まで！？",
+        "imagePrompt": "横長16:9。高校の職員室。仕事に疲れた様子の女性教師が机に座っている。入口には元気な女子生徒のシルエット。教師の周囲には書類が積まれ、入口からは明るい光が差し込む。疲れた大人と無邪気な少女の対比を強調。文字なし。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 2,
+        "animation": {},
+        "sceneNumber": 8,
+        "start": 120.505333333333,
+        "duration": 19.0773333333333,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{73CE3636-CA41-4E42-B793-EAEB02547AA8}",
+            "sourceText": "しかも、ひよの影響はクラスメイトだけにとどまりません。"
+          },
+          {
+            "cueId": "{F09ECA1D-FC81-4381-A2DC-DA20F814ACAB}",
+            "sourceText": "学級崩壊に悩む担任の鳴海先生も、彼女の可愛さに振り回されることになります。"
+          },
+          {
+            "cueId": "{46C6D652-8E5E-4785-A7C1-81A36AE2CA5D}",
+            "sourceText": "生徒だけでなく先生まで巻き込んでしまうとは、もはや学校全体が危ないのでは？"
+          },
+          {
+            "cueId": "{0A41C6BF-E48A-4F67-8685-B0B716BE32F5}",
+            "sourceText": "もちろん、破壊といっても心を撃ち抜くという意味。なんとも平和な破壊活動です！"
+          }
+        ],
+        "cueCount": 4,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{2D7338CF-723C-4576-8B09-649D0783E1AE}",
+        "title": "作品ならではの魅力",
+        "image": "",
+        "description": "天然の可愛さが最強！",
+        "imagePrompt": "横長16:9。明るい高校の教室を背景に、中央で無邪気に笑う女子生徒と、その笑顔に圧倒されて顔を赤くする複数の女子生徒。花びらやハート型の光が舞うコミカルな演出。可愛さの圧倒的な破壊力を視覚的に表現する。文字なし。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 2,
+        "animation": {},
+        "sceneNumber": 9,
+        "start": 139.582666666667,
+        "duration": 18.2666666666667,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{3B567D81-DE3C-459D-AF29-72798A4A1C4B}",
+            "sourceText": "この作品で特に注目したいのは、ひよに悪気がまったくないことです。"
+          },
+          {
+            "cueId": "{27B2C213-A1E3-44A2-BD26-79700C515969}",
+            "sourceText": "誰かを言い負かしたり、力で従わせたりするわけではありません。"
+          },
+          {
+            "cueId": "{5E99B959-6B7C-4A69-BDF6-B2E9A8212642}",
+            "sourceText": "ただ純粋に接するだけで、相手の心の壁を壊してしまうんです。"
+          },
+          {
+            "cueId": "{36C09C1C-F4D0-4CCC-B9F9-9502915E273E}",
+            "sourceText": "これまで対立していた人たちの関係まで変えてしまうのですから、可愛さは本当に恐ろしいですね。"
+          }
+        ],
+        "cueCount": 4,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{C1BC9B38-C363-4493-93C6-3DBDC7CB9444}",
+        "title": "こんな人におすすめ",
+        "image": "",
+        "description": "可愛さと笑いの学園コメディ",
+        "imagePrompt": "横長16:9。放課後の高校の教室。夕日が差し込む窓際で、複数の女子生徒が楽しそうに談笑している。中心には明るい笑顔の小柄な少女。温かく穏やかな雰囲気と学園コメディらしい軽快さを感じさせる構図。文字なし。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 1,
+        "animation": {},
+        "sceneNumber": 10,
+        "start": 157.849333333333,
+        "duration": 16.4946666666667,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{E36CEFD3-AF9A-4DFA-A4CD-6328513A9554}",
+            "sourceText": "本作は、かわいい女の子たちの日常や、テンポの良い4コマ漫画が好きな人におすすめです。"
+          },
+          {
+            "cueId": "{5795974C-D288-4C6F-8245-4BE0A8387BF7}",
+            "sourceText": "特に、性格の違う女の子たちが交流する作品が好きなら楽しめそうですね。"
+          },
+          {
+            "cueId": "{975F946A-B456-4C7A-AF49-AD014E2AFA73}",
+            "sourceText": "問題児だらけのクラスが、ひよによってどう変わっていくのか。そんな期待も持てる作品です。"
+          }
+        ],
+        "cueCount": 3,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{C288B8E7-6156-43ED-A80E-5C315E15BC12}",
+        "title": "総評",
+        "image": "",
+        "description": "",
+        "imagePrompt": "",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 0,
+        "displayMode": "image",
+        "animation": {},
+        "chart": {
+          "kind": "radar",
+          "title": "ストーリー",
+          "minimum": 0,
+          "maximum": 5,
+          "items": [
+            {
+              "label": "ストーリー",
+              "value": 4
+            },
+            {
+              "label": "キャラクター",
+              "value": 5
+            },
+            {
+              "label": "作画",
+              "value": 4
+            },
+            {
+              "label": "演出・テンポ",
+              "value": 4
+            },
+            {
+              "label": "世界観・設定",
+              "value": 4
+            }
+          ]
+        },
+        "sceneNumber": 11,
+        "start": 174.344,
+        "duration": 31.9866666666667,
+        "ready": true,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{C16E0E57-46C1-4337-A49E-4D751F92059E}",
+            "sourceText": "今回の評価は、公式紹介や公開されている序盤の情報を中心とした暫定的なものです。"
+          },
+          {
+            "cueId": "{B7BADF09-8F2E-42FF-8E88-E3958543218E}",
+            "sourceText": "最大の魅力は、天然少女の可愛さによって問題児たちが次々と陥落していく設定です。"
+          },
+          {
+            "cueId": "{62EE0A32-B8B3-4D7B-8924-C04D49DAF0F7}",
+            "sourceText": "無邪気なひよと個性的なクラスメイトたちの掛け合いが、作品の大きな見どころですね。"
+          },
+          {
+            "cueId": "{7992A035-0BE2-41B5-9448-9EAB6BAA20A6}",
+            "sourceText": "相崎うたう先生の『可愛いはすべてを破壊する』は、ニコニコ漫画でも公開されています。"
+          },
+          {
+            "cueId": "{FC102357-ADE8-4732-8F71-6A24684282DC}",
+            "sourceText": "皆さんは、ひよのような転校生がやってきたら仲良くなりたいですか？ぜひコメントで教えてください。"
+          },
+          {
+            "cueId": "{1FF9D781-493B-4313-BC5F-70B7EED57156}",
+            "sourceText": "それでは、また次の漫画紹介でお会いしましょう！"
+          }
+        ],
+        "cueCount": 6,
+        "hasMoreCues": false
+      }
+    ],
+    "referenceFiles": [
+      "References/official-preview-cover.png",
+      "References/official-page1.jpg",
+      "References/official-page4.jpg",
+      "References/official-page8.jpg",
+      "References/official-page11.jpg",
+      "References/official-page12.jpg",
+      "References/official-page14.jpg",
+      "References/official-page20.jpg"
+    ],
+    "narratorReference": "References/kiritan.png"
+  },
+  "decisions": [
+    "現在の作品ID・題名・作品URLを照合し、背景1枚・本編9シーン・最後の必須サムネイルを作成。空要望の冒頭と総評チャートは保持。",
+    "出版社の公式試し読みを確認し、ひよの金髪・金色の目・低い位置の長いツインテール・黄色のカーディガンと紺のセーラー襟、山門の短い黒髪と斜めの前髪、こと子のおかっぱと髪留めなどを低頭身のかわいいアニメ調へ反映。",
+    "人物は約2.5〜3頭身を指定。丸く大きな顔、小さい体、長袖・自然に下りたスカート・不透明なタイツを基本に、無邪気な笑顔と照れ・驚き・戸惑いをコミカルに描いた。",
+    "モノクロ資料しか確認できない人物の茶系の髪や目の色は紹介イラスト用の解釈。職員室の教師は正確な外見を断定せず、落ち着いた服の成人女性を主に後ろ姿で描いた創作のシルエット。教室・中庭・職員室の細部も紹介用の創作。",
+    "淡いピンク・クリーム色と木の机・緑の黒板・桜の見える窓を継続。昼食は同じ4人、放課後は同じ教室を夕日へ変更。破壊は照れや花・光の演出で表し、負傷や実際の破壊・親密な接触を描かない。",
+    "背景と各シーンの人間による確定後にsourcesReady=trueを取得。完成画像と使用中の東北きりたんのPNGを参照し、主題全文と漫画バッジ、ひよ・クラスメイト3人・案内するきりたんのサムネイルを生成。",
+    "生成ごとに画像を表示・目視後、要求ID・revision・SHA256を確認して採用・保存。人間の確定は代行せず、全44cueのJSONを保持。"
+  ],
+  "referenceMap": {
+    "00-common-background": [],
+    "01-cuteness-enters-the-classroom": [
+      "official-page1",
+      "official-page4",
+      "00-common-background"
+    ],
+    "02-classroom-awaiting-transfer": [
+      "01-cuteness-enters-the-classroom"
+    ],
+    "03-innocent-transfer-student": [
+      "01-cuteness-enters-the-classroom",
+      "02-classroom-awaiting-transfer"
+    ],
+    "04-tough-classmate-softens": [
+      "03-innocent-transfer-student",
+      "official-page4"
+    ],
+    "05-friendship-by-the-window": [
+      "04-tough-classmate-softens",
+      "official-page14"
+    ],
+    "06-courtyard-lunch-together": [
+      "05-friendship-by-the-window",
+      "04-tough-classmate-softens",
+      "official-page20"
+    ],
+    "07-teacher-in-the-staffroom": [
+      "03-innocent-transfer-student",
+      "02-classroom-awaiting-transfer"
+    ],
+    "08-irresistible-innocent-smile": [
+      "06-courtyard-lunch-together",
+      "02-classroom-awaiting-transfer"
+    ],
+    "09-after-school-friends": [
+      "08-irresistible-innocent-smile",
+      "02-classroom-awaiting-transfer"
+    ],
+    "10-thumbnail": [
+      "08-irresistible-innocent-smile",
+      "06-courtyard-lunch-together",
+      "kiritan"
+    ]
+  },
+  "artifacts": [
+    {
+      "key": "00-common-background",
+      "sceneId": "common-background",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-23a87ccc-c46d-47ce-aa0b-2153eed76bf6.png",
+      "prompt": "Use case: illustration-story. One wide landscape 16:9 illustration for a Japanese school-comedy manga-introduction video, ideally 1920x1080. Extremely cute polished 2D anime, clean delicate ink lines and soft cel shading, warm cream and pastel pink highlights, gentle sunlight, rounded charming shapes. Every schoolgirl is a tiny chibi about 2.5 to 3 heads tall, with a large round expressive head and small unaccentuated fully clothed body. Modest high-neck long-sleeved school blouses and cardigans or blazers, naturally resting longer pleated skirts, opaque tights and practical closed school shoes. Ordinary wholesome friendship, comic reactions, no romantic/intimate posing or anatomy emphasis, no actual violence. No writing, letters, subtitles, speech balloons, logos, watermarks, or panel borders.  Asset: quiet shared background for all narration. NO PEOPLE. Airy soft Japanese classroom ambience in very pale pink and cream, broad empty sunlit cream central area for app narrator and subtitles. Faint large classroom windows and pale curtains at far edges, a hint of light wood desk corners confined to lower corners, a few delicate cherry-petal accents at outer margins. Fresh warm morning light, subtle pink glow, very low contrast, simple unobtrusive school-life setting. Keep center mostly blank and lightly textured, no visible blackboard writing or signage, no big objects occupying center."
+    },
+    {
+      "key": "01-cuteness-enters-the-classroom",
+      "sceneId": "{98A6E5F0-D8B8-47EA-BA84-7D85C724264F}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-7b4c7610-9e11-44e9-a0c5-fe48b66485f5.png",
+      "prompt": "Use case: illustration-story. One wide landscape 16:9 illustration for a Japanese school-comedy manga-introduction video, ideally 1920x1080. Extremely cute polished 2D anime, clean delicate ink lines and soft cel shading, warm cream and pastel pink highlights, gentle sunlight, rounded charming shapes. Every schoolgirl is a tiny chibi about 2.5 to 3 heads tall, with a large round expressive head and small unaccentuated fully clothed body. Modest high-neck long-sleeved school blouses and cardigans or blazers, naturally resting longer pleated skirts, opaque tights and practical closed school shoes. Ordinary wholesome friendship, comic reactions, no romantic/intimate posing or anatomy emphasis, no actual violence. No writing, letters, subtitles, speech balloons, logos, watermarks, or panel borders.  Hiyo: long soft golden-blond hair in loose low twin bunches/ponytails, soft separated bangs and a tiny ahoge, sparkling golden-yellow eyes, fair skin, tiny cheerful round face. Pale-yellow oversized LONG-SLEEVED cardigan over a closed white blouse with navy sailor collar and subtle teal edging, small pink ribbon, naturally resting longer navy pleated skirt, opaque dark tights and loafers. Cute tiny 2.5-to-3-head-tall silhouette.  Asset: cute transfer student changes the atmosphere. Reference1 is ONLY for Hiyo's hair/eye colors, cardigan and sailor-uniform palette, NOT text or manga panels. Reference2 fixes classmate Yamato's short angular tousled black hair and long side-swept bang, stern brows and sailor uniform, NOT panel layout or violence. Reference3 gives soft cream/pink light. NEW wide eye-level Japanese high-school classroom, desks and chairs slightly askew, plain unwritten green chalkboard, windows to one side. Several small chibi girl classmates sit on chairs at desks with mildly grumpy expressions, including short black-haired Yamato in a white long-sleeved navy-collar blouse and long navy skirt. At open classroom doorway Hiyo is a small cheerful backlit figure, smiling brightly and holding her school bag with both hands. Soft golden-pink glow and a few tiny flower sparkles around her contrast with the cool gray-blue slightly tense classroom. All seated naturally, no sitting on tabletops, no threats, no damage or injuries. The mood is playful school comedy and new friendship, no words/signs."
+    },
+    {
+      "key": "02-classroom-awaiting-transfer",
+      "sceneId": "{DBF9CCB9-3992-4EA7-9B77-5578193B2C05}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-0e967fe5-5845-46e1-86b4-4de22619f2a7.png",
+      "prompt": "Use case: illustration-story. One wide landscape 16:9 illustration for a Japanese school-comedy manga-introduction video, ideally 1920x1080. Extremely cute polished 2D anime, clean delicate ink lines and soft cel shading, warm cream and pastel pink highlights, gentle sunlight, rounded charming shapes. Every schoolgirl is a tiny chibi about 2.5 to 3 heads tall, with a large round expressive head and small unaccentuated fully clothed body. Modest high-neck long-sleeved school blouses and cardigans or blazers, naturally resting longer pleated skirts, opaque tights and practical closed school shoes. Ordinary wholesome friendship, comic reactions, no romantic/intimate posing or anatomy emphasis, no actual violence. No writing, letters, subtitles, speech balloons, logos, watermarks, or panel borders.  Asset: establishing view of the class, NO PEOPLE. Reference gives the SAME Japanese high-school room: pale cream walls, wide sunlit windows with pink-tinted curtains, plain green chalkboard, light wood student desks and metal-framed chairs, warm wood flooring. New wide angle from near the classroom doorway. A handful of desks and chairs are slightly askew and school bags hang from desk hooks, suggesting a lively noisy class without actual damage. In the center leave one clean empty desk and chair ready for a transfer student. Bright morning sun with gentle pink reflections, a few cherry blossoms visible OUTSIDE windows. Blackboard blank, any pinned papers have no text, all signs blank. Charming cute anime background, roomy composition, no people, silhouettes, writing or logos."
+    },
+    {
+      "key": "03-innocent-transfer-student",
+      "sceneId": "{AEE9D66D-0A15-44F7-81AA-1149910F42B8}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-4f8eb94f-bce6-42db-9a30-a8f265157938.png",
+      "prompt": "Use case: illustration-story. One wide landscape 16:9 illustration for a Japanese school-comedy manga-introduction video, ideally 1920x1080. Extremely cute polished 2D anime, clean delicate ink lines and soft cel shading, warm cream and pastel pink highlights, gentle sunlight, rounded charming shapes. Every schoolgirl is a tiny chibi about 2.5 to 3 heads tall, with a large round expressive head and small unaccentuated fully clothed body. Modest high-neck long-sleeved school blouses and cardigans or blazers, naturally resting longer pleated skirts, opaque tights and practical closed school shoes. Ordinary wholesome friendship, comic reactions, no romantic/intimate posing or anatomy emphasis, no actual violence. No writing, letters, subtitles, speech balloons, logos, watermarks, or panel borders.  Hiyo: long soft golden-blond hair in loose low twin bunches/ponytails, soft separated bangs and a tiny ahoge, sparkling golden-yellow eyes, fair skin, tiny cheerful round face. Pale-yellow oversized LONG-SLEEVED cardigan over a closed white blouse with navy sailor collar and subtle teal edging, small pink ribbon, naturally resting longer navy pleated skirt, opaque dark tights and loafers. Cute tiny 2.5-to-3-head-tall silhouette.  Asset: Hiyo's innocent cheerful greeting. Reference1 fixes EXACT generated Hiyo's blonde low twin tails, yellow cardigan, navy sailor collar/pink ribbon, tiny body and large round head. Reference2 fixes SAME classroom. NEW camera angle, bright sunny classroom doorway viewed from inside. Hiyo in foreground greets classmates with a joyful open smile and sparkling GOLDEN-YELLOW eyes, one hand waving gently at shoulder height and other hand holding her bag strap. Tiny 2.5-to-3-head-tall chibi, cheeks rounded, pure innocent excitement. Behind her at a respectful distance a few soft small chibi classmates pause with wide surprised eyes, including the short black-haired girl; keep them secondary. Soft pink-white flower sparkles around her head and shoulders, gentle daylight through windows, no overwhelming effects. Full small figure and broad surroundings, ordinary upright greeting, longer skirt rests naturally over opaque tights, no low angle. Do not reproduce same composition as reference: Hiyo is closer and happily waving, not clasping bag at doorway center. No text or logos."
+    },
+    {
+      "key": "04-tough-classmate-softens",
+      "sceneId": "{AA5110DC-B742-4DE3-AE4A-0716062E6522}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-ab8a9937-6c90-4464-81e9-bd2aef0154bf.png",
+      "prompt": "Use case: illustration-story. One wide landscape 16:9 illustration for a Japanese school-comedy manga-introduction video, ideally 1920x1080. Extremely cute polished 2D anime, clean delicate ink lines and soft cel shading, warm cream and pastel pink highlights, gentle sunlight, rounded charming shapes. Every schoolgirl is a tiny chibi about 2.5 to 3 heads tall, with a large round expressive head and small unaccentuated fully clothed body. Modest high-neck long-sleeved school blouses and cardigans or blazers, naturally resting longer pleated skirts, opaque tights and practical closed school shoes. Ordinary wholesome friendship, comic reactions, no romantic/intimate posing or anatomy emphasis, no actual violence. No writing, letters, subtitles, speech balloons, logos, watermarks, or panel borders.  Hiyo: long soft golden-blond hair in loose low twin bunches/ponytails, soft separated bangs and a tiny ahoge, sparkling golden-yellow eyes, fair skin, tiny cheerful round face. Pale-yellow oversized LONG-SLEEVED cardigan over a closed white blouse with navy sailor collar and subtle teal edging, small pink ribbon, naturally resting longer navy pleated skirt, opaque dark tights and loafers. Cute tiny 2.5-to-3-head-tall silhouette.  Asset: a tough classmate is disarmed by kindness. Reference1 fixes EXACT Hiyo and SAME pastel classroom style, reference2 fixes Yamato's short angular black hair with asymmetrical long bang and tough eyebrows; do not copy manga text/panels/violence. NEW composition between classroom desks. Hiyo at left smiles innocently up toward Yamato, hands holding her bag strap naturally, delighted open golden eyes. Yamato at right wears a white LONG-SLEEVED sailor blouse with navy collar/teal lines, navy ribbon and longer navy pleated skirt with opaque tights, short black tousled hair and slate-gray eyes. She looks away awkwardly, blushes a little, shoulders raised and arms folded in a shy defensive way, surprised that her stern attitude has melted. Both are tiny round-headed 2.5-to-3-head-tall chibis, bodies unaccentuated. Two or three very small background classmates react with surprised wide eyes. Gentle pink flower petals and short comic radial light accents emphasize the funny reaction, not romance, no embracing, no physical impact, no injury, no aggressive gesture. Wide eye-level classroom framing, no words, logos, or panel frames."
+    },
+    {
+      "key": "05-friendship-by-the-window",
+      "sceneId": "{A42A3DF8-06D0-49F7-AA00-A7023AEECEC5}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-e03d8948-d57c-438b-bf93-386f59d6ae5a.png",
+      "prompt": "Use case: illustration-story. One wide landscape 16:9 illustration for a Japanese school-comedy manga-introduction video, ideally 1920x1080. Extremely cute polished 2D anime, clean delicate ink lines and soft cel shading, warm cream and pastel pink highlights, gentle sunlight, rounded charming shapes. Every schoolgirl is a tiny chibi about 2.5 to 3 heads tall, with a large round expressive head and small unaccentuated fully clothed body. Modest high-neck long-sleeved school blouses and cardigans or blazers, naturally resting longer pleated skirts, opaque tights and practical closed school shoes. Ordinary wholesome friendship, comic reactions, no romantic/intimate posing or anatomy emphasis, no actual violence. No writing, letters, subtitles, speech balloons, logos, watermarks, or panel borders.  Hiyo: long soft golden-blond hair in loose low twin bunches/ponytails, soft separated bangs and a tiny ahoge, sparkling golden-yellow eyes, fair skin, tiny cheerful round face. Pale-yellow oversized LONG-SLEEVED cardigan over a closed white blouse with navy sailor collar and subtle teal edging, small pink ribbon, naturally resting longer navy pleated skirt, opaque dark tights and loafers. Cute tiny 2.5-to-3-head-tall silhouette.  Asset: approaching the quiet bookish classmate. Reference1 fixes EXACT Hiyo's hair, golden eyes, yellow cardigan, skirt/tights and generated anime style. Reference2 fixes Kotoko's chin-length straight rounded BOB hairstyle with blunt bangs, two crossed small hairpins near temple, half-lidded reserved face and sailor uniform, NOT manga layout or text. Interpret monochrome Kotoko with muted chestnut-brown hair and brown eyes as an illustrative palette. Only TWO girls in this image, no Yamato or crowd. NEW quiet classroom window-side view. Kotoko sits properly upright in a chair at a wood desk, reading a plain unlettered hardback book, expression serious but mildly curious as she glances sideways. She wears a closed white LONG-SLEEVED navy sailor-collar blouse with pink ribbon, longer navy pleated skirt and opaque tights. Hiyo stands beside the desk at a respectful friendly distance, leaning her head slightly with a bright welcoming smile and one hand raised in a gentle greeting. Hiyo does not hug or touch her. Both tiny 2.5-to-3-head-tall chibi, big round heads. Warm diffused daylight through curtains, cherry tree outside, pink-cream school-life mood, peaceful contrast of personalities, wider eye-level environment framing. Book pages have no lettering, no words or logos anywhere."
+    },
+    {
+      "key": "06-courtyard-lunch-together",
+      "sceneId": "{454974C8-C5D7-48F8-BBC6-01525B366E72}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-927db68b-85c9-4dac-bb9d-7a5b7ac5c5cc.png",
+      "prompt": "Use case: illustration-story. One wide landscape 16:9 illustration for a Japanese school-comedy manga-introduction video, ideally 1920x1080. Extremely cute polished 2D anime, clean delicate ink lines and soft cel shading, warm cream and pastel pink highlights, gentle sunlight, rounded charming shapes. Every schoolgirl is a tiny chibi about 2.5 to 3 heads tall, with a large round expressive head and small unaccentuated fully clothed body. Modest high-neck long-sleeved school blouses and cardigans or blazers, naturally resting longer pleated skirts, opaque tights and practical closed school shoes. Ordinary wholesome friendship, comic reactions, no romantic/intimate posing or anatomy emphasis, no actual violence. No writing, letters, subtitles, speech balloons, logos, watermarks, or panel borders.  Hiyo: long soft golden-blond hair in loose low twin bunches/ponytails, soft separated bangs and a tiny ahoge, sparkling golden-yellow eyes, fair skin, tiny cheerful round face. Pale-yellow oversized LONG-SLEEVED cardigan over a closed white blouse with navy sailor collar and subtle teal edging, small pink ribbon, naturally resting longer navy pleated skirt, opaque dark tights and loafers. Cute tiny 2.5-to-3-head-tall silhouette.  Asset: four classmates sharing lunch in the school courtyard. Reference1 fixes EXACT Hiyo and chestnut-bob Kotoko with blunt bangs and crossed pins, reference2 fixes short angular black-haired Yamato, reference3 fixes the fourth girl's wavy long hair with straight bangs and loose side braid, plus ordinary shared-lunch friendship context only; do NOT reproduce panels, lettering, strange poses or effects. Interpret monochrome fourth girl with muted rosy-brown hair and hazel eyes, dark navy long-sleeved cardigan over modest sailor uniform. EXACTLY FOUR tiny chibi schoolgirls in one warm sunny courtyard scene: Hiyo at center cheerfully talking with hands held neatly near her open bento; short black-haired Yamato at one side looks flustered but pleased, bob-haired Kotoko quietly attentive with reserved eyes, wavy-haired girl amused and slightly shy. They sit naturally on two low wooden benches around a little garden picnic table, knees and laps fully covered by naturally resting longer skirts/opaque tights. Lunch boxes with rice, vegetables and egg rolls, simple bread and drinks, no labels, no one feeding or touching anyone else. Green lawn, one cherry tree, low flowerbeds, the same cream school building in background, warm afternoon breeze. Spacious friendly eye-level wide composition, large heads and very small fully clothed bodies, no text."
+    },
+    {
+      "key": "07-teacher-in-the-staffroom",
+      "sceneId": "{DC72EAD2-D085-46DD-AC65-B241C6FB215A}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-48452cee-4bc0-490d-98d8-ac56947c929e.png",
+      "prompt": "Use case: illustration-story. One wide landscape 16:9 illustration for a Japanese school-comedy manga-introduction video, ideally 1920x1080. Extremely cute polished 2D anime, clean delicate ink lines and soft cel shading, warm cream and pastel pink highlights, gentle sunlight, rounded charming shapes. Every schoolgirl is a tiny chibi about 2.5 to 3 heads tall, with a large round expressive head and small unaccentuated fully clothed body. Modest high-neck long-sleeved school blouses and cardigans or blazers, naturally resting longer pleated skirts, opaque tights and practical closed school shoes. Ordinary wholesome friendship, comic reactions, no romantic/intimate posing or anatomy emphasis, no actual violence. No writing, letters, subtitles, speech balloons, logos, watermarks, or panel borders.  Hiyo: long soft golden-blond hair in loose low twin bunches/ponytails, soft separated bangs and a tiny ahoge, sparkling golden-yellow eyes, fair skin, tiny cheerful round face. Pale-yellow oversized LONG-SLEEVED cardigan over a closed white blouse with navy sailor collar and subtle teal edging, small pink ribbon, naturally resting longer navy pleated skirt, opaque dark tights and loafers. Cute tiny 2.5-to-3-head-tall silhouette.  Asset: even the tired teacher is affected by the cheerful transfer student. Reference1 fixes Hiyo's SAME chibi appearance and soft school palette; reference2 fixes natural school interiors. NEW school STAFF ROOM, not classroom. In foreground an ADULT WOMAN TEACHER sits at a work desk, viewed mainly from BEHIND and SIDE so her exact facial details are not defined. A simple original adult silhouette with dark brown hair tied low, modest beige long-sleeved jacket over closed white blouse and long charcoal skirt, small chibi adult proportions about 3 heads tall, clearly adult rather than a student. She looks tired, one hand supporting her head near temple, facing a neat but large pile of unlettered paperwork, plain binders, a pen cup and mug. At the open doorway farther away stands Hiyo as a small radiant cheerful full figure waving politely, warm golden-pink daylight outlining her yellow cardigan and long blonde twin tails. The teacher turns slightly toward the light with surprised softened posture, a tiny comic sweatdrop at most. Wholesome difference between a weary worker and innocent cheerful student, professional respectful distance, no contact, no romantic or intimate posing. Soft indoor shadows versus bright doorway, wide eye-level scene, all papers and binders blank with no text."
+    },
+    {
+      "key": "08-irresistible-innocent-smile",
+      "sceneId": "{2D7338CF-723C-4576-8B09-649D0783E1AE}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-d85d264e-478d-42c8-b1d7-9fec9c15898e.png",
+      "prompt": "Use case: illustration-story. One wide landscape 16:9 illustration for a Japanese school-comedy manga-introduction video, ideally 1920x1080. Extremely cute polished 2D anime, clean delicate ink lines and soft cel shading, warm cream and pastel pink highlights, gentle sunlight, rounded charming shapes. Every schoolgirl is a tiny chibi about 2.5 to 3 heads tall, with a large round expressive head and small unaccentuated fully clothed body. Modest high-neck long-sleeved school blouses and cardigans or blazers, naturally resting longer pleated skirts, opaque tights and practical closed school shoes. Ordinary wholesome friendship, comic reactions, no romantic/intimate posing or anatomy emphasis, no actual violence. No writing, letters, subtitles, speech balloons, logos, watermarks, or panel borders.  Hiyo: long soft golden-blond hair in loose low twin bunches/ponytails, soft separated bangs and a tiny ahoge, sparkling golden-yellow eyes, fair skin, tiny cheerful round face. Pale-yellow oversized LONG-SLEEVED cardigan over a closed white blouse with navy sailor collar and subtle teal edging, small pink ribbon, naturally resting longer navy pleated skirt, opaque dark tights and loafers. Cute tiny 2.5-to-3-head-tall silhouette.  Asset: the story's special charm, innocent cuteness overwhelms classmates. Reference1 fixes EXACT four girls' faces, hairstyle and fully covered outfits: golden low-twin-tail Hiyo in yellow cardigan; angular short black-haired Yamato with slate eyes/white sailor blouse; chestnut blunt-bob Kotoko with crossed pins/white sailor blouse; long wavy rosy-brown side-braided girl in navy cardigan. Reference2 fixes SAME classroom. NEW cheerful wide eye-level composition in classroom: Hiyo at center with eyes happily closed and bright pure smile, both hands held near her own chest in excited conversation, very tiny 2.5-to-3-head-tall figure and large round head. Around her at respectful distance the other three classmates react differently: Yamato looks away flustered with folded arms, Kotoko pauses holding a book and glances up surprised, the wavy-haired girl covers her own cheeks lightly with an amused shy smile. Subtle floating pink flowers, tiny heart-shaped light sparkles and warm sunbeams emphasize how charming she is, no literal magic blast, destruction or harm. Platonic innocent school friendship, no hugging or physical closeness, all clothes modest and skirts naturally down over opaque tights. Classroom desks form a relaxed open semicircle behind them. No letters or logos, no actual manga panel reproduction."
+    },
+    {
+      "key": "09-after-school-friends",
+      "sceneId": "{C1BC9B38-C363-4493-93C6-3DBDC7CB9444}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-23a43dee-3336-4bda-9897-c50987f39913.png",
+      "prompt": "Use case: illustration-story. One wide landscape 16:9 illustration for a Japanese school-comedy manga-introduction video, ideally 1920x1080. Extremely cute polished 2D anime, clean delicate ink lines and soft cel shading, warm cream and pastel pink highlights, gentle sunlight, rounded charming shapes. Every schoolgirl is a tiny chibi about 2.5 to 3 heads tall, with a large round expressive head and small unaccentuated fully clothed body. Modest high-neck long-sleeved school blouses and cardigans or blazers, naturally resting longer pleated skirts, opaque tights and practical closed school shoes. Ordinary wholesome friendship, comic reactions, no romantic/intimate posing or anatomy emphasis, no actual violence. No writing, letters, subtitles, speech balloons, logos, watermarks, or panel borders.  Hiyo: long soft golden-blond hair in loose low twin bunches/ponytails, soft separated bangs and a tiny ahoge, sparkling golden-yellow eyes, fair skin, tiny cheerful round face. Pale-yellow oversized LONG-SLEEVED cardigan over a closed white blouse with navy sailor collar and subtle teal edging, small pink ribbon, naturally resting longer navy pleated skirt, opaque dark tights and loafers. Cute tiny 2.5-to-3-head-tall silhouette.  Asset: recommendation scene, a gentle after-school moment. Reference1 fixes EXACT SAME four tiny chibi friends, faces/hair/uniforms: yellow-cardigan blond Hiyo; short angular black-haired Yamato in white sailor blouse; chestnut blunt-bob Kotoko with crossed hairpins; long wavy rosy-brown side-braided girl in navy cardigan. Reference2 fixes SAME classroom windows, wood desks, blank green chalkboard and cream walls. NEW wider composition from a few desks away: the four small friends gather by the window after class, sitting naturally on chairs or standing in relaxed upright postures around two desks. Hiyo in middle laughs cheerfully while chatting, Yamato has a shy soft smile, Kotoko holds her closed book with a small reserved smile, the wavy-haired girl happily listens. Ordinary relaxed friendly conversation, no hugging or romantic closeness. Orange-pink SUNSET streams through windows, soft lavender shadows, cherry tree outside, school bags by desk legs. Characters remain 2.5-to-3-head-tall, big round heads and small fully clothed bodies, naturally resting skirts/opaque tights, no body emphasis. Warm and peaceful school-comedy ending atmosphere, scenery slightly dominates this wide eye-level shot. No text or logos, no panel borders."
+    },
+    {
+      "key": "10-thumbnail",
+      "sceneId": "thumbnail",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-b861c566-1196-4859-8d01-c91847973151.png",
+      "prompt": "Use case: illustration-story. ONE finished manga-introduction video thumbnail in landscape 16:9, ideally 1920x1080. Very cute polished 2D anime, clean ink lines, soft cel shading, warm pastel pink/cream sunlight, large round expressive heads and tiny fully clothed 2.5-to-3-head-tall chibi bodies. Reference1 fixes EXACT four friends and their faces/clothes from completed classroom images; reference2 fixes same friends and sunny courtyard/cherry-tree atmosphere; reference3 fixes Tohoku Kiritan narrator hairstyle, face and costume colors. Create a new composition using those completed illustrations, not a manga-panel copy.\n\nTypography: small badge exact 「漫画」 at top-left; dominant exact Japanese title 「可愛いはすべてを破壊する」. Arrange title in two clear big lines: first line 「可愛いはすべてを」, second line 「破壊する」. Copy all characters exactly, particularly 壊, and retain the は and を. Cute rounded bold pink/cream lettering with dark navy outlines and soft gold highlights, strong legibility at mobile size, generous safe margins, no additional text/slogans. Title occupies upper third, broad lightly colored uncluttered area behind letters. No watermark.\n\nBelow title place Hiyo largest at center-left, smiling innocently with sparkling golden-yellow eyes and a little delighted waving hand, long golden-blond low twin ponytails, separated soft bangs and tiny ahoge, pale-yellow oversized long-sleeved cardigan over closed white sailor blouse with navy/teal collar and pink ribbon, naturally resting longer navy pleated skirt, opaque dark tights and loafers. Big round head, tiny unaccentuated body. Behind her at far left, three small recognizable classmates react comically: Yamato short angular black hair, slate-gray eyes and white long-sleeved sailor blouse with navy ribbon, looking away shyly with folded arms; Kotoko chestnut blunt bob with crossed hairpins, holding a plain closed book with a surprised reserved face; long wavy rosy-brown side-braided girl in navy cardigan smiling shyly. Keep their shapes clearly separate and friendly, three classmates total.\n\nOn right is chibi Tohoku Kiritan presenting Hiyo with an open delighted smile and one hand gesturing toward her: wine-brown bob with straight bangs and side locks, red eyes, white pointed hair ornaments, white/pale-pink long-sleeved kimono and burgundy obi. Properly overlapped closed neckline, modest longer hem, opaque leggings/socks and practical shoes, same tiny chibi anime style. Five people total including Hiyo and narrator, fully clothed, ordinary upright gestures, no touching/intimate poses or anatomy emphasis.\n\nBackground combines bright school classroom with cream walls, blank green chalkboard and wooden desks, wide sunlit windows showing cherry trees and the school courtyard from completed scenes. Pink flower-shaped sparkles and a few tiny decorative heart lights emphasize innocent cuteness and comedy. Wholesome friendly school-life mood, no literal destruction, no injuries, no violence. No logos beyond requested title, no panel borders or speech balloons."
+    }
+  ],
+  "verification": {
+    "projectId": "{F2BB73EE-7C69-427C-8EA8-3C4D793E657D}",
+    "revision": 211,
+    "saved": true,
+    "cueCount": 44,
+    "cueJsonUnchanged": true,
+    "voiceReady": 44,
+    "voiceHeard": 44,
+    "imagesSent": 11,
+    "thumbnailSourcesReady": true,
+    "thumbnailApproved": false,
+    "images": [
+      {
+        "key": "00-common-background",
+        "sceneId": "common-background",
+        "sha256": "f1c73c0263c5ff9ac6bf41c9fb03418a7e8475441fa3e4fb2f9545a804418329",
+        "width": 1672,
+        "height": 941,
+        "bytes": 1562987,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{F2BB73EE-7C69-427C-8EA8-3C4D793E657D}\\project.assets\\f1c73c0263c5ff9ac6bf41c9fb03418a7e8475441fa3e4fb2f9545a804418329.png",
+        "approved": true
+      },
+      {
+        "key": "01-cuteness-enters-the-classroom",
+        "sceneId": "{98A6E5F0-D8B8-47EA-BA84-7D85C724264F}",
+        "sha256": "3de53f16551755e3f84a2b6f7b62bc7fc82c4d78c267126876586f799fa24a40",
+        "width": 1672,
+        "height": 941,
+        "bytes": 2050260,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{F2BB73EE-7C69-427C-8EA8-3C4D793E657D}\\project.assets\\3de53f16551755e3f84a2b6f7b62bc7fc82c4d78c267126876586f799fa24a40.png",
+        "approved": true
+      },
+      {
+        "key": "02-classroom-awaiting-transfer",
+        "sceneId": "{DBF9CCB9-3992-4EA7-9B77-5578193B2C05}",
+        "sha256": "c55a7651d781adc536e847c61224db0a65fbadc88e41c9fa9f97efbcd716f9d0",
+        "width": 1672,
+        "height": 941,
+        "bytes": 2020063,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{F2BB73EE-7C69-427C-8EA8-3C4D793E657D}\\project.assets\\c55a7651d781adc536e847c61224db0a65fbadc88e41c9fa9f97efbcd716f9d0.png",
+        "approved": true
+      },
+      {
+        "key": "03-innocent-transfer-student",
+        "sceneId": "{AEE9D66D-0A15-44F7-81AA-1149910F42B8}",
+        "sha256": "764a4cac42fca0d3ef64a34d75c23f26e683d24cfc6587d53da720a672a2ea97",
+        "width": 1672,
+        "height": 941,
+        "bytes": 2052252,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{F2BB73EE-7C69-427C-8EA8-3C4D793E657D}\\project.assets\\764a4cac42fca0d3ef64a34d75c23f26e683d24cfc6587d53da720a672a2ea97.png",
+        "approved": true
+      },
+      {
+        "key": "04-tough-classmate-softens",
+        "sceneId": "{AA5110DC-B742-4DE3-AE4A-0716062E6522}",
+        "sha256": "4b4467bab0fd2c8f3a1e37f4866641caa77f26c567d0a67f65db05fd3c2f3997",
+        "width": 1672,
+        "height": 941,
+        "bytes": 2229138,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{F2BB73EE-7C69-427C-8EA8-3C4D793E657D}\\project.assets\\4b4467bab0fd2c8f3a1e37f4866641caa77f26c567d0a67f65db05fd3c2f3997.png",
+        "approved": true
+      },
+      {
+        "key": "05-friendship-by-the-window",
+        "sceneId": "{A42A3DF8-06D0-49F7-AA00-A7023AEECEC5}",
+        "sha256": "dc76d8de96128d43399d48a8897290d45f4900e461e527fcd7d6ad9e7c0e718b",
+        "width": 1672,
+        "height": 940,
+        "bytes": 2134065,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{F2BB73EE-7C69-427C-8EA8-3C4D793E657D}\\project.assets\\dc76d8de96128d43399d48a8897290d45f4900e461e527fcd7d6ad9e7c0e718b.png",
+        "approved": true
+      },
+      {
+        "key": "06-courtyard-lunch-together",
+        "sceneId": "{454974C8-C5D7-48F8-BBC6-01525B366E72}",
+        "sha256": "730629e550b692c6f5b629dcfd73c3966550d0d6ca02461625fbe3f2eb754154",
+        "width": 1672,
+        "height": 941,
+        "bytes": 2593644,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{F2BB73EE-7C69-427C-8EA8-3C4D793E657D}\\project.assets\\730629e550b692c6f5b629dcfd73c3966550d0d6ca02461625fbe3f2eb754154.png",
+        "approved": true
+      },
+      {
+        "key": "07-teacher-in-the-staffroom",
+        "sceneId": "{DC72EAD2-D085-46DD-AC65-B241C6FB215A}",
+        "sha256": "17add3b009511006711316c7c371af17c2dbb0c8d6374dfd3ca7ac88cd2f9f12",
+        "width": 1672,
+        "height": 941,
+        "bytes": 1990650,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{F2BB73EE-7C69-427C-8EA8-3C4D793E657D}\\project.assets\\17add3b009511006711316c7c371af17c2dbb0c8d6374dfd3ca7ac88cd2f9f12.png",
+        "approved": true
+      },
+      {
+        "key": "08-irresistible-innocent-smile",
+        "sceneId": "{2D7338CF-723C-4576-8B09-649D0783E1AE}",
+        "sha256": "295b4645204553925c0938e4411e1e7573d34e0809cc71b8aa222e46f4686e3f",
+        "width": 1672,
+        "height": 941,
+        "bytes": 2497211,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{F2BB73EE-7C69-427C-8EA8-3C4D793E657D}\\project.assets\\295b4645204553925c0938e4411e1e7573d34e0809cc71b8aa222e46f4686e3f.png",
+        "approved": true
+      },
+      {
+        "key": "09-after-school-friends",
+        "sceneId": "{C1BC9B38-C363-4493-93C6-3DBDC7CB9444}",
+        "sha256": "cc827916ebe30cfb3c30708caeca9d2fa8d025a7aefacc88ad6faf25a0fc3da6",
+        "width": 1672,
+        "height": 941,
+        "bytes": 2398903,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{F2BB73EE-7C69-427C-8EA8-3C4D793E657D}\\project.assets\\cc827916ebe30cfb3c30708caeca9d2fa8d025a7aefacc88ad6faf25a0fc3da6.png",
+        "approved": true
+      },
+      {
+        "key": "10-thumbnail",
+        "sceneId": "thumbnail",
+        "sha256": "1cccf87528a180fadc380ab2f65bdce4b54b17726f67e6475e751f97ad7f9912",
+        "width": 1672,
+        "height": 941,
+        "bytes": 2632733,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{F2BB73EE-7C69-427C-8EA8-3C4D793E657D}\\project.assets\\1cccf87528a180fadc380ab2f65bdce4b54b17726f67e6475e751f97ad7f9912.png",
+        "approved": false
+      }
+    ]
+  },
+  "visualReview": {
+    "method": "各生成結果を表示して目視",
+    "result": "ひよの外見と制服、丸い顔と小さい体、4人の髪型の継続、教室・中庭・職員室、夕日の配色、サムネイルの正しい題名と東北きりたんを確認。",
+    "limits": "モノクロ資料の色付け・教師の外見・背景細部は創作。全11枚1672×941 PNG。動画出力・保存再開後のGUI表示は未実施。"
+  },
+  "humanReview": {
+    "backgroundAndMainImages": "ユーザーが確定チェックを入れたと回答。背景・本編のapproved=true、sourcesReady=trueを確認。",
+    "thumbnail": "送信・保存済み。最後の確定チェック待ち。"
+  },
+  "evidenceDirectory": "output/production/20261018-kawaii-destroys-all"
+}

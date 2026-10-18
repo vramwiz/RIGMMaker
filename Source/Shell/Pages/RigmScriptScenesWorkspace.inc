@@ -108,8 +108,16 @@ begin
   if VoiceBusy or VoicePlaying or VoiceContinuous then Exit('音声生成・再生を停止してください。');
   if Trim(JS(FScriptDraft.ScriptWizard,'titleInput'))='' then Exit('題名を入力してください。');
   if JS(FScriptDraft.ScriptWizard,'scene-assignmentStatus')<>'complete' then Exit('シーン割当を左の工程リストで保存してください。');
-  if not ScriptThumbnailSourcesReady(FScriptDraft) then Exit('使用する共通背景・シーン画像を用意し、確定チェックを確認してください。');
-  if not ScriptSceneReady(FScriptDraft,FScriptDraft.Thumbnail) then Exit('リスト最後の必須サムネイルを作成・確定してください。元画像・タイトル変更後はサムネイルの確定を解除して作り直してください。');
+  if not ScriptThumbnailSourcesReady(FScriptDraft) then begin
+    var Reason := ScriptSceneReadinessReason(FScriptDraft,FScriptDraft.ImageTarget(RigmCommonBackgroundId));
+    if Reason<>'' then Exit('共通背景：'+Reason);
+    for var Index := 0 to FScriptDraft.Scenes.Count-1 do begin
+      var S := FScriptDraft.Scenes[Index]; Reason := ScriptSceneReadinessReason(FScriptDraft,S);
+      if Reason<>'' then Exit(Format('シーン%d「%s」：%s',[Index+1,S.Title,Reason]));
+    end;
+    Exit('前工程が変わりました。音声・シーン割当を確認してください。');
+  end;
+  if not ScriptSceneReady(FScriptDraft,FScriptDraft.Thumbnail) then Exit('サムネイル：'+ScriptSceneReadinessReason(FScriptDraft,FScriptDraft.Thumbnail));
   for var C in FScriptDraft.Cues do if not FScriptDraft.AudioReady(C) then Exit('音声変更を確認してください。');
   Result := CastingAdvanceReason(False);
 end;

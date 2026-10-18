@@ -1,0 +1,663 @@
+﻿{
+  "format": "RIGMMaker.ImageProductionLearning",
+  "date": "2026-10-17",
+  "title": "50年後の老人ホーム",
+  "author": "金沢真之介",
+  "workUrl": "https://manga.nicovideo.jp/comic/86617",
+  "officialContextUrl": "https://comic-walker.com/detail/KC_021314_S/episodes/KC_0213140000400011_E?episodeType=latest",
+  "projectId": "{71BEF17B-63CF-45A1-A20F-10D889ADD03C}",
+  "mode": "built-in image_gen",
+  "userRequest": "画像生成で待機中。少し頭身を低めに、コメディタッチで生成して送信。",
+  "inputs": {
+    "scenes": [
+      {
+        "id": "{555294B3-25EB-40E6-87F7-5FA524694050}",
+        "title": "opening 1",
+        "image": "",
+        "description": "",
+        "imagePrompt": "",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 0,
+        "animation": {},
+        "sceneNumber": 1,
+        "start": 0,
+        "duration": 6.12666666666667,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{7D9DA3D8-03B4-4A30-A012-01765D2DA749}",
+            "sourceText": "東北きりたんです"
+          },
+          {
+            "cueId": "{73DB835B-E4AB-4421-90B3-2D4B80769638}",
+            "sourceText": "今回もニコニコ漫画から"
+          },
+          {
+            "cueId": "{1D23525B-1390-4989-AEFF-BD8B7B8760AE}",
+            "sourceText": "無料で最新話まで読める作品を紹介します"
+          }
+        ],
+        "cueCount": 3,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{C92BCC9C-0ECD-44DC-B269-0AB77CB7934D}",
+        "title": "50年後のオタクたち",
+        "image": "",
+        "description": "オタクの老後はこうなる！？",
+        "imagePrompt": "横長16:9。近未来の老人ホームの談話室。高齢の男女がソファに座り、アニメグッズやゲーム機、ぬいぐるみなどに囲まれて楽しそうに会話している。活気のあるコミカルな漫画風イラスト。人物の外見はオリジナルとし、文字やロゴは描かない。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 1,
+        "animation": {},
+        "sceneNumber": 2,
+        "start": 6.12666666666667,
+        "duration": 20.272,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{BFA4777F-613E-4632-9BD4-4CFAE19A4A1B}",
+            "sourceText": "皆さん、50年後の自分が何をしているか、想像したことはありますか？"
+          },
+          {
+            "cueId": "{EFC06E0A-C480-4CA2-BC49-482294D7DD8F}",
+            "sourceText": "アニメにゲーム、漫画に推し活。今夢中になっている趣味は、年を取ったら卒業するのでしょうか？"
+          },
+          {
+            "cueId": "{053FD8E9-A6C6-439E-9C42-8C8B59F81E68}",
+            "sourceText": "いやいや、そんなわけがない！50年後もオタクはオタクなんです！"
+          },
+          {
+            "cueId": "{D8E80E6D-B049-4F80-8D83-F78BEC6405F1}",
+            "sourceText": "今回紹介するのは、そんな未来を描いた、笑えてちょっと温かい漫画です。"
+          }
+        ],
+        "cueCount": 4,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{217F5AFE-AA25-45E0-BA78-1CCCF03D23C9}",
+        "title": "作品紹介",
+        "image": "",
+        "description": "50年後もオタクは健在！",
+        "imagePrompt": "横長16:9。明るい近未来型老人ホームの外観。緑豊かな庭園と大きなガラス窓、清潔感のある建物。窓越しに楽しそうに過ごす高齢者たちのシルエットが見える。温かくユーモラスな雰囲気。文字なし。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 2,
+        "animation": {},
+        "sceneNumber": 3,
+        "start": 26.3986666666667,
+        "duration": 20.912,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{A32FFAFB-9592-4367-85A7-4749980BA6EA}",
+            "sourceText": "今回ご紹介するのは、金沢真之介先生の『50年後の老人ホーム』。"
+          },
+          {
+            "cueId": "{04A3F9BD-655B-4298-A333-F8161350AE64}",
+            "sourceText": "SNSで大きな反響を呼び、2026年10月には商業連載も始まった話題作です。"
+          },
+          {
+            "cueId": "{689AB71F-132A-439D-8191-10D7C40307F4}",
+            "sourceText": "舞台はタイトルどおり、今から50年後の老人ホーム。"
+          },
+          {
+            "cueId": "{4EB0578A-EA18-48B1-97FC-A8A426186280}",
+            "sourceText": "そこではかつてのオタクたちが、昔の流行を懐かしみながら、今も趣味を全力で楽しんでいるのです。"
+          }
+        ],
+        "cueCount": 4,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{B93B9FA5-EAA8-421C-B6D7-98F4C59CF818}",
+        "title": "老人ホームはオタクの楽園",
+        "image": "",
+        "description": "趣味に定年なんてありません！",
+        "imagePrompt": "横長16:9。近未来の老人ホームの共有スペース。高齢の男女がゲーム機を囲み、別のグループはアニメグッズやフィギュアを並べて談笑している。壁には文字のない架空のポスター。明るくにぎやかな広角構図。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 2,
+        "animation": {},
+        "sceneNumber": 4,
+        "start": 47.3106666666667,
+        "duration": 17.744,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{2FD1F555-D3B8-4E7D-9590-A37C2432D4EE}",
+            "sourceText": "老人ホームと聞くと、皆さんはどんな生活を想像しますか？"
+          },
+          {
+            "cueId": "{24CE6F81-F8B3-472B-ABA1-C3611C64B679}",
+            "sourceText": "静かにお茶を飲んで、昔話をして、のんびり過ごす。そんなイメージもありますよね。"
+          },
+          {
+            "cueId": "{4F0EE075-003D-4754-A2CE-CFA726F15AE2}",
+            "sourceText": "ところがこの作品の住人たちは、オタク趣味で大盛り上がり！"
+          },
+          {
+            "cueId": "{0E166D59-DB08-4247-9BB0-A8ADBEB21ED7}",
+            "sourceText": "年齢を重ねても好きなものは好き。その姿がなんとも楽しそうなんです。"
+          }
+        ],
+        "cueCount": 4,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{5B0ECF8F-2539-4A84-A820-19D6EF166A79}",
+        "title": "平成女児が老人になったら",
+        "image": "",
+        "description": "平成女児、50年後も現役！",
+        "imagePrompt": "横長16:9。明るい老人ホームのテーブル。二人の高齢女性がカラフルなプロフィール帳やシール帳を広げ、少女のように目を輝かせている。机にはかわいらしいペンやシールが並ぶ。懐かしさと楽しさを感じるコミカルな構図。文字なし。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 2,
+        "animation": {},
+        "sceneNumber": 5,
+        "start": 65.0546666666667,
+        "duration": 21.34,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{42B65B82-1094-4701-BDA5-7DD75AA2617B}",
+            "sourceText": "例えば、かつての平成女児たちが老人ホームで再び盛り上がるお話。"
+          },
+          {
+            "cueId": "{5E70CCAA-1031-452C-90FE-14AE059AD573}",
+            "sourceText": "話題になるのは、昔懐かしいプロフィール帳！"
+          },
+          {
+            "cueId": "{AF38800C-EC78-4CF8-89B9-8CD976C1A033}",
+            "sourceText": "友達同士で好きなものを書き合った、あのアイテムです。"
+          },
+          {
+            "cueId": "{CEEFD3E8-3FDD-4E6C-AD37-56B60749EE84}",
+            "sourceText": "未来の職員にとっては知らない文化でも、当時を知る人たちには思い出の宝物。"
+          },
+          {
+            "cueId": "{A3CB8F5A-1B1B-4653-8A41-B56D1FA284E2}",
+            "sourceText": "年齢は80代でも、気持ちはあの頃の少女のまま！これはちょっと共感してしまいますね。"
+          }
+        ],
+        "cueCount": 5,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{F300077E-3BA9-4BA3-BB16-D9979B635C51}",
+        "title": "世代間ギャップが面白い",
+        "image": "",
+        "description": "未来では懐かしの文化が謎に！？",
+        "imagePrompt": "横長16:9。近未来の老人ホームの談話室。高齢女性が懐かしいシール帳を笑顔で見せ、若い介護職員が不思議そうにのぞき込んでいる。高齢者は楽しそう、若者は少し困惑した表情。二人の対比を強調した中距離構図。文字なし。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 2,
+        "animation": {},
+        "sceneNumber": 6,
+        "start": 86.3946666666667,
+        "duration": 20.8586666666667,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{20D5011D-47B1-4828-A645-498C27D06C1C}",
+            "sourceText": "この作品の面白いところは、今の私たちにとって身近な文化が、未来では昔の文化になっていることです。"
+          },
+          {
+            "cueId": "{496ECE01-834C-4A01-AC76-2ADC807CED75}",
+            "sourceText": "若い職員には理解できない懐かしのアイテムも、入居者同士なら話が通じる。"
+          },
+          {
+            "cueId": "{D09598CB-200C-4526-882B-7E80A16A8D1E}",
+            "sourceText": "この世代間ギャップが、絶妙な笑いにつながっています。"
+          },
+          {
+            "cueId": "{5EBF48C7-5D09-496A-AAF8-8F643E35C6C9}",
+            "sourceText": "今は当たり前に使っているものも、50年後には歴史的なオタクグッズになっているのかもしれません。"
+          }
+        ],
+        "cueCount": 4,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{B3CE3990-FEF4-4FFF-9955-BC5D1A1E2738}",
+        "title": "老後も続く推し活",
+        "image": "",
+        "description": "推しへの愛は一生もの！",
+        "imagePrompt": "横長16:9。老人ホームの個室。高齢のオタクが棚に並んだ架空のアニメキャラクターのフィギュアやぬいぐるみを大切そうに眺めている。壁には文字のないカラフルなイラスト。温かい午後の日差しが差し込む落ち着いた構図。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 2,
+        "animation": {},
+        "sceneNumber": 7,
+        "start": 107.253333333333,
+        "duration": 20.0053333333333,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{A50F5750-A01C-4C8C-9700-2610249CA4B9}",
+            "sourceText": "そして本作で感じられるのが、好きなものを大切にする気持ちは年齢では変わらないということ。"
+          },
+          {
+            "cueId": "{954A3A23-1337-4577-B226-D78424B47F87}",
+            "sourceText": "若い頃に夢中になった作品や推しは、何十年たっても大切な思い出です。"
+          },
+          {
+            "cueId": "{02032010-7492-43FE-81E1-258F6B86E4F9}",
+            "sourceText": "同じ時代を楽しんだ仲間が集まれば、昔話も尽きそうにありません。"
+          },
+          {
+            "cueId": "{0AECEFFB-117E-46D2-875A-A4962262EB3A}",
+            "sourceText": "単にオタク老人を笑うのではなく、こんな老後もいいなと思わせてくれるのが魅力ですね。"
+          }
+        ],
+        "cueCount": 4,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{99934998-218C-4931-8A3E-98D034A15C84}",
+        "title": "未来の自分を想像する楽しさ",
+        "image": "",
+        "description": "50年後、あなたは何オタク？",
+        "imagePrompt": "横長16:9。画面左側には現代の若いオタクがゲームや漫画を楽しむ部屋。右側には50年後の老人ホームで高齢者が同じように趣味を楽しむ光景。二つの時代を自然につなげた対比構図。オリジナルの人物と架空のグッズのみを描く。文字なし。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 2,
+        "animation": {},
+        "sceneNumber": 8,
+        "start": 127.258666666667,
+        "duration": 17.84,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{AF9B7B2C-CF03-4D1B-BACC-9D1FDB1A0707}",
+            "sourceText": "この作品を読むと、つい自分の50年後を想像してしまいます。"
+          },
+          {
+            "cueId": "{D53AC976-038B-4393-B2A1-D924E213419A}",
+            "sourceText": "昔のゲームを語り合うおじいちゃん。推しのグッズを持ち寄るおばあちゃん。"
+          },
+          {
+            "cueId": "{060AC991-C070-4CAE-96CB-8541590F8B13}",
+            "sourceText": "そんな光景が本当に生まれるとしたら、ちょっと楽しそうですよね。"
+          },
+          {
+            "cueId": "{B316126A-8A79-4753-8F71-4781DDB365F5}",
+            "sourceText": "しかも自分たちには懐かしい話が、若い世代には歴史の授業みたいに聞こえるかもしれません。"
+          }
+        ],
+        "cueCount": 4,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{EA6EAE51-8C48-41F6-A715-9367DBCD4FBD}",
+        "title": "こんな人におすすめ",
+        "image": "",
+        "description": "懐かしさと笑いの未来日常",
+        "imagePrompt": "横長16:9。近未来の老人ホームの大きな窓際。高齢の男女がテーブルを囲み、ゲームや漫画、シール帳などを楽しんでいる。全員が自然な笑顔で交流する温かな日常風景。やや高い位置からの広角構図。文字なし。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 1,
+        "animation": {},
+        "sceneNumber": 9,
+        "start": 145.098666666667,
+        "duration": 15.9826666666667,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{CE27D448-785F-4CE7-A2AD-3F5FC1420B1F}",
+            "sourceText": "本作は、アニメやゲーム、漫画などのオタク文化が好きな人におすすめです。"
+          },
+          {
+            "cueId": "{040E9193-3CC8-4AB5-AB90-75EAA4934851}",
+            "sourceText": "特に平成の流行を知っている人なら、思わず懐かしいと声が出る場面もあるでしょう。"
+          },
+          {
+            "cueId": "{4796E766-BCB2-4B8B-934B-2D714FE3CD27}",
+            "sourceText": "未来のお話なのに、どこか身近で共感できる。そんな日常系コメディを楽しめる作品です。"
+          }
+        ],
+        "cueCount": 3,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{E6AEC76E-56C4-4207-BD17-6980141DEBBC}",
+        "title": "総評",
+        "image": "",
+        "description": "",
+        "imagePrompt": "",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 0,
+        "displayMode": "image",
+        "animation": {},
+        "chart": {
+          "kind": "radar",
+          "title": "ストーリー",
+          "minimum": 0,
+          "maximum": 5,
+          "items": [
+            {
+              "label": "ストーリー",
+              "value": 4
+            },
+            {
+              "label": "キャラクター",
+              "value": 4.5
+            },
+            {
+              "label": "作画",
+              "value": 4
+            },
+            {
+              "label": "演出・テンポ",
+              "value": 4.5
+            },
+            {
+              "label": "世界観・設定",
+              "value": 5
+            }
+          ]
+        },
+        "sceneNumber": 10,
+        "start": 161.081333333333,
+        "duration": 31.9653333333333,
+        "ready": true,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{91541BC6-3E38-4A57-9543-1C24BF8374EC}",
+            "sourceText": "今回の評価は、公式紹介と公開されているエピソードの情報を中心にした暫定的なものです。"
+          },
+          {
+            "cueId": "{9CC8F5F0-1A62-4CFB-9E1C-4333AFF4ACB9}",
+            "sourceText": "最大の魅力は、50年後のオタク老人たちという発想と、懐かしさを笑いに変える設定です。"
+          },
+          {
+            "cueId": "{42CDEFAD-F00C-4CDE-8FA3-81AA57E52F65}",
+            "sourceText": "年を取っても趣味を楽しめる。そんな未来を想像させてくれるところも素敵ですね。"
+          },
+          {
+            "cueId": "{64F73F93-BAF7-4E1B-9876-29CAE32A3E0B}",
+            "sourceText": "金沢真之介先生の『50年後の老人ホーム』は、ニコニコ漫画でも公開されています。"
+          },
+          {
+            "cueId": "{D401F494-0726-404D-8521-D2453B3D229C}",
+            "sourceText": "皆さんは50年後、老人ホームでどんな趣味を楽しんでいると思いますか？ぜひコメントで教えてください。"
+          },
+          {
+            "cueId": "{4BA44DBD-6317-4A0D-A380-EFB1CE1DD8DC}",
+            "sourceText": "それでは、また次の漫画紹介でお会いしましょう！"
+          }
+        ],
+        "cueCount": 6,
+        "hasMoreCues": false
+      }
+    ],
+    "cueCount": 41,
+    "source": "現在開いている台本と画像要望をDotsパイプで取得。",
+    "characterReference": "現行サムネイル要求のpreviewPathから取得した東北きりたんの透過PNG。References/kiritan.png。"
+  },
+  "decisions": [
+    "人物は約4頭身を目標とする少し低めの体型を指示。白髪、眼鏡、しわ、大人の服装で高齢者の特徴を保持。",
+    "原作の公式人物デザインの再現ではなく、台本要望のオリジナル人物を使用。青緑カーディガンの白髪男性、薄紫の眼鏡・カーディガンの灰色ボブ女性、桃色カーディガンのまとめ髪女性、黄色セーターの白髪・丸眼鏡男性を共通キャストにした。",
+    "年齢をからかう表現ではなく、趣味への熱中や世代間ギャップを大きな表情と身振りで描く。",
+    "室内はクリーム色・水色・淡い木目、陽光と緑で統一。実在作品のロゴを入れず架空のグッズを描く。",
+    "前画像を参照し顔・服装・施設・グッズを継続。冒頭は共通背景、総評は既存チャートのまま保持。",
+    "背景と本編の人間確定後、thumbnail.sourcesReady=trueを確認し、現行要求へきりたんと題名ロゴ入りサムネイルを生成して送信。"
+  ],
+  "referenceMap": {
+    "07": [
+      "01",
+      "06"
+    ],
+    "08": [
+      "01",
+      "04"
+    ],
+    "04": [
+      "01",
+      "03"
+    ],
+    "02": [
+      "01"
+    ],
+    "03": [
+      "01",
+      "02"
+    ],
+    "06": [
+      "01",
+      "03"
+    ],
+    "00": [],
+    "01": [
+      "00"
+    ],
+    "05": [
+      "04"
+    ],
+    "09": [
+      "01",
+      "04",
+      "References/kiritan.png"
+    ]
+  },
+  "artifacts": [
+    {
+      "key": "00-common-background",
+      "sceneId": "common-background",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-76adfac6-5a27-448a-bb60-3c3c4ee3413e.png",
+      "prompt": "Use case: illustration-story. Asset: quiet shared background for a Japanese manga introduction video about a retirement home fifty years in the future. Single wide 16:9 landscape, preferably 1920x1080. Crisp playful 2D Japanese slice-of-life comedy illustration, confident clean ink lines, lively readable faces, soft flat cel colors, light cream, sky blue and mint palette with coral and lavender accents, restrained halftone accents and cheerful visual timing. Original people and fictional unbranded hobby items. People roughly four heads tall (slightly shortened proportions), unmistakably elderly when elderly: silver hair, gentle facial wrinkles, mature features, adult clothing, never baby-like. No words, lettering, logos, speech bubbles, watermark or panel borders. One coherent scene. NO PEOPLE in this background. Bright clean welcoming subtly near-future retirement home lounge, wide cream wall center left mostly empty, pale blue curved trim and understated soft geometric wall patterns, light oak floor, one large window at far left with soft sun and garden greenery, pale sky blue couch partially visible at left edge and potted green plant at right edge, airy accessible spacious interior. Simplified manga background with clean lines, uncluttered and low contrast central 65 percent, friendly gentle morning light. The narrator and subtitles will be added by the video app, so create no narrator and no lettering. No strong science-fiction gadgets, no hospital beds."
+    },
+    {
+      "key": "01-otaku-fifty-years-later",
+      "sceneId": "{C92BCC9C-0ECD-44DC-B269-0AB77CB7934D}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-ee965040-3b47-46e4-91db-51b541d95a31.png",
+      "prompt": "Use case: illustration-story. Asset: opening story scene 'otaku fifty years later'. Single wide 16:9 landscape, preferably 1920x1080. Crisp playful 2D Japanese slice-of-life comedy illustration, confident clean ink lines, lively readable faces, soft flat cel colors, light cream, sky blue and mint palette with coral and lavender accents, restrained halftone accents and cheerful visual timing. Original people and fictional unbranded hobby items. People roughly four heads tall (slightly shortened proportions), unmistakably elderly when elderly: silver hair, gentle facial wrinkles, mature features, adult clothing, never baby-like. No words, lettering, logos, speech bubbles, watermark or panel borders. One coherent scene. Reference image: keep the same airy cream and sky-blue retirement home lounge, rounded furniture, oak floor and sunny garden windows; simplify environment into a crisp comedy manga drawing rather than photorealism. Four original elderly Japanese hobby friends chatting excitedly on sofas around a low table: A, smiling older man with swept-back white hair, rectangular glasses, teal cardigan over ivory shirt and charcoal trousers, holding a handheld game console; B, lively older woman with gray bob hair, round lavender glasses, lilac cardigan over pale pink blouse, navy skirt, holding a cute fictional mint animal plush; C, cheerful older woman with silver hair in a bun, peach cardigan over mint top and gray trousers, showing a blank-cover manga book; D, older man with balding white horseshoe hair and round glasses, mustard sweater and navy trousers, enthusiastically raising a controller. Each elderly face has gentle age lines, older mature facial shapes; each body about four heads tall, slightly exaggerated rounded heads and expressive hands, NOT babies. They lean into a lively funny conversation with delighted eyes and warm laugh lines. Shelves of unbranded original fictional collectible figures, plushes and game boxes nearby; all package and book covers are abstract colors only. Cheerful friendship, playful comic timing, a few small decorative sparkle accents, no ridicule or ageist caricature. Large readable characters, welcoming wholesome image."
+    },
+    {
+      "key": "02-future-retirement-home",
+      "sceneId": "{217F5AFE-AA25-45E0-BA78-1CCCF03D23C9}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-2f6ee8e2-ddff-4bd8-95ec-457532e75d03.png",
+      "prompt": "Use case: illustration-story. Asset: establishing exterior shot of the retirement home in the same comedy manga story. Single wide 16:9 landscape, preferably 1920x1080. Crisp playful 2D Japanese slice-of-life comedy illustration, confident clean ink lines, lively readable faces, soft flat cel colors, light cream, sky blue and mint palette with coral and lavender accents, restrained halftone accents and cheerful visual timing. Original people and fictional unbranded hobby items. People roughly four heads tall (slightly shortened proportions), unmistakably elderly when elderly: silver hair, gentle facial wrinkles, mature features, adult clothing, never baby-like. No words, lettering, logos, speech bubbles, watermark or panel borders. One coherent scene. Reference establishes the SAME soft blue, cream, pale oak architecture and cheerful sunny mood. Show outside a bright modern gently futuristic two-story Japanese retirement home, large glass windows, softly rounded white and pale-blue facades, timber trim, wide accessible main entrance, lush tidy garden with flowers and a smooth footpath and benches. Human-scaled plausible near future, not sci-fi spacecraft. THROUGH the large communal lounge window see a few small happy elderly silhouettes waving their hands in animated conversation with a game controller and plush on the table. The building and lovely garden are the main focus, airy broad view under blue sky. No signage, no readable text, no logos. Clean softly simplified manga background, warm inviting humorous everyday tone, not photorealistic."
+    },
+    {
+      "key": "03-hobby-paradise",
+      "sceneId": "{B93B9FA5-EAA8-421C-B6D7-98F4C59CF818}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-b5e6819d-9a0a-4677-8d9b-b3255eef11de.png",
+      "prompt": "Use case: illustration-story. Asset: scene 'a paradise for hobby fans'. Single wide 16:9 landscape, preferably 1920x1080. Crisp playful 2D Japanese slice-of-life comedy illustration, confident clean ink lines, lively readable faces, soft flat cel colors, light cream, sky blue and mint palette with coral and lavender accents, restrained halftone accents and cheerful visual timing. Original people and fictional unbranded hobby items. People roughly four heads tall (slightly shortened proportions), unmistakably elderly when elderly: silver hair, gentle facial wrinkles, mature features, adult clothing, never baby-like. No words, lettering, logos, speech bubbles, watermark or panel borders. One coherent scene. Continue exact four recurring elderly friends from first reference and the same cream, blue, oak retirement-home lounge from both references. New wider communal-space composition and NEW lively actions: foreground left the white swept-back-haired man in teal cardigan and balding round-glasses man in mustard sweater sit facing a LARGE television game screen with controllers, leaning forward comically competitive but friendly, one laughing and one making a dramatic determined face. The screen displays an original abstract colorful racing game, no actual branded characters or words. On the right and farther back the gray-bob woman with lilac cardigan and purple glasses and the silver-bun woman in peach cardigan arrange small fictional character figurines and plushes on a separate table while delightedly chatting. One eye-level wide view showing two hobby groups, about four-head-tall adult proportions and clearly elderly features. Blank colorful fictional posters on far wall, accessible open floor, garden windows. Capture energetic fun retirement community without making fun of aging. Clean comedy manga contour lines, soft flat colors, friendly accent motion marks, no duplicate people, no lettering."
+    },
+    {
+      "key": "04-nostalgic-sticker-albums",
+      "sceneId": "{5B0ECF8F-2539-4A84-A820-19D6EF166A79}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-acadaccd-5796-4031-9fb6-c5c95aa82876.png",
+      "prompt": "Use case: illustration-story. Asset: scene 'Heisei girls fifty years later'. Single wide 16:9 landscape, preferably 1920x1080. Crisp playful 2D Japanese slice-of-life comedy illustration, confident clean ink lines, lively readable faces, soft flat cel colors, light cream, sky blue and mint palette with coral and lavender accents, restrained halftone accents and cheerful visual timing. Original people and fictional unbranded hobby items. People roughly four heads tall (slightly shortened proportions), unmistakably elderly when elderly: silver hair, gentle facial wrinkles, mature features, adult clothing, never baby-like. No words, lettering, logos, speech bubbles, watermark or panel borders. One coherent scene. Continue ONLY the two elderly women from the reference, same faces, hairstyles, clothes and mature age lines: gray bob-haired woman with round lavender eyeglasses, lilac cardigan, pink blouse and navy patterned long skirt; silver bun-haired woman with peach cardigan, mint top and gray trousers. They sit side by side at an oak table in the same bright sky-blue and cream retirement-home lounge. In front of them are colorful nostalgic friendship-profile notebooks and glittery sticker albums opened to purely decorative blank colored boxes, hearts, stars and tiny animal stickers, absolutely NO handwriting, printed words or letter-like marks. Cheerful candy-colored pens and translucent sticker sheets spread across the table. Both women have sparkling delighted eyes and broad mischievous grins, leaning in, one pointing at a cute star sticker and the other holding a sparkly pen as if rediscovering a childhood treasure. Slightly shortened four-head proportions, elderly not children. Comically enthusiastic yet affectionate depiction, a few tiny star sparkle accents around the albums. Strong readable mid-wide composition, faces and open albums both visible, relaxed healthy everyday scene. No other people."
+    },
+    {
+      "key": "05-generation-gap",
+      "sceneId": "{F300077E-3BA9-4BA3-BB16-D9979B635C51}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-4057632a-8e8d-4187-b818-51c51f5d4bd6.png",
+      "prompt": "Use case: illustration-story. Asset: humorous generation-gap scene. Single wide 16:9 landscape, preferably 1920x1080. Crisp playful 2D Japanese slice-of-life comedy illustration, confident clean ink lines, lively readable faces, soft flat cel colors, light cream, sky blue and mint palette with coral and lavender accents, restrained halftone accents and cheerful visual timing. Original people and fictional unbranded hobby items. People roughly four heads tall (slightly shortened proportions), unmistakably elderly when elderly: silver hair, gentle facial wrinkles, mature features, adult clothing, never baby-like. No words, lettering, logos, speech bubbles, watermark or panel borders. One coherent scene. Continue the SAME gray-bob-haired elderly woman with round lavender glasses, lilac cardigan and pale pink blouse from the reference; retain her elderly face and four-head adult proportions. In the same bright cream and sky-blue retirement-home lounge, she proudly holds open a colorful nostalgic sticker album and points to a sparkly star sticker with a delighted knowing grin. Beside her a young adult care worker with short chestnut-brown hair, mint green scrub top, navy trousers and small plain blank name badge leans in to inspect the album, eyebrows raised and head tilted in gentle bemusement, an affectionate comical puzzled face. Show only these two people in a medium two-shot, elderly resident enthusiastically explaining her treasure and the younger worker genuinely curious. On table: colorful pens, cute generic animal stickers, profile notebook with blank decorative boxes. No printed words or handwriting inside the album. Readable expressive visual contrast, a tiny sweat-drop mark near worker for comedy, friendly eye contact, respectful wholesome intergenerational warmth. No actual question-mark text, no lettering, no logos."
+    },
+    {
+      "key": "06-lifelong-fandom",
+      "sceneId": "{B3CE3990-FEF4-4FFF-9955-BC5D1A1E2738}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-ad0820e1-e1f5-42d9-87e7-8e67959ada06.png",
+      "prompt": "Use case: illustration-story. Asset: scene about cherished fandom in old age. Single wide 16:9 landscape, preferably 1920x1080. Crisp playful 2D Japanese slice-of-life comedy illustration, confident clean ink lines, lively readable faces, soft flat cel colors, light cream, sky blue and mint palette with coral and lavender accents, restrained halftone accents and cheerful visual timing. Original people and fictional unbranded hobby items. People roughly four heads tall (slightly shortened proportions), unmistakably elderly when elderly: silver hair, gentle facial wrinkles, mature features, adult clothing, never baby-like. No words, lettering, logos, speech bubbles, watermark or panel borders. One coherent scene. Keep EXACT older man from first reference: brushed-back white hair, rectangular black eyeglasses, gentle mature face wrinkles, teal cardigan over cream shirt and charcoal trousers. Full figure with slightly shortened four-head proportions, a lively elderly adult, no baby proportions. Inside his sunny private retirement-home room, he stands beside a beloved oak display shelf of small ORIGINAL fictional anime hero figures and soft animal plushes, gazing at them with a proud tender delighted grin. He carefully dusts a tiny colorful fictional space-hero figure with a soft small cloth, other hand supporting the figure; one amusing sparkle accent near his glasses communicates fan enthusiasm. Same pale blue and cream interior, afternoon window light, framed colorful illustrations with no text on the wall, a comfy chair and plain manga volumes nearby. Mood is affectionate and peaceful, hobbies treasured across decades, clean comic-style line work, simple soft cel shading. Figurines are modest toy heroes or animals, not sexualized, no actual franchise designs. Shelves are tidy, respectful everyday life, no words or logos, no other people."
+    },
+    {
+      "key": "07-now-and-fifty-years-later",
+      "sceneId": "{99934998-218C-4931-8A3E-98D034A15C84}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-7759753c-249b-409c-8b87-7a4ad9513bfd.png",
+      "prompt": "Use case: illustration-story. Asset: imagining oneself fifty years later. Single wide 16:9 landscape, preferably 1920x1080. Crisp playful 2D Japanese slice-of-life comedy illustration, confident clean ink lines, lively readable faces, soft flat cel colors, light cream, sky blue and mint palette with coral and lavender accents, restrained halftone accents and cheerful visual timing. Original people and fictional unbranded hobby items. People roughly four heads tall (slightly shortened proportions), unmistakably elderly when elderly: silver hair, gentle facial wrinkles, mature features, adult clothing, never baby-like. No words, lettering, logos, speech bubbles, watermark or panel borders. One coherent scene. A SINGLE flowing wide comparison composition, two time periods organically joined without panel borders or divider lines. LEFT HALF: a contemporary young adult Japanese man with short dark hair, rectangular black glasses and teal hoodie and a young adult woman with dark bob haircut, round lavender glasses and lilac sweater happily enjoy a handheld game and a mint animal plush in a cozy modern room with bookshelves. RIGHT HALF: their clearly fifty-years-older selves in the same clothing colors, exactly the brushed-back white-haired man with black rectangular glasses and teal cardigan and the gray-bob-haired woman with lavender glasses and lilac cardigan FROM THE REFERENCES, smiling together in the bright cream-and-blue retirement-home lounge with games, a manga book and SAME mint animal plush. Keep older wrinkles and gray hair visibly different from the young adults but maintain the matching glasses, expression and hobbies. All people slightly shortened roughly four-head proportions, comic anime adults, never babies. Link both rooms naturally with warm continuous window sunlight and a line of matching shelves; game controller and plush color repeated across time to make the comparison readable. Friendly imaginative hopeful humor, no romance, no lettering, no numbers, no arrows, no logos or watermarks."
+    },
+    {
+      "key": "08-happy-hobby-community",
+      "sceneId": "{EA6EAE51-8C48-41F6-A715-9367DBCD4FBD}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-d983cccd-8598-43dc-bdc4-2931769f635f.png",
+      "prompt": "Use case: illustration-story. Asset: final main scene, recommendation and warm communal daily life. Single wide 16:9 landscape, preferably 1920x1080. Crisp playful 2D Japanese slice-of-life comedy illustration, confident clean ink lines, lively readable faces, soft flat cel colors, light cream, sky blue and mint palette with coral and lavender accents, restrained halftone accents and cheerful visual timing. Original people and fictional unbranded hobby items. People roughly four heads tall (slightly shortened proportions), unmistakably elderly when elderly: silver hair, gentle facial wrinkles, mature features, adult clothing, never baby-like. No words, lettering, logos, speech bubbles, watermark or panel borders. One coherent scene. SAME four original elderly friends from reference, recognizable faces and clothes: swept white-haired man in black rectangular glasses and teal cardigan; gray-bob older woman in lavender round glasses and lilac cardigan; silver-bun older woman in peach cardigan; balding older man in round glasses and mustard sweater. SAME cream, light oak and blue retirement-home lounge and sunny garden windows. NEW slightly elevated wide camera angle looking down on them gathered around one large rounded oak activity table by the windows, a friendly community view, not the previous sofa lineup. Teal man shows a handheld game to mustard man and they grin, lilac woman shares her open decorated sticker album with peach woman, manga books, small fictional toy figures and mint animal plush sit on the table. Everyone exchanging relaxed natural smiles, enthusiastic gestures and warm amused eye contact. Slightly shortened roughly four-head adult proportions, mature elderly facial lines, readable hands and faces, no ageist exaggeration. A few subtle playful accent marks communicate conversation without speech bubbles. Broad airy composition, clean anime comedy lines and soft colors, hopeful inviting feeling. Book and album pages only blank decorative shapes, no letters, no logos, no panels."
+    },
+    {
+      "key": "09-thumbnail",
+      "sceneId": "thumbnail",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-3f41c27b-ab7d-43dd-a4e1-ba3ec4bcd518.png",
+      "prompt": "Use case: ads-marketing. Asset: final thumbnail/end-card for a Japanese manga introduction video, single wide landscape 16:9 preferably 1920x1080. A bright playful comedy manga illustration with slightly shortened adult proportions around four heads tall, clean confident outlines and soft colorful anime shading. REFERENCE ROLES: image1 the same friendly blue-and-cream near-future retirement home and cast; image2 the SAME elderly women's sticker albums, clothes and facial features; image3 original narrator Tohoku Kiritan, preserve her wine-brown bob hair, red eyes, white hair ornaments, pale white-and-pink kimono and burgundy sash, turn her into a slightly shortened cute four-head-tall anime guide and pose her energetically at the right foreground waving one hand and presenting the title with the other, smiling delightedly. Four original elderly hobby friends grouped along bottom-left and center: brushed-white-haired man with rectangular black glasses and teal cardigan happily holding a game console; gray-bob older woman with lavender glasses and lilac cardigan proudly opening a sparkling sticker album; silver-bun woman in peach cardigan hugging the same mint plush; balding round-glasses man in mustard sweater holding a controller with a comically triumphant grin. Preserve distinct gray/white hair and mature elderly wrinkles, no baby-like faces. A few small colorful original toy figures and manga books decorate the foreground, no actual franchise logos. Cheerful airy lounge and sunlit garden in background. Main feature: HUGE perfectly legible Japanese title logo in upper-left/center occupying at least half the canvas, on a solid deep navy rounded graphic backing for strong contrast. Exact text only, genre badge '漫画', then title in TWO lines '50年後の' and '老人ホーム'. The title together is exactly '50年後の老人ホーム'. Make 50 especially large, use warm coral and gold accents, thick pale cream letter fills and dark outlines, polished easy-to-read typography. Keep all letters unobstructed by characters and comfortable margins. Friendly humorous hopeful mood: hobbies last a lifetime, friends together, energetic expressions. No slogans, no author name, no additional text, no panels, no watermark. No dramatic medical devices or bleak atmosphere."
+    }
+  ],
+  "verification": {
+    "projectId": "{71BEF17B-63CF-45A1-A20F-10D889ADD03C}",
+    "revision": 314,
+    "saved": true,
+    "cueCount": 41,
+    "cueJsonUnchanged": true,
+    "voiceReady": 41,
+    "voiceHeard": 41,
+    "imagesSent": 10,
+    "thumbnailSourcesReady": true,
+    "thumbnailApproved": false,
+    "images": [
+      {
+        "sha256": "c545261b97db094643a1895c7853bfedacbc09fe0a1afa3670b076d3997b0091",
+        "bytes": 1865600,
+        "key": "00-common-background",
+        "width": 1672,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{71BEF17B-63CF-45A1-A20F-10D889ADD03C}\\project.assets\\c545261b97db094643a1895c7853bfedacbc09fe0a1afa3670b076d3997b0091.png",
+        "approved": true,
+        "sceneId": "common-background",
+        "height": 941
+      },
+      {
+        "sha256": "6b0ec4ff907a71327042fd483aef1db6709c338d0e169fd7c9f5f22a308bdc07",
+        "bytes": 2494978,
+        "key": "01-otaku-fifty-years-later",
+        "width": 1672,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{71BEF17B-63CF-45A1-A20F-10D889ADD03C}\\project.assets\\6b0ec4ff907a71327042fd483aef1db6709c338d0e169fd7c9f5f22a308bdc07.png",
+        "approved": true,
+        "sceneId": "{C92BCC9C-0ECD-44DC-B269-0AB77CB7934D}",
+        "height": 941
+      },
+      {
+        "sha256": "dfaee5a33f09a501011447db4844ebe3f6e6f287c29c69e0c65d0043acb479c8",
+        "bytes": 2649282,
+        "key": "02-future-retirement-home",
+        "width": 1672,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{71BEF17B-63CF-45A1-A20F-10D889ADD03C}\\project.assets\\dfaee5a33f09a501011447db4844ebe3f6e6f287c29c69e0c65d0043acb479c8.png",
+        "approved": true,
+        "sceneId": "{217F5AFE-AA25-45E0-BA78-1CCCF03D23C9}",
+        "height": 941
+      },
+      {
+        "sha256": "18815f5f60ee6637625593f0d9df6b8ccdf1e5c73a83eac5f5add06227bb69fe",
+        "bytes": 2587722,
+        "key": "03-hobby-paradise",
+        "width": 1672,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{71BEF17B-63CF-45A1-A20F-10D889ADD03C}\\project.assets\\18815f5f60ee6637625593f0d9df6b8ccdf1e5c73a83eac5f5add06227bb69fe.png",
+        "approved": true,
+        "sceneId": "{B93B9FA5-EAA8-421C-B6D7-98F4C59CF818}",
+        "height": 941
+      },
+      {
+        "sha256": "035cae8041e2669cd68310f2ca4db3b3f383178f794a92fe5c07e2f8ad075761",
+        "bytes": 2516249,
+        "key": "04-nostalgic-sticker-albums",
+        "width": 1672,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{71BEF17B-63CF-45A1-A20F-10D889ADD03C}\\project.assets\\035cae8041e2669cd68310f2ca4db3b3f383178f794a92fe5c07e2f8ad075761.png",
+        "approved": true,
+        "sceneId": "{5B0ECF8F-2539-4A84-A820-19D6EF166A79}",
+        "height": 941
+      },
+      {
+        "sha256": "6a95813781702e9584366ff064a2ac78d572c8663fca2ea5787474d9c65a66f3",
+        "bytes": 2556910,
+        "key": "05-generation-gap",
+        "width": 1672,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{71BEF17B-63CF-45A1-A20F-10D889ADD03C}\\project.assets\\6a95813781702e9584366ff064a2ac78d572c8663fca2ea5787474d9c65a66f3.png",
+        "approved": true,
+        "sceneId": "{F300077E-3BA9-4BA3-BB16-D9979B635C51}",
+        "height": 941
+      },
+      {
+        "sha256": "e8c4ea18ebd41172b8ee99c8a5d65ab41fbd327384ee96e1e49d7a5850214039",
+        "bytes": 2508748,
+        "key": "06-lifelong-fandom",
+        "width": 1672,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{71BEF17B-63CF-45A1-A20F-10D889ADD03C}\\project.assets\\e8c4ea18ebd41172b8ee99c8a5d65ab41fbd327384ee96e1e49d7a5850214039.png",
+        "approved": true,
+        "sceneId": "{B3CE3990-FEF4-4FFF-9955-BC5D1A1E2738}",
+        "height": 941
+      },
+      {
+        "sha256": "7446f3f4a0381ff35dcc524b6885bb446e6c208264b57308d94a3734abd32eba",
+        "bytes": 2638982,
+        "key": "07-now-and-fifty-years-later",
+        "width": 1672,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{71BEF17B-63CF-45A1-A20F-10D889ADD03C}\\project.assets\\7446f3f4a0381ff35dcc524b6885bb446e6c208264b57308d94a3734abd32eba.png",
+        "approved": true,
+        "sceneId": "{99934998-218C-4931-8A3E-98D034A15C84}",
+        "height": 941
+      },
+      {
+        "sha256": "c322d9418e3eacce5f75583baf62de5ad3d07f8e7a66aa6d29302aaa7971ca4f",
+        "bytes": 2654581,
+        "key": "08-happy-hobby-community",
+        "width": 1672,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{71BEF17B-63CF-45A1-A20F-10D889ADD03C}\\project.assets\\c322d9418e3eacce5f75583baf62de5ad3d07f8e7a66aa6d29302aaa7971ca4f.png",
+        "approved": true,
+        "sceneId": "{EA6EAE51-8C48-41F6-A715-9367DBCD4FBD}",
+        "height": 941
+      },
+      {
+        "sha256": "7b9c60f2c782424fc6f909cffc1b8ebd5485e0923d10b58946a8e788e86c3bd9",
+        "bytes": 2708069,
+        "key": "09-thumbnail",
+        "width": 1672,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{71BEF17B-63CF-45A1-A20F-10D889ADD03C}\\project.assets\\7b9c60f2c782424fc6f909cffc1b8ebd5485e0923d10b58946a8e788e86c3bd9.png",
+        "approved": false,
+        "sceneId": "thumbnail",
+        "height": 941
+      }
+    ]
+  },
+  "visualReview": {
+    "result": "高齢の特徴、少し低めの体型、コミカルな表情、共通人物・衣装・施設、サムネイル全文ロゴを確認。",
+    "method": "各生成結果を表示して目視",
+    "limits": "原作コマ・公式人物デザインの再現ではない。動画出力、保存再開後のGUI表示は未実施。"
+  },
+  "humanReview": {
+    "thumbnail": "送信・保存済み。最終確定チェック待ち。",
+    "backgroundAndMainImages": "ユーザーが確定チェックを入れたと回答。全9画像の承認とsourcesReady=trueをパイプで確認。"
+  },
+  "deliveryNote": "03-hobby-paradiseは採用成功後の状態取得が人間の確定操作と競合してrevision不一致になった。新しい状態から同一画像のSHA256と承認を確認して保存。再採用や確定の上書きは行っていない。",
+  "evidenceDirectory": "output/production/20261017-senior-home"
+}

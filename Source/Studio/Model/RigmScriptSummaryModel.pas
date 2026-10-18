@@ -21,7 +21,7 @@ procedure SyncSummaryReading(Project: TRigmMovieProject; const CueId: string);
 implementation
 uses System.SysUtils, System.StrUtils, System.Generics.Collections, RigmJson, PsdJson, RigmMovieComposition,
   RigmMovieChart, RigmScriptVoiceModel, RigmScriptCastingModel, RigmScriptSubtitleModel,
-  RigmScriptTextModel;
+  RigmScriptTextModel, RigmScriptSummaryFields;
 function ScriptSummaryFixedDraft(Draft: TJSONObject): TJSONObject;
 begin
   Result := Draft.Clone as TJSONObject;
@@ -133,16 +133,10 @@ begin
   PsdJson.Put(JO(Project.ScriptWizard,'summaryData'),'status','complete');
 end;
 procedure ConfigureScriptSummaryScene(Project: TRigmMovieProject);
-  function FieldAt(D: TJSONObject; const Key: string; Index,Count: Integer): string;
-  begin
-    Result := JS(D,Key); if (Result='') or (Count=1) then Exit;
-    var Lines := Result.Split([#13#10]);
-    if Index<Length(Lines) then Result := Lines[Index] else Result := '';
-    // 一続きの独立字幕は先頭行に保持する。
-    if (Key='subtitle') and (Length(Lines)=1) and (Index=0) then Result := JS(D,Key);
-  end;
 begin
   if JS(Project.ScriptWizard,'summaryChoice')<>'yes' then Exit;
+  RestoreScriptSummarySubtitles(Project);
+  RestoreScriptSummaryReadings(Project);
   var O := JO(Project.ScriptWizard,'summaryData'); var D := JO(O,'draft');
   var Count := 0;
   for var V in JA(JO(Project.ScriptWizard,'casting'),'rows') do if JS(TJSONObject(V),'section')='summary' then Inc(Count);
@@ -162,7 +156,7 @@ begin
       for var Key in ['subtitle','reading'] do
         if NewCue or not (O.GetValue('appliedDraft') is TJSONObject) or
           (JS(JO(O,'appliedDraft'),Key)<>JS(D,Key)) then begin
-          var Value := FieldAt(D,Key,Index,Count);
+          var Value := ScriptSummaryFieldLine(D,Key,Index,Count,C.Text);
           if NewCue and (O.GetValue('appliedDraft') is TJSONObject) and
             (JS(JO(O,'appliedDraft'),'text')<>JS(D,'text')) and (JS(JO(O,'appliedDraft'),Key)=JS(D,Key)) then begin
             Value := ''; if Key='subtitle' then Value := C.Text;

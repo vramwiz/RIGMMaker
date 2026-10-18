@@ -58,7 +58,10 @@
     "waitForListening": false,
     "checkGeneratedAudioAndImages": true,
     "waitForImageApproval": false,
-    "dialogueEqualsSubtitlesAndSpokenText": true
+    "dialogueEqualsSubtitlesAndSpokenText": false,
+    "dialogueEqualsSubtitles": true,
+    "spokenText": "Explicit 読み： text for each 字幕： line; omitted or empty reading falls back to subtitle text.",
+    "ignoreEmptyDialogueLines": true
   },
   "startup": {
     "doNotLaunchTwice": true,

@@ -123,6 +123,9 @@
         <DCCReference Include="Source\Studio\Model\RigmScriptAiImages.pas"/>
         <DCCReference Include="Source\Studio\Model\RigmAutomationInput.pas"/>
         <DCCReference Include="Source\Studio\Model\RigmScriptTextImport.pas"/>
+        <DCCReference Include="Source\Studio\Model\RigmScriptSummaryFields.pas"/>
+        <DCCReference Include="Source\Studio\Model\RigmScriptReadingModel.pas"/>
+        <DCCReference Include="Source\Shell\Pages\RigmScriptReadingDialog.pas"/>
         <DCCReference Include="Source\Studio\Model\RigmScriptResearchModel.pas"/>
         <DCCReference Include="Source\Studio\Rendering\RigmMovieText.pas"/>
         <DCCReference Include="Source\Studio\Model\RigmMoviePosting.pas"/>

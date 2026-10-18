@@ -16,7 +16,7 @@
 
 表示文とメモは入力ごとに同じWorkspaceの正本へ反映する。編集欄のカーソルは更新で戻さない。戻る・ホーム・終了で途中の文も保存し、再開は最後にNextで到達した字幕画面。選択発話・表示文・メモを保持する。
 
-表示用の正本は既存TRigmMovieCue.Subtitle。音声用のText、元台本3区分、SpeakerId、Scene、音声設定・音声キー、他発話は変更しない。字幕専用メモは同じCueの任意フィールドsubtitleNoteとして保存し、音声指紋には含めない。旧作品にメモがない場合は空として読む。
+表示用の正本は既存TRigmMovieCue.Subtitle。2026-10-16に音声用の読み欄（VoiceReading）を追加し、字幕と独立して同じ画面で編集できるようにした。空欄なら元のTextを読み上げる。字幕だけの修正では音声を保持し、読みを変えた行だけquery・音声採用・再生確認を失効する。元原稿、SpeakerId、Scene、共通音声設定、他発話は変更しない。字幕専用メモは同じCueの任意フィールドsubtitleNoteとして保存し、音声指紋には含めない。旧作品にメモがない場合は空として読む。今回の追加分はユーザー指定により未ビルド・未実行。
 
 左右操作は最初のCRLFだけを取り除いた表示文内で、その改行位置を移す。後ろにある手入力の改行を維持し、後続の改行を越える移動は拒否する。最初の手入力改行がない場合は、既存動画字幕と同じ幅・フォントで求めた最初の自動折返しを基準にする。右端まで移動した場合はその改行をなくせる。詳細編集では全ての表示文・改行を編集できる。
 
@@ -36,9 +36,9 @@ Exchange/workspace-<PID>.jsonのcommandPipeと既存schemaVersion=1封筒を使�
 
 | コマンド | args |
 | --- | --- |
-| app-script-subtitles | projectId, revision, offset。rowsは1件ずつ、nextOffset/hasMoreで続ける。cueId、role、character、subtitle、voiceText、note、sceneId、breakOffsetを取得。 |
+| app-script-subtitles | projectId, revision, offset。rowsは1件ずつ、nextOffset/hasMoreで続ける。cueId、role、character、subtitle、voiceText（元文）、reading（空なら元文）、spokenText（実際の読み）、note、sceneId、breakOffsetを取得。 |
 | app-script-select-subtitle | projectId, revision, cueId。選択のみ。 |
-| app-script-edit-subtitle | projectId, revision, cueId, subtitle, note（省略時は既存メモを保持）。字幕とメモだけを原子的に更新。 |
+| app-script-edit-subtitle | projectId, revision, cueId, subtitle, note（省略時は既存メモを保持）。reading省略時は字幕・メモだけ更新。readingを文字列で指定すると読みも原子的に更新。読みの変わった行だけquery・音声採用・再生確認を失効し、旧ファイルは保持する。 |
 | app-script-set-subtitle-break | projectId, revision, cueId, offset。最初のCRLFを除いた表示文内の0始まりUTF-16位置。 |
 
 GUIで詳細編集中は既存の共通入力ロックを保持し、外部の変更・別作品切替を拒否する。読取は可能。古いrevisionや別projectIdを拒否し、人の編集を古い結果で上書きしない。app-script-statusは件数・選択・工程状態だけを返し、全表示文やメモを埋め込まない。

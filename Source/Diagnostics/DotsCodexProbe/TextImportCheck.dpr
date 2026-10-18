@@ -4,13 +4,60 @@ uses System.SysUtils, System.Classes, System.IOUtils, System.JSON, System.Hash,
   Winapi.Windows, Vcl.Forms, Vcl.StdCtrls, Vcl.Graphics, Vcl.Imaging.pngimage,
   RigmMovieModel, RigmScriptCopyModel, RigmWizardWorkspace, RigmScriptCreatorFrame,
   RigmScriptTextImport, RigmAutomationInput, RigmScriptTextModel,
-  RigmScriptSummaryModel, RigmScriptScenesModel, RigmScriptCastingModel,
+  RigmScriptSummaryModel, RigmScriptScenesModel, RigmScriptCastingModel, RigmScriptSubtitleModel,
   RigmScriptSceneAssignmentModel, RigmMovieChart, RigmJson, PsdJson;
 var Checks: TJSONArray; Report: TJSONObject; Output,DataRoot: string;
 procedure Check(Value: Boolean; const Message: string);
 begin if not Value then raise Exception.Create(Message); Checks.Add(Message); end;
 function JsonOf(W: TRigmWizardWorkspace): string;
 begin var O := W.ScriptDraft.Json; try Result := O.ToJSON; finally O.Free; end; end;
+procedure CheckDialogueParser(const Text: string);
+begin
+  var Paired := Text.Replace('最初の見どころを紹介します。',
+    '字幕：歩が蜻蛉高校へ向かいます。'+#13#10+'　 '+#13#10+'読み:あゆむがかげろう高校へ向かいます。'+#13#10+#13#10);
+  var Input := ValidateAutomationInput(Paired,True);
+  try
+    Check(JB(Input,'valid'),'paired subtitle and reading accepted with intervening blanks');
+    var Block := TJSONObject(JA(JO(Input,'data'),'scenes')[0]); var Rows := JA(Block,'dialogue');
+    Check((Rows.Count=2) and (JS(TJSONObject(Rows[0]),'subtitle')='歩が蜻蛉高校へ向かいます。') and
+      (JS(TJSONObject(Rows[0]),'reading')='あゆむがかげろう高校へ向かいます。'),'one pair creates one dialogue with independent reading');
+    Check(JS(Block,'body')='歩が蜻蛉高校へ向かいます。'+#13#10+'この二行は同じシーンになります。',
+      'blank lines and reading labels never enter source dialogue');
+    Check(JS(TJSONObject(Rows[1]),'reading')='','plain dialogue keeps default pronunciation');
+  finally Input.Free; end;
+  for var BadLine in ['読み：先に読み','字幕：','字幕：セリフ'+#13#10+'読み：'+#13#10+'読み：重複',
+    '字幕：セリフ'+#13#10+'読み：'+StringOfChar('あ',2001)] do begin
+    Input := ValidateAutomationInput(Text.Replace('最初の見どころを紹介します。',BadLine),True);
+    try Check(not JB(Input,'valid'),'invalid pair rejected before any project mutation'); finally Input.Free; end;
+  end;
+  Input := ValidateAutomationInput(Text.Replace('実際に使用するとき',#13#10+'実際に使用するとき'),True);
+  try Check(JS(JO(JO(Input,'data'),'posting'),'body').Contains(#13#10+#13#10),'posting paragraph breaks remain intact'); finally Input.Free; end;
+  Input := ValidateAutomationInput(Text.Replace('登場人物の関係が魅力的な作品でした。',
+    '字幕：総評です。'+#13#10+'読み：'+StringOfChar('あ',2000)),True);
+  try Check(not JB(Input,'valid'),'combined summary reading overflow rejected before materialization'); finally Input.Free; end;
+end;
+procedure CheckDialogueEdits(Project: TRigmMovieProject; const CueId: string);
+begin
+  var P := Project.Clone;
+  try
+    var C := P.Cue(CueId); var Source := C.Text; var Other := P.Cues[0];
+    C.AudioKey := 'old-audio'; C.VoiceHeardKey := 'old-heard'; C.VoiceQuery := '{}'; C.VoiceQueryKey := 'old-query'; C.EffectAudioKey := 'old-effect';
+    Other.AudioKey := 'other-audio'; Other.VoiceHeardKey := 'other-heard';
+    EditSubtitleDialogue(P,C.Id,'表示だけ変更',C.VoiceReading,'メモ');
+    Check((C.Text=Source) and (C.AudioKey='old-audio') and (C.VoiceQueryKey='old-query') and
+      (C.VoiceHeardKey='old-heard') and (C.EffectAudioKey='old-effect'),'subtitle-only edit retains audio accent and playback acceptance');
+    EditSubtitleDialogue(P,C.Id,'表示だけ変更','あゆむがかげろう高校へ向かいます。','メモ');
+    Check((C.Text=Source) and (C.Subtitle='表示だけ変更') and (C.AudioKey='') and (C.VoiceQuery='') and
+      (C.VoiceHeardKey='') and (C.EffectAudioKey=''),'reading edit invalidates only matching cue audio and query');
+    Check((Other.AudioKey='other-audio') and (Other.VoiceHeardKey='other-heard'),'other dialogue audio untouched');
+    var Before := C.Json; var Rejected := False;
+    try
+      try EditSubtitleDialogue(P,C.Id,'変更しない',StringOfChar('あ',2001),'変更しない'); except on E: Exception do Rejected := True; end;
+      var After := C.Json;
+      try Check(Rejected and (Before.ToJSON=After.ToJSON),'invalid reading leaves subtitle reading and memo unchanged'); finally After.Free; end;
+    finally Before.Free; end;
+  finally P.Free; end;
+end;
 procedure Run;
 begin
   var SourceFile := ParamStr(1); var Example := ParamStr(2); Output := ParamStr(3);
@@ -18,6 +65,7 @@ begin
   ForceDirectories(Output); DataRoot := TPath.Combine(Output,'Data'); ForceDirectories(DataRoot);
   TFile.WriteAllText(TPath.Combine(Output,'テンプレート.txt'),ScriptTextInputTemplate,TEncoding.UTF8);
   var Text := ReadScriptTextInputFile(Example); var InputHash := THashSHA2.GetHashStringFromFile(Example);
+  CheckDialogueParser(Text);
   var Valid := ValidateAutomationInput(Text,True);
   try
     Check(JB(Valid,'valid'),'complete manual template is valid');
@@ -60,6 +108,31 @@ begin
         var Bad := W.ImportScriptText('');
         try Check(not JB(Bad,'valid') and (JA(Bad,'issues').Count>5),'invalid import returns missing fields'); finally Bad.Free; end;
         Check((JsonOf(W)=Before) and (THashSHA2.GetHashStringFromFile(Target)=DiskHash),'invalid import preserves memory and saved file');
+        var PairedText := Text.Replace('最初の見どころを紹介します。',
+          '字幕：歩が蜻蛉高校へ向かいます。'+#13#10+#13#10+'読み：あゆむがかげろう高校へ向かいます。')
+          .Replace('登場人物の関係が魅力的な作品でした。',
+          '字幕：歩の物語でした。'+#13#10+'読み：あゆむの物語でした。')
+          .Replace('こんにちは。','字幕：こんにちは。'+#13#10+'読み：こんにちわ。')
+          .Replace('ご視聴ありがとうございました。','字幕：ご視聴ありがとうございました。'+#13#10+'読み：ごしちょうありがとうございました。');
+        var PairedReply := W.ImportScriptText(PairedText);
+        try Check(JB(PairedReply,'imported'),'paired dialogue imported through shared workspace'); finally PairedReply.Free; end;
+        var PairedSaved := LoadMovie(Target); var PairCount := 0;
+        try
+          for var C in PairedSaved.Cues do begin
+            Check(not C.Text.StartsWith('読み：') and not C.Text.StartsWith('字幕：') and (C.Text.Trim<>''),'saved cues contain no labels or empty dialogue');
+            if C.Text='歩が蜻蛉高校へ向かいます。' then begin
+              Inc(PairCount); Check((C.Subtitle=C.Text) and (C.SpokenText='あゆむがかげろう高校へ向かいます。'),'body pair survives save and reload');
+              C.Subtitle := '手動字幕'; C.VoiceReading := '手動よみ'; ApplyImportedSceneInputs(PairedSaved);
+              Check((C.Subtitle='手動字幕') and (C.VoiceReading='手動よみ'),'reapplying input preserves manual subtitle and reading edits');
+            end;
+            if C.Text='歩の物語でした。' then begin
+              Inc(PairCount); Check(C.SpokenText='あゆむの物語でした。','summary pair survives save and reload');
+            end;
+            if C.Text='こんにちは。' then begin Inc(PairCount); Check(C.SpokenText='こんにちわ。','opening reading imported'); end;
+            if C.Text='ご視聴ありがとうございました。' then begin Inc(PairCount); Check(C.SpokenText='ごしちょうありがとうございました。','closing reading imported'); end;
+          end;
+          Check(PairCount=4,'each paired input creates exactly one cue in all four dialogue sections');
+        finally PairedSaved.Free; end;
         var FullExample := ParamStr(5); var FullText := ReadScriptTextInputFile(FullExample);
         var FullInput := ValidateAutomationInput(FullText,True);
         try
@@ -133,6 +206,7 @@ begin
           Check(C.Text=C.Subtitle,'prepared dialogue and subtitle match');
         end;
         Check(BodyLines=2,'multiline body remains in one input scene');
+        for var C in P.Cues do if C.Scene=Blue then begin CheckDialogueEdits(P,C.Id); Break; end;
         var Summary := ScriptSummaryCue(P); Check((Summary<>nil) and MovieChartEnabled(P.Scene(Summary.Scene).Chart),'summary retains independent chart');
         Check(JS(JO(P.ScriptWizard,'textImport'),'sceneState')='applied','deferred scene inputs applied');
         EditScriptSceneTitle(P,Blue,'手動で直したシーン名'); ApplyImportedSceneInputs(P);

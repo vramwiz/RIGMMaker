@@ -1,0 +1,660 @@
+﻿{
+  "format": "RIGMMaker.ImageProductionLearning",
+  "date": "2026-10-18",
+  "title": "鬱展開大好き主人公VS優しい世界 転生先が平和すぎるので、至高の絶望を求めて旅に出ます",
+  "author": "眞嶋 誠（漫画）／石蕗石（原作）／久賀フーナ（原作イラスト）",
+  "workUrl": "https://manga.nicovideo.jp/comic/85155",
+  "officialContextUrl": "https://over-lap.co.jp/Form/Product/ProductDetail.aspx?cat=CGB&pid=9784824018199&shop=0&swrd=&vid=",
+  "projectId": "{009CB6AB-5EA7-4663-B9FE-E9CE29119584}",
+  "mode": "built-in image_gen",
+  "userRequest": "キャラは等身を低く、アニメチックに。アプリ実行中。",
+  "inputs": {
+    "scenes": [
+      {
+        "id": "{9C521E60-0DD7-4EE4-9530-F39448D98E68}",
+        "title": "opening 1",
+        "image": "",
+        "description": "",
+        "imagePrompt": "",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 0,
+        "animation": {},
+        "sceneNumber": 1,
+        "start": 0,
+        "duration": 6.12666666666667,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{681D3926-5FEC-4948-9C0F-477C89F3E794}",
+            "sourceText": "東北きりたんです"
+          },
+          {
+            "cueId": "{3D9F76FE-A11D-4899-AA6A-7F1E336EDA35}",
+            "sourceText": "今回もニコニコ漫画から"
+          },
+          {
+            "cueId": "{09464AFD-9E81-4A0D-B03D-1C99D3394214}",
+            "sourceText": "無料で最新話まで読める作品を紹介します"
+          }
+        ],
+        "cueCount": 3,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{D1276D2E-A7DF-4367-8FDD-9A58AB7472DE}",
+        "title": "平和すぎる異世界に絶望！？",
+        "image": "",
+        "description": "平和すぎて絶望する王子！？",
+        "imagePrompt": "横長16:9。美しいファンタジー王国の城下町。花が咲き、人々が笑顔で暮らしている平和な街並み。手前には豪華な王子服を着た天使のような美少年が、周囲の幸福な光景に絶望したような表情で立っている。明るい背景と主人公の表情の落差を強調したコミカルな構図。文字なし。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 1,
+        "animation": {},
+        "sceneNumber": 2,
+        "start": 6.12666666666667,
+        "duration": 19.7706666666667,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{DAAFB303-3E7F-4FAD-BE8A-569B6F261374}",
+            "sourceText": "皆さん、異世界に転生するなら、平和な世界と危険な世界のどちらを選びますか？"
+          },
+          {
+            "cueId": "{442CDF85-FA67-47C6-B5E6-430EF8E61CC1}",
+            "sourceText": "普通なら平和な世界ですよね。ところが今回の主人公は違います！"
+          },
+          {
+            "cueId": "{03B55D35-D020-48EE-8ED7-6A7484285771}",
+            "sourceText": "戦争なし、悪人なし、みんな親切。そんな理想郷に転生したのに、平和すぎると絶望しているんです！"
+          },
+          {
+            "cueId": "{ACC53511-D5B6-4CF0-952F-3720906CAC17}",
+            "sourceText": "いやいや、いったい何が不満なんですか！？"
+          }
+        ],
+        "cueCount": 4,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{F92970F1-35FD-4737-B81E-89A52B391938}",
+        "title": "作品紹介",
+        "image": "",
+        "description": "常識が逆転した異世界転生",
+        "imagePrompt": "横長16:9。華やかな異世界の王宮。豪華なシャンデリアと大理石の床、美しい庭園が見える大きな窓。手前には天使のような美少年の王子が、穏やかな笑顔を浮かべながら玉座の近くに立っている。どこか不穏なユーモアを感じさせる構図。文字なし。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 2,
+        "animation": {},
+        "sceneNumber": 3,
+        "start": 25.8973333333333,
+        "duration": 21.3066666666667,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{5FA1D0D7-45D4-49B4-A85A-D118FCB5E1BC}",
+            "sourceText": "今回ご紹介するのは、鬱展開大好き主人公VS優しい世界。"
+          },
+          {
+            "cueId": "{A5F32A6A-FA14-4A4C-80ED-081EE448739E}",
+            "sourceText": "副題は、転生先が平和すぎるので、至高の絶望を求めて旅に出ます。"
+          },
+          {
+            "cueId": "{063203F2-6C75-45C6-952A-EF62CCE7E3E7}",
+            "sourceText": "石蕗石先生の原作を、眞嶋誠先生が漫画化。原作イラストは久賀フーナ先生です。"
+          },
+          {
+            "cueId": "{D579D8CE-72C0-415D-B087-C0327B5880AD}",
+            "sourceText": "普通の異世界転生とは、主人公の目的が根本的に違う異色のファンタジーコメディです。"
+          }
+        ],
+        "cueCount": 4,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{316562F1-D17E-4FF1-9DD8-ECE38748AD57}",
+        "title": "主人公は鬱展開マニア",
+        "image": "",
+        "description": "絶望からの逆転が大好物！",
+        "imagePrompt": "横長16:9。現代日本の薄暗い部屋。机には架空のファンタジー小説や漫画が積まれている。成人男性が物語に夢中になり、感動している後ろ姿。モニターには文字のないドラマチックなファンタジーの風景。人物の外見は限定しない。文字なし。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 2,
+        "animation": {},
+        "sceneNumber": 4,
+        "start": 47.204,
+        "duration": 20.0906666666667,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{57C9D2B5-9D1F-421D-BDF7-CD60B9568688}",
+            "sourceText": "主人公は、物語の登場人物が苦難に追い込まれる鬱展開が大好きな男。"
+          },
+          {
+            "cueId": "{417CE9D6-3FF9-4CB5-B136-C401EB11C683}",
+            "sourceText": "ただ苦しむだけではありません。絶望の底から這い上がって迎えるハッピーエンドこそが最高なんです！"
+          },
+          {
+            "cueId": "{0A5C86C4-8977-47AF-908B-CC835A621499}",
+            "sourceText": "そんな彼が女神の手違いで死亡し、お詫びとして異世界へ転生できることになります。"
+          },
+          {
+            "cueId": "{4791C589-49E4-4403-91B2-A266E54EECBC}",
+            "sourceText": "そこで望んだのは、理想の鬱展開を生で鑑賞できる世界でした。"
+          }
+        ],
+        "cueCount": 4,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{173CBE40-A80A-4710-B57E-EA2E3F8D8E6C}",
+        "title": "女神の勘違い",
+        "image": "",
+        "description": "女神の親切が裏目に！",
+        "imagePrompt": "横長16:9。雲の上に広がる幻想的な神殿。優しそうな女神が柔らかな光を放ち、転生を祝福している。手前には期待に胸を膨らませる成人男性のシルエット。神聖な雰囲気の中に、すれ違いを予感させるコミカルな演出。文字なし。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 2,
+        "animation": {},
+        "sceneNumber": 5,
+        "start": 67.2946666666667,
+        "duration": 20.24,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{A35D56A6-FC84-4B01-AE6A-8C0E8303682C}",
+            "sourceText": "しかし彼は、本当の願いを伝えたら断られるかもしれないと考えます。"
+          },
+          {
+            "cueId": "{FF4EFDE4-6446-45A3-88C6-6B43ED8FB7B9}",
+            "sourceText": "そこで、頑張っている人をたくさん助けたいと、聞こえの良い願いを伝えました。"
+          },
+          {
+            "cueId": "{562F736F-C0A4-47C7-97C5-CB4BA1C5C017}",
+            "sourceText": "すると女神は大感激！親切心から、戦争も悪政もない平和な国へ転生させてしまいます。"
+          },
+          {
+            "cueId": "{B24F25A5-19D5-4296-856D-C42FA2CF9706}",
+            "sourceText": "悪いのは女神ではなく、どう考えても主人公の説明不足ですよね！"
+          }
+        ],
+        "cueCount": 4,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{F743296D-B1A5-482C-A2A8-B9A98F0D93DE}",
+        "title": "天使の顔をした問題児",
+        "image": "",
+        "description": "外見は天使、中身は問題児！",
+        "imagePrompt": "横長16:9。豪華な王宮の庭園。金色の装飾が入った上品な王子服を着た美少年が、花に囲まれて優雅に微笑んでいる。背景には親切そうな家族や従者のシルエット。少年の背後だけに黒いもやのようなコミカルな演出を加え、外見と内心のギャップを表現。文字なし。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 2,
+        "animation": {},
+        "sceneNumber": 6,
+        "start": 87.5346666666667,
+        "duration": 19.8453333333333,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{847D279D-EBEA-4CBD-8F76-6613ACB8CAA0}",
+            "sourceText": "こうして生まれ変わった主人公は、平和な国の第三王子ライア。"
+          },
+          {
+            "cueId": "{932682A0-DE15-4728-A039-845943D9F66D}",
+            "sourceText": "地位もお金もあり、家族も従者も優しい。しかも外見は天使のような美少年です。"
+          },
+          {
+            "cueId": "{E52EA42C-ADEC-4D20-A022-F03DAB7F2D87}",
+            "sourceText": "ところが本人は、どこにも絶望が見当たらないことに不満を募らせていきます。"
+          },
+          {
+            "cueId": "{954C5E31-10DA-4A17-8200-547F6B56E2AF}",
+            "sourceText": "最高の環境にいるのに、本人にとっては最悪の環境。なんとも贅沢な悩みです！"
+          }
+        ],
+        "cueCount": 4,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{9694B625-CABF-4552-AE46-A5034A00577F}",
+        "title": "絶望を求める旅",
+        "image": "",
+        "description": "目指すは最高の絶望！",
+        "imagePrompt": "横長16:9。青空が広がるファンタジー王国の街道。美しい城を背に、旅装をまとった美少年の王子が遠くの山々を見つめている。周囲には色とりどりの花が咲き、小鳥が飛び交っている。希望に満ちた風景と、暗い展開を期待する主人公のギャップを描く。文字なし。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 2,
+        "animation": {},
+        "sceneNumber": 7,
+        "start": 107.38,
+        "duration": 18.9386666666667,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{1B77F195-7C88-43A7-A7BB-9DCFEA149CF4}",
+            "sourceText": "ついにライアは、まだ見ぬ理想の鬱展開を探して行動を始めます。"
+          },
+          {
+            "cueId": "{B26BC144-3C6C-4CE5-9ECA-2E534D69C8E7}",
+            "sourceText": "苦境に立たされながらも懸命に頑張る人物と出会い、その結末を見届けたいのです。"
+          },
+          {
+            "cueId": "{FB2A9D36-E761-4519-813F-B1BACDFB5A8C}",
+            "sourceText": "ところが彼の行動は、周囲から善意として受け取られてしまいます。"
+          },
+          {
+            "cueId": "{0A87DAD1-FE21-47A0-B58D-275D87084A73}",
+            "sourceText": "本人は悪趣味な欲望に忠実なのに、なぜか心優しい王子として評価されていくんです。"
+          }
+        ],
+        "cueCount": 4,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{9B67D1FA-D770-4E7B-8EB3-444DBB65957C}",
+        "title": "本音と評価が真逆！",
+        "image": "",
+        "description": "悪趣味なのに聖人扱い！？",
+        "imagePrompt": "横長16:9。王宮の明るい大広間。美少年の王子が穏やかに微笑み、周囲の人々が尊敬の眼差しを向けている。画面の片側には王子の内心を象徴する暗い紫色の煙と不気味な光を抽象的に配置。明るい現実と歪んだ内心を左右対比で表現する。文字なし。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 2,
+        "animation": {},
+        "sceneNumber": 8,
+        "start": 126.318666666667,
+        "duration": 19.792,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{CDC4B422-7DAD-4C6D-875E-921CFF7B483F}",
+            "sourceText": "この作品の面白さは、主人公の本音と周囲からの評価が正反対なところです。"
+          },
+          {
+            "cueId": "{8296FCC6-2F92-4326-8123-1C731DAD8D9B}",
+            "sourceText": "読者だけはライアの本心を知っているので、周囲が感動するほどツッコミたくなります。"
+          },
+          {
+            "cueId": "{AD4A2F6A-FF87-4283-98A0-F1F6C11DB468}",
+            "sourceText": "しかも主人公の視点はコメディでも、苦難に直面する人々の事情はシリアス。"
+          },
+          {
+            "cueId": "{8D541ECE-3B42-446F-B1C5-70A54A65383D}",
+            "sourceText": "この温度差が、単なる勘違いコメディでは終わらない独特の味になっています。"
+          }
+        ],
+        "cueCount": 4,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{A0075386-5EA7-44EB-AEF4-C47C2D577145}",
+        "title": "こんな人におすすめ",
+        "image": "",
+        "description": "勘違いコメディの異色作",
+        "imagePrompt": "横長16:9。明るいファンタジー王国を背景に、天使のような美少年の王子が優雅に立っている。画面左は花と光に包まれた穏やかな世界、右は暗い雲と荒れた大地を象徴する幻想的な世界。王子は両者の中央に配置し、ユーモラスでドラマチックな構図。文字なし。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 1,
+        "animation": {},
+        "sceneNumber": 9,
+        "start": 146.110666666667,
+        "duration": 16.2706666666667,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{81625F2A-3142-48F6-AF4E-00E052106761}",
+            "sourceText": "本作は、異世界転生ものや勘違いコメディが好きな人におすすめです。"
+          },
+          {
+            "cueId": "{37618610-E7E4-485A-824F-3A010D47BF3C}",
+            "sourceText": "特に、主人公の内心と周囲の反応が食い違う展開が好きなら、かなり楽しめそうです。"
+          },
+          {
+            "cueId": "{A65B2DB6-8A37-4529-90A2-F69316385855}",
+            "sourceText": "ただし、登場人物が苦境に立たされるシリアスな要素もあるので、そこは好みが分かれそうですね。"
+          }
+        ],
+        "cueCount": 3,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{A63A820A-1F5C-4E9B-B432-452AEB13B87A}",
+        "title": "総評",
+        "image": "",
+        "description": "",
+        "imagePrompt": "",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 0,
+        "displayMode": "image",
+        "animation": {},
+        "chart": {
+          "kind": "radar",
+          "title": "ストーリー",
+          "minimum": 0,
+          "maximum": 5,
+          "items": [
+            {
+              "label": "ストーリー",
+              "value": 5
+            },
+            {
+              "label": "キャラクター",
+              "value": 5
+            },
+            {
+              "label": "作画",
+              "value": 4
+            },
+            {
+              "label": "演出・テンポ",
+              "value": 4
+            },
+            {
+              "label": "世界観・設定",
+              "value": 5
+            }
+          ]
+        },
+        "sceneNumber": 10,
+        "start": 162.381333333333,
+        "duration": 32.936,
+        "ready": true,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{2BB8D0A2-5D4F-4BE1-82D5-C3371E06E3A0}",
+            "sourceText": "今回の評価は公式紹介と公開情報をもとにした暫定的なものですが、設定の独創性は特に高く評価したいですね。"
+          },
+          {
+            "cueId": "{99C4E71C-B523-46DE-8B52-D6F7E972D3FE}",
+            "sourceText": "絶望を求める主人公が、なぜか周囲から聖人として扱われる。この矛盾こそが最大の魅力です。"
+          },
+          {
+            "cueId": "{F57C9FE3-C61A-4518-8715-3F10409BA2B6}",
+            "sourceText": "単行本第1巻は2026年9月8日に発売されています。"
+          },
+          {
+            "cueId": "{6D18CF8A-208F-4AB1-878D-ACDCF1215E16}",
+            "sourceText": "ニコニコ漫画でも公開されていますので、ぜひチェックしてみてください。"
+          },
+          {
+            "cueId": "{CBBCDCE4-8533-4166-91BF-51220DCA40F2}",
+            "sourceText": "皆さんはライアのような王子がいたら、聖人だと思いますか？それとも危険人物でしょうか？"
+          },
+          {
+            "cueId": "{BCDF8BE0-45B5-4586-AA87-EB15085B6E1A}",
+            "sourceText": "ぜひコメントで教えてください。それでは、また次の漫画紹介でお会いしましょう！"
+          }
+        ],
+        "cueCount": 6,
+        "hasMoreCues": false
+      }
+    ],
+    "officialCover": "References/official-cover.jpg",
+    "officialCoverUrl": "https://over-lap.co.jp/Contents/ProductImages/0/9784824018199_LL.jpg",
+    "narratorReference": "References/kiritan.png"
+  },
+  "decisions": [
+    "作品URLと題名を現在の台本へ照合し、共通背景1枚・本編8シーン・最後の必須サムネイルを対象とした。空要望の冒頭と組み込み総評チャートは保持。",
+    "公式コミックス表紙を確認し、ライアの金髪・緑の目・白と金の王子服・紫のリボンを約2.5〜3頭身のアニメ調へ反映。前画像を参照して王子の顔と衣装、青い屋根の白い城、クリームと水色と金の配色を継続。",
+    "セリフに沿い、笑顔の住民と王子の落胆、甘い笑顔と紫のもやの落差をコミカルに表現。暗さは抽象的な内心や想像の風景で、流血や負傷描写を入れない。",
+    "転生前の成人男性は茶髪と青いカーディガン、女神は銀青色の長髪と閉じた長袖の白いローブを持つ創作デザイン。家族・従者や城、庭園の細部も紹介用の創作で、原作の正確なコマ・キャラデザインとは扱わない。",
+    "背景と各シーンの人間による確定後にsourcesReady=trueを取得。完成画像と使用中の東北きりたんの参照PNGで、主題・副題全文と漫画バッジを含むサムネイルを作成。きりたんは笑顔で作品を案内する身振りを指定。",
+    "各生成結果を表示してから目視し、要求ID・revision・SHA256を確認して順次採用・保存。人間の確定操作は代行せず、本文・字幕・読み・配役・アクセント・音声を変更しない。"
+  ],
+  "referenceMap": {
+    "00-common-background": [],
+    "01-too-peaceful-kingdom": [
+      "official-cover",
+      "00-common-background"
+    ],
+    "02-prince-in-the-palace": [
+      "01-too-peaceful-kingdom",
+      "00-common-background"
+    ],
+    "03-before-reincarnation": [
+      "02-prince-in-the-palace:style-only"
+    ],
+    "04-goddess-misunderstanding": [
+      "03-before-reincarnation",
+      "00-common-background"
+    ],
+    "05-angelic-troublemaker": [
+      "02-prince-in-the-palace",
+      "01-too-peaceful-kingdom"
+    ],
+    "06-journey-for-despair": [
+      "02-prince-in-the-palace",
+      "01-too-peaceful-kingdom"
+    ],
+    "07-inner-thoughts-and-reputation": [
+      "02-prince-in-the-palace",
+      "05-angelic-troublemaker"
+    ],
+    "08-kind-world-and-dark-dream": [
+      "02-prince-in-the-palace",
+      "06-journey-for-despair"
+    ],
+    "09-thumbnail": [
+      "08-kind-world-and-dark-dream",
+      "01-too-peaceful-kingdom",
+      "kiritan"
+    ]
+  },
+  "artifacts": [
+    {
+      "key": "00-common-background",
+      "sceneId": "common-background",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-5d862185-8cc2-41d6-adb4-85bc254a2194.png",
+      "prompt": "Use case: illustration-story. One wide 16:9 anime illustration for a Japanese fantasy-comedy manga-introduction video, ideally 1920x1080. Polished 2D anime, clean delicate linework, soft cel shading, fresh cream/sky-blue/gold palace palette with lavender contrasts. Characters are cute chibi about 2.5 to 3 heads tall, large expressive round heads and tiny fully clothed unaccentuated bodies, modest closed-neck long-sleeved outfits and full trousers or long robes. Charming comic timing and clear readable expressions. No writing, letters, subtitles, speech bubbles, logos, watermarks or panel borders. No graphic violence or injuries, the darkness is metaphorical cartoon gloom only.  Asset: quiet shared background. NO PEOPLE or characters. Pale cream and very light sky blue, airy peaceful fantasy-kingdom ambience. Faraway small ivory castle with slender blue roofs visible at upper-right edge, faint golden decorative flourishes confined to far left and right borders, soft sunlight, faint clouds and tiny flowers near bottom corners. Broad empty pale cream center for the app's narrator and subtitles. Low contrast, restrained detail, calm elegant royal atmosphere, no throne or big object occupying center, no text."
+    },
+    {
+      "key": "01-too-peaceful-kingdom",
+      "sceneId": "{D1276D2E-A7DF-4367-8FDD-9A58AB7472DE}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-603fa548-9ba3-4027-962c-3c55a377e5e5.png",
+      "prompt": "Use case: illustration-story. One wide 16:9 anime illustration for a Japanese fantasy-comedy manga-introduction video, ideally 1920x1080. Polished 2D anime, clean delicate linework, soft cel shading, fresh cream/sky-blue/gold palace palette with lavender contrasts. Characters are cute chibi about 2.5 to 3 heads tall, large expressive round heads and tiny fully clothed unaccentuated bodies, modest closed-neck long-sleeved outfits and full trousers or long robes. Charming comic timing and clear readable expressions. No writing, letters, subtitles, speech bubbles, logos, watermarks or panel borders. No graphic violence or injuries, the darkness is metaphorical cartoon gloom only.  SAME protagonist Prince Raia: fluffy short golden-blond hair with a prominent upward side-swept tuft, bright emerald-green eyes, fair skin, cherubic round face, white long-sleeved high-collared prince coat with gold trim and decorative crossed bands, dark lavender inner panel, pale lavender neck bow, white full-length trousers, gold-edged cuffs and dark practical boots. Tiny 2.5-to-3-head-tall chibi boy, no crown required.  Asset: opening comic contrast, peaceful fantasy castle town. Reference1 fixes Prince Raia's blond hair, green eyes and white/gold/lavender outfit only; transform to cute 2.5 to 3 heads tall, do NOT reproduce cover layout/text/other characters. Reference2 fixes cream-and-blue fairytale architecture. A sunny cobbled market square beneath beautiful blue-roofed ivory castle towers, blooming flower planters, friendly chibi townspeople in modest long medieval clothes smiling and helping each other, birds overhead. In foreground Raia stands stiffly with slumped shoulders, comically stunned gloomy expression and a tiny dark-violet cloud just above his head while everyone else is cheerful. His little eyes half-lidded with exaggerated harmless cartoon despair, tiny comic shadow lines without lettering. The kingdom remains wholly happy and safe. Broad eye-level scene with clear contrast between radiant setting and little prince's disappointed face, no actual danger or suffering, no text."
+    },
+    {
+      "key": "02-prince-in-the-palace",
+      "sceneId": "{F92970F1-35FD-4737-B81E-89A52B391938}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-35ab8c84-627c-40b1-9454-05c5f4cadfb5.png",
+      "prompt": "Use case: illustration-story. One wide 16:9 anime illustration for a Japanese fantasy-comedy manga-introduction video, ideally 1920x1080. Polished 2D anime, clean delicate linework, soft cel shading, fresh cream/sky-blue/gold palace palette with lavender contrasts. Characters are cute chibi about 2.5 to 3 heads tall, large expressive round heads and tiny fully clothed unaccentuated bodies, modest closed-neck long-sleeved outfits and full trousers or long robes. Charming comic timing and clear readable expressions. No writing, letters, subtitles, speech bubbles, logos, watermarks or panel borders. No graphic violence or injuries, the darkness is metaphorical cartoon gloom only.  SAME protagonist Prince Raia: fluffy short golden-blond hair with a prominent upward side-swept tuft, bright emerald-green eyes, fair skin, cherubic round face, white long-sleeved high-collared prince coat with gold trim and decorative crossed bands, dark lavender inner panel, pale lavender neck bow, white full-length trousers, gold-edged cuffs and dark practical boots. Tiny 2.5-to-3-head-tall chibi boy, no crown required.  Asset: manga introduction in the palace. Reference1 fixes EXACT Raia's chibi proportions, blond tuft, green eyes, white-gold prince uniform with lavender neck bow and emerald brooch, white long trousers and dark boots. Reference2 fixes architectural colors. NEW wide palace interior: ivory marble hall, slender gold-trimmed pillars, elegant chandelier, tall arched windows opening onto flower gardens, a dignified blue-and-gold throne set farther back. Raia stands beside rather than on the throne, hands politely folded, a sweet gentle smile and bright open eyes facing viewer. A faint mischievous glint in his eye and small lavender curlicue shadow behind him suggest comic double intentions without menace. Plenty of warm daylight, luxurious but welcoming, clean eye-level wide composition. Only Raia in foreground, no other reference people, no cloud above head in this shot. No lettering or logos."
+    },
+    {
+      "key": "03-before-reincarnation",
+      "sceneId": "{316562F1-D17E-4FF1-9DD8-ECE38748AD57}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-15f135b0-d3a4-4d6a-9177-6a146074374b.png",
+      "prompt": "Use case: illustration-story. One wide 16:9 anime illustration for a Japanese fantasy-comedy manga-introduction video, ideally 1920x1080. Polished 2D anime, clean delicate linework, soft cel shading, fresh cream/sky-blue/gold palace palette with lavender contrasts. Characters are cute chibi about 2.5 to 3 heads tall, large expressive round heads and tiny fully clothed unaccentuated bodies, modest closed-neck long-sleeved outfits and full trousers or long robes. Charming comic timing and clear readable expressions. No writing, letters, subtitles, speech bubbles, logos, watermarks or panel borders. No graphic violence or injuries, the darkness is metaphorical cartoon gloom only.  Asset: protagonist's PREVIOUS modern-Japan adult life, before reincarnation. Reference is anime rendering/style reference only, NOT this scene's architecture, clothes or blond child. A small dim modern Japanese study at night. ONE ADULT MAN seen from behind at a three-quarter angle, unmistakably grown-up with short slightly tousled dark-brown hair, a hint of adult jaw/stubble visible in profile, loose blue long-sleeved cardigan over gray shirt, full-length dark trousers. Draw him as a charming chibi ADULT about 3 heads tall, not a child prince. He sits properly upright at an ordinary wooden desk, absorbed in an open fictional fantasy novel, eyes shining with moved excitement as he follows a dramatic story, one hand near his cheek. Nearby a few stacks of invented fantasy books/manga with plain unlettered covers, mug and desk lamp. A computer monitor shows only a wordless dramatic imaginary landscape: distant ruined stone arch against storm clouds with a small patch of triumphant dawn, no people or violence. Warm desk light against muted blue room, quiet bookshelves, respectful medium-wide over-the-shoulder shot. The fantasy book titles and monitor have NO letters, no gore or injury, no actual suffering, no prince outfit or other people."
+    },
+    {
+      "key": "04-goddess-misunderstanding",
+      "sceneId": "{173CBE40-A80A-4710-B57E-EA2E3F8D8E6C}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-26a4a01a-ccc3-48fe-b347-43d5c96ba3a8.png",
+      "prompt": "Use case: illustration-story. One wide 16:9 anime illustration for a Japanese fantasy-comedy manga-introduction video, ideally 1920x1080. Polished 2D anime, clean delicate linework, soft cel shading, fresh cream/sky-blue/gold palace palette with lavender contrasts. Characters are cute chibi about 2.5 to 3 heads tall, large expressive round heads and tiny fully clothed unaccentuated bodies, modest closed-neck long-sleeved outfits and full trousers or long robes. Charming comic timing and clear readable expressions. No writing, letters, subtitles, speech bubbles, logos, watermarks or panel borders. No graphic violence or injuries, the darkness is metaphorical cartoon gloom only.  Asset: the goddess misunderstands the wish, reincarnation blessing above the clouds. Reference1 fixes the SAME modern-life ADULT man's dark-brown tousled short hair, faint stubble, blue cardigan and full-length trousers, depicted as a three-head-tall chibi adult. Reference2 fixes luminous ivory/blue/gold fantasy rendering only. NEW airy ancient-style temple floating on fluffy white clouds, slender ivory columns, pale gold mosaics, blue sky. In foreground the man seen from behind as a small hopeful silhouette, arms slightly open in eager expectation. Farther center-right a kind adult goddess smiles warmly and raises her hands to bless him, surrounded by gentle gold motes. Goddess is an ORIGINAL illustrative design, not the cover girl: long silvery-blue hair, delicate gold laurel circlet, flowing fully closed-neck white-and-pale-blue long-sleeved FLOOR-LENGTH robe, modest loose silhouette, chibi adult proportions and serene face. Her radiant generosity and his eager little posture hint at a comic misunderstanding, not romance or horror. Clear wide eye-level framing, no body emphasis or revealing dress, no speech balloons or words, no death scene, no violent imagery."
+    },
+    {
+      "key": "05-angelic-troublemaker",
+      "sceneId": "{F743296D-B1A5-482C-A2A8-B9A98F0D93DE}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-1687b69f-2b4d-4d8c-9238-453a8095976b.png",
+      "prompt": "Use case: illustration-story. One wide 16:9 anime illustration for a Japanese fantasy-comedy manga-introduction video, ideally 1920x1080. Polished 2D anime, clean delicate linework, soft cel shading, fresh cream/sky-blue/gold palace palette with lavender contrasts. Characters are cute chibi about 2.5 to 3 heads tall, large expressive round heads and tiny fully clothed unaccentuated bodies, modest closed-neck long-sleeved outfits and full trousers or long robes. Charming comic timing and clear readable expressions. No writing, letters, subtitles, speech bubbles, logos, watermarks or panel borders. No graphic violence or injuries, the darkness is metaphorical cartoon gloom only.  SAME protagonist Prince Raia: fluffy short golden-blond hair with a prominent upward side-swept tuft, bright emerald-green eyes, fair skin, cherubic round face, white long-sleeved high-collared prince coat with gold trim and decorative crossed bands, dark lavender inner panel, pale lavender neck bow, white full-length trousers, gold-edged cuffs and dark practical boots. Tiny 2.5-to-3-head-tall chibi boy, no crown required.  Asset: an angelic face hiding a troublesome inner wish. Use reference1 for EXACT prince's appearance/clothes, reference2 for cheerful castle-town setting and background character style. NEW royal palace garden, neat white-and-blue flowerbeds, white stone balustrade, green hedges, fountain and ornate ivory building under a fresh blue sky. Raia stands gracefully among the flowers with a perfectly sweet innocent smile, one hand politely raised near his chest. Just behind HIS shoulders a small abstract dark-purple swirling cartoon haze hints at mischievous thoughts, no faces or creatures in the haze. Farther behind, softly drawn kind family members and attendants admire him affectionately from a respectful distance: modest long royal coats/dresses, one mature fatherly figure and a cheerful servant, understated small supporting silhouettes rather than featured canon designs. Sunny welcoming garden occupies most of the wide eye-level composition. Warm happy outer world versus tiny comic gloom behind Raia, no literal harm, no text."
+    },
+    {
+      "key": "06-journey-for-despair",
+      "sceneId": "{9694B625-CABF-4552-AE46-A5034A00577F}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-03c577ca-3905-454a-a889-78881afc6bfb.png",
+      "prompt": "Use case: illustration-story. One wide 16:9 anime illustration for a Japanese fantasy-comedy manga-introduction video, ideally 1920x1080. Polished 2D anime, clean delicate linework, soft cel shading, fresh cream/sky-blue/gold palace palette with lavender contrasts. Characters are cute chibi about 2.5 to 3 heads tall, large expressive round heads and tiny fully clothed unaccentuated bodies, modest closed-neck long-sleeved outfits and full trousers or long robes. Charming comic timing and clear readable expressions. No writing, letters, subtitles, speech bubbles, logos, watermarks or panel borders. No graphic violence or injuries, the darkness is metaphorical cartoon gloom only.  SAME protagonist Prince Raia: fluffy short golden-blond hair with a prominent upward side-swept tuft, bright emerald-green eyes, fair skin, cherubic round face, white long-sleeved high-collared prince coat with gold trim and decorative crossed bands, dark lavender inner panel, pale lavender neck bow, white full-length trousers, gold-edged cuffs and dark practical boots. Tiny 2.5-to-3-head-tall chibi boy, no crown required.  Asset: setting off to seek dramatic stories. Reference1 fixes SAME Raia's blond tuft, green eyes, chibi proportions and white/gold/lavender princely uniform. Add a simple short sky-blue travelling cloak closed at neck and a small brown satchel, retaining full-length trousers and boots. Reference2 fixes SAME blue-roofed ivory castle and gentle kingdom. NEW wide countryside road outside the city gate, distant beautiful castle BEHIND him, rolling green meadows carpeted with little wildflowers, small songbirds, inviting far mountains under broad blue sky. Raia is a small-to-medium full figure in lower foreground seen in THREE-QUARTER BACK view, gazing eagerly toward the distant hills with a subtle mischievous expectant side-profile smile, one hand shielding his eyes to scout for adventure. No sad cloud over his head; he now looks motivated. Warm hopeful landscape deliberately contrasts with his peculiar motive. Entirely safe sunny road, flowing cloak stays behind him without hiding his coherent shape, no weapons drawn, no danger, no words. Landscape dominant wide eye-level camera."
+    },
+    {
+      "key": "07-inner-thoughts-and-reputation",
+      "sceneId": "{9B67D1FA-D770-4E7B-8EB3-444DBB65957C}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-a051dbb6-1198-4e55-a2e4-6d0f3a528aa3.png",
+      "prompt": "Use case: illustration-story. One wide 16:9 anime illustration for a Japanese fantasy-comedy manga-introduction video, ideally 1920x1080. Polished 2D anime, clean delicate linework, soft cel shading, fresh cream/sky-blue/gold palace palette with lavender contrasts. Characters are cute chibi about 2.5 to 3 heads tall, large expressive round heads and tiny fully clothed unaccentuated bodies, modest closed-neck long-sleeved outfits and full trousers or long robes. Charming comic timing and clear readable expressions. No writing, letters, subtitles, speech bubbles, logos, watermarks or panel borders. No graphic violence or injuries, the darkness is metaphorical cartoon gloom only.  SAME protagonist Prince Raia: fluffy short golden-blond hair with a prominent upward side-swept tuft, bright emerald-green eyes, fair skin, cherubic round face, white long-sleeved high-collared prince coat with gold trim and decorative crossed bands, dark lavender inner panel, pale lavender neck bow, white full-length trousers, gold-edged cuffs and dark practical boots. Tiny 2.5-to-3-head-tall chibi boy, no crown required.  Asset: his true thoughts and everyone else's evaluation are opposite. Reference1 fixes Raia and the SAME bright palace hall with ivory columns, blue throne, chandelier and gold details. Reference2 fixes admiring supporting people/style. NEW clear visual contrast within one scene, no split-panel borders. Raia stands near center with an outwardly gentle smile and hand held politely to chest. Most of the palace is warm ivory/gold daylight, small courteous chibi attendants and townspeople gathered at respectful distance looking at him with delighted admiration, some clasping hands in gratitude. They are supporting extras with modest long-sleeved medieval outfits. On the far right of composition, purple abstract swirling smoke and a few sharp violet glints symbolize his odd internal longing, occupying roughly a quarter of image without obscuring anyone. Dark metaphorical clouds must NOT become monsters, faces, demons, or literal disaster. All faces cute, tiny bodies, ordinary upright gestures, no romantic framing. Eye-level wide shot, visually funny gap between sweet public image and cartoonish secret gloom. No text/symbol letters or speech balloons."
+    },
+    {
+      "key": "08-kind-world-and-dark-dream",
+      "sceneId": "{A0075386-5EA7-44EB-AEF4-C47C2D577145}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-f2b2cda7-91c0-4a00-8bce-2960f9852e11.png",
+      "prompt": "Use case: illustration-story. One wide 16:9 anime illustration for a Japanese fantasy-comedy manga-introduction video, ideally 1920x1080. Polished 2D anime, clean delicate linework, soft cel shading, fresh cream/sky-blue/gold palace palette with lavender contrasts. Characters are cute chibi about 2.5 to 3 heads tall, large expressive round heads and tiny fully clothed unaccentuated bodies, modest closed-neck long-sleeved outfits and full trousers or long robes. Charming comic timing and clear readable expressions. No writing, letters, subtitles, speech bubbles, logos, watermarks or panel borders. No graphic violence or injuries, the darkness is metaphorical cartoon gloom only.  SAME protagonist Prince Raia: fluffy short golden-blond hair with a prominent upward side-swept tuft, bright emerald-green eyes, fair skin, cherubic round face, white long-sleeved high-collared prince coat with gold trim and decorative crossed bands, dark lavender inner panel, pale lavender neck bow, white full-length trousers, gold-edged cuffs and dark practical boots. Tiny 2.5-to-3-head-tall chibi boy, no crown required.  Asset: recommendation scene, a humorous dramatic contrast between a kind world and the dramatic world he imagines. Reference1 fixes SAME tiny chibi prince's face and full white-gold-lavender uniform. Reference2 fixes SAME beautiful green kingdom, blue-roofed white castle and distant mountains. NEW wide single landscape composition: Prince Raia stands upright gracefully in center, full small figure, cheerful sweet front-facing smile with a tiny knowing glint, hands resting naturally at sides. LEFT half of background: sunny pastel fantasy gardens, little flowers, ivory castle, birds and glowing blue sky. RIGHT half: symbolic imagined landscape of empty rocky ground, old weathered stone arch, lavender storm clouds and distant mountains, muted purple dramatic light. Blend two atmospheres softly behind the central prince without a panel divider; NOT a literal war, disaster or destruction. His spotless fully covered outfit stays evenly lit and readable. Cute chibi comedic contrast, broad eye-level framing and rich anime scenery, no other foreground characters, no monsters, victims or injuries, no captions/title/text."
+    },
+    {
+      "key": "09-thumbnail",
+      "sceneId": "thumbnail",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-4540dcc1-d726-4f1d-acfd-10aa6ddf270e.png",
+      "prompt": "Use case: illustration-story. Create ONE final Japanese manga introduction video thumbnail in landscape 16:9, ideally 1920x1080. Polished bright 2D anime, soft cel shading, crisp expressive chibi faces, cream/sky-blue/gold palace scenery versus playful purple gloom. Reference1 combines the SAME sunny blue-roofed ivory kingdom and symbolic purple storm/stone arch, reference2 fixes EXACT Prince Raia's face, blond tuft, green eyes and white-gold-lavender royal costume, reference3 fixes Tohoku Kiritan narrator hair/eyes/costume colors. Do not copy existing reference text or layouts.\n\nTypography must contain ALL these exact Japanese strings, no omissions:\nsmall badge 「漫画」\nlarge title line 1 「鬱展開大好き主人公」\nlarge title line 2 「VS 優しい世界」\nsmaller but clearly legible subtitle line 1 「転生先が平和すぎるので、」\nsubtitle line 2 「至高の絶望を求めて旅に出ます」\nUse bold beautifully readable Japanese display lettering, main title with white/cream and deep-violet outline, 'VS' gold accent, kind-world words sky-blue/gold contrast. Main title occupies the upper ~38% in two strong lines; subtitle goes on a pale cream lower banner in two clean lines with dark-violet letters. Text safe margins, no extra slogans or invented writing. Exact kanji especially 鬱 展開 至高 絶望, no duplicated characters.\n\nBetween title and subtitle, place two large round-headed cute 2.5-to-3-head-tall chibi characters, clear uncluttered composition. Left/center Prince Raia: fluffy golden blond hair with upward swept tuft, emerald-green eyes, fair skin, white long-sleeved closed high-collared prince coat with gold trim, lavender neck bow and emerald brooch, white full-length trousers and dark boots. He has a comically disappointed half-lidded expression and tiny harmless dark-purple gloom cloud above him, slumped little shoulders, contrasting with the radiant welcoming castle gardens behind him. Keep adorable, no actual suffering or violence.\nRight is Kiritan cheerfully presenting with an open smile and one hand gesturing toward the prince/title: wine-brown bob and straight bangs/side locks, red eyes, white pointed hair ornaments, white and pale-pink long-sleeved kimono with burgundy obi. Keep kimono neckline properly overlapped and closed; use a modest longer hem with opaque leggings/socks and practical footwear, fully clothed unaccentuated little chibi body. Preserve recognizable color design but adapt to this same anime style. Two characters total, ordinary upright gestures, no anatomy emphasis or intimate posing.\n\nBackground combines completed illustrations: peaceful ivory castle and blue sky toward left, violet swirls and distant empty weathered arch toward right, garden flowers near bottom edges. Purple darkness is only a humorous symbolic thought, no monsters, injuries or victims. Do not place detailed scenery behind the lettering. No watermark, no logos beyond requested text, no panel borders."
+    }
+  ],
+  "verification": {
+    "projectId": "{009CB6AB-5EA7-4663-B9FE-E9CE29119584}",
+    "revision": 276,
+    "saved": true,
+    "cueCount": 40,
+    "cueJsonUnchanged": true,
+    "voiceReady": 40,
+    "voiceHeard": 40,
+    "imagesSent": 10,
+    "thumbnailSourcesReady": true,
+    "thumbnailApproved": false,
+    "images": [
+      {
+        "key": "00-common-background",
+        "sceneId": "common-background",
+        "sha256": "b2ddbe46243a33a5b28db8e3d0500a7acdf6d78dca0b9e71d7d8d99ea392556e",
+        "width": 1672,
+        "height": 941,
+        "bytes": 2076208,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{009CB6AB-5EA7-4663-B9FE-E9CE29119584}\\project.assets\\b2ddbe46243a33a5b28db8e3d0500a7acdf6d78dca0b9e71d7d8d99ea392556e.png",
+        "approved": true
+      },
+      {
+        "key": "01-too-peaceful-kingdom",
+        "sceneId": "{D1276D2E-A7DF-4367-8FDD-9A58AB7472DE}",
+        "sha256": "60294409ce745f3fabc59ed6f50ab1d7fff49e9e9d922fc60522a11e2c72e6b8",
+        "width": 1672,
+        "height": 941,
+        "bytes": 2814248,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{009CB6AB-5EA7-4663-B9FE-E9CE29119584}\\project.assets\\60294409ce745f3fabc59ed6f50ab1d7fff49e9e9d922fc60522a11e2c72e6b8.png",
+        "approved": true
+      },
+      {
+        "key": "02-prince-in-the-palace",
+        "sceneId": "{F92970F1-35FD-4737-B81E-89A52B391938}",
+        "sha256": "08ebfbc6dff866e65d97c4e4e82bf73960f95e66e0e0973788001911dd7dc09e",
+        "width": 1672,
+        "height": 941,
+        "bytes": 2762666,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{009CB6AB-5EA7-4663-B9FE-E9CE29119584}\\project.assets\\08ebfbc6dff866e65d97c4e4e82bf73960f95e66e0e0973788001911dd7dc09e.png",
+        "approved": true
+      },
+      {
+        "key": "03-before-reincarnation",
+        "sceneId": "{316562F1-D17E-4FF1-9DD8-ECE38748AD57}",
+        "sha256": "b7e0e4b7fbdc7dcd6aeddd598927bc3dfac450dd8f86718b32cb06602d7a9e96",
+        "width": 1672,
+        "height": 941,
+        "bytes": 2230031,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{009CB6AB-5EA7-4663-B9FE-E9CE29119584}\\project.assets\\b7e0e4b7fbdc7dcd6aeddd598927bc3dfac450dd8f86718b32cb06602d7a9e96.png",
+        "approved": true
+      },
+      {
+        "key": "04-goddess-misunderstanding",
+        "sceneId": "{173CBE40-A80A-4710-B57E-EA2E3F8D8E6C}",
+        "sha256": "6e7a760dba0a6f3e93af7675bdd6f717a669e38b33a02dbc91cc9615f305aa1f",
+        "width": 1672,
+        "height": 941,
+        "bytes": 2658869,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{009CB6AB-5EA7-4663-B9FE-E9CE29119584}\\project.assets\\6e7a760dba0a6f3e93af7675bdd6f717a669e38b33a02dbc91cc9615f305aa1f.png",
+        "approved": true
+      },
+      {
+        "key": "05-angelic-troublemaker",
+        "sceneId": "{F743296D-B1A5-482C-A2A8-B9A98F0D93DE}",
+        "sha256": "b4036d1860739db3f6b8306445f5e5f7d1fddd183d784705ca88017c1d680707",
+        "width": 1672,
+        "height": 941,
+        "bytes": 2921779,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{009CB6AB-5EA7-4663-B9FE-E9CE29119584}\\project.assets\\b4036d1860739db3f6b8306445f5e5f7d1fddd183d784705ca88017c1d680707.png",
+        "approved": true
+      },
+      {
+        "key": "06-journey-for-despair",
+        "sceneId": "{9694B625-CABF-4552-AE46-A5034A00577F}",
+        "sha256": "66a6bfe29a1ed24854ae7c9f7d05f2777ee1e654b4f598d33c907af02709e804",
+        "width": 1672,
+        "height": 941,
+        "bytes": 2947741,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{009CB6AB-5EA7-4663-B9FE-E9CE29119584}\\project.assets\\66a6bfe29a1ed24854ae7c9f7d05f2777ee1e654b4f598d33c907af02709e804.png",
+        "approved": true
+      },
+      {
+        "key": "07-inner-thoughts-and-reputation",
+        "sceneId": "{9B67D1FA-D770-4E7B-8EB3-444DBB65957C}",
+        "sha256": "caa2397ff7af612a52362f5cd19bcb4da4069c7938c3cb23d4b3f7e035a2ebf6",
+        "width": 1672,
+        "height": 941,
+        "bytes": 2843808,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{009CB6AB-5EA7-4663-B9FE-E9CE29119584}\\project.assets\\caa2397ff7af612a52362f5cd19bcb4da4069c7938c3cb23d4b3f7e035a2ebf6.png",
+        "approved": true
+      },
+      {
+        "key": "08-kind-world-and-dark-dream",
+        "sceneId": "{A0075386-5EA7-44EB-AEF4-C47C2D577145}",
+        "sha256": "4ac899afcee0d20a3a710c1da6ba40c9c172b45e21d6fbd1f71aefe6c4707440",
+        "width": 1672,
+        "height": 941,
+        "bytes": 3038942,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{009CB6AB-5EA7-4663-B9FE-E9CE29119584}\\project.assets\\4ac899afcee0d20a3a710c1da6ba40c9c172b45e21d6fbd1f71aefe6c4707440.png",
+        "approved": true
+      },
+      {
+        "key": "09-thumbnail",
+        "sceneId": "thumbnail",
+        "sha256": "009c936e67e3b557bb44c7afdb50e403fb30831842ce86f7c9808873bb0d3274",
+        "width": 1672,
+        "height": 941,
+        "bytes": 2967379,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{009CB6AB-5EA7-4663-B9FE-E9CE29119584}\\project.assets\\009c936e67e3b557bb44c7afdb50e403fb30831842ce86f7c9808873bb0d3274.png",
+        "approved": false
+      }
+    ]
+  },
+  "visualReview": {
+    "method": "各生成結果を表示して目視",
+    "result": "王子の低頭身・外見・衣装の継続、明るい王国と紫の暗い想像との対比、サムネイルの主題・副題全文と東北きりたんを確認。",
+    "limits": "背景・脇役・転生前の男性と女神は紹介用の創作イメージ。全画像1672×941 PNG。動画出力・保存再開後のGUI表示は未実施。"
+  },
+  "humanReview": {
+    "backgroundAndMainImages": "ユーザーが確定チェックを入れたと回答。背景と本編のapproved=true、sourcesReady=trueを確認。",
+    "thumbnail": "送信・保存済み。最後の確定チェック待ち。"
+  },
+  "evidenceDirectory": "output/production/20261018-utsutenkai-chibi"
+}

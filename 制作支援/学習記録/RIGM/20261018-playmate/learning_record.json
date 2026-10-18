@@ -1,0 +1,723 @@
+﻿{
+  "format": "RIGMMaker.ImageProductionLearning",
+  "date": "2026-10-18",
+  "title": "ぷれいめ～と",
+  "author": "まゃ～吾郎",
+  "workUrl": "https://manga.nicovideo.jp/comic/77323",
+  "officialContextUrl": "https://comic-walker.com/detail/KC_008613_S",
+  "projectId": "{1F8F8489-EFDF-49CA-A892-F41A8D9A337C}",
+  "mode": "built-in image_gen",
+  "userRequest": "センシティブにならないように、キャラは等身を低くアニメチックに。実行中アプリへ生成・送信。",
+  "inputs": {
+    "scenes": [
+      {
+        "id": "{F3599BAC-A466-48C3-8B06-8B90F1079977}",
+        "title": "オープニング",
+        "image": "",
+        "description": "",
+        "imagePrompt": "",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 0,
+        "displayMode": "none",
+        "animation": {},
+        "sceneNumber": 1,
+        "start": 0,
+        "duration": 6.308,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{DBD583D5-C110-4940-B93D-71288D118924}",
+            "sourceText": "東北きりたんです"
+          },
+          {
+            "cueId": "{AA3C0041-50A5-4C5F-A871-48895E345214}",
+            "sourceText": "今回もニコニコ漫画から"
+          },
+          {
+            "cueId": "{71413BCC-4407-4BB6-932E-B5E8F7AE69B6}",
+            "sourceText": "無料で最新話まで読める作品を紹介します"
+          }
+        ],
+        "cueCount": 3,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{1E6F2095-703F-476A-B882-E5314CBF653F}",
+        "title": "お姫様と田舎の遊び！？",
+        "image": "",
+        "description": "お姫様が日本の田舎に！？",
+        "imagePrompt": "横長16:9。夏の日本の田舎町。青空と入道雲、緑豊かな田んぼ、遠くの山並み。手前の小道には二人の少女の後ろ姿を小さく配置し、一人は地元の少女、もう一人は外国から来た少女という雰囲気にする。具体的な外見は限定しない。明るく少しコミカルな漫画風。文字なし。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 1,
+        "animation": {},
+        "sceneNumber": 2,
+        "start": 6.308,
+        "duration": 18.5866666666667,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{F68AD4AE-7941-4F3E-99D4-5CCA2ABFD024}",
+            "sourceText": "皆さん、最近外で思いっきり遊んだことはありますか？"
+          },
+          {
+            "cueId": "{3D306136-DAFB-4D60-BBBE-61BE3D8491A2}",
+            "sourceText": "かくれんぼに鬼ごっこ、スイカ割り。子供の頃は何でも遊びになりましたよね。"
+          },
+          {
+            "cueId": "{853CC595-1CBA-4A2C-8C8E-711CD3D25FAA}",
+            "sourceText": "では、そんな日本の遊びを外国のお姫様が体験したら、どうなるのでしょうか？"
+          },
+          {
+            "cueId": "{0D05B78A-F341-460B-AB8F-19A706C9A0A2}",
+            "sourceText": "今回は、ちょっと変わった二人の少女の日常を描くコメディ漫画をご紹介します。"
+          }
+        ],
+        "cueCount": 4,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{EA7C3A1F-4301-4EA5-B2B7-7F933E76804C}",
+        "title": "作品紹介",
+        "image": "",
+        "description": "遊びがテーマの日常コメディ",
+        "imagePrompt": "横長16:9。緑豊かな日本の田舎町。古い木造の家屋、小さな商店、田んぼの間を通る道。明るい夏の日差しが降り注ぐ広角風景。のどかで懐かしい雰囲気。人物や文字は描かない。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 2,
+        "animation": {},
+        "sceneNumber": 3,
+        "start": 24.8946666666667,
+        "duration": 19.6213333333333,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{ECD141E2-4F91-4560-98D2-BC77AA3BC732}",
+            "sourceText": "今回ご紹介するのは、まゃ～吾郎先生の『ぷれいめ～と』。"
+          },
+          {
+            "cueId": "{E71AFCE6-409E-4F9F-805F-DC97888BFF04}",
+            "sourceText": "2026年6月30日にカドコミで連載が始まった、友情と遊びをテーマにした日常コメディです。"
+          },
+          {
+            "cueId": "{8E599900-38BE-4373-9BD8-2F00269EE7D7}",
+            "sourceText": "舞台は、どこか懐かしい雰囲気の日本の田舎町。"
+          },
+          {
+            "cueId": "{8D2A182F-D0E0-41B5-9A11-AFD06D81AB37}",
+            "sourceText": "そこで暮らす二人の少女が、毎日さまざまな遊びを楽しんでいく物語です。"
+          }
+        ],
+        "cueCount": 4,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{32CEA505-1194-4F2F-B78E-B25474DC5579}",
+        "title": "田舎暮らしのクロちゃん",
+        "image": "",
+        "description": "田舎町に暮らすクロちゃん",
+        "imagePrompt": "横長16:9。夏の田舎道を歩く一人の少女の後ろ姿。周囲には青々とした田んぼと木々、小さな用水路。少女は自然体で歩いている。外見の詳細は限定せず、明るく親しみやすい漫画風の構図。文字なし。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 2,
+        "animation": {},
+        "sceneNumber": 4,
+        "start": 44.516,
+        "duration": 16.112,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{AEA773BB-7FDF-4F55-A573-CC2DA4DA3280}",
+            "sourceText": "物語の中心となる一人目の少女は、田舎町で暮らすクロちゃん。"
+          },
+          {
+            "cueId": "{93322D54-C6E2-41D3-9891-70B51739D943}",
+            "sourceText": "彼女には、とても大切なお友達がいます。"
+          },
+          {
+            "cueId": "{5D7ABDA4-7E21-491A-963B-A49E82E31162}",
+            "sourceText": "その友達と一緒に、毎日いろいろな遊びを楽しんでいるんです。"
+          },
+          {
+            "cueId": "{F73C21A4-7A80-4F6F-A420-BAAA0FAFECCF}",
+            "sourceText": "特別な冒険に出かけるわけではなく、身近な場所が二人の遊び場になります。"
+          }
+        ],
+        "cueCount": 4,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{18AB0DA0-CB20-4770-A34E-BE1EEBA0F041}",
+        "title": "外国から来たお姫様",
+        "image": "",
+        "description": "もう一人の主役はお姫様！",
+        "imagePrompt": "横長16:9。日本の田舎にある古い木造家屋の縁側。二人の少女が並んで座り、楽しそうに会話している後ろ姿。一人は地元の少女、もう一人は外国のお姫様という設定を上品で控えめな服装の違いで表現。柔らかな午後の光。文字なし。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 2,
+        "animation": {},
+        "sceneNumber": 5,
+        "start": 60.628,
+        "duration": 18.3093333333333,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{FCBA8E2F-A009-4360-B4B8-0E829613D36C}",
+            "sourceText": "そしてもう一人の主役が、外国からやってきたお姫様、りりぃちゃんです。"
+          },
+          {
+            "cueId": "{0746B7D8-B2F5-4BAE-8A7D-11B1C78961F8}",
+            "sourceText": "お姫様と聞くと、豪華なお城や優雅なお茶会を想像しますよね。"
+          },
+          {
+            "cueId": "{D1A7C536-5E3D-4EE2-A1A1-E818519DD040}",
+            "sourceText": "ところが本作で二人が楽しむのは、日本の昔ながらの遊び！"
+          },
+          {
+            "cueId": "{E3DF1614-10AE-4F87-BCB0-17F709B795AC}",
+            "sourceText": "お姫様という特別な立場と、身近で素朴な遊びの組み合わせが面白いところです。"
+          }
+        ],
+        "cueCount": 4,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{1316EA8F-2FD3-4E96-989C-23016B14065A}",
+        "title": "夏といえばスイカ割り",
+        "image": "",
+        "description": "第1話はスイカ割り！",
+        "imagePrompt": "横長16:9。真夏の田舎の庭。中央に丸いスイカを置き、そばに木の棒と目隠し用の布を配置。周囲には青々とした草木と縁側、遠くには入道雲。夏休みを感じさせる明るくコミカルな漫画風の構図。人物や文字なし。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 2,
+        "animation": {},
+        "sceneNumber": 6,
+        "start": 78.9373333333333,
+        "duration": 18.064,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{F53BD167-71AE-40DB-A5AA-7BD91AEC15FA}",
+            "sourceText": "第1話のテーマは、夏の定番、スイカ割りです。"
+          },
+          {
+            "cueId": "{EDC603B8-C86D-4B21-8BA6-C03E8E2F500D}",
+            "sourceText": "目隠しをして、周りの声を頼りにスイカを目指す。単純ですが、盛り上がる遊びですよね。"
+          },
+          {
+            "cueId": "{6E0B7205-45A0-4169-931D-E5DB89469748}",
+            "sourceText": "そんな昔ながらの遊びを、クロちゃんとりりぃちゃんが楽しみます。"
+          },
+          {
+            "cueId": "{2C101E8B-FD90-43C8-8D2C-1B00E76410D7}",
+            "sourceText": "お姫様がスイカ割りをするというだけでも、なかなか珍しい光景ではないでしょうか。"
+          }
+        ],
+        "cueCount": 4,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{19138CCE-9ABA-4FD2-B0DA-730827AF6854}",
+        "title": "今度の遊びは肝試し",
+        "image": "",
+        "description": "次はドキドキの肝試し！",
+        "imagePrompt": "横長16:9。夏の夜の日本の田舎。暗い神社への石段と古い鳥居、周囲には木々が生い茂っている。月明かりと小さな懐中電灯の光が道を照らし、少し不気味ながらもコミカルな雰囲気。人物や文字なし。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 2,
+        "animation": {},
+        "sceneNumber": 7,
+        "start": 97.0013333333333,
+        "duration": 16.336,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{302C84B4-40FE-450B-841D-45BC88D54A40}",
+            "sourceText": "そして第2話では、肝試しがテーマになります。"
+          },
+          {
+            "cueId": "{D17B9FF2-54F9-4504-9D97-6DF713103894}",
+            "sourceText": "昼間の明るい遊びから一転して、今度はちょっと怖い夜の遊びです。"
+          },
+          {
+            "cueId": "{76D1E608-93C2-4B2A-A8D8-F2EB5DEC2238}",
+            "sourceText": "スイカ割りと肝試し。どちらも日本の夏休みを代表する遊びですよね。"
+          },
+          {
+            "cueId": "{6405A734-19D7-4A84-A52F-9A1E9398418F}",
+            "sourceText": "次はどんな遊びが登場するのか、そんな楽しみもある作品です。"
+          }
+        ],
+        "cueCount": 4,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{570EA1ED-EB8F-4443-8BC8-EA2EB4840B22}",
+        "title": "穏やかな日常、のはずが？",
+        "image": "",
+        "description": "穏やかな日常に何かが！？",
+        "imagePrompt": "横長16:9。明るい田舎の庭で、二人の少女が遊んでいる様子を少し離れた位置から描く。片方の少女は元気よく動き、もう一人は少し驚いた仕草をしている。周囲に小さな遊び道具。活気があり、コメディらしい雰囲気。外見の詳細は限定しない。文字なし。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 2,
+        "animation": {},
+        "sceneNumber": 8,
+        "start": 113.337333333333,
+        "duration": 20.5293333333333,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{9FE80F93-52B6-4D8C-91E5-D107D3494D59}",
+            "sourceText": "公式紹介では、二人が穏やかな日常を送っていると説明されています。"
+          },
+          {
+            "cueId": "{A6229565-7719-4F28-A287-8081BDFF0577}",
+            "sourceText": "ただし、その穏やかという言葉には、なぜか疑問符が付いているんです。"
+          },
+          {
+            "cueId": "{1B735968-991F-4547-A7CB-C12C2950E2F7}",
+            "sourceText": "これは普通の日常漫画だと思っていると、少し違うのかもしれません。"
+          },
+          {
+            "cueId": "{0D544791-7B49-4359-A647-A7B9E483DA85}",
+            "sourceText": "かわいらしい二人と、何が起こるかわからない遊びの組み合わせ。"
+          },
+          {
+            "cueId": "{2845C556-0956-4740-A324-180EA33B531F}",
+            "sourceText": "そんなギャグと日常のバランスにも注目したいですね。"
+          }
+        ],
+        "cueCount": 5,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{B9DA0EFF-A8E0-4324-B288-6ED25CB26B9B}",
+        "title": "スマホのない遊びの楽しさ",
+        "image": "",
+        "description": "遊びに必要なのは友達だけ！",
+        "imagePrompt": "横長16:9。日本の田舎の広い草原。鬼ごっこをしている二人の少女の小さなシルエット。背景には田んぼと山並み、青空に浮かぶ白い雲。草の揺れと夏の日差しで開放感を表現。文字なし。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 2,
+        "animation": {},
+        "sceneNumber": 9,
+        "start": 133.866666666667,
+        "duration": 18.7573333333333,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{662E305E-0485-432C-AE43-308B0636CF4C}",
+            "sourceText": "この作品でもう一つ注目したいのが、スマホやパソコンを使わない遊びです。"
+          },
+          {
+            "cueId": "{FC33BD26-D000-4219-A346-AF74E99C3D87}",
+            "sourceText": "かくれんぼ、水遊び、鬼ごっこ。どれも特別な機械がなくても楽しめます。"
+          },
+          {
+            "cueId": "{01914924-2AA0-4745-8E7A-3D0609998BE7}",
+            "sourceText": "便利な娯楽が増えた今だからこそ、こうした遊びが新鮮に感じられるかもしれません。"
+          },
+          {
+            "cueId": "{E50AFEA4-51C3-49FE-B06F-4193EB7FED86}",
+            "sourceText": "皆さんは子供の頃、どんな遊びに夢中になっていましたか？"
+          }
+        ],
+        "cueCount": 4,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{2FC8DDDF-2447-4653-B67E-988887202D13}",
+        "title": "こんな人におすすめ",
+        "image": "",
+        "description": "懐かしくて楽しい日常",
+        "imagePrompt": "横長16:9。夕暮れの日本の田舎町。オレンジ色に染まった空、遠くの山並み、静かな田んぼ。二人の少女の後ろ姿が並んで帰り道を歩いている。懐かしく温かな夏の終わりを感じさせる構図。文字なし。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 1,
+        "animation": {},
+        "sceneNumber": 10,
+        "start": 152.624,
+        "duration": 17.38,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{6A0DDB46-F179-4029-891A-51EB0BC53EB7}",
+            "sourceText": "本作は、かわいい女の子たちの日常や、ゆるいコメディが好きな人におすすめです。"
+          },
+          {
+            "cueId": "{D2FBA948-E838-46B1-920B-E63730040495}",
+            "sourceText": "特に、昔ながらの遊びや田舎の風景に懐かしさを感じる人には、楽しめそうな設定です。"
+          },
+          {
+            "cueId": "{6399C479-2712-4C98-973D-B49F12C0CD07}",
+            "sourceText": "外国のお姫様と日本の少女が、遊びを通してどんな友情を育んでいくのかにも期待したいですね。"
+          }
+        ],
+        "cueCount": 3,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{CFB9EFFC-7292-4308-B96B-7C289AB17FC1}",
+        "title": "総評",
+        "image": "",
+        "description": "",
+        "imagePrompt": "",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 0,
+        "displayMode": "image",
+        "animation": {},
+        "chart": {
+          "kind": "radar",
+          "title": "ストーリー",
+          "minimum": 0,
+          "maximum": 5,
+          "items": [
+            {
+              "label": "ストーリー",
+              "value": 4
+            },
+            {
+              "label": "キャラクター",
+              "value": 4.5
+            },
+            {
+              "label": "作画",
+              "value": 4
+            },
+            {
+              "label": "演出・テンポ",
+              "value": 4
+            },
+            {
+              "label": "世界観・設定",
+              "value": 4
+            }
+          ]
+        },
+        "sceneNumber": 11,
+        "start": 170.004,
+        "duration": 33.2773333333333,
+        "ready": true,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{370A7E1C-6249-4E70-A0B2-871C47EF74DD}",
+            "sourceText": "今回の評価は、公式紹介や公開されている各話の情報を中心にした暫定的なものです。"
+          },
+          {
+            "cueId": "{1C78DA8B-8547-4CEB-86E4-CA514715A9F2}",
+            "sourceText": "最大の魅力は、外国のお姫様と田舎の少女という組み合わせと、昔ながらの遊びを題材にしていることです。"
+          },
+          {
+            "cueId": "{0C54918E-F23C-4159-A424-77C133B955B7}",
+            "sourceText": "穏やかな日常にギャグが加わることで、どんな騒動が起こるのかも楽しみですね。"
+          },
+          {
+            "cueId": "{386622E1-14EC-4114-8132-73A7683353E1}",
+            "sourceText": "まゃ～吾郎先生の『ぷれいめ～と』は、ニコニコ漫画でも公開されています。"
+          },
+          {
+            "cueId": "{C3792535-E662-42CB-B50A-1C2339199CC7}",
+            "sourceText": "皆さんなら、クロちゃんとりりぃちゃんにどんな遊びを体験してもらいたいですか？"
+          },
+          {
+            "cueId": "{6834CE19-F358-44E4-8EA4-CF91707A58B4}",
+            "sourceText": "ぜひコメントで教えてください。それでは、また次の漫画紹介でお会いしましょう！"
+          }
+        ],
+        "cueCount": 6,
+        "hasMoreCues": false
+      }
+    ],
+    "officialReferences": [
+      "References/official-keyvisual.jpg",
+      "References/official-episode1.jpg"
+    ],
+    "narratorReference": "References/kiritan.png"
+  },
+  "decisions": [
+    "公式資料は人物の髪・目・肌の色の参照に限定し、衣装は襟元の閉じた長袖・長ズボン・長い服と不透明なタイツへ変更。約2.5〜3頭身のアニメ調とした。",
+    "クロは濃緑黒の横結び・黄色のパーカー・オリーブの長ズボン。りりぃは銀髪・水色と白の長袖・紺の長いジャンパースカート。身体の強調や親密なポーズを避け、遊びと田舎の日常を中心とした。",
+    "田んぼ・山・木造家屋と縁側を前画像の参照で継続。スイカ割りと肝試しは人物を置かず小物や背景で表現した。各風景は台本に基づく創作イメージ。",
+    "画像送信前に開いていた未保存の台本を保存し、現行cueを基準にして以後の画像作業で全45cueのJSONを保持した。元のディスクデータも別途保管。",
+    "背景・本編の人間の確定後にsourcesReady=trueを確認し、完成画像と使用中の東北きりたんを参照して題名入りサムネイルを作成。きりたんは髪・目・帯の色を保持し、着物の裾を長く閉じた衣装へ変更。",
+    "生成ごとに表示された画像を目視してから要求ID・revision・SHA256で採用・保存。空要望のオープニングと組み込み総評チャートは保持。"
+  ],
+  "referenceMap": {
+    "00-common-background": [],
+    "01-princess-and-country-games": [
+      "official-keyvisual",
+      "00-common-background"
+    ],
+    "02-country-village": [
+      "01-princess-and-country-games"
+    ],
+    "03-kuro-country-walk": [
+      "01-princess-and-country-games",
+      "02-country-village"
+    ],
+    "04-friends-on-the-veranda": [
+      "01-princess-and-country-games",
+      "02-country-village"
+    ],
+    "05-watermelon-game": [
+      "04-friends-on-the-veranda"
+    ],
+    "06-summer-night-courage": [
+      "02-country-village"
+    ],
+    "07-lively-garden-games": [
+      "01-princess-and-country-games",
+      "04-friends-on-the-veranda"
+    ],
+    "08-tag-in-the-meadow": [
+      "07-lively-garden-games",
+      "01-princess-and-country-games"
+    ],
+    "09-sunset-walk-home": [
+      "01-princess-and-country-games",
+      "02-country-village"
+    ],
+    "10-thumbnail": [
+      "07-lively-garden-games",
+      "04-friends-on-the-veranda",
+      "kiritan"
+    ]
+  },
+  "artifacts": [
+    {
+      "key": "00-common-background",
+      "sceneId": "common-background",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-a32113f5-35dc-4c24-9699-37e7336bb81e.png",
+      "prompt": "Use case: illustration-story. Asset: quiet shared background for a Japanese manga introduction video about friends playing in the countryside. One wide landscape 16:9 illustration, preferably 1920x1080. Bright wholesome 2D anime slice-of-life illustration, soft clean cel shading, confident delicate ink lines, fresh summer greens, cream and sky blue, warm sunlight and rounded charming forms. Characters when present are cute chibi about 2.5 to 3 heads tall, large expressive heads and tiny unaccentuated bodies, fully clothed in loose modest high-neck long-sleeved casual outfits and long trousers or ankle-length dresses, practical shoes. Respectful child-friendly friendship and outdoor games. No lettering, words, logos, speech balloons, watermarks or panel borders. NO PEOPLE and no characters in this background. Soft pale cream and fresh light-grass-green color scheme, a gentle rural Japanese summer garden ambience with faint leafy tree shadows, small grasses and tiny white/yellow flowers at far left and right edges, hints of a distant wooden fence and green rice fields near the edges. Broad unobstructed mostly pale cream central area with subtle warm sunshine so narrator and subtitles can be overlaid by the app. Spacious clean quiet composition, low contrast, restrained foliage detail, friendly soft anime background, no buildings dominating center, no toys in center, no text or logos."
+    },
+    {
+      "key": "01-princess-and-country-games",
+      "sceneId": "{1E6F2095-703F-476A-B882-E5314CBF653F}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-fd853ccf-c72c-490b-80eb-862ddd19f693.png",
+      "prompt": "Use case: illustration-story. Asset: cheerful countryside friendship opening scene. One wide landscape 16:9 illustration, preferably 1920x1080. Bright wholesome 2D anime slice-of-life illustration, soft clean cel shading, confident delicate ink lines, fresh summer greens, cream and sky blue, warm sunlight and rounded charming forms. Characters when present are cute chibi about 2.5 to 3 heads tall, large expressive heads and tiny unaccentuated bodies, fully clothed in loose modest high-neck long-sleeved casual outfits and long trousers or ankle-length dresses, practical shoes. Respectful child-friendly friendship and outdoor games. No lettering, words, logos, speech balloons, watermarks or panel borders. Reference1 is ONLY for hair, eye and skin colors of the two friends, NOT the outfits or title: Kuro has dark green-black hair with a tied-up side tuft and pale scrunchie, violet eyes, warm tan skin; Lily has long straight silver hair with straight bangs, blue eyes and fair skin. REDESIGN the clothes for a fully wholesome outdoor-play video: Kuro wears loose mustard-yellow LONG-SLEEVED high-neck hoodie, full-length olive trousers and sneakers. Lily wears closed high-neck white LONG-SLEEVED blouse, pale sky-blue cardigan and loose ANKLE-LENGTH navy pinafore dress with opaque tights and practical closed shoes. NO original short outfits, no exposed midriff or shoulders, no swimsuits. Both are cute 2.5 to 3 HEADS TALL chibi with tiny unaccentuated bodies and large round heads. Reference2 fixes rural warm greens and sunshine. Wide landscape of a Japanese countryside lane between vivid green rice paddies, irrigation ditch, distant low forested mountains, blue sky and huge white summer clouds. The two friends small in lower foreground walking away from camera side by side, Kuro eagerly pointing toward a place to play and Lily looking curiously in that direction. Friendly playful mood, wholesome childhood adventure, the scenery dominates, no body emphasis, eye-level distant composition, no low-angle view. No text or logos from reference."
+    },
+    {
+      "key": "02-country-village",
+      "sceneId": "{EA7C3A1F-4301-4EA5-B2B7-7F933E76804C}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-6348842e-8bd9-4c60-8e77-fffe19e32134.png",
+      "prompt": "Use case: illustration-story. Asset: setting introduction for a countryside friendship comedy. One wide landscape 16:9 illustration, preferably 1920x1080. Bright wholesome 2D anime slice-of-life illustration, soft clean cel shading, confident delicate ink lines, fresh summer greens, cream and sky blue, warm sunlight and rounded charming forms. Characters when present are cute chibi about 2.5 to 3 heads tall, large expressive heads and tiny unaccentuated bodies, fully clothed in loose modest high-neck long-sleeved casual outfits and long trousers or ankle-length dresses, practical shoes. Respectful child-friendly friendship and outdoor games. No lettering, words, logos, speech balloons, watermarks or panel borders. NO PEOPLE in this image. Match the same vivid green rice fields, blue summer sky with white cumulus and forested mountains from the reference. Show a sleepy little Japanese countryside village in a wide three-quarter establishing view: old two-story dark timber house with gray tiled roof, open wooden engawa veranda and shaded doorway, neighboring small old-fashioned shop with a plain fabric awning, tidy baskets and potted plants near the entrance, narrow sunlit lane winding between houses and rice paddies, small irrigation channel and wooden fence. Warm nostalgic summer afternoon, gentle breeze, a wind chime with blank plain tag under eaves. All shop signage blank or purely decorative, no letters or logos, no people, no vehicles in foreground. Cute gently simplified anime architecture and clean detailed background, peaceful everyday warmth."
+    },
+    {
+      "key": "03-kuro-country-walk",
+      "sceneId": "{32CEA505-1194-4F2F-B78E-B25474DC5579}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-b976159a-60de-4c22-b8ef-69403bd86cb4.png",
+      "prompt": "Use case: illustration-story. Asset: introduction of Kuro, a local countryside friend. One wide landscape 16:9 illustration, preferably 1920x1080. Bright wholesome 2D anime slice-of-life illustration, soft clean cel shading, confident delicate ink lines, fresh summer greens, cream and sky blue, warm sunlight and rounded charming forms. Characters when present are cute chibi about 2.5 to 3 heads tall, large expressive heads and tiny unaccentuated bodies, fully clothed in loose modest high-neck long-sleeved casual outfits and long trousers or ankle-length dresses, practical shoes. Respectful child-friendly friendship and outdoor games. No lettering, words, logos, speech balloons, watermarks or panel borders. Keep EXACT Kuro from reference1: dark green-black hair in short tied-up side ponytail with pale scrunchie, warm tan skin, loose mustard-yellow LONG-SLEEVED hoodie, full-length loose olive trousers, practical sneakers. Body is 2.5 to 3 heads tall, round large head and tiny child-friendly unaccentuated body. ONLY ONE person in this picture, NOT Lily. New wide view from behind Kuro walking naturally along a slightly different section of the same sunlit country lane, vivid green rice paddies on one side, a shallow narrow irrigation ditch on the other, trees with dappled light, far forested hills and a hint of the village from reference2. She casually swings her arms while looking ahead, relaxed happy everyday walk, no exaggerated pose. Eye-level distant camera emphasizing environment and her small cute silhouette, no low angle or anatomy emphasis. Keep complete loose long-sleeved/trouser coverage. Fresh nostalgic anime illustration, blue sky and soft white clouds, no text or logos."
+    },
+    {
+      "key": "04-friends-on-the-veranda",
+      "sceneId": "{18AB0DA0-CB20-4770-A34E-BE1EEBA0F041}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-0535b955-d2f8-478e-98ba-3130e363f4a1.png",
+      "prompt": "Use case: illustration-story. Asset: introducing the visiting princess through quiet friendship on an engawa. One wide landscape 16:9 illustration, preferably 1920x1080. Bright wholesome 2D anime slice-of-life illustration, soft clean cel shading, confident delicate ink lines, fresh summer greens, cream and sky blue, warm sunlight and rounded charming forms. Characters when present are cute chibi about 2.5 to 3 heads tall, large expressive heads and tiny unaccentuated bodies, fully clothed in loose modest high-neck long-sleeved casual outfits and long trousers or ankle-length dresses, practical shoes. Respectful child-friendly friendship and outdoor games. No lettering, words, logos, speech balloons, watermarks or panel borders. Reference1 fixes EXACT two friends, hair and wholesome outfits: Kuro dark green-black short side ponytail with pale scrunchie, warm tan skin, mustard LONG-SLEEVED hoodie and full-length olive trousers; Lily long straight silver hair with straight bangs, blue eyes, pale sky-blue long-sleeved cardigan over closed high-neck white blouse, loose long navy pinafore dress and opaque tights. Reference2 fixes the old dark-timber Japanese house, gray tiled roof and sunlit garden. NEW composition: the two tiny 2.5-to-3-head-tall chibi friends sitting upright side by side on the wooden engawa, viewed mostly FROM BEHIND from a respectful eye-level garden viewpoint, both looking slightly toward each other with friendly happy conversation. Lily's outfit slightly more neat and refined than Kuro's casual hoodie, but no fancy revealing costume. Keep their laps and legs fully covered, ordinary relaxed upright seated posture, no reclining, no romantic gestures. Warm gentle afternoon sunlight, shady timber beams, green garden, pale hydrangeas, a blank-tag wind chime. A small plain ball and coiled jump rope sit to one side for everyday-play context. Open wide environment-focused framing, no cropped body emphasis, no low viewpoint, no letters or logos."
+    },
+    {
+      "key": "05-watermelon-game",
+      "sceneId": "{1316EA8F-2FD3-4E96-989C-23016B14065A}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-6665f1fe-245d-41ae-ae5a-d7f4f9b38270.png",
+      "prompt": "Use case: illustration-story. Asset: summer watermelon-splitting game setup, NO PEOPLE. One wide landscape 16:9 illustration, preferably 1920x1080. Bright wholesome 2D anime slice-of-life illustration, soft clean cel shading, confident delicate ink lines, fresh summer greens, cream and sky blue, warm sunlight and rounded charming forms. Characters when present are cute chibi about 2.5 to 3 heads tall, large expressive heads and tiny unaccentuated bodies, fully clothed in loose modest high-neck long-sleeved casual outfits and long trousers or ankle-length dresses, practical shoes. Respectful child-friendly friendship and outdoor games. No lettering, words, logos, speech balloons, watermarks or panel borders. Use reference for the SAME Japanese old wooden house engawa, gray tiled eaves, garden greenery and distant rural summer hills, but create a NEW closer still-life composition in the sunny garden. Center a whole round green striped watermelon on a plain small straw mat on level earth. Nearby rest one smooth blunt wooden play stick lying horizontally on the ground and a neatly folded plain blue cotton cloth for a traditional outdoor-game blindfold. These are unused game supplies only, no person holding anything. Lush grass, small summer flowers, dappled tree shade at edges, the quiet veranda in background, blue summer sky and a few white cumulus clouds above the roof. Cheerful nostalgic summer-vacation mood, rounded cute anime object shapes, clear readable setup, harmless everyday play. No cut melon, no splatter, no aggressive action, no text or logos."
+    },
+    {
+      "key": "06-summer-night-courage",
+      "sceneId": "{19138CCE-9ABA-4FD2-B0DA-730827AF6854}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-5f16c0ff-fe9e-452a-966d-42592b7fb18c.png",
+      "prompt": "Use case: illustration-story. Asset: a gentle summer-night test-of-courage setting, NO PEOPLE. One wide landscape 16:9 illustration, preferably 1920x1080. Bright wholesome 2D anime slice-of-life illustration, soft clean cel shading, confident delicate ink lines, fresh summer greens, cream and sky blue, warm sunlight and rounded charming forms. Characters when present are cute chibi about 2.5 to 3 heads tall, large expressive heads and tiny unaccentuated bodies, fully clothed in loose modest high-neck long-sleeved casual outfits and long trousers or ankle-length dresses, practical shoes. Respectful child-friendly friendship and outdoor games. No lettering, words, logos, speech balloons, watermarks or panel borders. NEW nighttime countryside scene, retain the soft rounded anime environment quality and rural atmosphere of reference but change setting to a little wooded shrine path. Old mossy stone steps curve upward toward a simple weathered vermilion torii partly hidden among leafy trees. Cool blue moonlight filters through the canopy, a small ordinary flashlight resting on a foreground stone casts a warm narrow beam onto the lower steps, a few firefly glows and soft leaf shadows. Slightly mysterious but friendly whimsical summer-night atmosphere for children, not horror. Make the path clearly readable and safe-looking, no menace, no monsters or ghosts, no people, no silhouettes, no blood or frightening faces. No shrine lettering, no readable plaques, no logos. One broad eye-level landscape composition with charming miniature proportions and gentle anime colors."
+    },
+    {
+      "key": "07-lively-garden-games",
+      "sceneId": "{570EA1ED-EB8F-4443-8BC8-EA2EB4840B22}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-376f9aeb-975b-433c-b226-a123071030c4.png",
+      "prompt": "Use case: illustration-story. Asset: a lively funny everyday garden game. One wide landscape 16:9 illustration, preferably 1920x1080. Bright wholesome 2D anime slice-of-life illustration, soft clean cel shading, confident delicate ink lines, fresh summer greens, cream and sky blue, warm sunlight and rounded charming forms. Characters when present are cute chibi about 2.5 to 3 heads tall, large expressive heads and tiny unaccentuated bodies, fully clothed in loose modest high-neck long-sleeved casual outfits and long trousers or ankle-length dresses, practical shoes. Respectful child-friendly friendship and outdoor games. No lettering, words, logos, speech balloons, watermarks or panel borders. Keep SAME TWO chibi friends and FULLY COVERED outfits from reference1/2: Kuro dark green-black short side ponytail with pale scrunchie, violet eyes, warm tan skin, loose mustard long-sleeved high-neck hoodie, full-length olive trousers and sneakers. Lily long silver hair, straight bangs, blue eyes, fair skin, closed white long-sleeved high-neck blouse, pale blue cardigan, long loose navy pinafore dress, OPAQUE full-length tights and closed shoes. Both 2.5 to 3 heads tall, tiny unaccentuated bodies and large expressive heads. Sunny garden in front of the SAME old timber veranda, green trees and distant rice fields. From a respectful distant eye-level wide view show Kuro excitedly bouncing a soft round blue-and-white ball with both arms raised in delight, while Lily reacts with surprised wide eyes and a small amused smile, hands held near her chest in a natural surprised gesture. The ball has bounced unexpectedly high between them, gentle amusing surprise, no accidents or falls. Some small plain playthings, a coiled rope and simple wooden spinning top, lie near veranda edge. Fully clothed upright active poses, no skirt lifting or low angle, no body emphasis. Friendly childhood fun, a few subtle cheerful motion accents, no letters, no logos."
+    },
+    {
+      "key": "08-tag-in-the-meadow",
+      "sceneId": "{B9DA0EFF-A8E0-4324-B288-6ED25CB26B9B}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-3e0da937-1d38-4606-9204-3352132d2af8.png",
+      "prompt": "Use case: illustration-story. Asset: screen-free outdoor play, a cheerful game of tag. One wide landscape 16:9 illustration, preferably 1920x1080. Bright wholesome 2D anime slice-of-life illustration, soft clean cel shading, confident delicate ink lines, fresh summer greens, cream and sky blue, warm sunlight and rounded charming forms. Characters when present are cute chibi about 2.5 to 3 heads tall, large expressive heads and tiny unaccentuated bodies, fully clothed in loose modest high-neck long-sleeved casual outfits and long trousers or ankle-length dresses, practical shoes. Respectful child-friendly friendship and outdoor games. No lettering, words, logos, speech balloons, watermarks or panel borders. Keep exactly SAME TWO tiny chibi friends from reference1, 2.5 to 3 heads tall, Kuro's dark green-black tied side ponytail, mustard long-sleeved closed hoodie and full-length olive trousers, and Lily's long silver hair, pale-blue long sleeves and closed high-neck blouse, long loose navy pinafore dress, opaque tights and sensible shoes. NEW wide distant composition in a broad grassy meadow overlooking the SAME rice fields and forested mountains from reference2. The two friends are small friendly silhouettes near lower-middle distance playing tag: Kuro runs ahead glancing back with a delighted grin, Lily follows with one hand reaching forward playfully, respectful spacing, no grabbing or contact. Keep all clothes fully covering bodies, skirt stays down over opaque leggings, natural upright running gestures. Grass bending in soft summer breeze, a few tiny wildflowers, brilliant blue sky and drifting white clouds, warm sunny openness. Landscape is the focus, high or eye-level wide camera, no low-angle or close-up. Pure childhood friendship fun, no phones or screens, no water play, no text or logos."
+    },
+    {
+      "key": "09-sunset-walk-home",
+      "sceneId": "{2FC8DDDF-2447-4653-B67E-988887202D13}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-a0f4c31e-c474-41e7-860b-8b999653eca7.png",
+      "prompt": "Use case: illustration-story. Asset: warm nostalgic walk home after a day of playing. One wide landscape 16:9 illustration, preferably 1920x1080. Bright wholesome 2D anime slice-of-life illustration, soft clean cel shading, confident delicate ink lines, fresh summer greens, cream and sky blue, warm sunlight and rounded charming forms. Characters when present are cute chibi about 2.5 to 3 heads tall, large expressive heads and tiny unaccentuated bodies, fully clothed in loose modest high-neck long-sleeved casual outfits and long trousers or ankle-length dresses, practical shoes. Respectful child-friendly friendship and outdoor games. No lettering, words, logos, speech balloons, watermarks or panel borders. Keep EXACT SAME TWO tiny chibi friends from reference, about 2.5 to 3 heads tall, Kuro dark green-black side ponytail with pale scrunchie, loose mustard long-sleeved hoodie and full-length olive trousers and sneakers; Lily long silver hair with straight bangs, pale-blue long sleeves over closed white high-neck blouse, long loose navy dress, opaque tights and closed shoes. Both fully modestly dressed, ordinary upright walking, no body emphasis. NEW wide scene from BEHIND as the pair walk slowly side by side along the village lane between still rice paddies at SUNSET, small silhouettes in lower-middle of the frame. Soft orange-pink sky, lavender clouds, distant darkening forested mountains, warm golden reflections across irrigation water, old timber houses and wooden fence near side, long gentle shadows. They glance a little toward each other as friends chatting about their day, peaceful and content, hands naturally at sides, no romance or intimate posing. Nostalgic summer-evening warmth, coherent anime landscape, no text or logos."
+    },
+    {
+      "key": "10-thumbnail",
+      "sceneId": "thumbnail",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-6f393ee1-e922-4f6a-a44c-f14669a97509.png",
+      "prompt": "Use case: illustration-story. Create the final wholesome Japanese manga-introduction video thumbnail for 「ぷれいめ～と」. One landscape 16:9 illustration, ideally 1920x1080, bright polished 2D anime with soft clean cel shading, crisp expressive faces and detailed nostalgic Japanese countryside. Use references 1 and 2 for SAME two friends and same sunny garden/wooden engawa/rice-field setting, reference3 for narrator Kiritan's hairstyle, face and costume colors.\n\nLayout: large clearly legible exact Japanese title 「ぷれいめ～と」 across the top third, smaller 「漫画」 badge just above/left, no other writing. Copy the title exactly with wave mark ～. Bold charming rounded summer-yellow/cream letters with dark-green outline and subtle shadow, easy to read on mobile, generous safe margins. Main scene in lower two thirds: the two cute 2.5-to-3-head-tall chibi friends in center-left, smiling toward viewer, blue-white play ball beside them and whole small watermelon on a straw mat near veranda, a coiled jump rope, hydrangeas, sunny rice fields and distant wooded hills beneath clear blue clouds. A tiny moonlit torii-path postcard vignette at far left bottom may recall the summer-night scene, subtly and clearly secondary. Keep scene integrated and uncluttered, three characters total.\n\nPreserve Kuro: dark green-black short side ponytail with pale scrunchie, violet eyes, warm tan skin, large round head, mustard-yellow long-sleeved CLOSED hoodie, full-length loose olive trousers and sneakers. Preserve Lily: long silver straight hair and bangs, blue eyes, fair skin, long-sleeved white closed-neck blouse/pale-blue cardigan, loose navy long pinafore dress with OPAQUE full-length tights and practical closed shoes. Make skirt modestly long and resting naturally, no lifted hem.\nOn the right third place a cheerful chibi Tohoku Kiritan narrator adapted from reference3: wine-brown bob with straight bangs and side locks, red eyes, white pointed hair ornaments, white/pale-pink kimono and burgundy obi, same friendly recognizable face. For this family-friendly adaptation extend kimono to ANKLE LENGTH with closed overlapped neckline, long sleeves, opaque socks/leggings and closed footwear; no short skirt or exposed thighs. She stands upright waving one hand as a friendly presenter. Same large-head 2.5-to-3-head proportions and anime style as the two friends, no sexualization or anatomy emphasis. All characters fully covered in loose clothes, ordinary happy platonic play, eye-level camera. No revealing outfits, no swimsuits, no romantic/intimate gestures, no low angles. No watermarks, logos beyond requested manga title, extra lettering, speech bubbles or panels."
+    }
+  ],
+  "verification": {
+    "projectId": "{1F8F8489-EFDF-49CA-A892-F41A8D9A337C}",
+    "revision": 204,
+    "saved": true,
+    "cueCount": 45,
+    "cueJsonUnchanged": true,
+    "voiceReady": 45,
+    "voiceHeard": 45,
+    "imagesSent": 11,
+    "thumbnailSourcesReady": true,
+    "thumbnailApproved": false,
+    "images": [
+      {
+        "key": "00-common-background",
+        "sceneId": "common-background",
+        "sha256": "9c097d0f7dbea5145d2f733cfaa91f6ebc151b485773c7cf4c0efa127f67e039",
+        "width": 1672,
+        "height": 941,
+        "bytes": 2609978,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{1F8F8489-EFDF-49CA-A892-F41A8D9A337C}\\project.assets\\9c097d0f7dbea5145d2f733cfaa91f6ebc151b485773c7cf4c0efa127f67e039.png",
+        "approved": true
+      },
+      {
+        "key": "01-princess-and-country-games",
+        "sceneId": "{1E6F2095-703F-476A-B882-E5314CBF653F}",
+        "sha256": "d84ae90d63465572f3aaf199a675c8679f9b362c1e05f241fcacbec3544532b6",
+        "width": 1672,
+        "height": 941,
+        "bytes": 2960929,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{1F8F8489-EFDF-49CA-A892-F41A8D9A337C}\\project.assets\\d84ae90d63465572f3aaf199a675c8679f9b362c1e05f241fcacbec3544532b6.png",
+        "approved": true
+      },
+      {
+        "key": "02-country-village",
+        "sceneId": "{EA7C3A1F-4301-4EA5-B2B7-7F933E76804C}",
+        "sha256": "80f5375f703178404a1540b981239ebe999ae9a1a264b34fdb03d27273afc15f",
+        "width": 1672,
+        "height": 941,
+        "bytes": 3340579,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{1F8F8489-EFDF-49CA-A892-F41A8D9A337C}\\project.assets\\80f5375f703178404a1540b981239ebe999ae9a1a264b34fdb03d27273afc15f.png",
+        "approved": true
+      },
+      {
+        "key": "03-kuro-country-walk",
+        "sceneId": "{32CEA505-1194-4F2F-B78E-B25474DC5579}",
+        "sha256": "9045023ab194a9e1a3670a00da4ecd80c67502defe0263024348575f130391c2",
+        "width": 1672,
+        "height": 941,
+        "bytes": 3265521,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{1F8F8489-EFDF-49CA-A892-F41A8D9A337C}\\project.assets\\9045023ab194a9e1a3670a00da4ecd80c67502defe0263024348575f130391c2.png",
+        "approved": true
+      },
+      {
+        "key": "04-friends-on-the-veranda",
+        "sceneId": "{18AB0DA0-CB20-4770-A34E-BE1EEBA0F041}",
+        "sha256": "3b06ae9a8a7ed1df15c809d71c2f8caa76506b693c8ba436b9df73379c234182",
+        "width": 1672,
+        "height": 941,
+        "bytes": 2962901,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{1F8F8489-EFDF-49CA-A892-F41A8D9A337C}\\project.assets\\3b06ae9a8a7ed1df15c809d71c2f8caa76506b693c8ba436b9df73379c234182.png",
+        "approved": true
+      },
+      {
+        "key": "05-watermelon-game",
+        "sceneId": "{1316EA8F-2FD3-4E96-989C-23016B14065A}",
+        "sha256": "c46d6337e19d982dabe2074445490d0d7e31e4370cdb63ed15283dae214e63f0",
+        "width": 1672,
+        "height": 941,
+        "bytes": 3009109,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{1F8F8489-EFDF-49CA-A892-F41A8D9A337C}\\project.assets\\c46d6337e19d982dabe2074445490d0d7e31e4370cdb63ed15283dae214e63f0.png",
+        "approved": true
+      },
+      {
+        "key": "06-summer-night-courage",
+        "sceneId": "{19138CCE-9ABA-4FD2-B0DA-730827AF6854}",
+        "sha256": "7bcdcd79547da74e19a05801bdbe0bf8139fc53c9cbca9aa962941968e2452ee",
+        "width": 1672,
+        "height": 941,
+        "bytes": 3217984,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{1F8F8489-EFDF-49CA-A892-F41A8D9A337C}\\project.assets\\7bcdcd79547da74e19a05801bdbe0bf8139fc53c9cbca9aa962941968e2452ee.png",
+        "approved": true
+      },
+      {
+        "key": "07-lively-garden-games",
+        "sceneId": "{570EA1ED-EB8F-4443-8BC8-EA2EB4840B22}",
+        "sha256": "341759bfc28583cf280a9e9d927248cc7ab60cd36f157ce924907fce1c1b33b5",
+        "width": 1672,
+        "height": 941,
+        "bytes": 2943016,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{1F8F8489-EFDF-49CA-A892-F41A8D9A337C}\\project.assets\\341759bfc28583cf280a9e9d927248cc7ab60cd36f157ce924907fce1c1b33b5.png",
+        "approved": true
+      },
+      {
+        "key": "08-tag-in-the-meadow",
+        "sceneId": "{B9DA0EFF-A8E0-4324-B288-6ED25CB26B9B}",
+        "sha256": "e9cf28414305d7ac1209ba8b8edebc85cf59494be54fbcd9ed09ded5a0a48ddc",
+        "width": 1672,
+        "height": 941,
+        "bytes": 3047549,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{1F8F8489-EFDF-49CA-A892-F41A8D9A337C}\\project.assets\\e9cf28414305d7ac1209ba8b8edebc85cf59494be54fbcd9ed09ded5a0a48ddc.png",
+        "approved": true
+      },
+      {
+        "key": "09-sunset-walk-home",
+        "sceneId": "{2FC8DDDF-2447-4653-B67E-988887202D13}",
+        "sha256": "a0bfcbdce0372f7bca14e460ba687f54453c6b20024f9cd69731c21a718397ba",
+        "width": 1672,
+        "height": 941,
+        "bytes": 3089136,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{1F8F8489-EFDF-49CA-A892-F41A8D9A337C}\\project.assets\\a0bfcbdce0372f7bca14e460ba687f54453c6b20024f9cd69731c21a718397ba.png",
+        "approved": true
+      },
+      {
+        "key": "10-thumbnail",
+        "sceneId": "thumbnail",
+        "sha256": "f9e72e1a3cf675b09c47c0c0002e86fc4a28dda5ba04ce66cc4ecbe05d61e1fd",
+        "width": 1672,
+        "height": 941,
+        "bytes": 2949506,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{1F8F8489-EFDF-49CA-A892-F41A8D9A337C}\\project.assets\\f9e72e1a3cf675b09c47c0c0002e86fc4a28dda5ba04ce66cc4ecbe05d61e1fd.png",
+        "approved": false
+      }
+    ]
+  },
+  "visualReview": {
+    "method": "各生成結果を表示して目視",
+    "result": "低頭身・露出を抑えた衣装、二人の外見と田舎の配色の継続、サムネイルの正しい題名ときりたんを確認。",
+    "limits": "原作コマの再現ではない。生成寸法は1672×941。動画出力・保存再開後のGUI表示は未実施。"
+  },
+  "humanReview": {
+    "backgroundAndMainImages": "ユーザーが確定チェックを入れたと回答。10枚のapproved=trueとsourcesReady=trueを確認。",
+    "thumbnail": "生成・送信・保存済み。最終確定チェック待ち。"
+  },
+  "evidenceDirectory": "output/production/20261018-playmate"
+}

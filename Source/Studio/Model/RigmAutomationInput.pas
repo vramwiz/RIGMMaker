@@ -6,7 +6,7 @@ uses System.JSON;
 function ValidateAutomationInput(const Text: string; IncludeSharedSections: Boolean=False): TJSONObject; // 呼出側所有。valid/issues/dataを返す。
 implementation
 uses System.SysUtils, System.Classes, System.Generics.Collections, System.Math,
-  RigmScriptSummaryModel;
+  RigmScriptSummaryModel, RigmMovieModel;
 function ValidateAutomationInput(const Text: string; IncludeSharedSections: Boolean): TJSONObject;
 var Lines: TStringList; Data,Summary,Scene: TJSONObject; Issues,Scenes,Items: TJSONArray;
   Seen: TDictionary<string,Boolean>; Section: string; InBody: Boolean;
@@ -24,6 +24,41 @@ var Lines: TStringList; Data,Summary,Scene: TJSONObject; Issues,Scenes,Items: TJ
     if Section='summary' then Result := Summary
     else if (Section='opening') or (Section='closing') or (Section='posting') then
       Result := TJSONObject(Data.GetValue(Section));
+  end;
+  procedure AppendBody(const Raw: string; LineNumber: Integer);
+  begin
+    var Target := BodyTarget;
+    if Section='posting' then begin
+      var Body := S(Target,'body');
+      var SeenKey := Section+'-body-'+Scenes.Count.ToString;
+      if Seen.ContainsKey(SeenKey) then Body := Body+#13#10;
+      SetText(Target,'body',Body+Raw); Seen.AddOrSetValue(SeenKey,True); Exit;
+    end;
+    var Text := Raw.Trim;
+    if Text.Replace(#$3000,'').Trim='' then Exit; // 全角空白だけの行も詰める。
+    var Key := ''; var Value := Raw;
+    var SplitAt := Pos('：',Text); var AsciiColon := Pos(':',Text);
+    if (SplitAt=0) or ((AsciiColon>0) and (AsciiColon<SplitAt)) then SplitAt := AsciiColon;
+    if SplitAt>0 then begin Key := Text.Substring(0,SplitAt-1).Trim; Value := Text.Substring(SplitAt).Trim; end;
+    if Value.Replace(#$3000,'').Trim='' then Value := '';
+    if not (Target.GetValue('dialogue') is TJSONArray) then Target.AddPair('dialogue',TJSONArray.Create);
+    var Dialogue := TJSONArray(Target.GetValue('dialogue'));
+    if Key='読み' then begin
+      if Dialogue.Count=0 then begin Issue(Section+'.reading','「読み：」の前に字幕またはセリフを入力してください。',LineNumber); Exit; end;
+      var Last := TJSONObject(Dialogue[Dialogue.Count-1]);
+      if Last.GetValue('reading')<>nil then begin Issue(Section+'.reading','同じセリフの読みが重複しています。',LineNumber); Exit; end;
+      try ValidateVoiceReading(Value); ValidateVoiceReading(S(Last,'subtitle'));
+      except on E: Exception do Issue(Section+'.reading',E.Message,LineNumber); end;
+      SetText(Last,'reading',Value); Exit;
+    end;
+    if Key='字幕' then begin
+      if Value='' then begin Issue(Section+'.subtitle','「字幕：」にセリフを入力してください。',LineNumber); Exit; end;
+      try ValidateVoiceReading(Value);
+      except on E: Exception do Issue(Section+'.subtitle',E.Message,LineNumber); end;
+    end else Value := Raw;
+    Dialogue.AddElement(TJSONObject.Create.AddPair('subtitle',Value));
+    var Body := S(Target,'body'); if Body<>'' then Body := Body+#13#10;
+    SetText(Target,'body',Body+Value);
   end;
 begin
   Result := TJSONObject.Create; Issues := TJSONArray.Create; Result.AddPair('issues',Issues);
@@ -59,14 +94,12 @@ begin
           Continue;
         end;
         if InBody then begin
-          var Target := BodyTarget;
-          var Body := S(Target,'body');
-          if Seen.ContainsKey(Section+'-body-'+Scenes.Count.ToString) then Body := Body+#13#10;
-          SetText(Target,'body',Body+Raw); Seen.AddOrSetValue(Section+'-body-'+Scenes.Count.ToString,True);
+          AppendBody(Raw,I+1);
           Continue;
         end;
         if Line='' then Continue;
-        var SplitAt := Pos('：',Line); if SplitAt=0 then SplitAt := Pos(':',Line);
+        var SplitAt := Pos('：',Line); var AsciiColon := Pos(':',Line);
+        if (SplitAt=0) or ((AsciiColon>0) and (AsciiColon<SplitAt)) then SplitAt := AsciiColon;
         if SplitAt=0 then begin Issue(Section,'項目名と「：」を付けてください。本文の前には「本文：」が必要です。',I+1); Continue; end;
         var Key := Line.Substring(0,SplitAt-1).Trim; var Value := Line.Substring(SplitAt).Trim;
         var SeenKey := Section+'-'+Scenes.Count.ToString+'-'+Key;
@@ -85,10 +118,7 @@ begin
         end else if ((Key='本文') and ((Section='scene') or (Section='summary') or
           (Section='opening') or (Section='closing'))) or ((Key='概要') and (Section='posting')) then begin
           InBody := True;
-          if Value<>'' then begin
-            SetText(BodyTarget,'body',Value);
-            Seen.AddOrSetValue(Section+'-body-'+Scenes.Count.ToString,True);
-          end;
+          if Value<>'' then AppendBody(Value,I+1);
         end else if (Section='scene') or (Section='opening') or (Section='closing') then begin
           if Key='画像' then SetText(BodyTarget,'imagePrompt',Value)
           else if Key='表示' then SetText(BodyTarget,'displayText',Value)
@@ -136,6 +166,16 @@ begin
       end;
       Required(Summary,'body','summary.body');
       if Length(S(Summary,'body'))>2000 then Issue('summary.body','総評本文は2000文字以内です。');
+      if Summary.GetValue('dialogue') is TJSONArray then begin
+        var Reading := '';
+        for var V in TJSONArray(Summary.GetValue('dialogue')) do begin
+          var Entry := TJSONObject(V); var Value := S(Entry,'reading');
+          if Value='' then Value := S(Entry,'subtitle');
+          if Reading<>'' then Reading := Reading+#13#10; Reading := Reading+Value;
+        end;
+        try ValidateVoiceReading(Reading);
+        except on E: Exception do Issue('summary.reading','総評の読み全体：'+E.Message); end;
+      end;
       for var Axis in ScriptSummaryAxisNames do begin
         var Found := False;
         for var V in Items do if S(TJSONObject(V),'label')=Axis then Found := True;

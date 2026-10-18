@@ -8,8 +8,9 @@ function ReadScriptTextInputFile(const FileName: string): string;
 function ImportedScriptBody(Data: TJSONObject): string;
 procedure ApplyScriptTextInput(Project: TRigmMovieProject; Data: TJSONObject; const SourceName: string);
 procedure ApplyImportedSceneInputs(Project: TRigmMovieProject);
+procedure ApplyImportedDialogueInputs(Project: TRigmMovieProject; Data: TJSONObject; AppliedCueIds: TJSONArray);
 implementation
-uses System.SysUtils, System.IOUtils, System.Hash, Winapi.Windows, RigmJson, PsdJson,
+uses System.SysUtils, System.IOUtils, System.Hash, System.Generics.Collections, Winapi.Windows, RigmJson, PsdJson,
   RigmScriptTextModel, RigmScriptSummaryModel, RigmScriptClosingModel,
   RigmScriptCastingModel, RigmScriptSceneAssignmentModel, RigmScriptScenesModel,
   RigmMoviePosting, RigmScriptTypes;
@@ -17,12 +18,12 @@ uses System.SysUtils, System.IOUtils, System.Hash, Winapi.Windows, RigmJson, Psd
 function ScriptTextInputTemplate: string;
 begin
   Result := '作品名：'+#13#10+'種類：アニメ／漫画'+#13#10+'ニコニコ漫画の作品URL：'+#13#10+#13#10+
-    '*前段'+#13#10+'画像：'+#13#10+'表示：'+#13#10+'本文：'+#13#10+#13#10+
+    '*前段'+#13#10+'画像：'+#13#10+'表示：'+#13#10+'本文：'+#13#10+'字幕：'+#13#10+'読み：'+#13#10+#13#10+
     '*背景'+#13#10+'画像：'+#13#10+#13#10+
-    '*シーン名'+#13#10+'画像：'+#13#10+'表示：'+#13#10+'本文：'+#13#10+#13#10+
+    '*シーン名'+#13#10+'画像：'+#13#10+'表示：'+#13#10+'本文：'+#13#10+'字幕：'+#13#10+'読み：'+#13#10+#13#10+
     '*総評'+#13#10+'ストーリー：'+#13#10+'キャラクター：'+#13#10+'作画：'+#13#10+
-    '演出・テンポ：'+#13#10+'世界観・設定：'+#13#10+'本文：'+#13#10+#13#10+
-    '*締め'+#13#10+'画像：'+#13#10+'表示：'+#13#10+'本文：'+#13#10+#13#10+
+    '演出・テンポ：'+#13#10+'世界観・設定：'+#13#10+'本文：'+#13#10+'字幕：'+#13#10+'読み：'+#13#10+#13#10+
+    '*締め'+#13#10+'画像：'+#13#10+'表示：'+#13#10+'本文：'+#13#10+'字幕：'+#13#10+'読み：'+#13#10+#13#10+
     '*投稿情報'+#13#10+'タイトル：'+#13#10+'概要：'+#13#10;
 end;
 
@@ -107,6 +108,73 @@ begin
   Project.Changed;
 end;
 
+procedure ApplyImportedDialogueInputs(Project: TRigmMovieProject; Data: TJSONObject; AppliedCueIds: TJSONArray);
+var Applied: TDictionary<string,Boolean>; Rows: TDictionary<string,TJSONObject>;
+  Cues: TDictionary<string,TRigmMovieCue>; SummaryId: string;
+  procedure ApplyBlock(Block: TJSONObject; const Section: string; BaseOffset: Integer);
+  begin
+    if (Block=nil) or not (Block.GetValue('dialogue') is TJSONArray) then Exit;
+    var Position := BaseOffset;
+    for var V in JA(Block,'dialogue') do begin
+      var Entry := TJSONObject(V); var Text := JS(Entry,'subtitle');
+      var Offset := Position;
+      while Offset<Position+Length(Text) do begin
+        var Row: TJSONObject;
+        if not Rows.TryGetValue(Section+'|'+Offset.ToString,Row) then Break;
+        var C: TRigmMovieCue; if not Cues.TryGetValue(JS(Row,'cueId'),C) then Break;
+        var Count := JI(Row,'length');
+        if (Count<=0) or (Offset+Count>Position+Length(Text)) or
+          (C.Text<>Text.Substring(Offset-Position,Count)) then Break;
+        var WholeLine := (Offset=Position) and (Count=Length(Text));
+        Inc(Offset,Count);
+        if Applied.ContainsKey(C.Id) then Continue;
+        // 明示した読みを、手動で分割した複数行へ丸ごと複製しない。
+        var Reading := ''; if WholeLine then Reading := JS(Entry,'reading');
+        ValidateVoiceReading(Reading);
+        var Previous := C.SpokenText;
+        C.Subtitle := C.Text; C.VoiceReading := Reading;
+        if Previous<>C.SpokenText then begin
+          C.VoiceQuery := ''; C.VoiceQueryKey := ''; C.AudioKey := '';
+          C.VoiceHeardKey := ''; C.EffectAudioKey := '';
+          PsdJson.Put(Project.ScriptWizard,'voiceStatus','in-progress');
+        end;
+        Applied.Add(C.Id,True); AppliedCueIds.Add(C.Id);
+        if Section='summary' then SummaryId := C.Id;
+      end;
+      Inc(Position,Length(Text)+2);
+    end;
+  end;
+begin
+  Applied := TDictionary<string,Boolean>.Create;
+  Rows := TDictionary<string,TJSONObject>.Create;
+  Cues := TDictionary<string,TRigmMovieCue>.Create;
+  try
+    SummaryId := '';
+    for var V in AppliedCueIds do Applied.AddOrSetValue(V.Value,True);
+    for var C in Project.Cues do Cues.Add(C.Id,C);
+    for var V in JA(JO(Project.ScriptWizard,'casting'),'rows') do begin
+      var Row := TJSONObject(V);
+      Rows.AddOrSetValue(JS(Row,'section')+'|'+JI(Row,'offset').ToString,Row);
+    end;
+    for var Section in ['opening','body','summary','closing'] do begin
+      var Expected := '';
+      if Section='body' then Expected := ImportedScriptBody(Data)
+      else if Data.GetValue(Section) is TJSONObject then Expected := JS(JO(Data,Section),'body')
+      else Continue;
+      // 校正で原稿が変わった区分に、古い位置の読みを再適用しない。
+      if JS(ScriptSection(Project,Section),'text')<>Expected then Continue;
+      if Section='body' then begin
+        var Position := 0;
+        for var V in JA(Data,'scenes') do begin
+          var Block := TJSONObject(V); ApplyBlock(Block,Section,Position);
+          Inc(Position,Length(JS(Block,'body'))+2);
+        end;
+      end else ApplyBlock(JO(Data,Section),Section,0);
+    end;
+    if SummaryId<>'' then begin SyncSummarySubtitle(Project,SummaryId); SyncSummaryReading(Project,SummaryId); end;
+  finally Cues.Free; Rows.Free; Applied.Free; end;
+end;
+
 procedure ApplyImportedSceneInputs(Project: TRigmMovieProject);
   function BlockAt(Data: TJSONObject; Offset: Integer): Integer;
   begin
@@ -120,6 +188,8 @@ begin
   var W := Project.ScriptWizard;
   if not (W.GetValue('textImport') is TJSONObject) then Exit;
   var Import := JO(W,'textImport'); var Data := JO(Import,'data');
+  if not (Import.GetValue('dialogueCueIds') is TJSONArray) then Import.AddPair('dialogueCueIds',TJSONArray.Create);
+  ApplyImportedDialogueInputs(Project,Data,JA(Import,'dialogueCueIds'));
   if JS(ScriptSection(Project,'body'),'text')<>ImportedScriptBody(Data) then begin
     PsdJson.Put(Import,'sceneState','stale'); Exit;
   end;

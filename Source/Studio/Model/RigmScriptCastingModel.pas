@@ -451,7 +451,8 @@ begin
   if (JS(Cast,'state')='stale') or (JS(Cast,'fingerprint')<>CastingFingerprint(Project)) then
     raise Exception.Create('原稿が変わりました。台本確認から配役へ進んで再確認してください。');
   var C := Project.Cue(JS(Row,'cueId')); var Text := JS(ScriptSection(Project,JS(Row,'section')),'text').Substring(JI(Row,'offset'),JI(Row,'length'));
-  if (C.Text<>Text) or (C.Subtitle<>Text) or (C.WaveFile<>'') then raise Exception.Create('字幕または音声を編集済みのセリフは、この工程で分割・結合できません。');
+  if (C.Text<>Text) or (C.Subtitle<>Text) or ((C.VoiceReading<>'') and (C.VoiceReading<>Text)) or
+    (C.WaveFile<>'') then raise Exception.Create('字幕・読み・音声を編集済みのセリフは、この工程で分割・結合できません。原稿の行区切りを直してください。');
 end;
 procedure SplitCastingRow(Project: TRigmMovieProject; const CueId: string; Offset: Integer);
 begin

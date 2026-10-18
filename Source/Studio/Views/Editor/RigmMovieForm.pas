@@ -726,7 +726,9 @@ begin
     else Dialog.Filter := 'AVI動画（映像・音声） (*.avi)|*.avi';
     var Target := FSession.Project.OutputTarget;
     if Trim(Target)='' then Target := MovieDefaultExport(FSession.Project);
-    Target := ChangeFileExt(Target,'.'+Extension);
+    Target := ResolveMoviePath(FSession.Project.FileName,Target);
+    if Extension='mp4' then Target := TPath.Combine(ExtractFilePath(Target),MovieExportName(FSession.Project.Title)+'.mp4')
+    else Target := ChangeFileExt(Target,'.'+Extension);
     ForceDirectories(ExtractFilePath(Target)); Dialog.FileName := Target;
     Dialog.Options := [ofOverwritePrompt,ofPathMustExist,ofEnableSizing,ofNoChangeDir];
     if not Dialog.Execute then Exit;

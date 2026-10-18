@@ -1,6 +1,6 @@
 ﻿unit RigmScriptSubtitleFrame;
 
-// 配役を表示し、字幕専用編集と既存合成の字幕プレビューを同じWorkspaceに接続する。
+// 配役を表示し、字幕・読みの独立編集と合成字幕プレビューをWorkspaceに接続する。
 interface
 uses System.Classes, RigmScriptPageFrame, Vcl.Forms, Vcl.Controls, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.ComCtrls,
   Vcl.Graphics, RigmWizardWorkspace, RigmIconToolbar, RigmScriptTextFrame;
@@ -23,7 +23,7 @@ type
   TRigmScriptSubtitleFrame = class(TRigmScriptPageFrame)
   private
     FWorkspace: TRigmWizardWorkspace; FSync,FEditing: Boolean; FLoaded,FInputError: string;
-    FList: TListView; FEditor,FNote: TRigmScriptMemo; FVoice: TMemo;
+    FList: TListView; FEditor,FNote,FVoice: TRigmScriptMemo;
     FPreview: TRigmSubtitlePreview; FActor,FGuide: TLabel; FToolbar: TRigmIconToolbar;
     procedure Selected(Sender: TObject; Item: TListItem; Selected: Boolean);
     procedure HandleKey(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -32,6 +32,7 @@ type
     procedure Changed(Sender: TObject);
     procedure Detail(Sender: TObject);
     procedure Complete(Sender: TObject);
+    procedure CheckReadings(Sender: TObject);
     procedure Page(Sender: TObject);
     procedure UpdatePageButtons;
     function SelectedId: string;
@@ -46,7 +47,7 @@ type
   end;
 implementation
 uses System.SysUtils, System.JSON, System.Math, System.Types, Winapi.Windows, Winapi.Messages, Winapi.CommCtrl, Vcl.Themes,
-  RigmJson, RigmMovieRendering, RigmMovieLayout, RigmScriptSubtitleModel, RigmScriptTextModel, RigmScriptCastingModel, RigmToolbarIcons;
+  RigmJson, RigmMovieRendering, RigmMovieLayout, RigmScriptSubtitleModel, RigmScriptTextModel, RigmScriptCastingModel, RigmToolbarIcons, RigmScriptReadingDialog;
 {$R *.dfm}
 type
   TRigmSubtitleListView = class(TListView)
@@ -163,6 +164,12 @@ begin
   FToolbar.AddIcon('ScriptSubtitleReady','字幕入力完了（Ctrl+Enter / Esc、次の工程へは左の工程リスト）',riComplete,0,Complete);
   FToolbar.AddSeparator; FToolbar.AddIcon('ScriptSubtitlePrevious','前の字幕ページ',riUp,0,Page).Tag := -1;
   FToolbar.AddIcon('ScriptSubtitleFollowing','次の字幕プレビューページ',riDown,0,Page).Tag := 1;
+  var ReadingRow := TPanel.Create(Self); ReadingRow.Parent := Self; ReadingRow.Align := alTop;
+  ReadingRow.Top := ScaleValue(10000); ReadingRow.Height := ScaleValue(36); ReadingRow.BevelOuter := bvNone; ReadingRow.Caption := '';
+  var ReadingButton := TButton.Create(Self); ReadingButton.Parent := ReadingRow; ReadingButton.Align := alLeft;
+  ReadingButton.Width := ScaleValue(160); ReadingButton.Caption := '読みを確認'; ReadingButton.Name := 'ScriptSubtitleCheckReading'; ReadingButton.OnClick := CheckReadings;
+  var ReadingGuide := TRigmScriptLabel.Create(Self); ReadingGuide.Parent := ReadingRow; ReadingGuide.Align := alClient;
+  ReadingGuide.AutoSize := False; ReadingGuide.WordWrap := True; ReadingGuide.Caption := '字幕を保持し、辞書の補正候補を確認・選択して読みだけに反映します。';
   FGuide := TRigmScriptLabel.Create(Self); FGuide.Parent := Self; FGuide.Align := alBottom; FGuide.AutoSize := False; FGuide.WordWrap := True; FGuide.Height := ScaleValue(70); FGuide.Name := 'ScriptSubtitleGuide';
   FList := TRigmSubtitleListView.Create(Self); FList.Parent := Self; FList.Align := alLeft; FList.Width := ScaleValue(310); FList.ViewStyle := vsReport;
   // ListViewの内部バッファだけで合成する。親からのVCLバッファ継承は列描画を壊す。
@@ -174,14 +181,17 @@ begin
   var Body := TPanel.Create(Self); Body.Parent := Self; Body.Align := alClient; Body.Caption := ''; Body.BevelOuter := bvNone;
   FActor := TRigmScriptLabel.Create(Self); FActor.Parent := Body; FActor.Align := alTop; FActor.AutoSize := False; FActor.Height := ScaleValue(38); FActor.Name := 'ScriptSubtitleActor';
   FPreview := TRigmSubtitlePreview.CreateForWorkspace(Self,Workspace); FPreview.Parent := Body; FPreview.Align := alTop; FPreview.Height := ScaleValue(110); FPreview.Name := 'ScriptSubtitlePreview';
-  var VoicePanel := TPanel.Create(Self); VoicePanel.Parent := Body; VoicePanel.Align := alBottom; VoicePanel.Top := ScaleValue(10000); VoicePanel.Height := ScaleValue(88); VoicePanel.BevelOuter := bvNone; VoicePanel.Caption := '';
-  var VoiceLabel := TRigmScriptLabel.Create(Self); VoiceLabel.Parent := VoicePanel; VoiceLabel.Align := alTop; VoiceLabel.AutoSize := False; VoiceLabel.Height := ScaleValue(22); VoiceLabel.Font.Height := -ScaleValue(18); VoiceLabel.Caption := '音声文（保持・読取専用）';
-  FVoice := TMemo.Create(Self); FVoice.Parent := VoicePanel; FVoice.Align := alClient; FVoice.Font.Height := -ScaleValue(22); FVoice.ReadOnly := True; FVoice.ScrollBars := ssVertical; FVoice.Name := 'ScriptSubtitleVoice';
+  var VoicePanel := TPanel.Create(Self); VoicePanel.Parent := Body; VoicePanel.Align := alBottom; VoicePanel.Top := ScaleValue(10000); VoicePanel.Height := ScaleValue(120); VoicePanel.BevelOuter := bvNone; VoicePanel.Caption := '';
+  var VoiceLabel := TRigmScriptLabel.Create(Self); VoiceLabel.Parent := VoicePanel; VoiceLabel.Align := alTop; VoiceLabel.AutoSize := False; VoiceLabel.Height := ScaleValue(26); VoiceLabel.Font.Height := -ScaleValue(18); VoiceLabel.Caption := '音声用の読み（空欄なら元のセリフ）';
+  FVoice := TRigmScriptMemo.Create(Self); FVoice.Parent := VoicePanel; FVoice.Align := alClient; FVoice.Font.Height := -ScaleValue(22); FVoice.ReadOnly := True; FVoice.MaxLength := 2000; FVoice.ScrollBars := ssVertical; FVoice.Name := 'ScriptSubtitleVoice';
+  FVoice.OnChange := Changed; FVoice.OnBeginInput := BeginInput; FVoice.OnKeyDown := EditKey;
   var NotePanel := TPanel.Create(Self); NotePanel.Parent := Body; NotePanel.Align := alBottom; NotePanel.Top := 0; NotePanel.Height := ScaleValue(74); NotePanel.BevelOuter := bvNone; NotePanel.Caption := '';
   var NoteLabel := TRigmScriptLabel.Create(Self); NoteLabel.Parent := NotePanel; NoteLabel.Align := alTop; NoteLabel.AutoSize := False; NoteLabel.Height := ScaleValue(22); NoteLabel.Font.Height := -ScaleValue(18); NoteLabel.Caption := '字幕のメモ';
   FNote := TRigmScriptMemo.Create(Self); FNote.Parent := NotePanel; FNote.Align := alClient; FNote.Font.Height := -ScaleValue(22); FNote.ReadOnly := True; FNote.MaxLength := 2048; FNote.ScrollBars := ssVertical; FNote.Name := 'ScriptSubtitleNote';
   FNote.OnChange := Changed; FNote.OnBeginInput := BeginInput; FNote.OnKeyDown := EditKey;
-  FEditor := TRigmScriptMemo.Create(Self); FEditor.Parent := Body; FEditor.Align := alClient; FEditor.Font.Height := -ScaleValue(26);
+  var SubtitlePanel := TPanel.Create(Self); SubtitlePanel.Parent := Body; SubtitlePanel.Align := alClient; SubtitlePanel.BevelOuter := bvNone; SubtitlePanel.Caption := '';
+  var SubtitleLabel := TRigmScriptLabel.Create(Self); SubtitleLabel.Parent := SubtitlePanel; SubtitleLabel.Align := alTop; SubtitleLabel.AutoSize := False; SubtitleLabel.Height := ScaleValue(26); SubtitleLabel.Font.Height := -ScaleValue(18); SubtitleLabel.Caption := '表示字幕';
+  FEditor := TRigmScriptMemo.Create(Self); FEditor.Parent := SubtitlePanel; FEditor.Align := alClient; FEditor.Font.Height := -ScaleValue(26);
   FEditor.ReadOnly := True; FEditor.MaxLength := 3000; FEditor.ScrollBars := ssVertical; FEditor.Name := 'ScriptSubtitleText';
   FEditor.OnChange := Changed; FEditor.OnBeginInput := BeginInput; FEditor.OnKeyDown := EditKey;
 end;
@@ -195,7 +205,7 @@ end;
 procedure TRigmScriptSubtitleFrame.Changed(Sender: TObject);
 begin
   if FSync or FEditor.ReadOnly then Exit; BeginInput(Sender);
-  try FInputError := ''; FWorkspace.EditSubtitle(FLoaded,FEditor.Text,FNote.Text);
+  try FInputError := ''; FWorkspace.EditSubtitleDialogue(FLoaded,FEditor.Text,FVoice.Text,FNote.Text);
   except on E: Exception do begin FInputError := E.Message; FGuide.Caption := FInputError; end; end;
 end;
 function TRigmScriptSubtitleFrame.ApplyCurrent: Boolean;
@@ -207,7 +217,9 @@ begin
       var Text := NormalizeScriptText(FEditor.Text); var Note := NormalizeScriptText(FNote.Text);
       ValidateSubtitleText(Text,3000); ValidateSubtitleText(Note,2048);
       FInputError := '';
-      if (C.Subtitle<>Text) or (C.SubtitleNote<>Note) then FWorkspace.EditSubtitle(FLoaded,Text,Note);
+      var Reading := NormalizeScriptText(FVoice.Text);
+      if (C.Subtitle<>Text) or (C.SubtitleNote<>Note) or (C.VoiceReading<>Reading) then
+        FWorkspace.EditSubtitleDialogue(FLoaded,Text,Reading,Note);
     end;
     FInputError := ''; Result := True;
   except on E: Exception do begin FInputError := E.Message; FGuide.Caption := FInputError; end; end;
@@ -248,7 +260,7 @@ procedure TRigmScriptSubtitleFrame.Detail(Sender: TObject);
 begin
   try
     RequireCurrentSubtitles(FWorkspace.ScriptDraft);
-    FInputError := ''; FEditing := True; FEditor.ReadOnly := False; FNote.ReadOnly := False; FWorkspace.BeginScriptTextEdit; FEditor.SetFocus;
+    FInputError := ''; FEditing := True; FEditor.ReadOnly := False; FNote.ReadOnly := False; FVoice.ReadOnly := False; FWorkspace.BeginScriptTextEdit; FEditor.SetFocus;
   except on E: Exception do FGuide.Caption := E.Message; end;
 end;
 procedure TRigmScriptSubtitleFrame.Complete(Sender: TObject);
@@ -258,6 +270,12 @@ begin
     RequireCurrentSubtitles(FWorkspace.ScriptDraft);
     FEditing := False; FWorkspace.CompleteSubtitles; FList.SetFocus;
   except on E: Exception do FGuide.Caption := E.Message; end;
+end;
+procedure TRigmScriptSubtitleFrame.CheckReadings(Sender: TObject);
+begin
+  if not RequestFinish then Exit;
+  try ShowScriptReadingCheck(Self,FWorkspace);
+  except on E: Exception do begin FInputError := E.Message; FGuide.Caption := E.Message; end; end;
 end;
 procedure TRigmScriptSubtitleFrame.Page(Sender: TObject);
 begin FPreview.MovePage(TToolButton(Sender).Tag); UpdatePageButtons; end;
@@ -296,18 +314,18 @@ begin
       if SelectionChanged then FEditing := False;
       if NormalizeScriptText(FEditor.Text)<>C.Subtitle then FEditor.Text := C.Subtitle;
       if NormalizeScriptText(FNote.Text)<>C.SubtitleNote then FNote.Text := C.SubtitleNote;
+      if NormalizeScriptText(FVoice.Text)<>C.VoiceReading then FVoice.Text := C.VoiceReading;
       FLoaded := Id;
     end;
     // 選択後・入力完了後も直接編集する。前工程が古い場合だけ入力を止める。
-    FEditor.ReadOnly := Problem<>''; FNote.ReadOnly := Problem<>'';
-    if FVoice.Text<>C.Text then FVoice.Text := C.Text;
+    FEditor.ReadOnly := Problem<>''; FNote.ReadOnly := Problem<>''; FVoice.ReadOnly := Problem<>'';
     var RoleNumber := ScriptCueRole(P,Id); var Actor := RoleNumber.ToString+' / '+JS(CastingRole(P,RoleNumber),'name');
     if FActor.Caption<>Actor then FActor.Caption := Actor;
-    var Guide := '表示字幕・改行・メモは右側の欄で直接編集できます。Enter：字幕欄へ移動。'+#13#10+
+    var Guide := '表示字幕と音声用の読みを別々に編集できます。字幕だけの修正では音声を保持します。'+#13#10+
       '一覧の↑↓：セリフ選択 / ←→：最初の折返し移動 / Ctrl+Enter・Esc：入力完了。';
     TToolButton(FToolbar.FindComponent('ScriptSubtitleEdit')).Enabled := Problem='';
     TToolButton(FToolbar.FindComponent('ScriptSubtitleReady')).Enabled := Problem='';
-    if Problem<>'' then Guide := Problem+' 以前の字幕とメモは保持しています。'
+    if Problem<>'' then Guide := Problem+' 以前の字幕・読み・メモは保持しています。'
     else if FEditing then Guide := Guide+#13#10+'字幕の編集内容は左の工程リストで確認・保存して音声調整へ進めます。'
     else if JS(P.ScriptWizard,'subtitlesStatus')='complete' then Guide := Guide+#13#10+'字幕入力完了：左の工程リストで保存し、読み・音声調整へ進めます。'
     else Guide := Guide+#13#10+'左の工程リストで字幕入力を確認・保存し、読み・音声調整へ進んでください。';

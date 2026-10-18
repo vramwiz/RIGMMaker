@@ -39,6 +39,19 @@ procedure CheckSummaryLines;
 begin
   var P := W.ScriptDraft; var Cues := SummaryCues(P); var SceneId := Cues[0].Scene;
   Check(Length(Cues)=6,'six summary source lines create six casting and voice cues');
+  var Paragraphs := P.Clone;
+  try
+    var D := JO(JO(Paragraphs.ScriptWizard,'summaryData'),'draft');
+    var Text := JS(D,'text').Replace(#13#10,#13#10+#13#10);
+    for var Key in ['text','subtitle','reading'] do PsdJson.Put(D,Key,Text);
+    PsdJson.Put(ScriptSection(Paragraphs,'summary'),'text',Text);
+    PrepareScriptCasting(Paragraphs);
+    for var C in SummaryCues(Paragraphs) do begin
+      Check(C.Subtitle=C.Text,'paragraph breaks keep summary subtitle aligned with '+C.Text);
+      Check(C.VoiceReading=C.Text,'paragraph breaks keep new summary reading aligned with '+C.Text);
+    end;
+    CheckRenderedSummarySubtitles(Paragraphs);
+  finally Paragraphs.Free; end;
   var Sections := JA(JO(P.ScriptWizard,'casting'),'rows');
   for var C in Cues do begin
     var Row := CastingRow(P,C.Id);

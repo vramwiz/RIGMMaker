@@ -1,0 +1,676 @@
+﻿{
+  "format": "RIGMMaker.ImageProductionLearning",
+  "date": "2026-10-18",
+  "title": "ロストサマー・ジャーニー",
+  "author": "にわかあめ（よよはち×ナツノアメ）",
+  "workUrl": "https://manga.nicovideo.jp/comic/84556",
+  "officialContextUrl": "https://comic-walker.com/detail/KC_019956_S/episodes/KC_0199560000200011_E?episodeType=first",
+  "projectId": "{E9B0D5E4-8CB3-445C-B236-247718F4822A}",
+  "mode": "built-in image_gen",
+  "userRequest": "画像生成で待機中。頭身低く、アニメタッチで生成して送信。",
+  "inputs": {
+    "scenes": [
+      {
+        "id": "{E67E9AA8-5AE1-4CD2-8E4B-6C8F58ACF834}",
+        "title": "opening 1",
+        "image": "",
+        "description": "",
+        "imagePrompt": "",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 0,
+        "animation": {},
+        "sceneNumber": 1,
+        "start": 0,
+        "duration": 6.12666666666667,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{79F4AB35-1B38-4DF9-B814-D6FA3868C25B}",
+            "sourceText": "東北きりたんです"
+          },
+          {
+            "cueId": "{AFBDB148-95C9-4C97-BF14-7FE4068FFDD0}",
+            "sourceText": "今回もニコニコ漫画から"
+          },
+          {
+            "cueId": "{F7548E26-2CFA-410D-B1F8-22A3F62F9CF3}",
+            "sourceText": "無料で最新話まで読める作品を紹介します"
+          }
+        ],
+        "cueCount": 3,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{F42F725F-F443-4D24-84DF-FE0DB49D2D42}",
+        "title": "水平線の向こうへ",
+        "image": "",
+        "description": "世界が海に沈んだら？",
+        "imagePrompt": "横長16:9。果てしなく広がる青い海と夏空。画面中央には水平線へ向かって進む小さな船のシルエット。陸地は見えず、白い雲と太陽の光が水面に反射している。壮大で爽やかな冒険ファンタジー風の広角構図。文字なし。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 1,
+        "animation": {},
+        "sceneNumber": 2,
+        "start": 6.12666666666667,
+        "duration": 17.9893333333333,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{E690FD43-9A0E-4736-8B0D-7F4C00D9279B}",
+            "sourceText": "もし世界のほとんどが海に沈んでしまったら、皆さんはどうしますか？"
+          },
+          {
+            "cueId": "{115AF69E-1DA6-4666-B5CE-3CA1179750E7}",
+            "sourceText": "見渡す限りの水平線。どこまで進んでも広がる青い海。"
+          },
+          {
+            "cueId": "{9B69701F-51FB-4D3B-8B75-A6A344247899}",
+            "sourceText": "そんな世界で、まだ誰も見つけていない島を探す旅に出るとしたら？"
+          },
+          {
+            "cueId": "{A20BDADB-BE87-4653-A2F2-32EA605BF17C}",
+            "sourceText": "今回ご紹介するのは、ひと夏の冒険を描く『ロストサマー・ジャーニー』です。"
+          }
+        ],
+        "cueCount": 4,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{DEC08089-1F1A-42BF-89AD-D984440A0DBE}",
+        "title": "作品紹介",
+        "image": "",
+        "description": "海だらけの世界を旅する物語",
+        "imagePrompt": "横長16:9。青く輝く大海原に浮かぶ小さな島々。澄んだ空には大きな入道雲が浮かび、遠くには海鳥が飛んでいる。手前の水面には柔らかな波紋。夏の爽快感と未知の世界への期待を感じさせる広角構図。文字なし。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 2,
+        "animation": {},
+        "sceneNumber": 3,
+        "start": 24.116,
+        "duration": 20.112,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{7182ACB6-AE44-4794-9C3D-3ABB65379DB5}",
+            "sourceText": "本作は、よよはち先生とナツノアメ先生による創作ユニット、にわかあめの漫画作品です。"
+          },
+          {
+            "cueId": "{F62D7E77-C636-4209-B836-37CEF76853DE}",
+            "sourceText": "2026年8月からカドコミで連載が始まった、冒険と日常を組み合わせたファンタジーです。"
+          },
+          {
+            "cueId": "{E5A2B725-608B-4CEB-B66F-C5B81FAD9C66}",
+            "sourceText": "舞台は、ほとんどの陸地が海に沈んでしまった星。"
+          },
+          {
+            "cueId": "{478D2B55-6607-4B9E-8A16-853A4BB53004}",
+            "sourceText": "私たちの知る世界とはまったく違う、水平線ばかりが広がる場所なんです。"
+          }
+        ],
+        "cueCount": 4,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{0A71A8CB-218E-41D1-9993-0B87E5E6CCB7}",
+        "title": "旅する二人のきょうだい",
+        "image": "",
+        "description": "テトラとブイの夏休み",
+        "imagePrompt": "横長16:9。小さな船の上から広大な海を眺める二人の若い旅人の後ろ姿。人物の具体的な年齢や服装は限定せず、シルエットで表現する。二人の向こうには青い水平線と大きな入道雲。明るく希望に満ちた夏の風景。文字なし。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 2,
+        "animation": {},
+        "sceneNumber": 4,
+        "start": 44.228,
+        "duration": 16.2613333333333,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{CCD12240-1B05-43C1-8467-6ADAEE4FB4B7}",
+            "sourceText": "そんな世界で旅に出るのが、テトラとブイという二人のきょうだいです。"
+          },
+          {
+            "cueId": "{A2D90125-99B5-4057-9AB9-37E6DF94C7A0}",
+            "sourceText": "二人が目指すのは、まだ誰にも見つかっていない未知の島。"
+          },
+          {
+            "cueId": "{58851502-2CF5-437F-BC39-73A3B68AF5AE}",
+            "sourceText": "地図に載っていない場所を探すなんて、考えるだけでワクワクしますよね。"
+          },
+          {
+            "cueId": "{57184778-EB26-49B9-AC3F-25FA538DEE85}",
+            "sourceText": "ただし、この旅は目的地へ一直線に進むだけの冒険ではありません。"
+          }
+        ],
+        "cueCount": 4,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{B634CB19-A921-44C8-93B0-28B602017D50}",
+        "title": "寄り道だらけの大冒険",
+        "image": "",
+        "description": "目的地よりも寄り道が楽しい？",
+        "imagePrompt": "横長16:9。大海原の中に浮かぶ小さな島。緑豊かな丘と静かな入り江があり、近くには旅人の小さな船が停泊している。遠くには別の島影。穏やかな夏の日差しと冒険心を感じさせる風景。文字なし。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 2,
+        "animation": {},
+        "sceneNumber": 5,
+        "start": 60.4893333333334,
+        "duration": 21.436,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{66589CB3-E711-4EAB-A178-F24B4C584D55}",
+            "sourceText": "この作品の大きな特徴は、寄り道や回り道を楽しむ旅であることです。"
+          },
+          {
+            "cueId": "{119E047F-F007-4FDA-9567-429CD6E5DE40}",
+            "sourceText": "二人は旅の途中でさまざまな場所を訪れ、いろいろな人々と出会います。"
+          },
+          {
+            "cueId": "{50702C71-34F9-41BC-8361-A70415A30A4F}",
+            "sourceText": "目的地を目指すはずが、途中の出来事に夢中になってしまう。"
+          },
+          {
+            "cueId": "{CDB0FBEF-AEA4-47F2-B445-4B5210184392}",
+            "sourceText": "でも旅行って、予定になかった出来事ほど思い出に残ったりしますよね。"
+          },
+          {
+            "cueId": "{735EAFEB-A01A-4AC1-B8FA-77A33E90D53D}",
+            "sourceText": "そんな旅そのものを楽しむ感覚が、この物語の魅力です。"
+          }
+        ],
+        "cueCount": 5,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{1D6B85AF-15F0-4B7B-AF96-146070A4A864}",
+        "title": "美しくも不思議な世界",
+        "image": "",
+        "description": "ほとんどの陸地が沈んだ星",
+        "imagePrompt": "横長16:9。海に沈んだ世界をイメージした幻想的な風景。青く澄んだ海面から古い建造物の一部が顔を出し、遠くには緑の小島が浮かんでいる。水中には沈んだ建物のシルエットがうっすら見える。静かで少し不思議な雰囲気。文字なし。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 2,
+        "animation": {},
+        "sceneNumber": 6,
+        "start": 81.9253333333334,
+        "duration": 22.1186666666667,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{DB9E2E49-A728-454F-9038-8B70D166A119}",
+            "sourceText": "そして忘れてはいけないのが、この作品の独特な世界設定です。"
+          },
+          {
+            "cueId": "{30B014C1-C3EE-4882-8710-D2389C4E93F4}",
+            "sourceText": "ほとんどの陸地が海に沈んでいるということは、私たちとはまったく違う暮らしがあるはずです。"
+          },
+          {
+            "cueId": "{3AC6AE36-F737-498E-8E3D-B215D7DD7489}",
+            "sourceText": "人々はどんな場所に住み、どうやって生活しているのでしょうか？"
+          },
+          {
+            "cueId": "{D6D9A77F-5671-46F1-BF86-25CF583982EA}",
+            "sourceText": "世界がこうなった理由も含めて、気になることがたくさんあります。"
+          },
+          {
+            "cueId": "{BD9BD977-3B4D-4FBF-98B6-CA4BBAC46FD4}",
+            "sourceText": "穏やかな旅の背景に、大きな謎を想像できるところも面白いですね。"
+          }
+        ],
+        "cueCount": 5,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{30BA330E-8B10-43D4-A9E1-7E422480895A}",
+        "title": "出会いが広げる物語",
+        "image": "",
+        "description": "旅先で生まれる新しい出会い",
+        "imagePrompt": "横長16:9。海辺の小さな集落をイメージした風景。木造の建物と船着き場、穏やかな入り江。手前には旅人二人と地元の住人たちのシルエットがあり、楽しそうに交流している。夏の午後の柔らかな光。文字なし。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 2,
+        "animation": {},
+        "sceneNumber": 7,
+        "start": 104.044,
+        "duration": 17.6053333333333,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{92199770-F5D3-487D-BC42-BCC87E8B6AD2}",
+            "sourceText": "もう一つ注目したいのが、旅先で出会う人々との交流です。"
+          },
+          {
+            "cueId": "{72BD7987-7FED-42BE-919B-5842E48E1978}",
+            "sourceText": "知らない土地に行けば、そこには知らない人たちの暮らしがあります。"
+          },
+          {
+            "cueId": "{CDF330F6-A95B-44CD-91E5-555213D5CC1F}",
+            "sourceText": "そんな出会いを積み重ねながら、二人の旅が少しずつ広がっていくわけです。"
+          },
+          {
+            "cueId": "{698C0B94-4576-4E13-9EF0-125C7ECB281A}",
+            "sourceText": "大きな事件だけでなく、小さな発見にも意味がある。そんな冒険が期待できます。"
+          }
+        ],
+        "cueCount": 4,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{99FC10C7-1643-472F-9773-DFEE291BB301}",
+        "title": "ひと夏という特別な時間",
+        "image": "",
+        "description": "いつか終わる夏の旅",
+        "imagePrompt": "横長16:9。夕暮れの海。オレンジ色に染まる水平線へ向かって進む小さな船。船上には二人の旅人のシルエット。静かな波と空に広がる薄い雲。夏の終わりを予感させる、少し切なく美しい風景。文字なし。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 2,
+        "animation": {},
+        "sceneNumber": 8,
+        "start": 121.649333333333,
+        "duration": 17.4666666666667,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{1321F074-F92F-41D7-A5FB-75222DEF1556}",
+            "sourceText": "そして、この旅がひと夏の出来事であることにも注目です。"
+          },
+          {
+            "cueId": "{37BE650F-7E04-4617-A3D6-2D3CDD79E2A6}",
+            "sourceText": "夏休みって、始まる前は長く感じるのに、終わってみるとあっという間ですよね。"
+          },
+          {
+            "cueId": "{84D4D102-4846-4552-AC4B-5353BF7CFBD4}",
+            "sourceText": "だからこそ、その時間に出会った景色や人々が特別な思い出になるのかもしれません。"
+          },
+          {
+            "cueId": "{0D73BF4A-5BE6-412D-85F9-C8D26E41A6E8}",
+            "sourceText": "二人はどんな島を見つけ、どんな夏を過ごすのでしょうか？"
+          }
+        ],
+        "cueCount": 4,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{5D838D82-61D8-4FCB-8D54-7530D8025D8E}",
+        "title": "こんな人におすすめ",
+        "image": "",
+        "description": "のんびり冒険したい人へ",
+        "imagePrompt": "横長16:9。真夏の大海原と美しい入道雲。画面手前には静かに揺れる小さな船、遠くには緑豊かな島。開放感あふれる明るい色彩で、旅に出たくなるような幻想的な風景。文字なし。",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 1,
+        "animation": {},
+        "sceneNumber": 9,
+        "start": 139.116,
+        "duration": 15.0333333333333,
+        "ready": false,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{ABBCDFEA-7E41-4BF2-807E-D6FAB91D87FD}",
+            "sourceText": "本作は、未知の世界を旅する冒険漫画が好きな人におすすめです。"
+          },
+          {
+            "cueId": "{12C33C60-3A37-48F2-A432-837414688608}",
+            "sourceText": "特に、目的地へ急ぐよりも、旅先の景色や出会いを楽しみたい人には相性が良さそうですね。"
+          },
+          {
+            "cueId": "{BFF2111C-C1E9-4B69-9809-0FF7287DEACF}",
+            "sourceText": "ほのぼのした日常と、どこか不思議な世界を組み合わせた冒険に注目です。"
+          }
+        ],
+        "cueCount": 3,
+        "hasMoreCues": false
+      },
+      {
+        "id": "{FE342A0E-B06C-48A1-9A0E-F48B1786595F}",
+        "title": "総評",
+        "image": "",
+        "description": "",
+        "imagePrompt": "",
+        "padding": 0,
+        "imageFeedback": "",
+        "imageApproved": false,
+        "imageApprovalKey": "",
+        "imageEditEpoch": 0,
+        "displayMode": "image",
+        "animation": {},
+        "chart": {
+          "kind": "radar",
+          "title": "ストーリー",
+          "minimum": 0,
+          "maximum": 5,
+          "items": [
+            {
+              "label": "ストーリー",
+              "value": 4
+            },
+            {
+              "label": "キャラクター",
+              "value": 4
+            },
+            {
+              "label": "作画",
+              "value": 4
+            },
+            {
+              "label": "演出・テンポ",
+              "value": 4
+            },
+            {
+              "label": "世界観・設定",
+              "value": 4.5
+            }
+          ]
+        },
+        "sceneNumber": 10,
+        "start": 154.149333333333,
+        "duration": 36.628,
+        "ready": true,
+        "imagePath": "",
+        "sourceCues": [
+          {
+            "cueId": "{007BB41C-2706-44D7-952E-019777E3A8AA}",
+            "sourceText": "今回の評価は、公式あらすじや公開情報を中心に判断した暫定的なものです。"
+          },
+          {
+            "cueId": "{F1A9C7F9-E454-471C-BEA5-E0DBC390D0FF}",
+            "sourceText": "特に注目したいのは、海に沈んだ世界という設定と、きょうだい二人による自由な旅です。"
+          },
+          {
+            "cueId": "{09A075DD-EA94-4627-9275-A61D4751DF27}",
+            "sourceText": "未知の島を目指しながら、寄り道も楽しむ。そんな冒険の形に魅力を感じます。"
+          },
+          {
+            "cueId": "{DA73444A-F842-41D5-A0DF-B9BEE3ECCEE8}",
+            "sourceText": "なお、単行本第1巻は2026年11月28日に発売予定です。"
+          },
+          {
+            "cueId": "{E25617F2-A0A0-4AB7-965A-DD9AB304E408}",
+            "sourceText": "『ロストサマー・ジャーニー』はニコニコ漫画でも公開されていますので、ぜひチェックしてみてください。"
+          },
+          {
+            "cueId": "{B855171E-3949-4EC5-B357-6FF215A52570}",
+            "sourceText": "皆さんなら、海だらけの世界でどんな島を探してみたいですか？ぜひコメントで教えてください。"
+          },
+          {
+            "cueId": "{E492A6C9-89D0-4A27-B8CE-71002A649682}",
+            "sourceText": "それでは、また次の漫画紹介でお会いしましょう！"
+          }
+        ],
+        "cueCount": 7,
+        "hasMoreCues": false
+      }
+    ],
+    "cueCount": 43,
+    "officialEpisode1": "https://cdn.comic-walker.com/integration/cdpf/resources/019956/00002/01/01/01/74777e64-c92d-43bd-8d13-b792bc93d180.jpg",
+    "officialKeyvisual": "https://cdn.comic-walker.com/integration/cdpf/resources/019956/893205f7-1618-400e-afa6-dc3dc0dba8cf.jpg",
+    "characterReference": "現行サムネイル要求のpreviewPathから取得した東北きりたんの透過PNG。References/kiritan.png。",
+    "source": "現在開いている台本の全10シーン・画像要望・43セリフをDotsパイプで取得。"
+  },
+  "decisions": [
+    "人物は約3頭身の大きい頭と小さい体に揃えるアニメ調を指定。公式紹介画像の銀髪・青い目・白い上着・暗い中の服と短いボトム、背中に乗る小さい白いふわふわした同行者の外見を参照した。",
+    "登場人物を普通の人間二人として置き換えず、公式画像に見える異なる輪郭を保った。名称と人物の対応や種族は推測して確定しない。",
+    "海は透明な青緑、空は濃い青、白い入道雲で統一し、場面の必要に応じて人物を後ろ姿・小さいシルエットとした。",
+    "赤い小船室・黄土色の帆布屋根を持つ木造船を共通の創作デザインとして使用。船、島、港、水没建造物は台本の要望に基づく創作で、原作コマの正確な再現とは扱わない。",
+    "夕暮れだけオレンジ・桃・紫の静かな配色へ変え、次の推薦シーンは明るい夏の海へ戻す。",
+    "背景と本編の人間確定後にsourcesReady=trueを確認し、公式紹介画像・完成シーン・東北きりたんの原画を参照して全文題名ロゴ入りサムネイルを作成。"
+  ],
+  "referenceMap": {
+    "09": [
+      "References/official-keyvisual.jpg",
+      "03",
+      "04",
+      "References/kiritan.png"
+    ],
+    "05": [
+      "02",
+      "04"
+    ],
+    "02": [
+      "01"
+    ],
+    "06": [
+      "03",
+      "04",
+      "References/official-keyvisual.jpg"
+    ],
+    "00": [],
+    "07": [
+      "03",
+      "06"
+    ],
+    "01": [
+      "00",
+      "References/official-keyvisual.jpg"
+    ],
+    "04": [
+      "02",
+      "03"
+    ],
+    "08": [
+      "04",
+      "02"
+    ],
+    "03": [
+      "References/official-keyvisual.jpg",
+      "01"
+    ]
+  },
+  "artifacts": [
+    {
+      "key": "00-common-background",
+      "sceneId": "common-background",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-04c14e53-d297-4c47-8307-8f72d5d1548c.png",
+      "prompt": "Use case: illustration-story. Asset: low-contrast shared video background for manga introduction 'Lost Summer Journey'. One landscape 16:9 illustration, preferably 1920x1080. Bright polished 2D anime adventure illustration, crisp delicate ink outlines, clear soft cel shading, vibrant turquoise sea and rich summer sky, luminous white cumulonimbus clouds, warm sunlight and soft atmospheric distance. Gently rounded miniature-world proportions. Characters when present are low-head-count chibi, about three heads tall, expressive large heads and short small bodies, wholesome fully clothed travelers. A cohesive summer maritime journey with a feeling of wonder and gentle nostalgia. No lettering, words, logos, speech balloons, watermarks or panel borders. NO CHARACTERS, no boats, no buildings, no land. Gentle transparent pale turquoise sea under a light clear summer-blue sky, low horizon, broad mostly open softly lit center for a narrator and subtitles to be added separately. Small restrained wave patterns near the lower edge, soft white clouds gathered near left and right edges, delicate sunlight glints on clear water. Calm, refreshing airy anime background with quiet unobtrusive center, no overly busy wave detail, no deep shadows or dramatic weather. Landscape only, one complete seamless scene."
+    },
+    {
+      "key": "01-toward-the-horizon",
+      "sceneId": "{F42F725F-F443-4D24-84DF-FE0DB49D2D42}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-bfeb18fe-3868-4cab-8366-d2ccf8aa4419.png",
+      "prompt": "Use case: illustration-story. Asset: opening adventure scene 'beyond the horizon'. One landscape 16:9 illustration, preferably 1920x1080. Bright polished 2D anime adventure illustration, crisp delicate ink outlines, clear soft cel shading, vibrant turquoise sea and rich summer sky, luminous white cumulonimbus clouds, warm sunlight and soft atmospheric distance. Gently rounded miniature-world proportions. Characters when present are low-head-count chibi, about three heads tall, expressive large heads and short small bodies, wholesome fully clothed travelers. A cohesive summer maritime journey with a feeling of wonder and gentle nostalgia. No lettering, words, logos, speech balloons, watermarks or panel borders. First reference establishes turquoise sea and summer atmosphere; second reference is only for vivid anime palette and sense of a water-covered world, do NOT copy the title lettering or people. An immense endless ocean under a deep clear blue summer sky and majestic brilliant white cumulonimbus towers. A tiny rustic wooden traveling boat seen from far behind near lower center sails toward the distant horizon, warm wooden hull, a little red cabin and ochre canvas canopy suggested only as a small picturesque silhouette. White wake stretching behind it, vast sparkling water surrounding the tiny boat. NO land or islands visible, emphasize breathtaking scale, freedom and the start of a hopeful journey. Any travelers are too distant to distinguish, no close people. Wide slightly elevated establishing composition, clear anime linework and luminous clean cel-painted landscape, no text or logos."
+    },
+    {
+      "key": "02-islands-in-a-blue-world",
+      "sceneId": "{DEC08089-1F1A-42BF-89AD-D984440A0DBE}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-b5426138-6143-4676-bf81-c9e14b3d028a.png",
+      "prompt": "Use case: illustration-story. Asset: setting introduction, islands on a water-covered planet. One landscape 16:9 illustration, preferably 1920x1080. Bright polished 2D anime adventure illustration, crisp delicate ink outlines, clear soft cel shading, vibrant turquoise sea and rich summer sky, luminous white cumulonimbus clouds, warm sunlight and soft atmospheric distance. Gently rounded miniature-world proportions. Characters when present are low-head-count chibi, about three heads tall, expressive large heads and short small bodies, wholesome fully clothed travelers. A cohesive summer maritime journey with a feeling of wonder and gentle nostalgia. No lettering, words, logos, speech balloons, watermarks or panel borders. Match reference's SAME intense turquoise sea, cobalt summer sky, brilliantly lit white cloud masses and crisp luminous anime finish. A scenic chain of SMALL islands scattered through the enormous open ocean, low green grassy hilltops with rounded pale rocky edges and small beaches, mostly water and horizon, no continuous mainland. Foreground clear blue sea with soft ripple patterns and sunlight showing hints of pale submerged rock; huge puffy cumulonimbus high above, a few tiny white seabirds far in the distance. Open broad slightly elevated panoramic view, invite the eye to travel from foreground ripples through little islands to the far horizon. Refreshing summer adventure and unexplored possibility, no people, no boats, no houses, no text, no logos. Cute miniature-world scale without photorealistic texture."
+    },
+    {
+      "key": "03-two-travelers",
+      "sceneId": "{0A71A8CB-218E-41D1-9993-0B87E5E6CCB7}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-417c54f8-3092-4097-a171-224e9e2ede9c.png",
+      "prompt": "Use case: illustration-story. Asset: the two sibling travelers looking toward the ocean. One landscape 16:9 illustration, preferably 1920x1080. Bright polished 2D anime adventure illustration, crisp delicate ink outlines, clear soft cel shading, vibrant turquoise sea and rich summer sky, luminous white cumulonimbus clouds, warm sunlight and soft atmospheric distance. Gently rounded miniature-world proportions. Characters when present are low-head-count chibi, about three heads tall, expressive large heads and short small bodies, wholesome fully clothed travelers. A cohesive summer maritime journey with a feeling of wonder and gentle nostalgia. No lettering, words, logos, speech balloons, watermarks or panel borders. Reference 1 is the official CHARACTER APPEARANCE reference: retain the silver-gray tousled hair and blue eyes of the main traveler, white loose coat over dark inner shirt and dark shorts, and the SMALLER second traveler with cloud-like white fluffy hair/fur and soft white silhouette riding on the first traveler's back/shoulders. Do not turn the second traveler into a second ordinary human with different hair colors, do not invent a different species or extra facial details; preserve its visible reference silhouette. Reference 2 establishes the boat and ocean colors. NEW composition from BEHIND the pair on the front deck of the SAME small wooden boat with a little red cabin, ochre canvas canopy and simple wooden railing. Main traveler about THREE HEADS TALL with very short small body and round large head; the fluffy companion even smaller, looking over the shoulder. Seen mostly from behind as softly backlit chibi silhouettes, both peacefully gazing at the far brilliant horizon and immense white summer clouds. No close-up face emphasis. A few strands of silver hair and loose white coat flutter in the sea breeze, their small scale against the vast ocean conveys hope and adventure. Clear clean anime shapes, not realistic human proportions. Wide view with deck at lower third and open sea/sky dominating, no text from official reference, no logo."
+    },
+    {
+      "key": "04-island-detour",
+      "sceneId": "{B634CB19-A921-44C8-93B0-28B602017D50}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-45018dc6-d88c-45fc-8f29-cca063318186.png",
+      "prompt": "Use case: illustration-story. Asset: detours along the summer journey, quiet island cove. One landscape 16:9 illustration, preferably 1920x1080. Bright polished 2D anime adventure illustration, crisp delicate ink outlines, clear soft cel shading, vibrant turquoise sea and rich summer sky, luminous white cumulonimbus clouds, warm sunlight and soft atmospheric distance. Gently rounded miniature-world proportions. Characters when present are low-head-count chibi, about three heads tall, expressive large heads and short small bodies, wholesome fully clothed travelers. A cohesive summer maritime journey with a feeling of wonder and gentle nostalgia. No lettering, words, logos, speech balloons, watermarks or panel borders. Reference1 establishes small islands with pale rocks, soft green grassy hills and huge white clouds; reference2 fixes the SAME boat, warm wooden hull and railings, tiny red-painted cabin with dark small window, ochre canvas canopy and a short simple mast. Wide scenic view from a slightly raised grassy rocky shore looking down into a sheltered turquoise inlet beside one small lush island. The little red-cabin boat is quietly moored near a simple weathered wooden landing, sail/canopy relaxed, gentle reflections in clear shallow water. No close people; any travelers aboard too tiny to see. A winding green hill beyond the white sandy cove suggests exploration, two distant low island silhouettes on the open horizon. Welcoming unhurried sunny afternoon, wonder in a small discovery, cute miniature landscape with rich clean anime colors. No houses or large ports, no lettering, no actual map or logo."
+    },
+    {
+      "key": "05-submerged-world",
+      "sceneId": "{1D6B85AF-15F0-4B7B-AF96-146070A4A864}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-4054ffc9-e217-4181-8953-9046306d2a2c.png",
+      "prompt": "Use case: illustration-story. Asset: quiet mystery of a world mostly submerged by the sea. One landscape 16:9 illustration, preferably 1920x1080. Bright polished 2D anime adventure illustration, crisp delicate ink outlines, clear soft cel shading, vibrant turquoise sea and rich summer sky, luminous white cumulonimbus clouds, warm sunlight and soft atmospheric distance. Gently rounded miniature-world proportions. Characters when present are low-head-count chibi, about three heads tall, expressive large heads and short small bodies, wholesome fully clothed travelers. A cohesive summer maritime journey with a feeling of wonder and gentle nostalgia. No lettering, words, logos, speech balloons, watermarks or panel borders. References define the SAME exceptionally clear turquoise ocean, low green rocky islands and luminous anime sky. A contemplative wide three-quarter view across calm transparent water: a few weathered fragments of old building rooftops and a broken pale stone arch project above the sea, small patches of sea-worn vegetation, while BELOW the CLEAR SURFACE faint silhouettes of drowned walls, windows and rooftops recede into deep blue. Show underwater traces naturally visible through the water, NOT a diagram or split cross-section. Far distance a green little island and the same brilliant summer clouds. No people, no ship, no destruction happening now, no disaster victims, no grim city skyline. A gentle touch of intriguing lost history in an otherwise beautiful serene summer seascape, muted warm stone against turquoise and deep blue, fine simple anime outlines. No text, no markings or logos."
+    },
+    {
+      "key": "06-harbor-encounters",
+      "sceneId": "{30BA330E-8B10-43D4-A9E1-7E422480895A}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-bc34e972-c35c-4f2d-b1be-eae5fc9670ec.png",
+      "prompt": "Use case: illustration-story. Asset: friendly encounters in a tiny island settlement. One landscape 16:9 illustration, preferably 1920x1080. Bright polished 2D anime adventure illustration, crisp delicate ink outlines, clear soft cel shading, vibrant turquoise sea and rich summer sky, luminous white cumulonimbus clouds, warm sunlight and soft atmospheric distance. Gently rounded miniature-world proportions. Characters when present are low-head-count chibi, about three heads tall, expressive large heads and short small bodies, wholesome fully clothed travelers. A cohesive summer maritime journey with a feeling of wonder and gentle nostalgia. No lettering, words, logos, speech balloons, watermarks or panel borders. Reference1 fixes the SAME two travelers, silver-haired one in white coat/dark clothes and short boots with a much smaller all-white fluffy companion on the back/shoulders, both low-head-count chibi. Reference2 fixes the SAME red-cabin wooden boat with ochre canopy; reference3 is official appearance and palette ONLY, do not copy its lettering. NEW wide scene of a small warm wooden harbor village on the edge of a green rocky islet: modest colorful timber houses on low stilts, little dock, mooring posts and clean turquoise inlet, no large city. At front of dock the two sibling travelers are seen mostly from behind/side as small softly shaded chibi silhouettes; the silver-haired traveler waves enthusiastically to two original local island residents. The residents, rounded low-head-count figures with simple practical modest summer clothes and one broad straw hat, smile and gesture in welcome; one indicates the way with an open hand. Preserve the travelers' distinctive hair and fluffy silhouette but keep face details understated. Their SAME red-cabin boat sits moored beside the dock. Late-afternoon gentle warm light, lively friendly exchange, warm little discovery on a long adventure. No actual maps with labels, no sign writing, no logos, one coherent anime scene."
+    },
+    {
+      "key": "07-summer-sunset",
+      "sceneId": "{99FC10C7-1643-472F-9773-DFEE291BB301}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-005fb987-e50c-4413-a0a9-832070d53206.png",
+      "prompt": "Use case: illustration-story. Asset: one precious summer, quiet sunset on the ocean. One landscape 16:9 illustration, preferably 1920x1080. Bright polished 2D anime adventure illustration, crisp delicate ink outlines, clear soft cel shading, vibrant turquoise sea and rich summer sky, luminous white cumulonimbus clouds, warm sunlight and soft atmospheric distance. Gently rounded miniature-world proportions. Characters when present are low-head-count chibi, about three heads tall, expressive large heads and short small bodies, wholesome fully clothed travelers. A cohesive summer maritime journey with a feeling of wonder and gentle nostalgia. No lettering, words, logos, speech balloons, watermarks or panel borders. Keep the SAME rustic wooden traveling boat from the references: small red-painted cabin, ochre canvas canopy, simple short mast and wooden railing. Now a DIFFERENT distant wide rear three-quarter view of that little boat slowly heading toward a broad orange sunset horizon. On deck are the SAME TWO travelers reduced to small chibi SILHOUETTES: short silver-haired white-coated traveler with the very small cloud-white fluffy companion perched on the back/shoulders, distinguishable rounded three-head silhouette, no detailed close faces. Very gentle sea with copper, soft rose, lavender and deep blue reflections. Sky transitions from warm peach and gold at the horizon to soft violet-blue above, a few thin elongated clouds and distant low cloud silhouettes. Warm light outlining hair and canopy, long narrow reflection path from low sun to the boat. Minimal other details, NO land, peaceful bittersweet ending-of-summer mood, wonder and memories rather than sadness, clean expressive anime landscape, no lettering or logos."
+    },
+    {
+      "key": "08-invitation-to-the-sea",
+      "sceneId": "{5D838D82-61D8-4FCB-8D54-7530D8025D8E}",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-6ba72940-8b82-4185-a2b1-8550f0cd7717.png",
+      "prompt": "Use case: illustration-story. Asset: recommendation scene, an invitation to a summer sea journey. One landscape 16:9 illustration, preferably 1920x1080. Bright polished 2D anime adventure illustration, crisp delicate ink outlines, clear soft cel shading, vibrant turquoise sea and rich summer sky, luminous white cumulonimbus clouds, warm sunlight and soft atmospheric distance. Gently rounded miniature-world proportions. Characters when present are low-head-count chibi, about three heads tall, expressive large heads and short small bodies, wholesome fully clothed travelers. A cohesive summer maritime journey with a feeling of wonder and gentle nostalgia. No lettering, words, logos, speech balloons, watermarks or panel borders. References establish the SAME small red-cabin wooden boat with ochre canvas canopy, turquoise sea, pale rocky green islands and bright clean anime finish. Return to brilliant midday after the preceding sunset scene: foreground at lower-left the SAME little boat floating quietly on gentle clear water, shown from a graceful side three-quarter angle, wooden railing and tiny cabin visible, NO close passengers or faces. Far ahead near right-of-center a lush green little island with pale rocky shore and small beach beckons beyond the open water. Majestic sunlit white cumulonimbus towers across a deep blue summer sky, warm sun glints, soft sea breeze and slightly rounded miniature-world shapes. Different composition from prior cove: open ocean, no pier, no land near camera, broad spacious horizon and strong sense of possibility. Crisp anime adventure backdrop, uplifting vivid but harmonious turquoise/white/green palette. No lettering, no logo, no extra ships or characters."
+    },
+    {
+      "key": "09-thumbnail",
+      "sceneId": "thumbnail",
+      "generatedPath": "C:\\Users\\zan12\\.codex\\generated_images\\01a143c2-7487-77c2-b84c-515fcbeab6eb\\exec-5ef0b954-c200-48e6-8980-e964748e8010.png",
+      "prompt": "Use case: ads-marketing. Asset: finished final thumbnail/end-card for manga introduction 'ロストサマー・ジャーニー'. One polished wide 16:9 illustration, preferably 1920x1080, vivid 2D anime adventure touch, clean ink lines and luminous cel shading, ALL characters are low-head-count chibi around THREE HEADS TALL with large expressive heads and small short bodies. REFERENCE ROLES: 1 official appearance reference for the silver-gray tousled-haired blue-eyed traveler in a loose white coat over dark shirt and dark shorts and the tiny all-white fluffy cloud-haired companion with reddish eyes perched on the back/shoulders; retain those distinct silhouettes and colors, not two ordinary human adventurers, do not copy original title art directly. 2 generated boat-deck scene fixes their low-head-count shape and the red cabin/ochre canopy wooden boat. 3 island cove fixes bright turquoise ocean, green rocky islands and huge white summer clouds. 4 ORIGINAL narrator Tohoku Kiritan reference: preserve her wine-brown bob hair, red eyes, white hair ornaments, pale pink/white kimono and burgundy obi, drawn in the same three-head chibi style. Composition: bright sweeping turquoise sea with little green islands and dazzling cumulus as backdrop; red-cabin boat and railing along lower left, the silver-haired traveler in front/three-quarter view at lower-left smiling eagerly toward horizon, tiny fluffy companion smiling over the shoulder; Kiritan on right foreground, cheerful guide expression and lively pointing pose toward the title/sea, properly closed modest kimono, original colors. Main focus: HUGE beautifully readable Japanese TITLE LOGO across upper-left and center, solid deep navy/teal shaped backing under letters for contrast, warm orange-and-sunshine-gold bold letters with thick cream white outline and navy shadow, playful maritime energy. EXACT text only, small badge '漫画' above; title on TWO lines 'ロストサマー・' and 'ジャーニー'. Together they spell exactly ロストサマー・ジャーニー including the middle dot and long-vowel marks. Make title occupy half the canvas and never cover it with hair, birds, waves or props. Generous outer margins, coherent composition, no comic panel divisions. Fresh summer wonder and friendly exploration, no romance or suggestive posing, no actual brand logos, no author name, no invented tagline or additional lettering, no watermark."
+    }
+  ],
+  "verification": {
+    "projectId": "{E9B0D5E4-8CB3-445C-B236-247718F4822A}",
+    "revision": 205,
+    "saved": true,
+    "cueCount": 43,
+    "cueJsonUnchanged": true,
+    "voiceReady": 43,
+    "voiceHeard": 43,
+    "imagesSent": 10,
+    "thumbnailSourcesReady": true,
+    "thumbnailApproved": false,
+    "images": [
+      {
+        "height": 941,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{E9B0D5E4-8CB3-445C-B236-247718F4822A}\\project.assets\\d12240f08e6cc04f553f1eff4b5b1401ba1abfa0b4de690c80b4633eabcc2b04.png",
+        "bytes": 2063857,
+        "sha256": "d12240f08e6cc04f553f1eff4b5b1401ba1abfa0b4de690c80b4633eabcc2b04",
+        "approved": true,
+        "width": 1672,
+        "sceneId": "common-background",
+        "key": "00-common-background"
+      },
+      {
+        "height": 941,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{E9B0D5E4-8CB3-445C-B236-247718F4822A}\\project.assets\\28b7a2ae144ce2bd9022ee1a24a7d26a896cd493092c567b85a373201a0b5c70.png",
+        "bytes": 2198999,
+        "sha256": "28b7a2ae144ce2bd9022ee1a24a7d26a896cd493092c567b85a373201a0b5c70",
+        "approved": true,
+        "width": 1672,
+        "sceneId": "{F42F725F-F443-4D24-84DF-FE0DB49D2D42}",
+        "key": "01-toward-the-horizon"
+      },
+      {
+        "height": 941,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{E9B0D5E4-8CB3-445C-B236-247718F4822A}\\project.assets\\dfe564b60c102e020a76953afa0495852c65bbf15ea648d824d0e14ce31e5400.png",
+        "bytes": 2677814,
+        "sha256": "dfe564b60c102e020a76953afa0495852c65bbf15ea648d824d0e14ce31e5400",
+        "approved": true,
+        "width": 1672,
+        "sceneId": "{DEC08089-1F1A-42BF-89AD-D984440A0DBE}",
+        "key": "02-islands-in-a-blue-world"
+      },
+      {
+        "height": 941,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{E9B0D5E4-8CB3-445C-B236-247718F4822A}\\project.assets\\9e5a8bcce86a7227551e2332dececb3cfb84df034625b2e6c88cedc5cecee4fd.png",
+        "bytes": 2480998,
+        "sha256": "9e5a8bcce86a7227551e2332dececb3cfb84df034625b2e6c88cedc5cecee4fd",
+        "approved": true,
+        "width": 1672,
+        "sceneId": "{0A71A8CB-218E-41D1-9993-0B87E5E6CCB7}",
+        "key": "03-two-travelers"
+      },
+      {
+        "height": 941,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{E9B0D5E4-8CB3-445C-B236-247718F4822A}\\project.assets\\0cff210bef88ce7085d296551e461eb071d0e1d228b35dbdcbb9bc5ff78241c7.png",
+        "bytes": 3201276,
+        "sha256": "0cff210bef88ce7085d296551e461eb071d0e1d228b35dbdcbb9bc5ff78241c7",
+        "approved": true,
+        "width": 1672,
+        "sceneId": "{B634CB19-A921-44C8-93B0-28B602017D50}",
+        "key": "04-island-detour"
+      },
+      {
+        "height": 941,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{E9B0D5E4-8CB3-445C-B236-247718F4822A}\\project.assets\\65b6f8146f3d0ee576e3a67e4212f3217696e708a002270a199ae875d1bdcc03.png",
+        "bytes": 3103343,
+        "sha256": "65b6f8146f3d0ee576e3a67e4212f3217696e708a002270a199ae875d1bdcc03",
+        "approved": true,
+        "width": 1672,
+        "sceneId": "{1D6B85AF-15F0-4B7B-AF96-146070A4A864}",
+        "key": "05-submerged-world"
+      },
+      {
+        "height": 941,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{E9B0D5E4-8CB3-445C-B236-247718F4822A}\\project.assets\\853132a19da71f7384f5ff9f62cdac0ec2a06d21806c7555a10657baa4a2f0f9.png",
+        "bytes": 3079579,
+        "sha256": "853132a19da71f7384f5ff9f62cdac0ec2a06d21806c7555a10657baa4a2f0f9",
+        "approved": true,
+        "width": 1672,
+        "sceneId": "{30BA330E-8B10-43D4-A9E1-7E422480895A}",
+        "key": "06-harbor-encounters"
+      },
+      {
+        "height": 941,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{E9B0D5E4-8CB3-445C-B236-247718F4822A}\\project.assets\\5c7b49b008e30a879fdca0f107b5e32b7b7779beee22e5ac4f4569f7fe634938.png",
+        "bytes": 2691094,
+        "sha256": "5c7b49b008e30a879fdca0f107b5e32b7b7779beee22e5ac4f4569f7fe634938",
+        "approved": true,
+        "width": 1672,
+        "sceneId": "{99FC10C7-1643-472F-9773-DFEE291BB301}",
+        "key": "07-summer-sunset"
+      },
+      {
+        "height": 941,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{E9B0D5E4-8CB3-445C-B236-247718F4822A}\\project.assets\\a389e6da751fa0186084f0663ca6da144ad565739f8ad674107b663cc8d1f93a.png",
+        "bytes": 2694557,
+        "sha256": "a389e6da751fa0186084f0663ca6da144ad565739f8ad674107b663cc8d1f93a",
+        "approved": true,
+        "width": 1672,
+        "sceneId": "{5D838D82-61D8-4FCB-8D54-7530D8025D8E}",
+        "key": "08-invitation-to-the-sea"
+      },
+      {
+        "height": 941,
+        "managedPath": "C:\\Users\\zan12\\Documents\\RIGMMaker\\Projects\\{E9B0D5E4-8CB3-445C-B236-247718F4822A}\\project.assets\\45eb25c28918334f90da09a86439d13a85087bbcd6db070ea9da2d50a6384138.png",
+        "bytes": 2769578,
+        "sha256": "45eb25c28918334f90da09a86439d13a85087bbcd6db070ea9da2d50a6384138",
+        "approved": false,
+        "width": 1672,
+        "sceneId": "thumbnail",
+        "key": "09-thumbnail"
+      }
+    ]
+  },
+  "visualReview": {
+    "result": "低頭身の旅人二人、外見・服装・船の継続、夏の海と夕暮れの配色、サムネイルの全文題名ときりたんを確認。",
+    "limits": "背景は創作イラスト。動画出力・保存再開後のGUI表示は未確認。",
+    "method": "各生成結果を表示して目視"
+  },
+  "humanReview": {
+    "thumbnail": "送信・保存済み。最終確定チェック待ち。",
+    "backgroundAndMainImages": "ユーザーが確定チェックを入れたと回答。アプリのsourcesReady=trueを確認。"
+  },
+  "evidenceDirectory": "output/production/20261018-lost-summer-journey"
+}

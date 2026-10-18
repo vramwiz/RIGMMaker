@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "recordType": "rigm_scene_image_creation_learning",
+  "date": "2026-10-16",
+  "purpose": "コール・ミー・フランケンシュタイン紹介台本の8シーンとサムネイルを作成し、起動中アプリへパイプ送信する。",
+  "userInstructions": [
+    "マンガの元の絵柄を覚えて、頭身を低く表現する。",
+    "note.mdからリンクされたCodexでの送信方法を参照する。"
+  ],
+  "projectId": "{B17AEAEB-E692-4C93-9FDD-BF10798EABAA}",
+  "projectPath": "C:/Users/zan12/Documents/RIGMMaker/Projects/{B17AEAEB-E692-4C93-9FDD-BF10798EABAA}/project.rigmovie",
+  "method": "内蔵image_gen。現在のapp-script-status/scenesとschemaを取得し、未確定行をrequest-scene-image、生成後に現在要求を再照合してadopt-scene-image、script-saveで保存。全てSend-RigmDotsCommand.ps1経由。過去のPIDや要求を次回再利用しない。",
+  "sourceImages": [
+    {
+      "role": "原作の作中デザインと色",
+      "url": "https://pbs.twimg.com/media/HIm2-nmbQAAQ5Vx.jpg",
+      "context": "https://twiman.net/user/961844316/2056375545861173529",
+      "local": "C:/Users/zan12/Documents/RIGMMaker/Exchange/FrankensteinChibi-20261016/References/reference-original-color.jpg"
+    },
+    {
+      "role": "原作の作中デザイン補足",
+      "url": "https://pbs.twimg.com/media/HIm2-npbsAA7Dtj.jpg",
+      "local": "C:/Users/zan12/Documents/RIGMMaker/Exchange/FrankensteinChibi-20261016/References/reference-original-story.jpg"
+    },
+    {
+      "role": "サムネイルの使用キャラ。東北きりたんの元の色・服装を優先",
+      "local": "C:/Users/zan12/Documents/RIGMMaker/Cache/ScriptThumbnailRefs/2cb0350eecf100678d19936f691c6603da557f38b9e678af63041ac973610b56.png"
+    }
+  ],
+  "reusableRules": [
+    "人物は約2.5頭身。大きな頭、小さな胴、短い手足。原作の輪郭・顔・髪・服装・小物を残す。原作のコマや台詞を複製せず、台本の要望に沿った別構図を作る。",
+    "現在の虹乃橋ゆかり：長く乱れた暗い茶～黒の髪、内側のくすんだ赤桃色、赤い四角いヘアクリップ、大きな丸眼鏡と渦巻き反射、青い目、白衣と暗緑色のハイネック。金髪ポニーの告知絵と混同しない。",
+    "黄泉路はるか：水色のボブ、電池残量表示の黒いカチューシャ、頭の両側から伸びる黒と水色の大きな角張った電池、赤橙色フード上着、袖の十字パッチ、灰色シャツ、暗色スカート、黒い手袋。普通の角・一般的なゾンビへ置換しない。",
+    "青紫とシアンの照明、石壁、アーチ窓、薬品瓶・電気装置で研究室を統一。次の場面にも前画像を参照する。",
+    "人物のない指定の場面へ人物を増やさない。背景タンク内に無関係な人や怪物を追加しない。",
+    "サムネイルは確定済み背景・通常シーンから要求を取得して作る。使用キャラはアプリ提供PNGを参照し、表情・視線・ポーズは場面に合わせる。大きい作品名ロゴの視認性を優先する。"
+  ],
+  "lessons": [
+    "最初に使った作者の告知絵は金髪ポニーだった。初回掲載の作中カラーで現在の博士の外見が異なることを確認し、導入を黒髪・緑ハイネックへ修正して最終採用。",
+    "かわいいのに不穏の初稿でタンクに無関係な人影が生成されたため、液体とケーブルだけへ修正して最終採用。",
+    "生成要求は1920x1080、実生成は1672x941。画像の原本を再加工せずアプリへ渡した。"
+  ],
+  "verification": {
+    "applicationImport": "8シーンとサムネイルの採用成功応答を確認。",
+    "imageVisualReview": "生成画像をモデルが目視し、人物の特徴・低頭身・構図・サムネイル文字を確認。",
+    "userVisualEvaluation": "背景と通常10行の人間確定をライブ状態で確認。サムネイルは最終確認時の状態をverification.json参照。",
+    "savedAssets": "各シーンの生成原本コピー・管理画像・保存済みproject.assetsのSHA256一致を確認。",
+    "sourceCuesPreserved": "生成前の取得値と8シーンの台詞・画像要望が一致。",
+    "rigmSaveAndReload": "rigmovieのJSONと保存資産を直接再読込。アプリ終了後の再開は未実施。"
+  },
+  "unverified": [
+    "動画の再出力・保存終了後のGUI再開はこの画像制作では行っていない。",
+    "原作の線そのものの完全一致は保証せず、参照に基づく低頭身の新しいイラストとして生成。"
+  ],
+  "artifacts": {
+    "directory": "C:/Users/zan12/Documents/RIGMMaker/Exchange/FrankensteinChibi-20261016",
+    "prompts": "C:/Users/zan12/Documents/RIGMMaker/Exchange/FrankensteinChibi-20261016/prompts.json",
+    "verification": "C:/Users/zan12/Documents/RIGMMaker/Exchange/FrankensteinChibi-20261016/verification.json",
+    "thumbnail": "C:/Users/zan12/Documents/RIGMMaker/Exchange/FrankensteinChibi-20261016/thumbnail.png"
+  }
+}
