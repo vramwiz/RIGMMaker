@@ -20,7 +20,6 @@ type
     procedure Changed(Sender: TObject);
     procedure Adopt(Sender: TObject);
     procedure Done(Sender: TObject);
-    procedure Ready(Sender: TObject);
     procedure ModeChanged(Sender: TObject);
     procedure SpeechChanged(Sender: TObject);
   protected
@@ -85,7 +84,6 @@ begin
   inherited Create(AOwner); Align := alClient; FWorkspace := W; FSync := True;
   var Actions := TPanel.Create(Self); Actions.Parent := Self; Actions.Align := alTop; Actions.Height := ScaleValue(48); Actions.ShowCaption := False; Actions.BevelOuter := bvNone;
   var Apply := TButton.Create(Self); Apply.Parent := Actions; Apply.Name := 'ScriptClosingDone'; Apply.Caption := '入力を反映'; Apply.SetBounds(ScaleValue(8),ScaleValue(4),ScaleValue(120),ScaleValue(34)); Apply.OnClick := Done;
-  var Confirm := TButton.Create(Self); Confirm.Parent := Actions; Confirm.Name := 'ScriptClosingReady'; Confirm.Caption := '締めの設定を確認完了'; Confirm.SetBounds(ScaleValue(136),ScaleValue(4),ScaleValue(204),ScaleValue(34)); Confirm.OnClick := Ready;
   FGuide := TRigmScriptLabel.Create(Self); FGuide.Parent := Self; FGuide.AutoSize := False; FGuide.WordWrap := True; FGuide.Align := alBottom; FGuide.Height := ScaleValue(56); FGuide.Name := 'ScriptClosingGuide';
   FBody := TPanel.Create(Self); FBody.Parent := Self; FBody.Align := alClient; FBody.ShowCaption := False; FBody.BevelOuter := bvNone; FBody.Padding.SetBounds(ScaleValue(8),0,ScaleValue(8),ScaleValue(8));
   FSettings := TPanel.Create(Self); FSettings.Parent := FBody; FSettings.Align := alLeft; FSettings.ShowCaption := False; FSettings.BevelOuter := bvNone; FSettings.Padding.Right := ScaleValue(16); FSettings.Name := 'ScriptClosingSettings';
@@ -138,8 +136,6 @@ function TRigmScriptClosingFrame.RequestFinish: Boolean;
 begin if not FEditing then Exit(True); Result := False; var D := Draft; try try FWorkspace.SetScriptClosingDraft(D); Result := True; except on E: Exception do FGuide.Caption := E.Message; end; finally D.Free; end; if Result then begin FEditing := False; FWorkspace.EndScriptTextEdit; RefreshState; end; end;
 procedure TRigmScriptClosingFrame.Done(Sender: TObject);
 begin RequestFinish; end;
-procedure TRigmScriptClosingFrame.Ready(Sender: TObject);
-begin if not RequestFinish then Exit; try FWorkspace.CompleteScriptClosing; except on E: Exception do FGuide.Caption := E.Message; end; end;
 procedure TRigmScriptClosingFrame.Adopt(Sender: TObject);
 begin if not RequestFinish then Exit; var Dialog := TOpenDialog.Create(Self); try Dialog.Title := AdoptHints[TButton(Sender).Tag]; Dialog.Filter := '既存画像|*.png;*.jpg;*.jpeg;*.bmp'; if Dialog.Execute then try FWorkspace.AdoptScriptClosingImage(ImageKeys[TButton(Sender).Tag],Dialog.FileName); except on E: Exception do FGuide.Caption := E.Message; end; finally Dialog.Free; end; end;
 procedure TRigmScriptClosingFrame.ModeChanged(Sender: TObject);
@@ -165,7 +161,7 @@ begin
     else if JS(D,ChoiceKeys[I])='use' then FPaths[I].Caption := '「画像を選ぶ」から画像を指定してください。'
     else FPaths[I].Caption := '採用するか、省略するかを選んでください。';
   end;
-  FGuide.Caption := '締めの代表・終了画像を選び、設定を確認完了してください。必須サムネイルは第16段階の最後に作成します。'; FPreview.Invalidate;
+  FGuide.Caption := '締めの代表・終了画像を採用/省略で選び、左の「台本確認」へ進んでください。移動時に検査・保存します。必須サムネイルは第16段階の最後に作成します。'; FPreview.Invalidate;
   finally FSync := False; end;
 end;
 end.

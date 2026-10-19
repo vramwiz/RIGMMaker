@@ -1135,7 +1135,6 @@ begin
     end;
     if Next='summary-edit' then PrepareScriptSummary(Snapshot);
     if Stage='summary-edit' then begin
-      if JS(JO(Snapshot.ScriptWizard,'summaryData'),'status')<>'complete' then raise Exception.Create('総評の確認完了を押してください。');
       ConfirmScriptSummaryDraft(Snapshot); PrepareScriptDialogue(Snapshot);
     end;
     if Next='closing' then begin
@@ -1143,7 +1142,7 @@ begin
       Snapshot.ScriptWizard.RemovePair('voiceReturnStage').Free;
     end;
     if Next='script-confirm' then begin
-      if JS(JO(Snapshot.ScriptWizard,'closingData'),'status')<>'complete' then raise Exception.Create('締め設定の確認完了を押してください。');
+      MaterializeScriptClosing(Snapshot);
       PrepareScriptDialogue(Snapshot);
     end;
     if Next='scene-assignment' then begin PrepareScriptScenes(Snapshot,Stage<>'voice-effects'); ApplyImportedSceneInputs(Snapshot); end;
@@ -1432,6 +1431,7 @@ begin
   Result.AddPair('implementedStage','closing-editor'); Result.AddPair('placementEditing',TJSONBool.Create(FPlacementEditing));
   Result.AddPair('textEditing',TJSONBool.Create(ScriptTextEditing));
   var Advance := False; var CanConfirmVoice := False; var CanConfirmSubtitles := False; var CanConfirmCasting := False;
+  var ScenesReason := '';
   if FScriptDraft<>nil then Advance := not FPlacementEditing and not ScriptTextEditing and (Trim(JS(FScriptDraft.ScriptWizard,'titleInput'))<>'') and
     ((CurrentScriptStage='title') or (((CurrentScriptStage='characters') or (CurrentScriptStage='layout') or (CurrentScriptStage='placement') or (CurrentScriptStage='text') or (CurrentScriptStage='review') or (CurrentScriptStage='casting')) and
     (FScriptDraft.ScriptWizard.GetValue('selectedCharacters')<>nil) and (JA(FScriptDraft.ScriptWizard,'selectedCharacters').Count>0)));
@@ -1455,10 +1455,18 @@ begin
     if VoiceBusy or VoicePlaying or VoiceContinuous then Reason := '音声生成・再生を停止してから左の工程リストで進んでください。';
     Advance := not ScriptTextEditing and (Reason=''); Result.AddPair('advanceBlockedReason',Reason);
   end;
-    if (FScriptDraft<>nil) and (CurrentScriptStage='scenes') then begin var Reason := ScriptScenesAdvanceReason; Advance := Reason=''; PsdJson.Put(Result,'advanceBlockedReason',Reason); end;
+  if (FScriptDraft<>nil) and (CurrentScriptStage='scenes') then begin
+    ScenesReason := ScriptScenesAdvanceReason; Advance := ScenesReason=''; PsdJson.Put(Result,'advanceBlockedReason',ScenesReason);
+  end;
   if (FScriptDraft<>nil) and (CurrentScriptStage='summary') then Advance := not ScriptTextEditing and MatchStr(JS(FScriptDraft.ScriptWizard,'summaryChoice'),['none','yes']);
-  if (FScriptDraft<>nil) and (CurrentScriptStage='summary-edit') then Advance := not ScriptTextEditing and (JS(JO(FScriptDraft.ScriptWizard,'summaryData'),'status')='complete');
-  if (FScriptDraft<>nil) and (CurrentScriptStage='closing') then Advance := not ScriptTextEditing and not VoiceBusy and (JS(JO(FScriptDraft.ScriptWizard,'closingData'),'status')='complete');
+  if (FScriptDraft<>nil) and (CurrentScriptStage='summary-edit') then begin
+    var Reason := ScriptSummaryDraftReason(JO(JO(FScriptDraft.ScriptWizard,'summaryData'),'draft'));
+    Advance := Reason=''; PsdJson.Put(Result,'advanceBlockedReason',Reason);
+  end;
+  if (FScriptDraft<>nil) and (CurrentScriptStage='closing') then begin
+    var Reason := ScriptClosingDraftReason(FScriptDraft);
+    Advance := Reason=''; PsdJson.Put(Result,'advanceBlockedReason',Reason);
+  end;
   if (FScriptDraft<>nil) and (CurrentScriptStage='script-confirm') then begin
     var Reason := ScriptConfirmationReason(FScriptDraft); Advance := Reason=''; PsdJson.Put(Result,'advanceBlockedReason',Reason);
   end;
@@ -1537,7 +1545,8 @@ begin
   var AssignmentReady := JS(FScriptDraft.ScriptWizard,'scene-assignmentStatus')='complete';
   if AssignmentReady then try ValidateScriptSceneAssignment(FScriptDraft); except AssignmentReady := False; end;
   AddB(Result,'assignmentReady',AssignmentReady);
-  AddB(Result,'scenesReady',(FScriptDraft.ScriptWizard.GetValue('scenes')<>nil) and (ScriptScenesAdvanceReason=''));
+  if (CurrentScriptStage<>'scenes') and (FScriptDraft.ScriptWizard.GetValue('scenes')<>nil) then ScenesReason := ScriptScenesAdvanceReason;
+  AddB(Result,'scenesReady',(FScriptDraft.ScriptWizard.GetValue('scenes')<>nil) and (ScenesReason=''));
   var Blocked := ScriptStageBlockReason(Result,ScriptNextStage(CurrentScriptStage,Wizard));
   if Blocked<>'' then begin
     PsdJson.Put(Result,'canAdvance',TJSONBool.Create(False)); PsdJson.Put(Result,'canConfirmCasting',TJSONBool.Create(False));

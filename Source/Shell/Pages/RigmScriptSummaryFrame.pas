@@ -21,7 +21,6 @@ type
     procedure GridEdit(Sender: TObject; ACol,ARow: Integer; const Value: string);
     procedure Edit(Sender: TObject);
     procedure Done(Sender: TObject);
-    procedure Ready(Sender: TObject);
     procedure Key(Sender: TObject; var Key: Word; Shift: TShiftState);
   protected
     procedure Resize; override;
@@ -59,7 +58,6 @@ begin
   var Tools := TRigmIconToolbar.Create(Self); Tools.Parent := Self; Tools.Align := alTop; Tools.Name := 'ScriptSummaryToolbar';
   Tools.AddIcon('ScriptSummaryEdit','総評の入力',riEditPreview,0,Edit);
   Tools.AddIcon('ScriptSummaryDone','入力完了（途中の数値も保存）',riSave,0,Done);
-  Tools.AddIcon('ScriptSummaryReady','セリフ・チャートの確認完了',riComplete,0,Ready);
   FGuide := TRigmScriptLabel.Create(Self); FGuide.Parent := Self; FGuide.Align := alBottom;
   FGuide.AutoSize := False; FGuide.WordWrap := True; FGuide.Height := ScaleValue(54); FGuide.Name := 'ScriptSummaryGuide';
   FColumns := TPanel.Create(Self); FColumns.Parent := Self; FColumns.Align := alClient;
@@ -142,8 +140,6 @@ begin
 end;
 procedure TRigmScriptSummaryFrame.Done(Sender: TObject);
 begin RequestFinish; end;
-procedure TRigmScriptSummaryFrame.Ready(Sender: TObject);
-begin if not RequestFinish then Exit; try FWorkspace.CompleteScriptSummary; except on E: Exception do FGuide.Caption := E.Message; end; end;
 procedure TRigmScriptSummaryFrame.Key(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin if (Key=VK_ESCAPE) or ((Key=VK_RETURN) and (ssCtrl in Shift)) then begin Done(Self); Key := 0; end; end;
 procedure TRigmScriptSummaryFrame.RefreshState;
@@ -155,7 +151,7 @@ begin
       FGrid.RowCount := JA(D,'items').Count+1; for var I := 0 to JA(D,'items').Count-1 do begin var O := TJSONObject(JA(D,'items')[I]); FGrid.Cells[0,I+1] := JS(O,'label'); FGrid.Cells[1,I+1] := JS(O,'value'); end; FLoaded := P.Id;
     end;
     FText.ReadOnly := False; FSubtitle.ReadOnly := False; FReading.ReadOnly := False;
-    var Guide := '総評のセリフと、右の固定5項目の点数（初期範囲0～5）を入力してください。点数欄をクリックして入力できます。字幕・読み・チャート題名は任意です。';
+    var Guide := '総評のセリフと、右の固定5項目の点数（初期範囲0～5）を入力してください。字幕・読み・チャート題名は任意です。左の「締め設定」を選ぶと検査・保存して進みます。';
     var Reason := ScriptSummaryDraftReason(D);
     if Reason<>'' then Guide := Guide+#13#10+Reason;
     if FGuide.Caption<>Guide then FGuide.Caption := Guide;

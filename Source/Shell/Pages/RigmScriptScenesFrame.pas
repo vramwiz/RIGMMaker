@@ -228,7 +228,7 @@ begin
 end;
 function TRigmScriptScenesFrame.RequestFinish: Boolean;
 begin
-  Result := False; var A := TJSONArray.Create;
+  Result := False; var WasEditing := FEditing; var A := TJSONArray.Create;
   try
     for var Row in FRows do begin
       var S := FWorkspace.ScriptDraft.ImageTarget(Row.SceneId); if S=nil then raise Exception.Create('シーン構成が変わりました。入力を保持しています。');
@@ -251,7 +251,8 @@ begin
     end;
     FSync := True;
     try FWorkspace.UpdateScriptSceneInputs(A); FEditing := False; FWorkspace.EndScriptTextEdit; finally FSync := False; end;
-    RefreshState; Result := True;
+    if (A.Count>0) or WasEditing then RefreshState;
+    Result := True;
   except on E: Exception do FGuide.Caption := E.Message; end;
   A.Free;
 end;
@@ -262,7 +263,10 @@ begin
   if FSync then Exit; var Row := RowFor(Sender); if Row=nil then Exit;
   var Id := Row.SceneId; var Value := Row.Approved.Checked;
   if not RequestFinish then begin RefreshState; Exit; end;
-  try FWorkspace.SetScriptSceneApproved(Id,Value); RefreshState;
+  // Workspaceの通知が親の工程リストと画像行を一度に更新する。
+  try
+    FWorkspace.SetScriptSceneApproved(Id,Value);
+    if not Assigned(FWorkspace.OnScriptChanged) then RefreshState;
   except on E: Exception do begin RefreshState; FGuide.Caption := E.Message; end; end;
 end;
 procedure TRigmScriptScenesFrame.Key(Sender: TObject; var Key: Word; Shift: TShiftState);

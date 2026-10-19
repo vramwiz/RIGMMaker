@@ -150,7 +150,9 @@ begin
   if (S.ImageApproved=Value) and (not Value or ScriptSceneReady(Project,S,True)) then Exit;
   if S.ImageEditEpoch=MaxInt then raise Exception.Create('画像編集世代の上限です。');
   if Value and SceneNeedsImage(S) then begin
-    if (Id=RigmThumbnailId) and not ScriptThumbnailSourcesReady(Project,True) then raise Exception.Create('使用する背景・各シーンの画像を確定してから、最後にサムネイルを作成してください。');
+    // 元画像は採用・確定時に復号済み。ここではファイルの変更を照合し、全画像を再復号しない。
+    // 編集へ移る直前と出力時にはForce=Trueで全素材を再検査する。
+    if (Id=RigmThumbnailId) and not ScriptThumbnailSourcesReady(Project) then raise Exception.Create('使用する背景・各シーンの画像を確定してから、最後にサムネイルを作成してください。');
     if S.Image='' then raise Exception.Create('画像を用意してから確定してください。');
     CheckedMovieImageHash(ResolveMoviePath(Project.FileName,S.Image),True);
   end;
@@ -287,9 +289,13 @@ begin
   for var S in Project.Scenes do begin if ScriptSceneReady(Project,S) then Inc(Ready); var R := ScriptSceneRequest(Project,S.Id); if (R<>nil) and (JS(R,'state')='pending') then Inc(Pending); end;
   var BackgroundRequest := ScriptSceneRequest(Project,RigmCommonBackgroundId);
   if (BackgroundRequest<>nil) and (JS(BackgroundRequest,'state')='pending') then Inc(Pending);
-  AddB(Result,'backgroundReady',ScriptSceneReady(Project,Project.ImageTarget(RigmCommonBackgroundId)));
-  AddB(Result,'thumbnailReady',ScriptSceneReady(Project,Project.Thumbnail)); AddB(Result,'thumbnailSourcesReady',ScriptThumbnailSourcesReady(Project));
+  var BackgroundReady := ScriptSceneReady(Project,Project.ImageTarget(RigmCommonBackgroundId));
+  var ThumbnailReady := ScriptSceneReady(Project,Project.Thumbnail);
+  var SourcesReady := BackgroundReady and (Ready=Project.Scenes.Count) and (Ready>0);
+  if SourcesReady then try RequireScriptScenes(Project); except SourcesReady := False; end;
+  AddB(Result,'backgroundReady',BackgroundReady);
+  AddB(Result,'thumbnailReady',ThumbnailReady); AddB(Result,'thumbnailSourcesReady',SourcesReady);
   var ThumbnailRequest := ScriptSceneRequest(Project,RigmThumbnailId); if (ThumbnailRequest<>nil) and (JS(ThumbnailRequest,'state')='pending') then Inc(Pending);
-  AddB(Result,'allApproved',ScriptScenesReady(Project)); AddN(Result,'ready',Ready); AddN(Result,'pendingRequests',Pending); Result.AddPair('selectedScene',JS(JO(Project.ScriptWizard,'scenes'),'selectedScene')); var State := 'in-progress'; if ScriptScenesReady(Project) then State := 'complete'; Result.AddPair('state',State);
+  AddB(Result,'allApproved',SourcesReady and ThumbnailReady); AddN(Result,'ready',Ready); AddN(Result,'pendingRequests',Pending); Result.AddPair('selectedScene',JS(JO(Project.ScriptWizard,'scenes'),'selectedScene')); var State := 'in-progress'; if SourcesReady and ThumbnailReady then State := 'complete'; Result.AddPair('state',State);
 end;
 end.

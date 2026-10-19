@@ -5,12 +5,13 @@ procedure PrepareScriptClosing(Project: TRigmMovieProject);
 function ScriptClosingTitleFollowsProject(Project: TRigmMovieProject): Boolean;
 procedure SyncScriptClosingTitle(Project: TRigmMovieProject; const Title: string);
 procedure ValidateScriptClosing(Project: TRigmMovieProject);
+function ScriptClosingDraftReason(Project: TRigmMovieProject): string;
 procedure SetScriptClosingDraft(Project: TRigmMovieProject; Draft: TJSONObject);
 procedure MaterializeScriptClosing(Project: TRigmMovieProject);
 function ScriptClosingCards(Project: TRigmMovieProject): TJSONArray;
 function ScriptClosingScene(Project: TRigmMovieProject): string;
 implementation
-uses System.SysUtils, System.Classes, System.IOUtils, System.Math, System.StrUtils, Vcl.Graphics, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, RigmJson, RigmModel, PsdJson, RigmMovieEndCards, RigmMovieComposition, RigmScriptThumbnailModel;
+uses System.SysUtils, System.Classes, System.IOUtils, System.Math, System.StrUtils, Vcl.Graphics, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, RigmJson, RigmModel, PsdJson, RigmMovieEndCards, RigmMovieComposition, RigmScriptThumbnailModel, RigmMovieImageTransfer;
 function ScriptClosingScene(Project: TRigmMovieProject): string;
 begin Result := ''; if not(Project.ScriptWizard.GetValue('casting') is TJSONObject) then Exit; for var V in JA(JO(Project.ScriptWizard,'casting'),'rows') do if JS(TJSONObject(V),'section')='closing' then begin var C := Project.Cue(JS(TJSONObject(V),'cueId')); if C<>nil then Exit(C.Scene); end; end;
 procedure ValidateDraft(D: TJSONObject);
@@ -86,6 +87,21 @@ begin
     end;
     ValidateMovieEndCards(Result);
   except Result.Free; raise; end;
+end;
+function ScriptClosingDraftReason(Project: TRigmMovieProject): string;
+begin
+  Result := '';
+  try
+    ValidateScriptClosing(Project);
+    var D := JO(JO(Project.ScriptWizard,'closingData'),'draft');
+    var Choice := JS(D,'representativeChoice');
+    if not MatchStr(Choice,['none','use']) then Exit('締めの代表画像を採用/省略で選んでください。');
+    if Choice='use' then CheckedMovieImageHash(ResolveMoviePath(Project.FileName,JS(D,'representative')));
+    var Cards := ScriptClosingCards(Project);
+    try
+      for var V in Cards do CheckedMovieImageHash(ResolveMoviePath(Project.FileName,JS(TJSONObject(V),'image')));
+    finally Cards.Free; end;
+  except on E: Exception do Result := E.Message; end;
 end;
 procedure MaterializeScriptClosing(Project: TRigmMovieProject);
   procedure Image(const Value: string);
