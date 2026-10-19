@@ -9,6 +9,9 @@ function TRigmWizardWorkspace.VoiceConnectionStatus: TJSONObject;
 begin
   Result := TJSONObject.Create; AddB(Result,'busy',VoiceBusy); Result.AddPair('error',FVoiceError);
   AddB(Result,'catalogReady',VoiceCatalogReady); AddN(Result,'catalogCount',FVoiceCatalog.Count); Result.AddPair('catalogUrl',FVoiceCatalogUrl);
+  AddB(Result,'playbackPageActive',FVoicePlaybackPageActive);
+  AddB(Result,'playbackDeviceOpen',(FVoicePlayback<>nil) and FVoicePlayback.IsOpen);
+  if FVoicePlayback<>nil then AddN(Result,'playbackDeviceOpenCount',FVoicePlayback.DeviceOpenCount);
   if FVoiceJob<>nil then Result.AddPair('job',FVoiceJob.Status);
 end;
 function TRigmWizardWorkspace.CastingAdvanceReason(RequireConnection,RequireConfirmation: Boolean): string;
@@ -310,44 +313,45 @@ begin
   finally Lock.Free; end;
 end;
 
-// MCIの再生終了を監視し、選択行から末尾まで1行ずつ生成・再生する。
+// ページ内ではwaveOutを共有し、行の停止・完了・切替では音声デバイスを閉じない。
 function TRigmWizardWorkspace.VoicePlaying: Boolean;
-begin Result := FVoicePlaybackAlias<>''; end;
+begin Result := FVoicePlaybackCue<>''; end;
 function TRigmWizardWorkspace.VoiceContinuous: Boolean;
 begin Result := FVoiceContinuous; end;
+procedure TRigmWizardWorkspace.SetVoicePlaybackPageActive(Value: Boolean);
+begin
+  if FVoicePlaybackPageActive=Value then Exit;
+  FVoicePlaybackPageActive := Value;
+  if Value then begin
+    if FVoicePlayback=nil then FVoicePlayback := TRigmEffectsPlayback.Create;
+    try FVoicePlayback.OpenSession;
+    except on E: Exception do begin FVoiceError := E.Message; FreeAndNil(FVoicePlayback); end; end;
+  end else begin
+    StopVoice;
+    FreeAndNil(FVoicePlayback);
+  end;
+end;
 procedure TRigmWizardWorkspace.CloseVoicePlayback;
 begin
-  if FVoicePlaybackAlias<>'' then mciSendString(PChar('close '+FVoicePlaybackAlias),nil,0,0);
-  FVoicePlaybackAlias := ''; FVoicePlaybackCue := ''; FVoicePlaybackKey := '';
-  if (FVoicePlaybackTempFile<>'') and FileExists(FVoicePlaybackTempFile) then TFile.Delete(FVoicePlaybackTempFile);
-  FVoicePlaybackTempFile := '';
+  if FVoicePlayback<>nil then begin
+    if FVoicePlaybackPageActive then begin
+      try FVoicePlayback.Stop;
+      except on E: Exception do begin FVoiceError := E.Message; FreeAndNil(FVoicePlayback); end; end;
+    end else FreeAndNil(FVoicePlayback);
+  end;
+  FVoicePlaybackCue := ''; FVoicePlaybackKey := '';
 end;
 procedure TRigmWizardWorkspace.StartVoicePlayback(const CueId: string);
-  procedure CheckMci(Code: MCIERROR);
-  begin
-    if Code<>0 then begin var MessageText: array[0..255] of Char; mciGetErrorString(Code,MessageText,Length(MessageText)); raise Exception.Create('音声再生に失敗しました: '+string(MessageText)); end;
-  end;
-  procedure Send(const Command: string);
-  begin
-    CheckMci(mciSendString(PChar(Command),nil,0,0));
-  end;
 begin
   CloseVoicePlayback;
   var C := FScriptDraft.Cue(CueId);
   if (C=nil) or not FScriptDraft.AudioReady(C) then raise Exception.Create('現在の入力に一致する音声がありません。');
   if C.SpokenText='' then begin FVoiceSequencePhase := 'pause'; FVoicePauseUntil := GetTickCount64+Round(C.Pause*1000); Exit; end;
-  var Path := ResolveMoviePath(FScriptDraft.FileName,C.WaveFile);
-  if Pos('"',Path)>0 then raise Exception.Create('音声ファイル名に引用符を含められません。');
-  FVoicePlaybackAlias := 'RigmVoice'+IntToHex(GetCurrentProcessId,8)+IntToHex(NativeUInt(Self),SizeOf(Pointer)*2);
+  if FVoicePlayback=nil then FVoicePlayback := TRigmEffectsPlayback.Create;
   try
-    // MCI waveaudioの長いファイル名制限は構造体版openでも残る。原本を保持し、再生用コピーだけを所有する。
-    if Length(Path)>120 then begin
-      FVoicePlaybackTempFile := TPath.Combine(TPath.GetTempPath,'RigmVoice-'+PsdJson.NewId+'.wav');
-      TFile.Copy(Path,FVoicePlaybackTempFile,False); Path := FVoicePlaybackTempFile;
-    end;
-    Send('open "'+Path+'" type waveaudio alias '+FVoicePlaybackAlias);
-    Send('set '+FVoicePlaybackAlias+' time format milliseconds');
-    Send('play '+FVoicePlaybackAlias);
+    if FVoicePlaybackPageActive then FVoicePlayback.OpenSession;
+    FVoicePlayback.Open(ResolveMoviePath(FScriptDraft.FileName,C.WaveFile));
+    FVoicePlayback.Play;
     FVoicePlaybackCue := CueId; FVoicePlaybackKey := FScriptDraft.AudioFingerprint(C); FVoiceSequencePhase := 'playing';
   except CloseVoicePlayback; raise; end;
 end;
@@ -386,14 +390,9 @@ begin
     if VoicePlaying then begin
       var C := FScriptDraft.Cue(FVoicePlaybackCue);
       if (C=nil) or (FVoicePlaybackKey<>FScriptDraft.AudioFingerprint(C)) then raise Exception.Create('再生中の入力が変わったため停止しました。');
-      var Mode: array[0..31] of Char;
-      if mciSendString(PChar('status '+FVoicePlaybackAlias+' mode'),Mode,Length(Mode),0)<>0 then raise Exception.Create('再生状態を取得できないため停止しました。');
-      if SameText(string(Mode),'playing') then Exit;
-      if not SameText(string(Mode),'stopped') then raise Exception.Create('音声再生が中断されたため停止しました。');
-      var LengthText,PositionText: array[0..31] of Char; var Duration,Position: Integer;
-      if (mciSendString(PChar('status '+FVoicePlaybackAlias+' length'),LengthText,Length(LengthText),0)<>0) or
-        (mciSendString(PChar('status '+FVoicePlaybackAlias+' position'),PositionText,Length(PositionText),0)<>0) or
-        not TryStrToInt(string(LengthText),Duration) or not TryStrToInt(string(PositionText),Position) or (Position<Duration) then
+      if FVoicePlayback=nil then raise Exception.Create('音声出力が閉じられたため停止しました。');
+      if FVoicePlayback.Playing then Exit;
+      if FVoicePlayback.PositionSeconds+0.001<FVoicePlayback.DurationSeconds then
         raise Exception.Create('音声が最後まで再生されていないため確認完了にしません。');
       if MarkScriptVoiceHeard(FScriptDraft,C.Id,FVoicePlaybackKey) then FScriptDraft.Changed;
       var Pause := C.Pause; CloseVoicePlayback;

@@ -105,6 +105,37 @@ begin
   finally Player.Free; end;
 end;
 
+procedure ExerciseSession(Manifest: TJSONObject);
+var Player: TRigmEffectsPlayback; Paths: TJSONArray; Started: UInt64;
+begin
+  Player := TRigmEffectsPlayback.Create;
+  try
+    Player.OpenSession;
+    Check('session.openEmpty',Player.IsOpen and not Player.Loaded and not Player.Playing);
+    Player.OpenSession;
+    Check('session.repeatActivation',Player.DeviceOpenCount=1);
+    Paths := Manifest.GetValue<TJSONArray>('valid');
+    for var I := 0 to Paths.Count-1 do begin
+      Player.Open(Paths[I].GetValue<string>('path'));
+      Check('session.duration'+I.ToString,Abs(Player.DurationSeconds-1)<0.00001);
+      Player.Play; Sleep(40); Player.Stop;
+      Check('session.stopKeepsDevice'+I.ToString,Player.IsOpen and not Player.Playing and (Player.DeviceOpenCount=1));
+      Player.Play; Started := GetTickCount64;
+      while Player.Playing and (GetTickCount64-Started<5000) do Sleep(10);
+      Check('session.endKeepsDevice'+I.ToString,not Player.Playing and Player.IsOpen and
+        (Player.DeviceOpenCount=1) and (Abs(Player.PositionSeconds-1)<0.00001));
+    end;
+    var Refused := False;
+    try Player.Open(Manifest.GetValue<TJSONArray>('invalid')[0].GetValue<string>('path'));
+    except Refused := True; end;
+    Check('session.invalidKeepsDevice',Refused and Player.IsOpen and (Player.DeviceOpenCount=1));
+    Player.Close;
+    Check('session.closeReleasesDevice',not Player.IsOpen and not Player.Loaded);
+    Player.OpenSession;
+    Check('session.reentryOpensOnce',Player.IsOpen and (Player.DeviceOpenCount=2));
+  finally Player.Free; end;
+end;
+
 procedure ExerciseLifetime(const GoodPath: string);
 var Player: TRigmEffectsPlayback; OtherThread: TThread; Refused: Boolean;
 begin
@@ -159,6 +190,7 @@ begin
       end;
       ExerciseInvalid(Manifest, Paths.Items[0].GetValue<string>('path'));
       ExerciseLifetime(Paths.Items[0].GetValue<string>('path'));
+      ExerciseSession(Manifest);
     except on E: Exception do Check('fatal', False, E.ClassName + ': ' + E.Message); end;
     Report.AddPair('failures', TJSONNumber.Create(Failures));
     TFile.WriteAllText(ReportPath, Report.ToJSON, TEncoding.UTF8);

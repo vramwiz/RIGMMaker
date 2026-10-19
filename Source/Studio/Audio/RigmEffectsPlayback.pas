@@ -25,6 +25,8 @@ type
     FOwnerThread: DWORD;
     FPath, FLastError: string;
     FActive, FCompleted: Boolean;
+    FSession: Boolean;
+    FDeviceOpenCount: Integer;
     FPosition: Double;
     procedure CheckThread;
     procedure Fail(const Operation: string; Code: MMRESULT);
@@ -32,25 +34,31 @@ type
     function GetPositionSeconds: Double;
     function GetDurationSeconds: Double;
     function GetLoaded: Boolean;
+    function GetDeviceOpen: Boolean;
   public
     constructor Create;
     destructor Destroy; override;
     procedure Open(const Path: string);
+    procedure OpenSession; // 音声編集ページ専用。48kHz stereoでデバイスを保持する。
     procedure Play;
     procedure Stop;
     procedure Close;
     property Loaded: Boolean read GetLoaded;
-    property IsOpen: Boolean read GetLoaded;
+    property IsOpen: Boolean read GetDeviceOpen;
     property Path: string read FPath;
     property Playing: Boolean read GetPlaying;
     property PositionSeconds: Double read GetPositionSeconds;
     property DurationSeconds: Double read GetDurationSeconds;
     property LastError: string read FLastError;
+    property DeviceOpenCount: Integer read FDeviceOpenCount;
   end;
 
 implementation
 
 uses System.Classes, System.Math, System.SyncObjs, System.Generics.Collections;
+
+{$POINTERMATH ON}
+type PPlaybackSample = ^SmallInt;
 
 const
   MaxWaveBytes = 512 * 1024 * 1024;
@@ -261,9 +269,39 @@ begin
   try
     try
       Buffer := ReadWave(Path, FullPath);
-      Close;
-      Code := waveOutOpen(@Buffer.Handle, WAVE_MAPPER, @Buffer.Format, 0, 0, CALLBACK_NULL);
-      if Code <> MMSYSERR_NOERROR then Fail('Open audio device', Code);
+      if FSession then begin
+        // 固定出力形式へメモリ上で変換する。WAV原本は変更せず、形式の違いでも再openしない。
+        var SourceRate := Buffer.Format.nSamplesPerSec;
+        var Channels := Buffer.Format.nChannels;
+        var SourceFrames := Length(Buffer.Bytes) div Buffer.Format.nBlockAlign;
+        var Frames := Integer((Int64(SourceFrames)*48000+SourceRate-1) div SourceRate);
+        var Converted: TBytes; SetLength(Converted,Frames*4);
+        var Source := PPlaybackSample(@Buffer.Bytes[0]); var Dest := PPlaybackSample(@Converted[0]);
+        for var I := 0 to Frames-1 do begin
+          var Q := Double(I)*SourceRate/48000;
+          var A := Min(SourceFrames-1,Floor(Q)); var B := Min(SourceFrames-1,A+1);
+          for var Channel := 0 to 1 do begin
+            var Offset := Min(Channel,Channels-1);
+            Dest[I*2+Channel] := Round(Source[A*Channels+Offset]+
+              (Integer(Source[B*Channels+Offset])-Source[A*Channels+Offset])*Frac(Q));
+          end;
+        end;
+        Buffer.Bytes := Converted;
+        Buffer.Format := FBuffer.Format;
+        Buffer.Header.lpData := PAnsiChar(@Buffer.Bytes[0]); Buffer.Header.dwBufferLength := Length(Buffer.Bytes);
+        Stop;
+        if FBuffer.Prepared then begin
+          Code := waveOutUnprepareHeader(FBuffer.Handle,@FBuffer.Header,SizeOf(FBuffer.Header));
+          if Code<>MMSYSERR_NOERROR then Fail('Release previous audio buffer',Code);
+          FBuffer.Prepared := False;
+        end;
+        Buffer.Handle := FBuffer.Handle; FBuffer.Handle := 0; FreeAndNil(FBuffer);
+      end else begin
+        Close;
+        Code := waveOutOpen(@Buffer.Handle, WAVE_MAPPER, @Buffer.Format, 0, 0, CALLBACK_NULL);
+        if Code <> MMSYSERR_NOERROR then Fail('Open audio device', Code);
+        Inc(FDeviceOpenCount);
+      end;
       FBuffer := Buffer; Buffer := nil;
       FPath := FullPath; FActive := False; FCompleted := False; FPosition := 0; FLastError := '';
     except
@@ -275,11 +313,28 @@ begin
   end;
 end;
 
+procedure TRigmEffectsPlayback.OpenSession;
+var Code: MMRESULT;
+begin
+  CheckThread;
+  if FSession then Exit;
+  Close;
+  FBuffer := TRigmEffectsPlaybackBuffer.Create;
+  FBuffer.Format.wFormatTag := WAVE_FORMAT_PCM;
+  FBuffer.Format.nChannels := 2; FBuffer.Format.nSamplesPerSec := 48000;
+  FBuffer.Format.wBitsPerSample := 16; FBuffer.Format.nBlockAlign := 4;
+  FBuffer.Format.nAvgBytesPerSec := 192000;
+  Code := waveOutOpen(@FBuffer.Handle,WAVE_MAPPER,@FBuffer.Format,0,0,CALLBACK_NULL);
+  if Code<>MMSYSERR_NOERROR then begin FreeAndNil(FBuffer); Fail('Open audio device',Code); end;
+  Inc(FDeviceOpenCount);
+  FSession := True;
+end;
+
 procedure TRigmEffectsPlayback.Play;
 var Code: MMRESULT;
 begin
   CheckThread;
-  if FBuffer = nil then begin FLastError := 'Load a WAV before playing.'; raise ERigmEffectsPlayback.Create(FLastError); end;
+  if not Loaded then begin FLastError := 'Load a WAV before playing.'; raise ERigmEffectsPlayback.Create(FLastError); end;
   Stop;
   if not FBuffer.Prepared then
   begin
@@ -314,13 +369,17 @@ begin
     FreeAndNil(FBuffer);
   end;
   FPath := ''; FActive := False; FCompleted := False; FPosition := 0;
+  FSession := False;
   ReapRetired;
 end;
 
 function TRigmEffectsPlayback.GetLoaded: Boolean;
 begin
-  Result := FBuffer <> nil;
+  Result := (FBuffer <> nil) and (Length(FBuffer.Bytes)>0);
 end;
+
+function TRigmEffectsPlayback.GetDeviceOpen: Boolean;
+begin Result := (FBuffer<>nil) and (FBuffer.Handle<>0); end;
 
 function TRigmEffectsPlayback.GetPlaying: Boolean;
 begin

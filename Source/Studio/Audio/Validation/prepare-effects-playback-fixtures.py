@@ -28,8 +28,9 @@ paths.append(long_dir / '\u9078\u629e\u3057\u305f\u53f0\u8a5e \u8a66\u8074\u306e
 for i, p in enumerate(paths):
     with wave.open(str(io_path(p)), 'wb') as w:
         channels = 2 if i == len(paths) - 1 else 1
-        w.setparams((channels, 2, 48000, 0, 'NONE', 'not compressed'))
-        w.writeframes(b'\0' * (48000 * channels * 2))
+        rate = (24000, 44100, 22050, 48000, 48000, 48000)[i]
+        w.setparams((channels, 2, rate, 0, 'NONE', 'not compressed'))
+        w.writeframes(b'\0' * (rate * channels * 2))
 good = io_path(paths[0]).read_bytes()
 invalid = []
 def bad(name, content):

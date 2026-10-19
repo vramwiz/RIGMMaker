@@ -128,7 +128,7 @@ begin
   FConnection := TRigmVoiceConnection.CreateForWorkspace(Self,FWorkspace); FConnection.OnChanged := ConnectionChanged;
 end;
 destructor TRigmScriptVoiceFrame.Destroy;
-begin FConnection.SetActive(False); if FWorkspace<>nil then FWorkspace.SetVoiceAutoGeneration(False); inherited; end;
+begin FConnection.SetActive(False); if FWorkspace<>nil then begin FWorkspace.SetVoicePlaybackPageActive(False); FWorkspace.SetVoiceAutoGeneration(False); end; inherited; end;
 function TRigmScriptVoiceFrame.SelectedId: string;
 begin Result := JS(JO(FWorkspace.ScriptDraft.ScriptWizard,'voice'),'selectedCue'); end;
 function TRigmScriptVoiceFrame.Number: Integer;
@@ -197,6 +197,7 @@ begin
   if FActive=Value then Exit;
   if not Value and FActive then begin FWorkspace.StopVoice; FSettings.ShowRow('','',-1,TSerifVoicevoxAudioValues.Defaults,'',''); FShownSource := ''; FShownAudio := ''; end;
   FActive := Value; FEditing := Value; FConnection.SetActive(Value); FWorkspace.SetVoiceAutoGeneration(False);
+  FWorkspace.SetVoicePlaybackPageActive(Value);
 end;
 procedure TRigmScriptVoiceFrame.CheckReadings(Sender: TObject);
 begin

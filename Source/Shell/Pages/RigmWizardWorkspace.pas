@@ -3,7 +3,7 @@
 // 台本/動画ページ共通の既存Session所有者。UIを作らず、ページより長く生存する。
 interface
 uses System.Classes, System.SysUtils, System.JSON, System.Generics.Collections, Vcl.ExtCtrls,
-  RigmMovieSession, RigmMovieModel, RigmPageNavigation, RigmWizardPipe, ArtPipeProtocol, RigmThumbnailCache, RigmMovieJobs, RigmMovieImageTransfer, Vcl.Graphics, RigmCodexClient, RigmScriptAiExpressions;
+  RigmMovieSession, RigmMovieModel, RigmPageNavigation, RigmWizardPipe, ArtPipeProtocol, RigmThumbnailCache, RigmMovieJobs, RigmMovieImageTransfer, Vcl.Graphics, RigmCodexClient, RigmScriptAiExpressions, RigmEffectsPlayback;
 type
   TRigmWizardWorkspace = class(TComponent)
   private
@@ -22,8 +22,8 @@ type
     FVoiceContinuous: Boolean;
     FVoiceSequenceProjectId,FVoiceSequencePhase,FVoiceSequenceStatus: string;
     FVoiceSequenceOrder: TArray<string>; FVoiceSequenceIndex: Integer; FVoicePauseUntil: UInt64;
-    FVoicePlaybackAlias,FVoicePlaybackCue,FVoicePlaybackKey: string;
-    FVoicePlaybackTempFile: string;
+    FVoicePlaybackCue,FVoicePlaybackKey: string;
+    FVoicePlayback: TRigmEffectsPlayback; FVoicePlaybackPageActive: Boolean;
     FVoiceAutoGenerationActive: Boolean; FVoiceAutoGenerationKey: string;
     FVoiceQueryNotifyAt: UInt64; // 正本は即時更新し、ドラッグ中の全画面通知だけをまとめる。
     FSceneAssignmentNotifyAt: UInt64;
@@ -147,6 +147,7 @@ type
     function VoiceContinuous: Boolean;
     procedure CancelVoice;
     procedure StopVoice;
+    procedure SetVoicePlaybackPageActive(Value: Boolean);
     procedure CompleteVoice;
     function VoiceBusy: Boolean;
     function VoiceStatus: TJSONObject;
@@ -242,7 +243,7 @@ begin
   FTimer := TTimer.Create(Self); FTimer.Interval := 150; FTimer.OnTimer := Poll;
 end;
 destructor TRigmWizardWorkspace.Destroy;
-begin FTimer.Enabled := False; FAutomationCheck.Free; FImageAiJob.Free; FImageAiTargets.Free; FImageAiRequest.Free; FExpressionAiJob.Free; FExpressionAiRequest.Free; StopVoice; FSceneJob.Free; FSceneRetired.Free; FSceneBitmap.Free; FSceneContracts.Free; FScriptTransfers.Free; FVoiceJob.Free; FVoiceBindings.Free; FVoiceCatalog.Free; FExpressionAssets.Free; FThumbnails.Free; FPipe.Free; FScriptSavedHashes.Free; FScriptDrafts.Free; FSessions.Free; FAutomationSource.Free; FAutomationRun.Free; inherited; end;
+begin FTimer.Enabled := False; FAutomationCheck.Free; FImageAiJob.Free; FImageAiTargets.Free; FImageAiRequest.Free; FExpressionAiJob.Free; FExpressionAiRequest.Free; FVoicePlaybackPageActive := False; StopVoice; FSceneJob.Free; FSceneRetired.Free; FSceneBitmap.Free; FSceneContracts.Free; FScriptTransfers.Free; FVoiceJob.Free; FVoiceBindings.Free; FVoiceCatalog.Free; FExpressionAssets.Free; FThumbnails.Free; FPipe.Free; FScriptSavedHashes.Free; FScriptDrafts.Free; FSessions.Free; FAutomationSource.Free; FAutomationRun.Free; inherited; end;
 procedure TRigmWizardWorkspace.StartPipe(const Root: string);
 begin if FPipe=nil then FPipe := TRigmWizardPipe.Create(Root,Command); end;
 function TRigmWizardWorkspace.Command(const Name: string; Args: TJSONObject): TJSONObject;
@@ -1038,6 +1039,7 @@ begin
   FScriptDraft.ThemeBackground := Snapshot.ThemeBackground;
   FScriptDraft.BindCharacterPlacements;
   FScriptDraft.Modified := False; FScriptViewStage := ViewStage;
+  if ViewStage<>'voice' then SetVoicePlaybackPageActive(False);
   FScriptSavedHashes.AddOrSetValue(FScriptDraft.Id,THashSHA2.GetHashStringFromFile(Path)); ScriptChanged;
 end;
 procedure TRigmWizardWorkspace.SaveScriptDraft(ConfirmTitle: Boolean);

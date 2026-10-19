@@ -39,3 +39,7 @@ EXE選択・保存・非同期準備はRigmVoiceConnectionを配役/第9段階�
 解析を再生まで待つ場合も、`SerifVoicevoxAccentView`はqueryの`_rigm_pending_reading`を句の読みとして直ちに表示する。元の音響モーラは変更せず、保留がない句は従来のモーラ別表示を保つ。長い読みの幅をMoraCellsへ反映し、高低線・クリック・編集欄・下段音高グラフの座標を共通にする。短い読みは句の先頭へ表示する。コピー元プロジェクトは変更していない。
 
 専用検証 `Source/Diagnostics/DotsCodexProbe/AccentReadingDisplayCheck.dpr` は所有フォームでネイティブの確定・取消・再編集と保存queryの再表示、実画素・長短の読みを確認する。結果24項目と既存工程495項目が成功。実行記録と配置は `note-history.md` の2026-10-16を参照する。
+
+## 2026-10-19 編集後の読みを通常のセル配置で描画
+
+`_rigm_pending_reading`の表示用ラベル・セル座標を分離し、連続した左寄せ文字列ではなく中央揃えの文字セルとして描く。表示数が音響モーラ数と同じ場合はモーラの座標をそのまま使い、異なる場合は通常の幅で句の先頭から表示する。拗音・結合濁点・サロゲートペアを保持する。元queryと音響モーラのデータ、アクセント編集の対象、解析・合成の実行条件は変更しない。読みの長短・再表示・取消・拗音等を含むネイティブ描画検証27項目が成功し、PNGも目視確認した。検証ソースは既存のAccentReadingDisplayCheck.dpr、最新結果はoutput/maintenance/20261019-reading-cell-display/Final/。

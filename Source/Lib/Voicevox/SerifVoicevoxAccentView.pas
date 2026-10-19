@@ -52,6 +52,8 @@ type
     FHoverBoundary: Integer;
     FMoras: TArray<TSerifVoicevoxAccentMora>;
     FPendingReadings: TArray<string>;
+    FReadingLabels: TArray<TArray<string>>;
+    FReadingCells: TArray<TArray<TRect>>;
     FCells: TArray<TRect>; FCellsPpi: Integer;
     FOnAccentPosition: TSerifVoicevoxAccentPositionEvent;
     FOnBoundary: TSerifVoicevoxAccentBoundaryEvent;
@@ -381,6 +383,7 @@ begin
   FBoundaryPending := -1;
   FHoverBoundary := -1;
   SetLength(FMoras, 0);
+  FPendingReadings := nil; FReadingLabels := nil; FReadingCells := nil;
   FCells := nil; FCellsPpi := 0;
   Invalidate;
 end;
@@ -476,7 +479,7 @@ begin
   var Widths: TArray<Integer>; SetLength(Widths,Length(FMoras));
   for var I := 0 to High(FMoras) do
     Widths[I] := Max(AccentScale(MORA_CELL_MIN_WIDTH,CurrentPPI),Canvas.TextWidth(FMoras[I].Text)+AccentScale(MORA_CELL_TEXT_PADDING,CurrentPPI));
-  // 未解析の読みは句全体で表示する。文字数が増えた分だけ列を広げ、音高欄と同じ座標を使う。
+  // 音響モーラは保持し、未解析の読みも通常の文字セルに必要な幅を確保する。
   var First := 0;
   while First<Length(FMoras) do begin
     var Last := First; var Width := Widths[First];
@@ -485,7 +488,17 @@ begin
     end;
     var Phrase := FMoras[First].PhraseIndex;
     if (Phrase<Length(FPendingReadings)) and (FPendingReadings[Phrase]<>'') then begin
-      var Extra := Max(0,Canvas.TextWidth(FPendingReadings[Phrase])+AccentScale(MORA_CELL_TEXT_PADDING,CurrentPPI)-Width);
+      var Labels := FReadingLabels[Phrase]; var Required := 0;
+      for var LabelText in Labels do Inc(Required,Max(AccentScale(MORA_CELL_MIN_WIDTH,CurrentPPI),
+        Canvas.TextWidth(LabelText)+AccentScale(MORA_CELL_TEXT_PADDING,CurrentPPI)));
+      if Length(Labels)=Last-First+1 then begin
+        Width := 0;
+        for var I := First to Last do begin
+          Widths[I] := Max(Widths[I],Canvas.TextWidth(Labels[I-First])+AccentScale(MORA_CELL_TEXT_PADDING,CurrentPPI));
+          Inc(Width,Widths[I]);
+        end;
+      end;
+      var Extra := Max(0,Required-Width);
       var Count := Last-First+1;
       for var I := First to Last do begin
         Inc(Widths[I],Extra div Count);
@@ -499,6 +512,25 @@ begin
     if FMoras[I].PhraseStart and (I>0) then Inc(X,AccentScale(12,CurrentPPI));
     var W := Widths[I];
     FCells[I] := Rect(X,0,X+W,AccentScale(104,CurrentPPI)); Inc(X,W);
+  end;
+  SetLength(FReadingCells,Length(FReadingLabels));
+  First := 0;
+  while First<Length(FMoras) do begin
+    var Last := First;
+    while (Last<High(FMoras)) and (FMoras[Last+1].PhraseIndex=FMoras[First].PhraseIndex) do Inc(Last);
+    var Phrase := FMoras[First].PhraseIndex; var Labels := FReadingLabels[Phrase];
+    SetLength(FReadingCells[Phrase],Length(Labels));
+    if Length(Labels)=Last-First+1 then begin
+      for var I := 0 to High(Labels) do FReadingCells[Phrase][I] := FCells[First+I];
+    end else if Length(Labels)>0 then begin
+      // 短い読みを旧句の幅全体に引き伸ばさず、先頭から通常幅で並べる。
+      X := FCells[First].Left;
+      for var I := 0 to High(Labels) do begin
+        var W := Max(AccentScale(MORA_CELL_MIN_WIDTH,CurrentPPI),Canvas.TextWidth(Labels[I])+AccentScale(MORA_CELL_TEXT_PADDING,CurrentPPI));
+        FReadingCells[Phrase][I] := Rect(X,0,X+W,AccentScale(104,CurrentPPI)); Inc(X,W);
+      end;
+    end;
+    First := Last+1;
   end;
 end;
 function TSerifVoicevoxAccentPaintControl.MoraCells: TArray<TRect>;
@@ -783,13 +815,13 @@ begin
     Canvas.Brush.Style := bsSolid;
   end;
 
-  // 再生時の解析を待つ間も、編集を確定した読みを古いモーラ表記に代えて表示する。
+  // 未解析の読みも一続きの左寄せ文字列にせず、通常と同じセルの中央へ描く。
   Canvas.Brush.Style := bsClear; Canvas.Font.Color := A2SCPanelText;
-  for I := 0 to High(FPendingReadings) do if FPendingReadings[I]<>'' then begin
-    TextRect := PhraseBounds(I); TextRect.Top := AccentScale(TEXT_Y,CurrentPPI);
+  for I := 0 to High(FReadingCells) do for var J := 0 to High(FReadingCells[I]) do begin
+    TextRect := FReadingCells[I][J]; TextRect.Top := AccentScale(TEXT_Y,CurrentPPI);
     TextRect.Bottom := ClientHeight;
-    DrawText(Canvas.Handle,PChar(FPendingReadings[I]),Length(FPendingReadings[I]),
-      TextRect,DT_LEFT or DT_TOP or DT_SINGLELINE or DT_NOPREFIX);
+    DrawText(Canvas.Handle,PChar(FReadingLabels[I][J]),Length(FReadingLabels[I][J]),
+      TextRect,DT_CENTER or DT_TOP or DT_SINGLELINE or DT_NOPREFIX);
   end;
   Canvas.Brush.Style := bsSolid;
 
@@ -849,6 +881,7 @@ begin
   FCells := nil; FCellsPpi := 0;
   SetLength(FMoras, 0);
   FPendingReadings := nil;
+  FReadingLabels := nil; FReadingCells := nil;
   RootValue := TJSONObject.ParseJSONValue(QueryJson);
   try
     if not (RootValue is TJSONObject) then Exit;
@@ -856,12 +889,28 @@ begin
     AccentPhrases := RootObject.GetValue<TJSONArray>('accent_phrases');
     if not Assigned(AccentPhrases) then Exit;
     SetLength(FPendingReadings,AccentPhrases.Count);
+    SetLength(FReadingLabels,AccentPhrases.Count);
 
     MoraCount := 0;
     for I := 0 to AccentPhrases.Count - 1 do
     begin
       PhraseObject := AccentPhrases.Items[I] as TJSONObject;
       FPendingReadings[I] := PhraseObject.GetValue<string>('_rigm_pending_reading','');
+      // 表示だけを仮名単位へ分ける。拗音・結合濁点・サロゲートペアは分断しない。
+      var Reading := FPendingReadings[I]; var Offset := 1;
+      while Offset<=Length(Reading) do begin
+        var Count := 1; var C := Reading[Offset];
+        if (Ord(C)>=$D800) and (Ord(C)<=$DBFF) and (Offset<Length(Reading)) and
+          (Ord(Reading[Offset+1])>=$DC00) and (Ord(Reading[Offset+1])<=$DFFF) then Count := 2;
+        var LabelText := Copy(Reading,Offset,Count);
+        var Join := (Pos(C,'ゃゅょぁぃぅぇぉゎャュョァィゥェォヮ'+#$3099+#$309A)>0) and (Length(FReadingLabels[I])>0);
+        if Join then FReadingLabels[I][High(FReadingLabels[I])] := FReadingLabels[I][High(FReadingLabels[I])]+LabelText
+        else begin
+          SetLength(FReadingLabels[I],Length(FReadingLabels[I])+1);
+          FReadingLabels[I][High(FReadingLabels[I])] := LabelText;
+        end;
+        Inc(Offset,Count);
+      end;
       Moras := PhraseObject.GetValue<TJSONArray>('moras');
       if Assigned(Moras) then Inc(MoraCount, Moras.Count);
     end;

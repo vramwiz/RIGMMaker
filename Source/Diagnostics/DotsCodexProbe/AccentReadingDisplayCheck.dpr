@@ -1,7 +1,7 @@
 ﻿program AccentReadingDisplayCheck;
 {$APPTYPE CONSOLE}
 // 所有フォームだけで読みの確定・取消・保存再表示と実描画画素を検査する。引数は出力先。
-uses System.SysUtils, System.Classes, System.IOUtils, System.JSON, System.Types,
+uses System.SysUtils, System.Classes, System.IOUtils, System.JSON, System.Types, System.Math,
   Winapi.Windows, Winapi.Messages, Vcl.Forms, Vcl.Controls, Vcl.StdCtrls,
   Vcl.Graphics, Vcl.Imaging.pngimage, SerifVoicevoxAccentView, AviUtl2StyleColors,
   PsdJson, RigmJson;
@@ -32,17 +32,27 @@ begin
   end;
   Result := True;
 end;
-procedure CheckReadingPixels(Paint: TSerifVoicevoxAccentPaintControl; const Reading: string);
+procedure CheckReadingPixels(Paint: TSerifVoicevoxAccentPaintControl;
+  const Labels: array of string; AcousticCount: Integer=3);
 begin
   var Actual := Capture(Paint); var Expected := TBitmap.Create;
   try
     Expected.Assign(Actual); var Cells := Paint.MoraCells;
-    var Area := Rect(Cells[0].Left,MulDiv(78,Paint.CurrentPPI,96),Cells[2].Right,Paint.Height);
+    var Area := Rect(Cells[0].Left,MulDiv(78,Paint.CurrentPPI,96),Min(Paint.Width,Cells[AcousticCount-1].Right),Paint.Height);
     Expected.Canvas.Brush.Color := TAccentPaintAccess(Paint).Color; Expected.Canvas.FillRect(Area);
     Expected.Canvas.Font.Assign(TAccentPaintAccess(Paint).Font); Expected.Canvas.Font.Color := A2SCPanelText;
-    Expected.Canvas.Brush.Style := bsClear; var TextRect := Area;
-    DrawText(Expected.Canvas.Handle,PChar(Reading),Length(Reading),TextRect,DT_LEFT or DT_TOP or DT_SINGLELINE or DT_NOPREFIX);
-    Check(SamePixels(Actual,Expected,Area),'painted reading matches committed text: '+Reading);
+    Expected.Canvas.Brush.Style := bsClear; var X := Cells[0].Left; var Reading := '';
+    for var I := 0 to High(Labels) do begin
+      var TextRect := Area;
+      if Length(Labels)=AcousticCount then begin TextRect.Left := Cells[I].Left; TextRect.Right := Cells[I].Right; end
+      else begin
+        TextRect.Left := X;
+        TextRect.Right := X+Max(MulDiv(28,Paint.CurrentPPI,96),Expected.Canvas.TextWidth(Labels[I])+MulDiv(6,Paint.CurrentPPI,96));
+      end;
+      X := TextRect.Right; Reading := Reading+Labels[I];
+      DrawText(Expected.Canvas.Handle,PChar(Labels[I]),Length(Labels[I]),TextRect,DT_CENTER or DT_TOP or DT_SINGLELINE or DT_NOPREFIX);
+    end;
+    Check(SamePixels(Actual,Expected,Area),'committed reading uses centered UI cells: '+Reading);
     var PNG := TPngImage.Create;
     try PNG.Assign(Actual); PNG.SaveToFile(TPath.Combine(Output,'reading-'+Checks.Count.ToString+'.png')); finally PNG.Free; end;
   finally Expected.Free; Actual.Free; end;
@@ -87,7 +97,7 @@ begin
           for var I := 0 to 1 do Check(JA(TJSONObject(JA(Saved,'accent_phrases')[I]),'moras').ToJSON=JA(TJSONObject(JA(Query,'accent_phrases')[I]),'moras').ToJSON,
             'display update preserves acoustic mora data for phrase '+I.ToString);
         finally Saved.Free; end;
-        CheckReadingPixels(Paint,'サシス');
+        CheckReadingPixels(Paint,['サ','シ','ス']);
         var Updated := Capture(Paint);
         try
           Check(SamePixels(Original,Updated,Rect(0,0,Original.Width,MulDiv(74,Paint.CurrentPPI,96))),'reading edit leaves accent graph pixels unchanged');
@@ -106,10 +116,10 @@ begin
         Check(Accent.ContentWidth>OriginalWidth,'longer reading expands the horizontal content width');
         Cells := Paint.MoraCells;
         Check((Length(Cells)=6) and (Cells[3].Left>Cells[2].Right),'widened phrase preserves mora count and the next phrase boundary');
-        CheckReadingPixels(Paint,LongReading);
+        CheckReadingPixels(Paint,['な','が','い','よ','み','に','へ','ん','こ','う','し','て','も','さ','い','ご','ま','で','す','べ','て','ひょ','う','じ','し','ま','す']);
         var Path := TPath.Combine(Output,'saved-query.json'); TFile.WriteAllText(Path,Probe.Query,TEncoding.UTF8);
         Accent.ShowText('',-1,''); Accent.ShowText('表示だけを検証する所有セリフ',1,TFile.ReadAllText(Path,TEncoding.UTF8));
-        CheckReadingPixels(Paint,LongReading);
+        CheckReadingPixels(Paint,['な','が','い','よ','み','に','へ','ん','こ','う','し','て','も','さ','い','ご','ま','で','す','べ','て','ひょ','う','じ','し','ま','す']);
         Edit := BeginEdit(Paint); Check(Edit.Text=LongReading,'saved query reopens with the full reading');
         Edit.Perform(WM_KEYDOWN,VK_ESCAPE,0);
         var LongPhrase := Query.Clone as TJSONObject;
@@ -118,8 +128,20 @@ begin
           for var I := 1 to 97 do JA(Phrase,'moras').AddElement(JA(Phrase,'moras')[0].Clone as TJSONObject);
           PsdJson.Put(Phrase,'_rigm_pending_reading','みじかい');
           Accent.ShowText('長い句から短い読みへ',1,LongPhrase.ToJSON);
-          CheckReadingPixels(Paint,'みじかい');
+          CheckReadingPixels(Paint,['み','じ','か','い'],100);
         finally LongPhrase.Free; end;
+        var KanaQuery := Query.Clone as TJSONObject;
+        try
+          var Phrase := TJSONObject(JA(KanaQuery,'accent_phrases')[0]);
+          PsdJson.Put(Phrase,'_rigm_pending_reading','キャット');
+          var Unchanged := KanaQuery.ToJSON;
+          Accent.ShowText('拗音と促音の表示',1,Unchanged);
+          CheckReadingPixels(Paint,['キャ','ッ','ト']);
+          Check(KanaQuery.ToJSON=Unchanged,'display segmentation never modifies the input query');
+          PsdJson.Put(Phrase,'_rigm_pending_reading','か'+#$3099+'キ😀');
+          Accent.ShowText('結合濁点とサロゲートペア',1,KanaQuery.ToJSON);
+          CheckReadingPixels(Paint,['か'+#$3099,'キ','😀']);
+        finally KanaQuery.Free; end;
         Accent.ShowText('表示だけを検証する所有セリフ',1,Query.ToJSON);
         Check(Accent.ContentWidth=OriginalWidth,'resolved query restores normal mora widths');
         var Restored := Capture(Paint);

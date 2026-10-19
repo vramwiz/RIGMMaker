@@ -2045,3 +2045,19 @@ SceneApprovalCheck.dprを隔離コンパイルし、モデル24項目と実VCL�
 Source/Diagnostics/DotsCodexProbe/StageCompletionCheck.dprを追加。本編dprojの検索パス・範囲/オーバーフロー検査付きの隔離プログラムで17項目成功。実VCLの左リスト選択で総評→締め→台本確認、確認ボタン不要、移動と確定状態の保存JSON再読込、不足・画像欠損時の移動拒否、セリフ/音声データ保持、画像変更時のキャッシュ失効・サムネイル確定拒否を確認。旧HEADの隔離ビルドでは総評の次工程が表示されないことを再現。同じ10枚の1672×941 PNGでサムネイル確定→状態要約→解除を3往復した測定は旧1473ms、新165ms（約89%削減）。これはモデル経路の隔離測定であり、実作品GUIのクリック時間は未測定。
 
 Win64 Debug／ReleaseをWin64/StageCompletion-20261019/Productへ隔離コンパイルし、エラー0・既存警告13件、今回変更ユニットの警告0。全変更PascalのUTF-8 BOM/CRLFとgit diff --checkを確認。通常アプリが終了していることを確認し、作業フォルダのRIGMMaker.exeを旧版の全量SHA256付きでoutput/maintenance/20261019-stage-completion/PreviousExecutableへ退避コピー後、最新Releaseへ更新。更新元と通常EXEのSHA256一致を確認。deployment.jsonに配置を記録した。今回のEXEは既存のMP4題名命名・クリップボード入力・画像確定キー修正も含む。利用者の作品・音声・画像・設定は変更せず、通常アプリの起動は行っていない。実台本での最終クリックと終了後の再開は未確認。
+## 2026-10-19 VOICEVOX音声編集ページ内で音声出力を保持
+
+ユーザー報告の「再生のたびに音声ポートを開閉して先頭の音が欠ける」対策として、第13段階のMCI waveaudioによるセリフごとのopen/play/closeをwaveOutのページセッションへ変更。音声編集フレームのSetActive(True)でデバイスを開き、単発・連続再生・停止・自然終了・行切替・生成待ちでは保持する。SetActive(False)、フレーム破棄、音声以外の工程のStoreScript、Workspace破棄で停止・解放する。開いているだけの状態はVoicePlayingに含めない。
+
+既存RigmEffectsPlaybackへOpenSessionとIsOpen/Loadedの区別・診断用DeviceOpenCountを追加。出力をPCM16/48kHz stereoに固定し、読込WAVのレート/チャンネルが違ってもメモリ上の線形補間・チャンネル展開で同じwaveOutハンドルへ差し替える。元WAV・台本・アクセント・生成設定は変更しない。音声APIへファイル名を渡さないため、音声工程のMCI別名・120文字超の一時WAVコピーも不要となった。通常のOpen/Closeを使う音声エフェクトページの寿命は保持。自然終了と現行音声指紋の一致による再生確認、途中停止では確認しないこと、連続再生の行送り・間隔は維持した。
+
+EffectsPlaybackProbeとfixture作成を拡張し、Win32/Win64それぞれ111項目成功。22.05/24/44.1/48kHz、mono/stereo、最大344文字の日本語パス、異なるファイル・形式の切替でもopenが1回、停止・自然終了後の保持、無効WAV、close/再入場、異スレッド拒否・破棄を確認。17個のfixtureの前後SHA256一致。VoiceDeviceSessionCheck.dprでWorkspaceの有効/無効、5回の有効化・停止、取消、工程移動、再入場と破棄の23項目成功。実機の音欠けを聴取確認した試験ではなく、再生用fixtureは無音。
+
+Win64 Debug／ReleaseをWin64/VoiceDeviceSession-20261019/Productへ隔離ビルドし、エラー0・既存警告13件、新規警告0。ログと再生試験はoutput/maintenance/20261019-voice-device-session/Playback、Workspace検証はWin64/VoiceDeviceSession-20261019/Check。差分とPascalのUTF-8 BOM/CRLFを確認。通常アプリの終了を確認し、現在の通常EXEをoutput/maintenance/20261019-voice-device-session/PreviousExecutableへ退避コピーした後、作業フォルダのRIGMMaker.exeを最新Releaseへ更新。退避と配置は全量SHA256で照合し、deployment.jsonに記録した。通常アプリの起動・利用者の実台本/音声/設定の変更は行っていない。実機での冒頭音欠けの解消確認は未実施。
+## 2026-10-19 読み編集後の表示を通常のセル配置へ修正
+
+同じVOICEVOX音声編集ページで、編集済みの読みが通常UIに沿わないテキストになるとの報告に対応。AutoAnalyze=Falseの未解析読みを、句全体へDT_LEFTで描画する旧経路が原因。SerifVoicevoxAccentPaintControlで表示専用のラベルとセル座標を構築し、通常と同じDT_CENTERで描くよう修正した。読みの表示数が音響モーラ数と同じなら既存セルへ配置。異なる場合は句先頭から通常幅で描き、必要な横幅を確保する。短い読みを旧句の幅全体に引き伸ばさない。拗音・結合濁点・サロゲートペアを分断しない。音響モーラ・音高・音素長・保存query・解析と合成の実行条件は変更していない。
+
+AccentReadingDisplayCheck.dprを更新し、所有フォームのネイティブ編集でEnter・フォーカス離脱・Esc・再編集・保存再表示、中央配置の実画素、長短の読み、他の句と同数編集時のアクセント線の不変、キャ/ッ、結合濁点とサロゲートペア、query不変など27項目が成功。実描画PNGも目視確認した。結果・画像はoutput/maintenance/20261019-reading-cell-display/Final、ログはWin64/ReadingCellDisplay-20261019/Check。利用者の実台本や音声は変更していない。
+
+Win64 Debug／ReleaseをWin64/ReadingCellDisplay-20261019/Productへ隔離ビルドし、エラー0・既存警告13件、新規警告0。UTF-8 BOM/CRLFとgit diff --checkを確認。通常アプリの終了を確認し、更新前EXEをoutput/maintenance/20261019-reading-cell-display/PreviousExecutableへ退避コピーして通常EXEを最新Releaseへ更新。更新元・配置先・退避版の全量SHA256を照合しdeployment.jsonへ記録。直前の音声出力保持修正も含む。通常アプリの起動と実台本での再現操作は行っていない。
