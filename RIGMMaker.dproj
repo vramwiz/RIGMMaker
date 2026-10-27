@@ -130,6 +130,8 @@
         <DCCReference Include="Source\Studio\Rendering\RigmMovieText.pas"/>
         <DCCReference Include="Source\Studio\Model\RigmMoviePosting.pas"/>
         <DCCReference Include="Source\Studio\Model\RigmScriptThumbnailModel.pas"/>
+        <DCCReference Include="Source\Studio\Model\RigmAnimeRankingModel.pas"/>
+        <DCCReference Include="Source\Shell\Pages\RigmAnimeRankingFrame.pas"/>
         <DCCReference Include="Source\Studio\Views\Editor\RigmMoviePostingFrame.pas"/>
         <DCCReference Include="Source\Integrations\RigmNicoManga.pas"/>
         <DCCReference Include="Source\Psd\Validation\RigmScriptNavigationProbe.pas"/>

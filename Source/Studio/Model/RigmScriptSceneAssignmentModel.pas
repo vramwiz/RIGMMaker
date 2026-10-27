@@ -10,16 +10,18 @@ procedure ValidateScriptSceneAssignment(Project: TRigmMovieProject);
 procedure SetScriptSceneStart(Project: TRigmMovieProject; const CueId: string; Value: Boolean);
 implementation
 uses System.SysUtils, System.JSON, System.Generics.Collections, RigmJson, PsdJson,
-  RigmMovieComposition, RigmScriptScenesModel, RigmScriptSummaryModel;
+  RigmMovieComposition, RigmScriptScenesModel, RigmScriptSummaryModel, RigmScriptTypes;
 
 function ScriptSceneStartsAt(Project: TRigmMovieProject; Index: Integer): Boolean;
 begin
   Result := (Index>0) and (Index<Project.Cues.Count);
+  if IsSingleSceneScript(Project) then Exit(False);
   if Result then Result := Project.Cues[Index].Scene<>Project.Cues[Index-1].Scene;
 end;
 function ScriptSceneStartEditable(Project: TRigmMovieProject; Index: Integer): Boolean;
 begin
   Result := (Index>0) and (Index<Project.Cues.Count);
+  if IsStandaloneScript(Project) then Exit(False);
   if not Result then Exit;
   // 総評の前後は独立チャートの境界を保持する。
   Result := not IsScriptSummaryCue(Project,Project.Cues[Index]) and not IsScriptSummaryCue(Project,Project.Cues[Index-1]);
@@ -34,6 +36,8 @@ end;
 procedure ValidateScriptSceneAssignment(Project: TRigmMovieProject);
 begin
   RequireScriptScenes(Project);
+  if IsSingleSceneScript(Project) and (Project.Scenes.Count<>1) then
+    raise Exception.Create('この共通構成は1シーンで作成してください。');
   if Project.Cues.Count=0 then raise Exception.Create('シーンへ割り当てるセリフがありません。');
   var Number := -1; var Previous := '';
   for var Cue in Project.Cues do begin

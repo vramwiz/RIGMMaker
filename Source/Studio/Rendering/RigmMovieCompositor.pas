@@ -14,7 +14,7 @@ procedure ValidateCompositionMaterials(Project: TRigmMovieProject);
 implementation
 uses System.Classes, System.Types, System.Math, System.IOUtils, System.StrUtils,
   System.Generics.Collections, Winapi.Windows, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg,
-  ArtDocument, RigmJson, RigmStorage, RigmSample, RigmRenderer, RigmMovieRendering, RigmMovieActing, RigmMovieChart, RigmMoviePsdRendering, RigmMovieLayout, RigmMovieEndCards, RigmMovieTransitions, RigmMovieText;
+  ArtDocument, RigmJson, RigmStorage, RigmSample, RigmRenderer, RigmMovieRendering, RigmMovieActing, RigmMovieChart, RigmMoviePsdRendering, RigmMovieLayout, RigmMovieEndCards, RigmMovieTransitions, RigmMovieText, RigmAnimeRankingModel;
 type
   TActorEntry = class
     Stamp: string;
@@ -420,6 +420,16 @@ begin
       Dib := CreateDIBSection(DC,Info,DIB_RGB_COLORS,Bits,0,0);
       if (DC=0) or (Dib=0) or (Bits=nil) then RaiseLastOSError;
       Previous := SelectObject(DC,Dib); Canvas := TCanvas.Create; Canvas.Handle := DC;
+      // 順位発表だけはテーマ画像・人物・字幕・他の素材の描画経路へ入らない。
+      var RankStart,RankLocal: Double; var RankScene := Project.SceneAt(Seconds,RankStart,RankLocal);
+      if AnimeRankingSceneSection(Project,RankScene)='rank' then begin
+        Canvas.Brush.Color := clBlack; Canvas.FillRect(Rect(0,0,Project.Width,Project.Height));
+        Canvas.Font.Style := [fsBold];
+        Text(AnimeRankingOverlay(Project,RankScene),BaseRect(180,250,1740,650),150,DT_CENTER or DT_VCENTER or DT_SINGLELINE);
+        GdiFlush;
+        for var Y := 0 to Project.Height-1 do Move(PByte(Bits)[Y*Project.Width*4],Result.ScanLine[Y]^,Project.Width*4);
+        Exit;
+      end;
       Canvas.Brush.Color := TColor(Project.BackgroundColor); Canvas.FillRect(Rect(0,0,Project.Width,Project.Height));
       var Tail := MovieEndCardAt(Project.EndCards,Seconds-Project.StoryDuration);
       if (Tail=nil) and (Project.Layout='theme') then Image(Project.ThemeBackground,Rect(0,0,Project.Width,Project.Height),True);
@@ -446,6 +456,11 @@ begin
           InflateRect(DescriptionRect,-12,-8);
           Text(S.Description,DescriptionRect,32,DT_LEFT or DT_WORDBREAK,True);
         end;
+        var RankingText := AnimeRankingOverlay(Project,S);
+        var RankingSection := AnimeRankingSceneSection(Project,S);
+        if RankingSection='rank' then Text(RankingText,BaseRect(300,260,1620,600),130,DT_CENTER or DT_VCENTER or DT_SINGLELINE,True)
+        else if RankingSection='body' then Text(RankingText,BaseRect(280,150,1640,390),76,DT_CENTER or DT_WORDBREAK,True)
+        else if RankingText<>'' then Text(RankingText,BaseRect(300,120,1640,330),42,DT_CENTER or DT_WORDBREAK,True);
         Text(S.Title,BaseRect(55,20,1850,90),36,DT_LEFT or DT_WORDBREAK,True);
       end;
       GdiFlush;

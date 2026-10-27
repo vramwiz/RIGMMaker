@@ -28,7 +28,7 @@ function RequestScriptSceneImage(Project: TRigmMovieProject; const Id: string): 
 procedure RequireSceneImageRequest(Project: TRigmMovieProject; const Id,RequestId: string);
 function ScriptScenesSummary(Project: TRigmMovieProject): TJSONObject;
 implementation
-uses System.SysUtils, System.Hash, System.Generics.Collections, RigmJson, PsdJson, RigmScriptCastingModel, RigmScriptVoiceModel, RigmScriptTextModel, RigmMovieChart, RigmMovieImageTransfer, RigmScriptThumbnailModel;
+uses System.SysUtils, System.Hash, System.Generics.Collections, RigmJson, PsdJson, RigmScriptCastingModel, RigmScriptVoiceModel, RigmScriptTextModel, RigmMovieChart, RigmMovieImageTransfer, RigmScriptThumbnailModel, RigmScriptTypes;
 function SceneImageInstruction(Scene: TRigmMovieScene): string;
 begin
   Result := Scene.ImagePrompt;
@@ -45,6 +45,7 @@ begin
 end;
 function SceneNeedsImage(Scene: TRigmMovieScene): Boolean;
 begin
+  if JS(Scene.Animation,'animeRankingSection')='rank' then Exit(False);
   if Scene.Id=RigmThumbnailId then Exit(True);
   if Scene.Id=RigmCommonBackgroundId then Exit((SceneImageInstruction(Scene).Trim<>'') or (Scene.Image<>''));
   Result := ((Scene.DisplayMode='both') or (Scene.DisplayMode='image')) and not MovieChartEnabled(Scene.Chart);
@@ -115,6 +116,8 @@ procedure EditScriptScene(Project: TRigmMovieProject; const Id,Description,Promp
 begin
   RequireScriptScenes(Project); RequireEditableScriptScene(Project,Id); var S := Project.ImageTarget(Id);
   var D := NormalizeScriptText(Description); var P := NormalizeScriptText(Prompt); ValidateText(D,3000); ValidateText(P,16004);
+  if (JS(S.Animation,'animeRankingSection')='rank') and ((D<>'') or (P<>'') or (Mode<>'none')) then
+    raise Exception.Create('順位シーンは黒背景と白文字の表示です。画像・補足は設定しません。');
   if (Id=RigmThumbnailId) and ((Mode<>'image') or (D<>'')) then raise Exception.Create('サムネイルは省略できません。文字は生成する画像のロゴに含めます。');
   var O := S.Json;
   try PsdJson.Put(O,'description',D); PsdJson.Put(O,'imagePrompt',P); PsdJson.Put(O,'displayMode',Mode);
@@ -209,7 +212,9 @@ begin
 end;
 function ScriptScenesReady(Project: TRigmMovieProject; Force: Boolean): Boolean;
 begin
-  Result := ScriptThumbnailSourcesReady(Project,Force) and ScriptSceneReady(Project,Project.Thumbnail,Force);
+  Result := ScriptThumbnailSourcesReady(Project,Force);
+  if IsStandaloneScript(Project) then Result := Result and (not IsSingleSceneScript(Project) or (Project.Scenes.Count=1)) and (Project.EndCards.Count=0)
+  else Result := Result and ScriptSceneReady(Project,Project.Thumbnail,Force);
 end;
 function ScriptThumbnailSourcesReady(Project: TRigmMovieProject; Force: Boolean): Boolean;
 begin
@@ -236,6 +241,7 @@ begin
   try
   // Approval itself is excluded; the edit epoch prevents approval -> unlock replay.
   for var Key in ['imageApproved','imageApprovalKey','animation','chart','padding','title'] do O.RemovePair(Key).Free;
+  if IsAnimeRankingScript(Project) then O.AddPair('animeRanking',JO(Project.ScriptWizard,'animeRanking').Clone as TJSONObject);
   if Id=RigmThumbnailId then O.AddPair('sourceFingerprint',ThumbnailSourceKey(Project));
   // 保存時に素材をproject.assetsへ移しても、同じ画像内容なら外部要求を保持する。
   if S.Image<>'' then begin var Path := ResolveMoviePath(Project.FileName,S.Image);
@@ -259,6 +265,7 @@ begin
   RequireScriptScenes(Project); var S := Project.ImageTarget(Id); if S=nil then raise Exception.Create('対象シーンがありません。');
   RequireEditableScriptScene(Project,Id);
   if (Id=RigmThumbnailId) and not ScriptThumbnailSourcesReady(Project) then raise Exception.Create('背景・各シーンの画像を確定してから、サムネイルを最後に要求してください。');
+  if JS(S.Animation,'animeRankingSection')='rank' then raise Exception.Create('順位シーンは画像生成の対象ではありません。');
   var Prompt := SceneImageInstruction(S);
   if Prompt.Trim='' then raise Exception.Create('Codexへの画像指示を入力してください。');
   ValidateText(Prompt,16004);

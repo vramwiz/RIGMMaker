@@ -7,7 +7,7 @@ function SceneImageAiTargets(Project: TRigmMovieProject; const Id: string): TJSO
 function SceneImageAiPrompt(Project: TRigmMovieProject; Request: TJSONObject; References: TJSONArray): string;
 function SceneImageAiContextKey(Project: TRigmMovieProject): string;
 implementation
-uses System.SysUtils, System.Hash, RigmJson, RigmScriptScenesModel, RigmMovieChart;
+uses System.SysUtils, System.Hash, RigmJson, RigmScriptScenesModel, RigmMovieChart, RigmScriptTypes;
 function SceneImageAiContextKey(Project: TRigmMovieProject): string;
 begin
   Result := THashSHA2.GetHashString(Project.Title+'|'+JS(Project.ScriptWizard,'scriptType')+'|'+
@@ -16,6 +16,10 @@ end;
 function SceneImageAiTargets(Project: TRigmMovieProject; const Id: string): TJSONArray;
   procedure Add(const SceneId: string; Required: Boolean);
   begin
+    if IsStandaloneScript(Project) and (SceneId=RigmThumbnailId) then begin
+      if Required then raise Exception.Create('この共通構成に末尾サムネイルはありません。');
+      Exit;
+    end;
     var S := Project.ImageTarget(SceneId);
     if S=nil then raise Exception.Create('画像生成の対象がありません。');
     if S.ImageApproved or (SceneImageInstruction(S).Trim='') or not SceneNeedsImage(S) or MovieChartEnabled(S.Chart) then begin
@@ -46,6 +50,7 @@ begin
   try
     Context.AddPair('projectId',Project.Id); Context.AddPair('title',Project.Title);
     Context.AddPair('scriptType',JS(Project.ScriptWizard,'scriptType'));
+    if IsAnimeRankingScript(Project) then Context.AddPair('animeRanking',JO(Project.ScriptWizard,'animeRanking').Clone as TJSONObject);
     Context.AddPair('imageRequest',Request.Clone as TJSONObject);
     Context.AddPair('references',References.Clone as TJSONArray);
     var Cues := TJSONArray.Create; Context.AddPair('sourceCues',Cues);

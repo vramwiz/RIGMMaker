@@ -10,7 +10,8 @@ procedure TRigmWizardWorkspace.MoveScriptScene(Delta: Integer);
 begin
   var S := FScriptDraft.ImageTarget(JS(JO(FScriptDraft.ScriptWizard,'scenes'),'selectedScene'));
   var Current := FScriptDraft.Scenes.IndexOf(S)+1; if S=FScriptDraft.Thumbnail then Current := FScriptDraft.Scenes.Count+1;
-  var Index := EnsureRange(Current+Delta,0,FScriptDraft.Scenes.Count+1);
+  var Last := FScriptDraft.Scenes.Count+1; if IsStandaloneScript(FScriptDraft) then Dec(Last);
+  var Index := EnsureRange(Current+Delta,0,Last);
   if Index=0 then SelectScriptScene(RigmCommonBackgroundId) else if Index>FScriptDraft.Scenes.Count then SelectScriptScene(RigmThumbnailId) else SelectScriptScene(FScriptDraft.Scenes[Index-1].Id);
 end;
 procedure TRigmWizardWorkspace.EditScriptScene(const Id,Description,Prompt,Mode: string; const Position: string);
@@ -94,7 +95,7 @@ begin
       RigmScriptScenesModel.RequestScriptSceneImage(FScriptDraft,S.Id); Inc(Count);
     end;
   end;
-  if ScriptThumbnailSourcesReady(FScriptDraft) and not FScriptDraft.Thumbnail.ImageApproved then begin
+  if not IsStandaloneScript(FScriptDraft) and ScriptThumbnailSourcesReady(FScriptDraft) and not FScriptDraft.Thumbnail.ImageApproved then begin
     RigmScriptScenesModel.RequestScriptSceneImage(FScriptDraft,RigmThumbnailId); Inc(Count);
   end;
   if Count=0 then raise Exception.Create('要望のある未確定シーンがありません。');
@@ -117,7 +118,7 @@ begin
     end;
     Exit('前工程が変わりました。音声・シーン割当を確認してください。');
   end;
-  if not ScriptSceneReady(FScriptDraft,FScriptDraft.Thumbnail) then Exit('サムネイル：'+ScriptSceneReadinessReason(FScriptDraft,FScriptDraft.Thumbnail));
+  if not IsStandaloneScript(FScriptDraft) and not ScriptSceneReady(FScriptDraft,FScriptDraft.Thumbnail) then Exit('サムネイル：'+ScriptSceneReadinessReason(FScriptDraft,FScriptDraft.Thumbnail));
   for var C in FScriptDraft.Cues do if not FScriptDraft.AudioReady(C) then Exit('音声変更を確認してください。');
   Result := CastingAdvanceReason(False);
 end;

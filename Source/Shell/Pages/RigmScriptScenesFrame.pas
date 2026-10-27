@@ -63,7 +63,7 @@ type
 implementation
 uses System.SysUtils, System.JSON, System.Math, System.Types, Vcl.Dialogs,
   Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, Winapi.Windows, RigmJson, RigmToolbarIcons,
-  RigmScriptScenesModel, RigmMovieModel, RigmMovieImageTransfer, RigmScriptTextModel, RigmMovieChart, RigmScriptThumbnailModel;
+  RigmScriptScenesModel, RigmMovieModel, RigmMovieImageTransfer, RigmScriptTextModel, RigmMovieChart, RigmScriptTypes, RigmScriptThumbnailModel;
 {$R *.dfm}
 const
   Positions: array[0..4] of string = ('below-image','image-top','image-center','image-bottom','screen-top');
@@ -312,10 +312,11 @@ begin
   if FSync then Exit; var P := FWorkspace.ScriptDraft; if (P=nil) or (P.ScriptWizard.GetValue('scenes')=nil) then Exit;
   FSync := True;
   try
-    var Rebuild := FRows.Count<>P.Scenes.Count+2;
+    var Extra := 2; if IsStandaloneScript(P) then Extra := 1;
+    var Rebuild := FRows.Count<>P.Scenes.Count+Extra;
     if not Rebuild then begin
       Rebuild := FRows[0].SceneId<>RigmCommonBackgroundId;
-      if FRows.Last.SceneId<>RigmThumbnailId then Rebuild := True;
+      if not IsStandaloneScript(P) and (FRows.Last.SceneId<>RigmThumbnailId) then Rebuild := True;
       for var I := 0 to P.Scenes.Count-1 do if FRows[I+1].SceneId<>P.Scenes[I].Id then begin Rebuild := True; Break; end;
     end;
     if Rebuild then begin
@@ -323,7 +324,7 @@ begin
       try
         FRows.Clear; FRows.Add(TRigmSceneImageRow.CreateRow(Self,RigmCommonBackgroundId));
         for var S in P.Scenes do begin var Row := TRigmSceneImageRow.CreateRow(Self,S.Id); FRows.Add(Row); end;
-        FRows.Add(TRigmSceneImageRow.CreateRow(Self,RigmThumbnailId));
+        if not IsStandaloneScript(P) then FRows.Add(TRigmSceneImageRow.CreateRow(Self,RigmThumbnailId));
       finally FScroll.EnableAlign; end;
       LayoutRows;
     end;
@@ -332,6 +333,7 @@ begin
       var Row := FRows[I]; var S := P.ImageTarget(Row.SceneId); if S=nil then Continue;
       var IsBackground := Row.SceneId=RigmCommonBackgroundId;
       var IsThumbnail := Row.SceneId=RigmThumbnailId;
+      var IsRankCard := IsAnimeRankingScript(P) and (JS(S.Animation,'animeRankingSection')='rank');
       if IsBackground then Row.Number.Caption := '共通'+#13#10+'背景'
       else if IsThumbnail then Row.Number.Caption := '必須'+#13#10+'サムネイル' else Row.Number.Caption := I.ToString;
       if not FEditing then begin
@@ -345,7 +347,8 @@ begin
       end;
       var Busy := FWorkspace.SceneImageAiBusy;
       Row.SceneName.ReadOnly := Busy;
-      Row.Prompt.ReadOnly := S.ImageApproved or Busy; Row.Description.ReadOnly := IsBackground or IsThumbnail or S.ImageApproved or Busy;
+      Row.Picture.Visible := not IsRankCard;
+      Row.Prompt.ReadOnly := IsRankCard or S.ImageApproved or Busy; Row.Description.ReadOnly := IsRankCard or IsBackground or IsThumbnail or S.ImageApproved or Busy;
       Row.Position.Visible := not IsBackground and not IsThumbnail; Row.Position.Enabled := not S.ImageApproved and not Busy;
       var CurrentApproval := ScriptSceneReady(P,S);
       Row.Approved.Checked := S.ImageApproved and CurrentApproval;
@@ -367,7 +370,9 @@ begin
     RefreshImageAi;
     if not FEditing then begin
       var State := '未確定'; if ScriptSceneReady(P,P.Thumbnail) then State := '確定済み';
-      FGuide.Caption := Format('シーン確定 %d / %d。共通背景は任意。最後に必須サムネイルを作成・確定して動画編集へ（%s）。',[Ready,P.Scenes.Count,State]);
+      if IsStandaloneScript(P) then FGuide.Caption := '1シーンの内容・素材を確認して確定し、動画編集へ進んでください。共通背景は任意です。'
+      else FGuide.Caption := Format('シーン確定 %d / %d。共通背景は任意。最後に必須サムネイルを作成・確定して動画編集へ（%s）。',[Ready,P.Scenes.Count,State]);
+      if IsAnimeRankingScript(P) then FGuide.Caption := '順位は黒一色＋大きな白文字（背景画像・人物なし）。後続の紹介・総評の素材を確認して動画編集へ進みます。末尾サムネイルは追加しません。';
     end;
   finally FSync := False; end;
 end;

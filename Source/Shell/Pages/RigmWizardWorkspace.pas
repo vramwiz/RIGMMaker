@@ -97,6 +97,7 @@ type
     procedure SetScriptTitle(const Value: string);
     function ImportScriptText(const Text: string; const SourceName: string=''): TJSONObject;
     function ImportScriptFile(const FileName: string): TJSONObject;
+    procedure SetAnimeRankingField(const Key,Value: string);
     procedure SetScriptType(const Value: string); // 固定ID。GUIとパイプの共通更新。
     procedure SetScriptStage(const Value: string);
     procedure SetScriptCharacters(Paths: TJSONArray);
@@ -233,7 +234,7 @@ type
 implementation
 uses RigmScriptReadingModel, RigmScriptTextImport, RigmScriptCopyModel, RigmVoiceEffects, RigmVoiceEffectSettings, RigmAutomationInput, RigmFFmpegApi, System.IOUtils, System.Math, System.DateUtils, System.StrUtils, Winapi.Windows, RigmJson, RigmAppSettings, PsdSession,
   PsdCharacter, PsdJson, PsdPackage, PsdProduction, RigmEditor, PsdImport, RigmStorage,
-  RigmMovieComposition, RigmMovieChart, RigmMoviePosting, System.Hash, ArtDocument, PsdWorkspace, RigmCharacterCatalog, RigmMovieLayout, RigmScriptPlacementModel, RigmScriptNavigationModel, RigmScriptTextModel, RigmScriptReviewModel, RigmScriptResearchModel, RigmScriptCastingModel, RigmScriptSubtitleModel, RigmScriptVoiceModel, RigmScriptVoiceSelection, System.SyncObjs, Winapi.MMSystem, RigmScriptScenesModel, RigmScriptSceneAssignmentModel, RigmScriptSummaryModel, RigmScriptClosingModel, RigmMovieCompositor, RigmMovieWorkspace, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, RigmScriptTypes, RigmScriptConfirmationModel, RigmScriptThumbnailModel, RigmScriptAiImages;
+  RigmMovieComposition, RigmMovieChart, RigmMoviePosting, System.Hash, ArtDocument, PsdWorkspace, RigmCharacterCatalog, RigmMovieLayout, RigmScriptPlacementModel, RigmScriptNavigationModel, RigmScriptTextModel, RigmScriptReviewModel, RigmScriptResearchModel, RigmScriptCastingModel, RigmScriptSubtitleModel, RigmScriptVoiceModel, RigmScriptVoiceSelection, System.SyncObjs, Winapi.MMSystem, RigmScriptScenesModel, RigmScriptSceneAssignmentModel, RigmScriptSummaryModel, RigmScriptClosingModel, RigmMovieCompositor, RigmMovieWorkspace, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, RigmScriptTypes, RigmScriptConfirmationModel, RigmScriptThumbnailModel, RigmScriptAiImages, RigmAnimeRankingModel;
 constructor TRigmWizardWorkspace.Create(AOwner: TComponent);
 begin
   inherited; FSessions := TObjectList<TRigmMovieSession>.Create(True);
@@ -638,7 +639,7 @@ begin
   if Project.ScriptWizard.GetValue('readingDictionary')<>nil then begin
     var Dictionary := ScriptReadingDictionary(Project); Dictionary.Free;
   end;
-  ValidateScriptType(Project);
+  ValidateScriptType(Project); ValidateAnimeRanking(Project);
   for var C in Project.Characters do if (C.PlacementRef='') or (Project.Placement(C.PlacementRef)=nil) then
     raise Exception.Create('台本工程のキャラは共通配置への参照が必要です。');
   if Project.ScriptWizard.GetValue('scriptText')<>nil then ValidateScriptText(JO(Project.ScriptWizard,'scriptText'))
@@ -793,6 +794,17 @@ begin
   if (FScriptDraft=nil) or (CurrentScriptStage<>'title') then raise Exception.Create('第1段階で台本テキストを読み込んでください。');
   if VoiceBusy or ExpressionAiBusy or SceneImageAiBusy or FPlacementEditing or (FAutomationRunPhase<>0) or (FAutomationCheckPhase<>0) then
     raise Exception.Create('実行中の処理を終了してから読み込んでください。');
+  if IsSingleSceneScript(FScriptDraft) then raise Exception.Create('この共通構成は画面でセリフを入力します。');
+  if IsAnimeRankingScript(FScriptDraft) then begin
+    if (FScriptDraft.Cues.Count>0) or not MatchStr(JS(FScriptDraft.ScriptWizard,'furthestStage'),['','title']) then
+      raise Exception.Create('順位紹介の取り込みは第1段階の配役前に行ってください。');
+    var Snapshot := FScriptDraft.Clone;
+    try
+      ImportAnimeRankingText(Snapshot,Text); Snapshot.Changed; StoreScript(Snapshot,'title');
+    finally Snapshot.Free; end;
+    Exit(TJSONObject.Create.AddPair('valid',TJSONBool.Create(True)).AddPair('imported',TJSONBool.Create(True))
+      .AddPair('sceneCount',TJSONNumber.Create(7)).AddPair('message','順位紹介の原稿を保存しました。未入力の任意区分は動画に含めません。音声・画像生成は開始していません。'));
+  end;
   var Input := ValidateAutomationInput(Text,True);
   if not JB(Input,'valid') then begin Input.AddPair('message','読み込めませんでした。不足・不正を修正してください。台本は変更していません。'); Exit(Input); end;
   try
@@ -808,12 +820,43 @@ begin
       .AddPair('message','台本・セリフ・シーンを自動作成して保存しました。第1段階のまま、通常の工程を続けられます。音声・画像生成は開始していません。');
   finally Input.Free; end;
 end;
+procedure TRigmWizardWorkspace.SetAnimeRankingField(const Key,Value: string);
+begin
+  if not IsAnimeRankingScript(FScriptDraft) or not MatchStr(CurrentScriptStage,['text','script-confirm']) then
+    raise Exception.Create('順位紹介の台本入力で操作してください。');
+  if JS(JO(FScriptDraft.ScriptWizard,'animeRanking'),Key)=Value then Exit;
+  var Before := ScriptFingerprint(FScriptDraft);
+  RigmAnimeRankingModel.SetAnimeRankingField(FScriptDraft,Key,Value);
+  if Before<>ScriptFingerprint(FScriptDraft) then begin
+    InvalidateScriptCasting(FScriptDraft); PsdJson.Put(FScriptDraft.ScriptWizard,'scriptConfirmedFingerprint','');
+  end;
+  FScriptDraft.Changed; ScriptChanged;
+end;
 procedure TRigmWizardWorkspace.SetScriptType(const Value: string);
 begin
   if FScriptDraft=nil then raise Exception.Create('台本を新規作成または再開してください。');
   if (Value<>'') and (ScriptTypeIndex(Value)<0) then raise Exception.Create('対応していない台本種類です。');
   if ProjectScriptType(FScriptDraft)=Value then Exit;
+  // 既存本文・素材・未保存入力を構成変更で切り捨てない。新規の空台本だけで選ぶ。
+  if IsStandaloneScript(FScriptDraft) or (SingleSceneSection(Value)<>'') or (Value='anime-ranking') then begin
+    if (CurrentScriptStage<>'title') or (FScriptDraft.Cues.Count>0) or
+      (FScriptDraft.Scenes.Count>0) or (FScriptDraft.EndCards.Count>0) or
+      (FScriptDraft.ThemeBackground<>'') or (FScriptDraft.Thumbnail.Image<>'') or
+      (FScriptDraft.ScriptWizard.GetValue('textImport')<>nil) or
+      (FScriptDraft.ScriptWizard.GetValue('summaryData')<>nil) or
+      (FScriptDraft.ScriptWizard.GetValue('closingData')<>nil) then
+      raise Exception.Create('構成は新規の空台本で選んでください。既存の作品と素材は保持しています。');
+    if FScriptDraft.ScriptWizard.GetValue('scriptText') is TJSONObject then
+      for var V in JA(JO(FScriptDraft.ScriptWizard,'scriptText'),'sections') do
+        if Trim(JS(TJSONObject(V),'text'))<>'' then
+          raise Exception.Create('入力済みの台本は構成を変更できません。新規台本で選んでください。');
+  end;
   PsdJson.Put(FScriptDraft.ScriptWizard,'scriptType',Value); ChangeResearchType(FScriptDraft);
+  if IsAnimeRankingScript(FScriptDraft) then begin PrepareAnimeRanking(FScriptDraft); PrepareScriptSummary(FScriptDraft); end;
+  if IsSingleSceneScript(FScriptDraft) then begin
+    PrepareScriptText(FScriptDraft);
+    PsdJson.Put(JO(FScriptDraft.ScriptWizard,'scriptText'),'activeSection',SingleSceneSection(Value));
+  end;
   FScriptDraft.Changed; ScriptChanged;
 end;
 function TRigmWizardWorkspace.Thumbnails: TRigmThumbnailCache;
@@ -875,7 +918,7 @@ begin
   // 動画編集への直行で未作成の任意工程も、左リストから初めて開く前に準備する。
   if (Value='summary-edit') and (FScriptDraft.ScriptWizard.GetValue('summaryData')=nil) then begin PrepareScriptSummary(FScriptDraft); FScriptDraft.Changed; end;
   if (Value='closing') and (FScriptDraft.ScriptWizard.GetValue('closingData')=nil) then begin PrepareScriptClosing(FScriptDraft); FScriptDraft.Changed; end;
-  if Value='script-confirm' then begin PrepareScriptDialogue(FScriptDraft); PrepareScriptClosing(FScriptDraft); FScriptDraft.Changed; end;
+  if Value='script-confirm' then begin PrepareScriptDialogue(FScriptDraft); if not IsStandaloneScript(FScriptDraft) then PrepareScriptClosing(FScriptDraft); FScriptDraft.Changed; end;
   var Snapshot := FScriptDraft.Clone;
   try
     if Value='scenes' then PrepareScriptThumbnail(Snapshot);
@@ -1144,7 +1187,7 @@ begin
       Snapshot.ScriptWizard.RemovePair('voiceReturnStage').Free;
     end;
     if Next='script-confirm' then begin
-      MaterializeScriptClosing(Snapshot);
+      if not IsStandaloneScript(Snapshot) then MaterializeScriptClosing(Snapshot);
       PrepareScriptDialogue(Snapshot);
     end;
     if Next='scene-assignment' then begin PrepareScriptScenes(Snapshot,Stage<>'voice-effects'); ApplyImportedSceneInputs(Snapshot); end;
@@ -1179,6 +1222,9 @@ begin
 end;
 procedure TRigmWizardWorkspace.SelectScriptSection(const Section: string);
 begin
+  if IsSingleSceneScript(FScriptDraft) and (Section<>SingleSceneSection(ProjectScriptType(FScriptDraft))) then
+    raise Exception.Create('この構成のセリフだけを編集できます。');
+  if IsAnimeRankingScript(FScriptDraft) and not MatchStr(Section,AnimeRankingSections) then raise Exception.Create('順位紹介の区分を選んでください。');
   if (CurrentScriptStage<>'text') or (ScriptSection(FScriptDraft,Section)=nil) then raise Exception.Create('台本入力工程で区分を選んでください。');
   var O := JO(FScriptDraft.ScriptWizard,'scriptText'); if JS(O,'activeSection')=Section then Exit;
   PsdJson.Put(O,'activeSection',Section); FScriptDraft.Changed; ScriptChanged;
@@ -1187,6 +1233,9 @@ procedure TRigmWizardWorkspace.SetScriptText(const Section,Text: string);
 begin
   if (FScriptDraft=nil) or not MatchStr(CurrentScriptStage,['text','script-confirm','closing']) then raise Exception.Create('台本入力・確認工程で操作してください。');
   if (CurrentScriptStage='closing') and (Section<>'closing') then raise Exception.Create('締めのセリフを入力してください。');
+  if IsSingleSceneScript(FScriptDraft) and (Section<>SingleSceneSection(ProjectScriptType(FScriptDraft))) then
+    raise Exception.Create('この構成のセリフだけを編集できます。');
+  if IsAnimeRankingScript(FScriptDraft) and not MatchStr(Section,AnimeRankingSections) then raise Exception.Create('順位紹介の区分を選んでください。');
   if Section='summary' then begin
     if CurrentScriptStage<>'script-confirm' then raise Exception.Create('台本確認で総評を編集してください。');
     var Value := NormalizeScriptText(Text); ValidateVoiceReading(Value);
@@ -1497,6 +1546,9 @@ begin
       for var V in JA(JO(FScriptDraft.ScriptWizard,'scriptText'),'sections') do HasText := HasText or (Trim(JS(TJSONObject(V),'text'))<>'');
       Advance := HasText;
       if not HasText then PsdJson.Put(Result,'advanceBlockedReason','台本文を入力してから作品情報の確認へ進んでください。');
+      if IsAnimeRankingScript(FScriptDraft) then begin
+        var Reason := AnimeRankingReason(FScriptDraft); Advance := Reason=''; PsdJson.Put(Result,'advanceBlockedReason',Reason);
+      end;
     end;
   end;
   var GlobalBlock := '';

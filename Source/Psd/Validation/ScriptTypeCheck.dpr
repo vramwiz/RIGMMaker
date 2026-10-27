@@ -43,7 +43,7 @@ begin
   Form.Show; Application.ProcessMessages;
   Combo := Frame.FindComponent('ScriptType') as TComboBox;
   var Title := Frame.FindComponent('ScriptTitle') as TEdit;
-  Check((Combo.Items.Count=2) and (Combo.Items[0]='アニメ批評') and (Combo.Items[1]='漫画紹介'),'two catalog choices reach title UI');
+  Check((Combo.Items.Count=ScriptTypeCount) and (Combo.Items[0]='アニメ批評') and (Combo.Items[1]='漫画紹介'),'catalog retains original choices in title UI');
   Check((Combo.ItemIndex=-1) and (ProjectScriptType(W.ScriptDraft)=''),'new script is unclassified until selected');
   Title.Text := '種類を保存する検証'; var Id := W.ScriptDraft.Id; var Revision := W.ScriptDraft.Revision;
   Combo.ItemIndex := 0; Combo.OnChange(Combo);
@@ -57,9 +57,9 @@ begin
   W.SaveScriptDraft(False); Loaded := LoadMovie(Path);
   try Check(ProjectScriptType(Loaded)='manga-introduction','manga ID survives actual save and independent load'); finally Loaded.Free; end;
   var Status := W.ScriptStatus;
-  try Check((JS(Status,'scriptType')='manga-introduction') and (JS(Status,'scriptTypeName')='漫画紹介') and (JA(Status,'scriptTypes').Count=2),'status exposes ID, display name and catalog'); finally Status.Free; end;
+  try Check((JS(Status,'scriptType')='manga-introduction') and (JS(Status,'scriptTypeName')='漫画紹介') and (JA(Status,'scriptTypes').Count=ScriptTypeCount),'status exposes ID, display name and catalog'); finally Status.Free; end;
   var Schema := W.Command('app-schema',nil);
-  try Check((JO(Schema,'workspace').GetValue('script-set-type')<>nil) and (JA(JO(Schema,'workspace'),'scriptTypes').Count=2),'schema exposes category setter and catalog'); finally Schema.Free; end;
+  try Check((JO(Schema,'workspace').GetValue('script-set-type')<>nil) and (JA(JO(Schema,'workspace'),'scriptTypes').Count=ScriptTypeCount),'schema exposes category setter and catalog'); finally Schema.Free; end;
   Revision := W.ScriptDraft.Revision; W.SetScriptType('manga-introduction');
   Check(W.ScriptDraft.Revision=Revision,'same type is an idempotent no-op');
   Reject(procedure begin W.SetScriptType('unsupported-type'); end,'setter rejects unsupported type');
@@ -89,7 +89,7 @@ begin
     Legacy.Id := PsdJson.NewId; PsdJson.Put(Legacy.ScriptWizard,'scriptType','future-review');
     var FuturePath := TPath.Combine(DataRoot,'Projects\'+Legacy.Id+'\project.rigmovie'); SaveMovie(Legacy,FuturePath,False);
     FreshOpen(FuturePath);
-    Check((Combo2.ItemIndex=2) and (Combo2.Items.Count=3) and (ProjectScriptType(W2.ScriptDraft)='future-review'),'future type is retained and displayed without substitution');
+    Check((Combo2.ItemIndex=ScriptTypeCount) and (Combo2.Items.Count=ScriptTypeCount+1) and (ProjectScriptType(W2.ScriptDraft)='future-review'),'future type is retained and displayed without substitution');
     (Frame2.FindComponent('ScriptTitle') as TEdit).Text := '将来の種類を保持'; W2.SaveScriptDraft(False);
     Loaded := LoadMovie(FuturePath);
     try Check(ProjectScriptType(Loaded)='future-review','editing title and saving preserves a future type ID'); finally Loaded.Free; end;

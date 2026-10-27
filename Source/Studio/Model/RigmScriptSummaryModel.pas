@@ -4,7 +4,7 @@ interface
 uses System.JSON, RigmMovieModel;
 const ScriptSummaryAxisNames: array[0..4] of string = (
   'ストーリー','キャラクター','作画','演出・テンポ','世界観・設定');
-function ScriptSummaryFixedDraft(Draft: TJSONObject): TJSONObject; // 呼出側所有。旧評価値を残して固定5項目へ表示する。
+function ScriptSummaryFixedDraft(Draft: TJSONObject; AnimeRanking: Boolean=False): TJSONObject; // 既存5項目と順位紹介専用6項目を区別。
 procedure PrepareScriptSummary(Project: TRigmMovieProject);
 procedure ValidateScriptSummary(Project: TRigmMovieProject);
 procedure SetScriptSummaryDraft(Project: TRigmMovieProject; Draft: TJSONObject);
@@ -21,23 +21,25 @@ procedure SyncSummaryReading(Project: TRigmMovieProject; const CueId: string);
 implementation
 uses System.SysUtils, System.StrUtils, System.Generics.Collections, RigmJson, PsdJson, RigmMovieComposition,
   RigmMovieChart, RigmScriptVoiceModel, RigmScriptCastingModel, RigmScriptSubtitleModel,
-  RigmScriptTextModel, RigmScriptSummaryFields;
-function ScriptSummaryFixedDraft(Draft: TJSONObject): TJSONObject;
+  RigmScriptTextModel, RigmScriptSummaryFields, RigmScriptTypes;
+function ScriptSummaryFixedDraft(Draft: TJSONObject; AnimeRanking: Boolean): TJSONObject;
 begin
   Result := Draft.Clone as TJSONObject;
+  var Axes := TArray<string>.Create('ストーリー','キャラクター','作画','演出・テンポ','世界観・設定');
+  if AnimeRanking then Axes := TArray<string>.Create('物語','キャラクター','作画','演出','声の演技','音楽');
   var Items := TJSONArray.Create;
-  for var I := 0 to High(ScriptSummaryAxisNames) do begin
+  for var I := 0 to High(Axes) do begin
     var Value := ''; var Found := False;
     for var V in JA(Draft,'items') do
-      if JS(TJSONObject(V),'label')=ScriptSummaryAxisNames[I] then begin
+      if JS(TJSONObject(V),'label')=Axes[I] then begin
         Value := JS(TJSONObject(V),'value'); Found := True; Break;
       end;
     if not Found and (I<JA(Draft,'items').Count) then begin
       var Previous := TJSONObject(JA(Draft,'items')[I]);
-      if not MatchStr(JS(Previous,'label'),ScriptSummaryAxisNames) then Value := JS(Previous,'value');
+      if not MatchStr(JS(Previous,'label'),Axes) then Value := JS(Previous,'value');
     end;
     var Item := TJSONObject.Create; Items.AddElement(Item);
-    Item.AddPair('label',ScriptSummaryAxisNames[I]); Item.AddPair('value',Value);
+    Item.AddPair('label',Axes[I]); Item.AddPair('value',Value);
   end;
   PsdJson.Put(Result,'items',Items);
 end;
@@ -82,7 +84,7 @@ procedure PrepareScriptSummary(Project: TRigmMovieProject);
 begin
   if Project.ScriptWizard.GetValue('summaryData')=nil then begin
     var Summary := PsdJson.ObjectText('{"format":"RIGMMaker.ScriptSummary","schemaVersion":1,"materialized":false,"status":"draft","draft":{"text":"","subtitle":"","reading":"","role":0,"kind":"radar","title":"","minimum":"0","maximum":"5","items":[]}}');
-    PsdJson.Put(Summary,'draft',ScriptSummaryFixedDraft(JO(Summary,'draft')));
+    PsdJson.Put(Summary,'draft',ScriptSummaryFixedDraft(JO(Summary,'draft'),IsAnimeRankingScript(Project)));
     Project.ScriptWizard.AddPair('summaryData',Summary);
   end;
   ValidateScriptSummary(Project);
@@ -115,8 +117,8 @@ end;
 procedure SetScriptSummaryDraft(Project: TRigmMovieProject; Draft: TJSONObject);
 begin
   ValidateDraft(Draft); PrepareScriptSummary(Project); var O := JO(Project.ScriptWizard,'summaryData'); if JO(O,'draft').ToJSON=Draft.ToJSON then Exit;
-  var Fixed := ScriptSummaryFixedDraft(JO(O,'draft'));
-  var NewFixed := ScriptSummaryFixedDraft(Draft);
+  var Fixed := ScriptSummaryFixedDraft(JO(O,'draft'),IsAnimeRankingScript(Project));
+  var NewFixed := ScriptSummaryFixedDraft(Draft,IsAnimeRankingScript(Project));
   try
     // 旧3～8項目の内容は固定5項目へ初めて書き換える際にも復元できる形で残す。
     if (O.GetValue('previousChartDraft')=nil) and

@@ -8,6 +8,8 @@ uses
   Vcl.Themes,
   Vcl.Styles,
   RigmWizardMainForm in 'Source\Shell\RigmWizardMainForm.pas',
+  RigmAnimeRankingModel in 'Source\Studio\Model\RigmAnimeRankingModel.pas',
+  RigmAnimeRankingFrame in 'Source\Shell\Pages\RigmAnimeRankingFrame.pas',
   RigmScriptResearchModel in 'Source\Studio\Model\RigmScriptResearchModel.pas',
   RigmScriptNavigationProbe in 'Source\Psd\Validation\RigmScriptNavigationProbe.pas',
   RigmWizardValidation in 'Source\Psd\Validation\RigmWizardValidation.pas';

@@ -8,10 +8,19 @@ function ScriptDialogueConfirmed(Project: TRigmMovieProject): Boolean; // 現文
 procedure UpgradeScriptFlow(Project: TRigmMovieProject); // 安定した工程IDから到達位置を復元する。素材は変更しない。
 implementation
 uses System.SysUtils, System.JSON, RigmJson, PsdJson, RigmScriptTextModel,
-  RigmScriptReviewModel, RigmScriptSummaryModel, RigmScriptPlacementModel;
+  RigmScriptReviewModel, RigmScriptSummaryModel, RigmScriptPlacementModel, RigmScriptTypes, RigmAnimeRankingModel;
 function ScriptConfirmationReason(Project: TRigmMovieProject): string;
 begin
   Result := '';
+  if IsAnimeRankingScript(Project) then begin
+    Result := AnimeRankingReason(Project); if Result<>'' then Exit;
+    Result := ScriptSummaryDraftReason(JO(JO(Project.ScriptWizard,'summaryData'),'draft')); Exit;
+  end;
+  if IsSingleSceneScript(Project) then begin
+    if Trim(JS(ScriptSection(Project,SingleSceneSection(ProjectScriptType(Project))),'text'))='' then
+      Result := 'この構成のセリフを入力してください。';
+    Exit;
+  end;
   if Trim(JS(ScriptSection(Project,'body'),'text'))='' then Exit('本題の台本を入力してください。');
   if not ((JS(Project.ScriptWizard,'summaryChoice')='none') or (JS(Project.ScriptWizard,'summaryChoice')='yes')) then Exit('総評の有無を選んでください。');
   if JS(Project.ScriptWizard,'summaryChoice')='yes' then begin

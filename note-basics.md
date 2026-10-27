@@ -19,7 +19,7 @@ GitHubへ同期するのはソース、ビルド設定、文書、再利用す�
 
 Codexの指示とGUIの調整は共通のモデル・処理を使う。対象は固定IDで識別し、現在のprojectId・revision・要求IDを取得してから適用する。過去の要求・パーツID・接続情報を新しい作品へ再送しない。
 
-題名画面で台本の種類を選び、scriptWizard.scriptTypeへ固定IDを保存する。現在の種類はアニメ批評（anime-review）と漫画紹介（manga-introduction）。未設定の旧台本は自動分類しない。追加方法とパイプは[種類選択・保存識別](Source/Shell/Pages/SCRIPT-TYPES-20261008.md)を参照する。
+題名画面で台本の種類を選び、scriptWizard.scriptTypeへ固定IDを保存する。現在の種類はアニメ批評（anime-review）、漫画紹介（manga-introduction）と、導入のみの共通構成アニメ（最初）（anime-opening）、締めのみの共通構成アニメ（最後）（anime-closing）と、順位紹介のアニメ（順位）（anime-ranking）。導入・締めの2種は新規の空台本で選び、1シーンで制作する。順位紹介は作品単位の複数シーン構成で、全体の導入・締めを含めない。未設定の旧台本は自動分類しない。追加方法とパイプは[種類選択・保存識別](Source/Shell/Pages/SCRIPT-TYPES-20261008.md)を参照する。
 
 ユーザーの原稿、元画像・音声、過去版、未保存入力を保持する。実行中の通常アプリや通常EXEの扱いは、その作業でのユーザー指示と状態を確認する。過去の履歴にある許可・禁止を一律の現行指示として扱わない。
 

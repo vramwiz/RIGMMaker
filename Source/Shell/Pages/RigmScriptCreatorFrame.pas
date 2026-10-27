@@ -1,18 +1,18 @@
 ﻿unit RigmScriptCreatorFrame;
 interface
 uses System.Classes, System.Types, RigmScriptPageFrame, System.JSON, Vcl.Controls, Vcl.Forms, Vcl.StdCtrls, RigmBufferedControls, Vcl.ComCtrls, Vcl.ExtCtrls, Vcl.ImgList, RigmWizardWorkspace,
-  RigmMovieCreator, RigmPageNavigation, RigmThumbnailList, RigmScriptLayoutFrame, RigmScriptPlacementFrame, RigmScriptTextFrame, RigmScriptReviewFrame, RigmScriptCastingFrame, RigmScriptSubtitleFrame, RigmScriptVoiceFrame, RigmScriptVoiceEffectsFrame, RigmScriptSceneAssignmentFrame, RigmScriptScenesFrame, RigmScriptSummaryFrame, RigmScriptClosingFrame, RigmScriptConfirmationFrame;
+  RigmMovieCreator, RigmPageNavigation, RigmThumbnailList, RigmScriptLayoutFrame, RigmScriptPlacementFrame, RigmScriptTextFrame, RigmScriptReviewFrame, RigmScriptCastingFrame, RigmScriptSubtitleFrame, RigmScriptVoiceFrame, RigmScriptVoiceEffectsFrame, RigmScriptSceneAssignmentFrame, RigmScriptScenesFrame, RigmScriptSummaryFrame, RigmScriptClosingFrame, RigmScriptConfirmationFrame, RigmAnimeRankingFrame;
 type
   TRigmScriptCreatorFrame = class(TRigmScriptPageFrame,IRigmPageLifecycle)
   private
     FWorkspace: TRigmWizardWorkspace; FRoot: string; FTitle: TEdit; FScriptType: TComboBox; FStatus,FProgress: TLabel;
     FHeader,FSidebar,FBody: TPanel; FSave,FReturn,FReload: TButton; FStageLabel: TLabel; FSync: Boolean;
     FStages: TListBox; FStageIds: TArray<string>; FStageEnabled: TArray<Boolean>;
-    FText: TRigmScriptTextFrame; FReview: TRigmScriptReviewFrame; FCasting: TRigmScriptCastingFrame; FSubtitles: TRigmScriptSubtitleFrame; FVoice: TRigmScriptVoiceFrame;
+    FRanking: TRigmAnimeRankingFrame; FText: TRigmScriptTextFrame; FReview: TRigmScriptReviewFrame; FCasting: TRigmScriptCastingFrame; FSubtitles: TRigmScriptSubtitleFrame; FVoice: TRigmScriptVoiceFrame;
     FScenes: TRigmScriptScenesFrame; FSummaryBody: TPanel; FSummaryChoice: TRadioGroup; FSummaryEdit: TRigmScriptSummaryFrame; FClosingEdit: TRigmScriptClosingFrame;
     FEffects: TRigmScriptVoiceEffectsFrame;
     FSceneAssignment: TRigmScriptSceneAssignmentFrame;
-    FConfirmation: TRigmScriptConfirmationFrame;
+    FConfirmation: TRigmScriptConfirmationFrame, RigmAnimeRankingFrame;
     FPlacement: TRigmScriptPlacementFrame;
     FLayout: TRigmScriptLayoutFrame; FActive: Boolean;
     FTitleBody,FStageHost: TScrollBox; FCharactersBody: TPanel; FCharacters: TListView; FImages: TImageList;
@@ -57,7 +57,7 @@ type
 implementation
 uses System.SysUtils, System.IOUtils, System.Math, Vcl.Graphics, Vcl.Themes, Winapi.Windows, Winapi.Messages, Winapi.CommCtrl,
   RigmJson, RigmCharacterCatalog, PsdJson, RigmScriptPlacementModel, RigmScriptTypes, RigmScriptNavigationModel,
-  Vcl.Dialogs, Vcl.Clipbrd, RigmScriptTextImport;
+  Vcl.Dialogs, Vcl.Clipbrd, RigmScriptTextImport, RigmAnimeRankingModel;
 {$R *.dfm}
 type
   TRigmStageListBox = class(TListBox)
@@ -135,6 +135,8 @@ begin
   FScriptType := TComboBox.Create(Self); FScriptType.Parent := Body; FScriptType.Align := alTop;
   FScriptType.Style := csDropDownList; FScriptType.Font.Size := 12; FScriptType.Name := 'ScriptType';
   FScriptType.TextHint := '種類を選択（未設定）';
+  FScriptType.Hint := 'アニメ（最初）・アニメ（最後）は、外部台本なしでセリフと素材を編集する1シーン共通構成です。新規の空台本で選んでください。';
+  FScriptType.ShowHint := True;
   for var I := 0 to ScriptTypeCount-1 do FScriptType.Items.Add(ScriptTypeName(ScriptTypeId(I)));
   FScriptType.ItemIndex := -1; FScriptType.OnChange := ScriptTypeChanged;
   var Guide := TRigmScriptLabel.Create(Self); Guide.Parent := Body; Guide.Align := alTop; Guide.Top := FScriptType.Top+FScriptType.Height;
@@ -288,7 +290,7 @@ begin
   FStageLayout := True;
   FStageHost.DisableAlign;
   try
-    for var Page in TArray<TFrame>.Create(FLayout,FPlacement,FText,FReview,FCasting,FSubtitles,FVoice,FEffects,FSceneAssignment,FScenes,FSummaryEdit,FClosingEdit,FConfirmation) do
+    for var Page in TArray<TFrame>.Create(FLayout,FPlacement,FText,FRanking,FReview,FCasting,FSubtitles,FVoice,FEffects,FSceneAssignment,FScenes,FSummaryEdit,FClosingEdit,FConfirmation) do
       if Page<>nil then begin
         Page.Align := alNone; Page.Parent := FStageHost;
         // 狭い高DPI画面でも編集欄を潰さず、必要な方向だけスクロールして到達できるようにする。
@@ -340,6 +342,16 @@ begin
     try
       if FTitle.Text<>JS(State,'title') then FTitle.Text := JS(State,'title');
       var TypeId := JS(State,'scriptType');
+      var IsRanking := TypeId='anime-ranking';
+      FImportActions.Visible := SingleSceneSection(TypeId)='';
+      var TitleGuide := FindComponent('ScriptTitleGuide') as TLabel;
+      if SingleSceneSection(TypeId)<>'' then
+        TitleGuide.Caption := 'この共通構成は導入または締めだけの1シーン動画です。外部台本は不要です。'+#13#10+
+          'キャラ・配置を選び、セリフと素材を画面で編集して動画編集へ進んでください。'
+      else TitleGuide.Caption := '台本の種類と題名を入力し、左の工程リストでキャラ選択を選んでください。'+#13#10+
+        'コピー直後ならファイルやクリップボードから台本を取り込めます。';
+      if IsRanking then TitleGuide.Caption := '順位 → 作品タイトル・概要（同じ画面）→ 人物・制作・OP/EDの紹介と評価 → 作品総評。'+#13#10+
+        '台本入力で作品情報とセリフを編集できます。専用テンプレートの取り込みも任意で利用できます。';
       // 将来の種類を旧版で開いても、表示・保持し、別の種類へ自動置換しない。
       while FScriptType.Items.Count>ScriptTypeCount do FScriptType.Items.Delete(FScriptType.Items.Count-1);
       FScriptType.ItemIndex := ScriptTypeIndex(TypeId);
@@ -358,7 +370,8 @@ begin
         FLayout := TRigmScriptLayoutFrame.CreateForWorkspace(Self,FWorkspace); FLayout.Parent := FStageHost;
       end;
       if IsPlacement and (FPlacement=nil) then begin FPlacement := TRigmScriptPlacementFrame.CreateForWorkspace(Self,FWorkspace); FPlacement.Parent := FStageHost; end;
-      if IsText and (FText=nil) then begin FText := TRigmScriptTextFrame.CreateForWorkspace(Self,FWorkspace); FText.Parent := FStageHost; end;
+      if IsText and not IsRanking and (FText=nil) then begin FText := TRigmScriptTextFrame.CreateForWorkspace(Self,FWorkspace); FText.Parent := FStageHost; end;
+      if IsText and IsRanking and (FRanking=nil) then begin FRanking := TRigmAnimeRankingFrame.CreateForWorkspace(Self,FWorkspace); FRanking.Parent := FStageHost; end;
       if IsReview and (FReview=nil) then begin FReview := TRigmScriptReviewFrame.CreateForWorkspace(Self,FWorkspace); FReview.Parent := FStageHost; end;
       if IsCasting and (FCasting=nil) then begin FCasting := TRigmScriptCastingFrame.CreateForWorkspace(Self,FWorkspace); FCasting.Parent := FStageHost; end;
       if IsSubtitles and (FSubtitles=nil) then begin FSubtitles := TRigmScriptSubtitleFrame.CreateForWorkspace(Self,FWorkspace); FSubtitles.Parent := FStageHost; end;
@@ -385,7 +398,8 @@ begin
       if FConfirmation<>nil then begin FConfirmation.Visible := IsConfirmation; if IsConfirmation then FConfirmation.RefreshState; end;
       if FLayout<>nil then begin FLayout.Visible := IsLayout; FLayout.SetActive(FActive and IsLayout); if IsLayout and not FActive then FLayout.RefreshState; end;
       if FPlacement<>nil then begin FPlacement.Visible := IsPlacement; if IsPlacement then FPlacement.RefreshState else FPlacement.SetActive(False); end;
-      if FText<>nil then begin FText.Visible := IsText; FText.SetActive(FActive and IsText); if IsText and not FActive then FText.RefreshState; end;
+      if FText<>nil then begin FText.Visible := IsText and not IsRanking; FText.SetActive(FActive and IsText and not IsRanking); if IsText and not IsRanking and not FActive then FText.RefreshState; end;
+      if FRanking<>nil then begin FRanking.Visible := IsText and IsRanking; if FRanking.Visible then FRanking.RefreshState; end;
       if FReview<>nil then begin FReview.Visible := IsReview; if IsReview then FReview.RefreshState; end;
       if FCasting<>nil then begin FCasting.Visible := IsCasting; FCasting.SetActive(FActive and IsCasting); if IsCasting and not FActive then FCasting.RefreshState; end;
       if FSubtitles<>nil then begin FSubtitles.Visible := IsSubtitles; FSubtitles.SetActive(FActive and IsSubtitles); if IsSubtitles then FSubtitles.RefreshState; end;
@@ -521,7 +535,9 @@ begin
     Dialog.DefaultExt := 'txt'; Dialog.FileName := '台本入力テンプレート.txt';
     Dialog.Options := [ofOverwritePrompt,ofPathMustExist,ofEnableSizing];
     if not Dialog.Execute then Exit;
-    try TFile.WriteAllText(Dialog.FileName,ScriptTextInputTemplate,TEncoding.UTF8);
+    try
+        var Template := ScriptTextInputTemplate; if IsAnimeRankingScript(FWorkspace.ScriptDraft) then Template := AnimeRankingInputTemplate;
+        TFile.WriteAllText(Dialog.FileName,Template,TEncoding.UTF8);
       FStatus.Caption := 'テンプレートを保存しました。記入後にファイルまたはクリップボードから読み込めます。';
     except on E: Exception do FStatus.Caption := E.Message; end;
   finally Dialog.Free; end;

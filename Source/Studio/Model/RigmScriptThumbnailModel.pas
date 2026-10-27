@@ -12,7 +12,7 @@ procedure MaterializeScriptThumbnail(Project: TRigmMovieProject); // 既存thumb
 function ScriptThumbnailCard(Project: TRigmMovieProject): TJSONObject; // 呼出側所有。
 procedure RequireScriptThumbnail(Project: TRigmMovieProject); // 台本からの出力で必須。従来の単独動画は対象外。
 implementation
-uses System.SysUtils, System.IOUtils, System.Hash, RigmJson, PsdJson, RigmMovieImageTransfer, RigmThumbnailCache, RigmScriptScenesModel;
+uses System.SysUtils, System.IOUtils, System.Hash, RigmJson, PsdJson, RigmMovieImageTransfer, RigmThumbnailCache, RigmScriptScenesModel, RigmScriptTypes;
 function ThumbnailLogo(Project: TRigmMovieProject): string;
 begin
   var Name := Project.Title;
@@ -60,6 +60,7 @@ begin
 end;
 procedure PrepareScriptThumbnail(Project: TRigmMovieProject);
 begin
+  if IsStandaloneScript(Project) then Exit;
   var S := Project.Thumbnail;
   if S.Image='' then begin
     for var V in Project.EndCards do if JS(TJSONObject(V),'kind')='thumbnail' then S.Image := JS(TJSONObject(V),'image');
@@ -77,6 +78,7 @@ begin
 end;
 procedure MaterializeScriptThumbnail(Project: TRigmMovieProject);
 begin
+  if IsStandaloneScript(Project) then Exit;
   for var I := Project.EndCards.Count-1 downto 0 do
     if JS(TJSONObject(Project.EndCards[I]),'kind')='thumbnail' then Project.EndCards.Remove(I).Free;
   if Project.Thumbnail.Image='' then Exit;
@@ -85,6 +87,12 @@ end;
 procedure RequireScriptThumbnail(Project: TRigmMovieProject);
 begin
   if Project.ScriptWizard=nil then Exit;
+  if IsStandaloneScript(Project) then begin
+    if (Project.Scenes.Count=0) or (IsSingleSceneScript(Project) and (Project.Scenes.Count<>1)) or
+      (Project.EndCards.Count<>0) or not ScriptScenesReady(Project,True) then
+      raise Exception.Create('構成のシーンと素材を確認してください。');
+    Exit;
+  end;
   var S := Project.Thumbnail;
   if not ScriptScenesReady(Project,True) or not S.ImageApproved or (S.Image='') then raise Exception.Create('第16段階の最後で必須のサムネイル画像を作成し、確定してください。');
   CheckedMovieImageHash(ResolveMoviePath(Project.FileName,S.Image),True);

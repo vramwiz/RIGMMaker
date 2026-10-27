@@ -9,6 +9,10 @@ function ScriptTypeName(const Id: string): string;
 function ScriptTypeIndex(const Id: string): Integer;
 function ScriptTypesJson: TJSONArray; // 呼出側が所有する種類一覧。
 function ProjectScriptType(Project: TRigmMovieProject): string; // 旧台本・従来作品は空文字。
+function SingleSceneSection(const Id: string): string; // 共通構成以外は空文字。
+function IsSingleSceneScript(Project: TRigmMovieProject): Boolean;
+function IsAnimeRankingScript(Project: TRigmMovieProject): Boolean;
+function IsStandaloneScript(Project: TRigmMovieProject): Boolean;
 procedure ValidateScriptType(Project: TRigmMovieProject); // 将来の有効なIDも保持。書換えなし。
 
 implementation
@@ -18,9 +22,12 @@ type
     Id,Name: string;
   end;
 const
-  Types: array[0..1] of TScriptTypeEntry = (
+  Types: array[0..4] of TScriptTypeEntry = (
     (Id: 'anime-review'; Name: 'アニメ批評'),
-    (Id: 'manga-introduction'; Name: '漫画紹介'));
+    (Id: 'manga-introduction'; Name: '漫画紹介'),
+    (Id: 'anime-opening'; Name: 'アニメ（最初）'),
+    (Id: 'anime-closing'; Name: 'アニメ（最後）'),
+    (Id: 'anime-ranking'; Name: 'アニメ（順位）'));
 function ScriptTypeCount: Integer;
 begin Result := Length(Types); end;
 function ScriptTypeId(Index: Integer): string;
@@ -49,6 +56,18 @@ function ProjectScriptType(Project: TRigmMovieProject): string;
 begin
   Result := ''; if (Project<>nil) and (Project.ScriptWizard<>nil) then Result := JS(Project.ScriptWizard,'scriptType');
 end;
+function SingleSceneSection(const Id: string): string;
+begin
+  Result := '';
+  if Id='anime-opening' then Result := 'opening'
+  else if Id='anime-closing' then Result := 'closing';
+end;
+function IsSingleSceneScript(Project: TRigmMovieProject): Boolean;
+begin Result := SingleSceneSection(ProjectScriptType(Project))<>''; end;
+function IsAnimeRankingScript(Project: TRigmMovieProject): Boolean;
+begin Result := ProjectScriptType(Project)='anime-ranking'; end;
+function IsStandaloneScript(Project: TRigmMovieProject): Boolean;
+begin Result := IsSingleSceneScript(Project) or IsAnimeRankingScript(Project); end;
 procedure ValidateScriptType(Project: TRigmMovieProject);
 begin
   if (Project=nil) or (Project.ScriptWizard=nil) then Exit;

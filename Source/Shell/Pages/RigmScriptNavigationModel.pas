@@ -11,7 +11,7 @@ function ScriptStageBlockReason(State: TJSONObject; const Stage: string; AllowCo
 function ScriptStageAvailable(State: TJSONObject; const Stage: string): Boolean;
 function ScriptVisibleStages(State: TJSONObject): TArray<string>;
 implementation
-uses System.SysUtils, System.Math, RigmJson, RigmScriptPlacementModel;
+uses System.SysUtils, System.Math, RigmJson, RigmScriptPlacementModel, RigmScriptTypes;
 function ScriptStageCaption(const Stage: string): string;
 begin
   if Stage='editor' then Result := '動画編集'
@@ -21,6 +21,11 @@ function ScriptNextStage(const Stage: string; Wizard: TJSONObject): string;
 begin
   Result := '';
   if Stage='scenes' then Exit('editor');
+  if JS(Wizard,'scriptType')='anime-ranking' then begin
+    if Stage='text' then Exit('summary-edit');
+    if Stage='summary-edit' then Exit('script-confirm');
+  end;
+  if (SingleSceneSection(JS(Wizard,'scriptType'))<>'') and (Stage='text') then Exit('script-confirm');
   if Stage='summary' then begin
     if JS(Wizard,'summaryChoice')='none' then Result := 'closing'
     else if JS(Wizard,'summaryChoice')='yes' then Result := 'summary-edit';
@@ -46,6 +51,11 @@ begin
   var Wizard := JO(State,'wizard'); var Current := JS(Wizard,'stage');
   var Index := ScriptStageIndex(Stage); var CurrentIndex := ScriptStageIndex(Current);
   if Index<0 then Exit('工程がありません。');
+  if (SingleSceneSection(JS(Wizard,'scriptType'))<>'') and
+    ((Stage='review') or (Stage='summary') or (Stage='summary-edit') or (Stage='closing')) then
+    Exit('この共通構成では使用しない工程です。');
+  if (JS(Wizard,'scriptType')='anime-ranking') and
+    ((Stage='review') or (Stage='summary') or (Stage='closing')) then Exit('順位紹介では使用しない工程です。');
   // 前工程へ戻って不足を直す操作は、後工程の未完了によって妨げない。
   if Index<=CurrentIndex then Exit;
   var Next := ScriptNextStage(Current,Wizard); var Immediate := Stage=Next;
@@ -74,6 +84,10 @@ begin
   var Reached := Max(ScriptStageIndex(Current),ScriptStageIndex(JS(Wizard,'furthestStage',JS(State,'resumeStage'))));
   var Next := ScriptNextStage(Current,Wizard);
   for var Stage in ScriptStages do begin
+    if (JS(Wizard,'scriptType')='anime-ranking') and
+      ((Stage='review') or (Stage='summary') or (Stage='closing')) then Continue;
+    if (SingleSceneSection(JS(Wizard,'scriptType'))<>'') and
+      ((Stage='review') or (Stage='summary') or (Stage='summary-edit') or (Stage='closing')) then Continue;
     var Seen := (ScriptStageIndex(Stage)<=Reached) and (Stage<>'editor') and
       ((ScriptStageIndex(Stage)<=ScriptStageIndex(Current)) or ScriptStageAvailable(State,Stage));
     // 総評入力を飛ばした旧台本には、まだ存在しない総評画面を追加しない。

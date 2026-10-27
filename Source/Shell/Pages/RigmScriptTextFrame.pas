@@ -30,7 +30,7 @@ type
     procedure SetActive(Value: Boolean);
   end;
 implementation
-uses System.SysUtils, RigmJson, RigmScriptTextModel, RigmBufferedControls;
+uses System.SysUtils, RigmJson, RigmScriptTextModel, RigmBufferedControls, RigmScriptTypes;
 {$R *.dfm}
 const SectionIds: array[0..2] of string = ('opening','body','closing');
   SectionNames: array[0..2] of string = ('共通の出だし','今回の本文','共通の締め');
@@ -64,6 +64,9 @@ destructor TRigmScriptTextFrame.Destroy;
 begin FWorkspace.EndScriptTextEdit; inherited; end;
 procedure TRigmScriptTextFrame.UpdateGuide;
 begin
+  if IsSingleSceneScript(FWorkspace.ScriptDraft) then begin
+    FGuide.Caption := 'このセリフだけで1シーンを作ります。外部台本は不要です。左の台本確認へ進んでください。'; Exit;
+  end;
   FGuide.Caption := 'Codexはフォーカスや入力操作に関係なく、パイプで現在の台本を取得・変更できます。'+#13#10+
     '戻る・終了・任意の保存で文章を保存します。左の工程リストで保存して作品情報・掘り下げ確認へ進みます。';
 end;
@@ -89,6 +92,7 @@ begin
   if FWorkspace.ScriptDraft=nil then Exit; FSync := True;
   try
     var Active := JS(JO(FWorkspace.ScriptDraft.ScriptWizard,'scriptText'),'activeSection');
+    FSections.Visible := not IsSingleSceneScript(FWorkspace.ScriptDraft);
     for var I := 0 to 2 do begin
       var Section := ScriptSection(FWorkspace.ScriptDraft,SectionIds[I]); if Section=nil then Continue;
       if NormalizeScriptText(FEditors[I].Text)<>JS(Section,'text') then FEditors[I].Text := JS(Section,'text');

@@ -30,7 +30,7 @@ procedure SetCastingExpression(Project: TRigmMovieProject; const CueId,Expressio
 implementation
 uses System.SysUtils, System.Types, System.Math, System.StrUtils, System.Hash, System.Generics.Collections,
   RigmJson, PsdJson, RigmScriptTextModel, RigmScriptReviewModel, RigmMovieComposition, RigmScriptSummaryModel,
-  RigmMovieActing, RigmCharacterCatalog, RigmStorage, RigmModel;
+  RigmMovieActing, RigmCharacterCatalog, RigmStorage, RigmModel, RigmScriptTypes, RigmAnimeRankingModel;
 function ReadCastingExpressionAssets(const Path: string): TJSONObject;
 begin
   if CharacterFormat(Path)='psd' then Exit(ReadPsdActorAssets(Path));
@@ -375,9 +375,14 @@ begin
       for var C in Project.Cues do A.AddElement(C.Json); A := TJSONArray.Create; Archive.AddPair('scenes',A);
       for var S in Project.Scenes do A.AddElement(S.Json);
     end;
-    for var Id in ['opening','body','summary','closing'] do begin
+    var SectionIds := TArray<string>.Create('opening','body','summary','closing');
+    if IsAnimeRankingScript(Project) then SectionIds := TArray<string>.Create('rank','body','characters','credits','op','ed','summary');
+    for var Id in SectionIds do begin
+      if IsSingleSceneScript(Project) and (Id<>SingleSceneSection(ProjectScriptType(Project))) then Continue;
       if (Id='summary') and (JS(Project.ScriptWizard,'summaryChoice')<>'yes') then Continue;
-      var Text := JS(ScriptSection(Project,Id),'text'); var S := TJSONObject.Create; Sections.AddElement(S); S.AddPair('id',Id); S.AddPair('text',Text);
+      var Text := JS(ScriptSection(Project,Id),'text');
+      if IsAnimeRankingScript(Project) and (Trim(Text)='') then Continue;
+      var S := TJSONObject.Create; Sections.AddElement(S); S.AddPair('id',Id); S.AddPair('text',Text);
       if Id='summary' then begin AddScriptSummaryLines(Project,Old,Text,NewCues,Rows,NewScenes); Continue; end;
       var Unchanged := False;
       if Old<>nil then for var V in JA(Old,'sections') do if (JS(TJSONObject(V),'id')=Id) and (JS(TJSONObject(V),'text')=Text) then Unchanged := True;
@@ -391,7 +396,20 @@ begin
         end;
         Continue;
       end;
-      AddReconciledScriptSection(Project,Old,Id,Text,NewCues,Rows,NewScenes);
+      if IsStandaloneScript(Project) then begin
+        var SceneId := '';
+        if IsAnimeRankingScript(Project) and (Old<>nil) then
+          for var V in JA(Old,'rows') do if JS(TJSONObject(V),'section')=Id then begin
+            var Cue := Project.Cue(JS(TJSONObject(V),'cueId')); if Cue<>nil then begin SceneId := Cue.Scene; Break; end;
+          end;
+        if IsSingleSceneScript(Project) and (Project.Scenes.Count=1) then SceneId := Project.Scenes[0].Id;
+        if SceneId='' then begin
+          var Scene := TRigmMovieScene.Create; Scene.Title := ScriptTypeName(ProjectScriptType(Project));
+          if IsAnimeRankingScript(Project) then Scene.DisplayMode := 'none';
+          SceneId := Scene.Id; NewScenes.Add(Scene);
+        end;
+        AddReconciledScriptSection(Project,Old,Id,Text,NewCues,Rows,NewScenes,SceneId);
+      end else AddReconciledScriptSection(Project,Old,Id,Text,NewCues,Rows,NewScenes);
     end;
     if Rows.Count=0 then raise Exception.Create('配役するセリフがありません。');
     if Rows.Count>2000 then raise Exception.Create('セリフは既存モデルの2000件上限以内にしてください。');
@@ -415,7 +433,7 @@ begin
         var Page := JO(Project.ScriptWizard,Key);
         if Project.Cue(JS(Page,'selectedCue'))=nil then PsdJson.Put(Page,'selectedCue',Project.Cues[0].Id);
       end;
-    ConfigureScriptSummaryScene(Project);
+    ConfigureScriptSummaryScene(Project); ConfigureAnimeRankingScenes(Project);
     ApplyScriptVoiceDefaults(Project); RequestScriptCasting(Project); ValidateScriptCasting(Project); UpgradeScriptCastingLines(Project);
   finally Cast.Free; NewCues.Free; NewScenes.Free; end;
 end;

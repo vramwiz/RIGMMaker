@@ -5,7 +5,7 @@ uses RigmMovieModel;
 function CreateScriptCopy(Source: TRigmMovieProject; const CreatedAt: string): TRigmMovieProject;
 implementation
 uses System.SysUtils, System.JSON, RigmJson, PsdJson, RigmScriptTextModel,
-  RigmScriptSummaryModel, RigmScriptClosingModel;
+  RigmScriptSummaryModel, RigmScriptClosingModel, RigmScriptTypes, RigmAnimeRankingModel;
 function CopyVoiceBinding(Source: TRigmMovieProject; Character: TJSONObject): TJSONObject;
 begin
   Result := nil;
@@ -35,6 +35,11 @@ begin
   try
     Result.ScriptWizard := PsdJson.ObjectText('{"format":"RIGMMaker.ScriptWizard","schemaVersion":1,"flowVersion":2,"stage":"title","furthestStage":"title","titleStatus":"in-progress","scriptType":"","charactersStatus":"in-progress","selectedCharacters":[]}');
     var Target := Result.ScriptWizard;
+    if IsAnimeRankingScript(Source) then begin
+      PsdJson.Put(Target,'scriptType',ProjectScriptType(Source));
+      PsdJson.Put(Target,'animeRanking',JO(Source.ScriptWizard,'animeRanking').Clone as TJSONObject);
+      PsdJson.Put(Target,'rankingInitialized',TJSONBool.Create(True));
+    end;
     Result.Title := Source.Title; Target.AddPair('titleInput',JS(Source.ScriptWizard,'titleInput',Source.Title));
     Target.AddPair('createdAt',CreatedAt); Target.AddPair('updatedAt',CreatedAt);
     var Selected := JA(Target,'selectedCharacters');
@@ -57,7 +62,7 @@ begin
     PrepareScriptText(Result);
     if Source.ScriptWizard.GetValue('scriptText') is TJSONObject then
       for var V in JA(JO(Source.ScriptWizard,'scriptText'),'sections') do begin
-        var Old := TJSONObject(V); var Id := JS(Old,'id'); if Id='body' then Continue;
+        var Old := TJSONObject(V); var Id := JS(Old,'id'); if (Id='body') and not IsAnimeRankingScript(Source) then Continue;
         var Section := ScriptSection(Result,Id);
         if Section=nil then begin
           Section := TJSONObject.Create; JA(JO(Target,'scriptText'),'sections').AddElement(Section);
@@ -90,6 +95,11 @@ begin
         if Old.GetValue(Key)<>nil then AddN(Settings,Key,JN(Old,Key));
       ValidateVoiceValues(Settings);
     end;
+    if IsSingleSceneScript(Source) then begin
+      PsdJson.Put(Target,'scriptType',ProjectScriptType(Source));
+      PsdJson.Put(JO(Target,'scriptText'),'activeSection',SingleSceneSection(ProjectScriptType(Source)));
+    end;
+    if IsAnimeRankingScript(Source) then begin PrepareAnimeRanking(Result); PsdJson.Put(JO(Target,'scriptText'),'activeSection','rank'); end;
     ValidateScriptText(JO(Target,'scriptText')); Result.Modified := True;
   except Result.Free; raise; end;
 end;

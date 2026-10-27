@@ -31,7 +31,7 @@ type
   end;
 implementation
 uses System.Generics.Collections, System.SysUtils, System.Types, System.Math, Winapi.Windows, Vcl.Graphics,
-  RigmJson, PsdJson, RigmMovieChart, RigmScriptSummaryModel, RigmScriptCastingModel, RigmToolbarIcons;
+  RigmJson, PsdJson, RigmMovieChart, RigmScriptSummaryModel, RigmScriptCastingModel, RigmToolbarIcons, RigmScriptTypes;
 {$R *.dfm}
 constructor TRigmSummaryChartPreview.CreateForWorkspace(AOwner: TComponent; Workspace: TRigmWizardWorkspace);
 begin inherited Create(AOwner); FWorkspace := Workspace; DoubleBuffered := True; end;
@@ -144,14 +144,17 @@ procedure TRigmScriptSummaryFrame.Key(Sender: TObject; var Key: Word; Shift: TSh
 begin if (Key=VK_ESCAPE) or ((Key=VK_RETURN) and (ssCtrl in Shift)) then begin Done(Self); Key := 0; end; end;
 procedure TRigmScriptSummaryFrame.RefreshState;
 begin
-  var P := FWorkspace.ScriptDraft; if (P=nil) or not(P.ScriptWizard.GetValue('summaryData') is TJSONObject) then Exit; var D := ScriptSummaryFixedDraft(JO(JO(P.ScriptWizard,'summaryData'),'draft')); FSync := True;
+  var P := FWorkspace.ScriptDraft; if (P=nil) or not(P.ScriptWizard.GetValue('summaryData') is TJSONObject) then Exit; var D := ScriptSummaryFixedDraft(JO(JO(P.ScriptWizard,'summaryData'),'draft'),IsAnimeRankingScript(P)); FSync := True;
   try
     if not FEditing or (FLoaded<>P.Id) then begin
       FText.Text := JS(D,'text'); FSubtitle.Text := JS(D,'subtitle'); FReading.Text := JS(D,'reading'); FTitle.Text := JS(D,'title'); FMinimum.Text := JS(D,'minimum'); FMaximum.Text := JS(D,'maximum'); FKind.ItemIndex := 0; if JS(D,'kind')='bar' then FKind.ItemIndex := 1;
       FGrid.RowCount := JA(D,'items').Count+1; for var I := 0 to JA(D,'items').Count-1 do begin var O := TJSONObject(JA(D,'items')[I]); FGrid.Cells[0,I+1] := JS(O,'label'); FGrid.Cells[1,I+1] := JS(O,'value'); end; FLoaded := P.Id;
     end;
+    FGrid.Cells[0,0] := '評価項目（固定5項目）';
+    if IsAnimeRankingScript(P) then FGrid.Cells[0,0] := 'アニメ評価（6項目）';
     FText.ReadOnly := False; FSubtitle.ReadOnly := False; FReading.ReadOnly := False;
     var Guide := '総評のセリフと、右の固定5項目の点数（初期範囲0～5）を入力してください。字幕・読み・チャート題名は任意です。左の「締め設定」を選ぶと検査・保存して進みます。';
+    if IsAnimeRankingScript(P) then Guide := 'アニメ専用6項目（物語・キャラクター・作画・演出・声の演技・音楽）と総評を入力します。音楽にはOP/EDも含めます。台本確認へ進んでください。';
     var Reason := ScriptSummaryDraftReason(D);
     if Reason<>'' then Guide := Guide+#13#10+Reason;
     if FGuide.Caption<>Guide then FGuide.Caption := Guide;

@@ -10,7 +10,7 @@ type
     FWorkspace: TRigmWizardWorkspace; FSync: Boolean;
     FBoxes: array[0..3] of TPanel; FEditors: array[0..3] of TRigmScriptMemo;
     FLabels: array[0..3] of TLabel;
-    FBody,FActions,FTitleBar: TPanel; FGuide,FBlocked: TLabel; FRepair: TButton;
+    FAnimeOverview: TMemo; FBody,FActions,FTitleBar: TPanel; FGuide,FBlocked: TLabel; FRepair: TButton;
     FWorkTitle: TEdit; FCopyTitle: TButton;
     procedure CopyTitle(Sender: TObject);
     procedure Changed(Sender: TObject);
@@ -24,7 +24,7 @@ type
   end;
 implementation
 uses System.SysUtils, System.JSON, System.Math, RigmJson, RigmScriptTextModel,
-  RigmScriptSummaryModel, RigmScriptResearchModel, Vcl.Clipbrd;
+  RigmScriptSummaryModel, RigmScriptResearchModel, RigmScriptTypes, RigmAnimeRankingModel, Vcl.Clipbrd;
 {$R *.dfm}
 const Ids: array[0..3] of string = ('opening','body','summary','closing');
   Captions: array[0..3] of string = ('前段の台本','本題：ここが台本','総評のセリフ','〆のセリフ');
@@ -67,11 +67,25 @@ begin
     if I=2 then FEditors[I].MaxLength := 2000;
     FEditors[I].OnChange := Changed;
   end;
+  FAnimeOverview := TMemo.Create(Self); FAnimeOverview.Parent := FBody; FAnimeOverview.Align := alClient;
+  FAnimeOverview.Name := 'AnimeRankingConfirmation'; FAnimeOverview.ReadOnly := True; FAnimeOverview.ScrollBars := ssVertical; FAnimeOverview.Font.Size := 12; FAnimeOverview.Visible := False;
   FSync := False; LayoutEditors;
 end;
 procedure TRigmScriptConfirmationFrame.LayoutEditors;
 begin
   if (FBody=nil) or (FBoxes[3]=nil) then Exit;
+  if FAnimeOverview<>nil then FAnimeOverview.Visible := IsAnimeRankingScript(FWorkspace.ScriptDraft);
+  if IsAnimeRankingScript(FWorkspace.ScriptDraft) then begin
+    for var I := 0 to 3 do FBoxes[I].Visible := False; Exit;
+  end;
+  if IsSingleSceneScript(FWorkspace.ScriptDraft) then begin
+    for var I := 0 to 3 do begin
+      FBoxes[I].Visible := Ids[I]=SingleSceneSection(ProjectScriptType(FWorkspace.ScriptDraft));
+      if FBoxes[I].Visible then FBoxes[I].SetBounds(0,0,FBody.ClientWidth,FBody.ClientHeight);
+    end;
+    Exit;
+  end;
+  for var I := 0 to 3 do FBoxes[I].Visible := True;
   var W := FBody.ClientWidth div 2; var H := FBody.ClientHeight div 2;
   for var I := 0 to 3 do FBoxes[I].SetBounds((I mod 2)*W,(I div 2)*H,
     W+(I mod 2)*(FBody.ClientWidth-2*W),H+(I div 2)*(FBody.ClientHeight-2*H));
@@ -125,7 +139,15 @@ begin
     var Guide := '各欄でセリフを確認・編集してください。左の工程リストで保存して配役へ進みます。';
     if JS(P.ScriptWizard,'summaryChoice')<>'yes' then Guide := Guide+#13#10+
       '総評の選択は入力で変わりません。総評を動画に入れる場合は、第7段階で「総評あり」を選んでください。';
+    if IsSingleSceneScript(P) then Guide := 'この構成のセリフを確認・編集して配役へ進んでください。動画は1シーンです。';
     if FGuide.Caption<>Guide then FGuide.Caption := Guide;
+    if IsAnimeRankingScript(P) then begin
+      var Overview := '';
+      for var I := 0 to High(AnimeRankingSections) do Overview := Overview+'【'+AnimeRankingSectionNames[I]+'】'+#13#10+JS(ScriptSection(P,AnimeRankingSections[I]),'text')+#13#10+#13#10;
+      FAnimeOverview.Text := Overview;
+      FGuide.Caption := '各区分の修正は左の台本入力、総評の修正は総評入力で行います。タイトルと概要は同じ画面を維持します。';
+    end;
+    LayoutEditors;
     var State := FWorkspace.ScriptStatus;
     try
       FBlocked.Caption := JS(State,'advanceBlockedReason'); FActions.Visible := FBlocked.Caption<>'';
